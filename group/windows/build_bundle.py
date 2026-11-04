@@ -195,7 +195,8 @@ def write_manifest(out, models):
             files[rel] = {"size": p.stat().st_size}
             if p.stat().st_size > 5 * 1048576 or rel.endswith((".nupkg", ".exe")):
                 files[rel]["sha256"] = sha256(p)
-    req = (HERE / "requirements-cpu.txt").read_bytes()
+    # 統一換行再算（Windows 的 git 會把 LF 換成 CRLF），安裝時用同樣的算法比對
+    req = (HERE / "requirements-cpu.txt").read_bytes().replace(b"\r\n", b"\n")
     manifest = {"format": 1, "created": time.strftime("%Y-%m-%d %H:%M:%S"), "python": PY_VERSION,
                 "whisper_models": models, "requirements_sha256": hashlib.sha256(req).hexdigest(),
                 "total_mb": round(sum(f["size"] for f in files.values()) / 1048576), "files": files}

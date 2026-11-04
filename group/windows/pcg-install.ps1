@@ -22,6 +22,11 @@ function Log($msg) {
     Add-Content -Path $log -Value $line -Encoding UTF8
 }
 function Fail($msg) { Log "[錯誤] $msg"; exit 1 }
+# 任何沒預料到的例外：把原因與行號寫進安裝紀錄（安裝程式是隱藏視窗執行，沒寫下來就什麼都看不到）
+trap {
+    Log ("[錯誤] {0}（第 {1} 行：{2}）" -f $_.Exception.Message, $_.InvocationInfo.ScriptLineNumber, $_.InvocationInfo.Line.Trim())
+    exit 1
+}
 function Copy-Tree($src, $dst) {
     New-Item -ItemType Directory -Force -Path $dst | Out-Null
     & robocopy $src $dst /E /NFL /NDL /NJH /NJS /NP /R:2 /W:2 | Out-Null
@@ -40,7 +45,10 @@ $manifest = Get-Content $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
 Log ("資源包：{0}，Python {1}，辨識模型 {2}，共 {3} MB" -f $manifest.created, $manifest.python, ($manifest.whisper_models -join ","), $manifest.total_mb)
 $reqHere = Join-Path $AppDir "group\windows\requirements-cpu.txt"
 if (Test-Path $reqHere) {
-    $sha = (Get-FileHash $reqHere -Algorithm SHA256).Hash.ToLower()
+    # 比對前統一換行（Windows 的 git 會把 LF 換成 CRLF，內容一樣卻會被當成不同）
+    $text = [System.IO.File]::ReadAllText($reqHere).Replace("`r`n", "`n")
+    $bytes = (New-Object System.Text.UTF8Encoding($false)).GetBytes($text)
+    $sha = -join ([System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes) | ForEach-Object { $_.ToString("x2") })
     if ($sha -ne $manifest.requirements_sha256) {
         Log "[注意] 資源包的套件清單與這一版程式不同（資源包可能太舊）。照資源包安裝，若功能不正常請 IT 重新製作資源包"
     }
