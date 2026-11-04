@@ -572,6 +572,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "local_live_model": s.get("local_live_model", "small"),
                 "diarize": bool(s.get("diarize", s.get("backend") == "server")),
                 "staff_password_set": bool(s.get("password_hash") or s.get("password")),
+                "allow_remote_view": bool(s.get("allow_remote_view", False)),
                 "m2m_installed": (base_dir / "models" / "m2m100_418m" / "model.bin").is_file()}
 
     @app.get("/simple/admin", response_class=HTMLResponse)
@@ -668,6 +669,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 else:
                     s.pop(k, None)
         s["diarize"] = bool(body.get("diarize"))
+        s["allow_remote_view"] = bool(body.get("allow_remote_view"))
         if gh:
             rw = cfg.get("remote_whisper") if isinstance(cfg.get("remote_whisper"), dict) else {}
             rw.update(host=gh, whisper_port=int(body.get("gpu_port") or 8978))

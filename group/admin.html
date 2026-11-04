@@ -105,6 +105,8 @@ label.f>input,label.f>select{margin-top:4px}
       <h2 data-t="other_title"></h2>
       <label class="check"><input type="checkbox" id="diarize"><span data-t="diarize"></span></label>
       <p class="note" data-t="diarize_note"></p>
+      <label class="check"><input type="checkbox" id="remoteView"><span data-t="remote_view"></span></label>
+      <p class="note" data-t="remote_view_note"></p>
       <label class="f"><span id="staffPwLabel"></span><input type="password" id="staffPw" autocomplete="new-password" data-t-ph="staff_pw_ph"></label>
       <label class="check" id="clearStaffWrap" hidden><input type="checkbox" id="clearStaff"><span data-t="clear_staff_pw"></span></label>
     </div>
@@ -132,6 +134,7 @@ zh:{title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式
   llm_model:'翻譯模型',summary_model:'會議紀錄（摘要）模型',default_ph:'留空＝主程式預設',asr_model:'辨識模型（GPU 伺服器）',
   local_title:'本機模式的辨識模型',live_model:'即時字幕',file_model:'錄音檔',
   local_models_note:'沒有獨立顯示卡的電腦：即時字幕建議 small（base 較快但錯字多）；錄音檔不趕時間可以用 medium，較準但要久很多。',
+  remote_view:'允許其他電腦或手機連進來看字幕',remote_view_note:'開會時一台電腦收音，其他人用瀏覽器看（只能看、不能停止）。關閉時只有這台電腦能用。變更後要關掉程式再開一次才生效。',
   other_title:'其他',diarize:'區分講者（講者辨識）',diarize_note:'會議紀錄會標出誰說了什麼。本機模式下會讓處理時間再多一些。',
   staff_pw:'同仁密碼（從別台電腦連進來時要輸入）',staff_pw_set:'同仁密碼：已設定（要改才填）',staff_pw_ph:'留空＝不變更',clear_staff_pw:'取消同仁密碼（不需要密碼）',
   save:'儲存',saved:'已儲存，下一次開始字幕或處理錄音就會使用新設定',back:'回到簡易頁面',change_it_pw:'變更 IT 密碼',
@@ -149,6 +152,7 @@ en:{title:'PCG Meeting Translator: IT settings',tagline:'Switch between local an
   llm_model:'Translation model',summary_model:'Minutes (summary) model',default_ph:'Blank = program default',asr_model:'Recognition model (GPU server)',
   local_title:'Recognition models in local mode',live_model:'Live subtitles',file_model:'Recordings',
   local_models_note:'Computers without a dedicated GPU: use small for live subtitles (base is faster but less accurate); medium is more accurate for recordings but much slower.',
+  remote_view:'Allow other computers and phones to view subtitles',remote_view_note:'One computer captures the meeting audio; others watch in a browser (view only). When off, only this computer can use it. Takes effect after restarting the program.',
   other_title:'Other',diarize:'Identify speakers (diarization)',diarize_note:'Shows who said what. Adds processing time in local mode.',
   staff_pw:'Staff password (required when connecting from another computer)',staff_pw_set:'Staff password: set (fill in only to change)',staff_pw_ph:'Blank = unchanged',clear_staff_pw:'Remove the staff password',
   save:'Save',saved:'Saved. New settings apply the next time subtitles start or a recording is processed',back:'Back to the simple page',change_it_pw:'Change IT password',
@@ -204,7 +208,7 @@ function showMain(){
   $('llmModel').value=state.llm_model||'';$('sumModel').value=state.summary_model||'';
   $('asrModel').value=state.asr_model||'large-v3-turbo';
   $('liveModel').value=state.local_live_model||'small';$('fileModel').value=state.local_file_model||'small';
-  $('diarize').checked=!!state.diarize;$('clearStaffWrap').hidden=!state.staff_password_set;
+  $('diarize').checked=!!state.diarize;$('remoteView').checked=!!state.allow_remote_view;$('clearStaffWrap').hidden=!state.staff_password_set;
   modeVis();applyLang();
 }
 function modeVis(){
@@ -231,7 +235,7 @@ $('pMain').onsubmit=async e=>{
     backend:document.querySelector('input[name=backend]:checked').value,
     gpu_host:$('gpuHost').value,gpu_port:$('gpuPort').value,llm_host:$('llmHost').value,llm_port:$('llmPort').value,
     llm_model:$('llmModel').value,summary_model:$('sumModel').value,asr_model:$('asrModel').value,
-    local_live_model:$('liveModel').value,local_file_model:$('fileModel').value,diarize:$('diarize').checked,
+    local_live_model:$('liveModel').value,local_file_model:$('fileModel').value,diarize:$('diarize').checked,allow_remote_view:$('remoteView').checked,
     staff_password:$('staffPw').value,clear_staff_password:$('clearStaff').checked});
   const r=$('saveRes');r.hidden=false;r.className='res '+(j.ok?'ok':'err');r.textContent=j.ok?t('saved'):errMsg(j);
   if(j.ok){state=j.state;$('staffPw').value='';$('clearStaff').checked=false;$('clearStaffWrap').hidden=!state.staff_password_set;applyLang()}

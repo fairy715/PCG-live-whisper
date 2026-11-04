@@ -1,0 +1,25 @@
+# PCG 集團版：Windows 同仁電腦（沒有獨立顯示卡）的執行套件。離線資源包照這份下載，安裝時照這份裝。
+# 與原作者 install.ps1 的 corePackages 相同，少了這幾項：
+#   argostranslate（只有英翻中，集團版用 M2M100）、moonshine-voice（英文專用、要另外下載模型）、
+#   transformers（Qwen3-ASR／Nemotron 講者辨識，CPU 太慢）。resemblyzer 另外用 --no-deps 安裝
+setuptools<81
+numpy
+ctranslate2
+sentencepiece
+faster-whisper
+huggingface_hub
+scipy
+librosa
+spectralcluster
+sounddevice
+noisereduce
+fastapi
+uvicorn
+websockets
+python-multipart
+PyQt6
+opencc-python-reimplemented
+PyAudioWPatch
+webrtcvad-wheels
+# 講者辨識（resemblyzer）需要；PyPI 上的 Windows 版就是 CPU 版
+torch

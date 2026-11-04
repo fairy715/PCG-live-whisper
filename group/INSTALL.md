@@ -85,6 +85,11 @@ bash install.sh --server
 
 **同仁的網址：`http://應用伺服器:19781/simple`**（完整版 WebUI 在 `/`，給 IT 用）
 
+## 同仁電腦離線安裝（沒有網路、沒有 GPU 伺服器也能用）
+
+**請看 [windows/README.md](windows/README.md)**：Setup.exe＋離線資源包，預設本機模式（CPU），
+之後有了 GPU 伺服器，IT 在 `/simple/admin` 切換即可。下面「③」是有網路時的另一種安裝方式。
+
 ## ③ 需要即時字幕的同仁電腦
 
 ### Windows

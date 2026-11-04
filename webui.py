@@ -2757,7 +2757,9 @@ def main():
     signal.signal(signal.SIGINT, _sigint_handler)
 
     try:
-        _WebUIServer(_uvicorn_config(app=app, host="0.0.0.0", port=args.port, log_level="warning", **ssl_kw)).run()
+        # 集團版：同仁電腦預設只給本機用（launch.ps1 依 IT 設定的「允許其他電腦觀看字幕」設 PCG_WEBUI_HOST）
+        _bind = os.environ.get("PCG_WEBUI_HOST") or "0.0.0.0"
+        _WebUIServer(_uvicorn_config(app=app, host=_bind, port=args.port, log_level="warning", **ssl_kw)).run()
     except KeyboardInterrupt:
         pass
     finally:
