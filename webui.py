@@ -2628,7 +2628,8 @@ try:
 
     _pcg_simple.register(app, BASE_DIR, _is_local, _pw_hash, _pw_match, CONFIG_FILE, _write_config,
                          start_live=_pcg_start_live,
-                         live_running=lambda: _proc is not None and _proc.poll() is None)
+                         live_running=lambda: _proc is not None and _proc.poll() is None,
+                         live_args=lambda: list(_proc.args) if _proc is not None and _proc.poll() is None else None)
 except ImportError as _pcg_e:          # group/ 不在（例如只複製了上游的檔案）：簡易頁面不提供，其他照舊
     print(f"  [提示] 簡易頁面未載入：{_pcg_e}")
 

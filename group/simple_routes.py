@@ -335,7 +335,7 @@ def _error_of(tail, rc):
 
 
 def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path, write_config,
-             start_live=None, live_running=None):
+             start_live=None, live_running=None, live_args=None):
     """把簡易版的路由掛到 WebUI 的 FastAPI app 上（webui.py 呼叫）。
     start_live(body)：用 WebUI 原本的方式啟動即時字幕；live_running()：WebUI 是否正在跑"""
     from fastapi import File, Form, Request, UploadFile
@@ -398,6 +398,11 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
     @app.get("/simple", response_class=HTMLResponse)
     async def simple_page():
         return HTMLResponse(html_path.read_text(encoding="utf-8"))
+
+    @app.get("/simple/live", response_class=HTMLResponse)
+    async def simple_live_page():
+        """精簡字幕畫面（五種語言、我要看的語言）。字幕內容沿用 WebUI 的 /ws 即時推送"""
+        return HTMLResponse(Path(__file__).with_name("live.html").read_text(encoding="utf-8"))
 
     @app.get("/api/simple/config")
     async def simple_config(request: Request):
@@ -491,8 +496,11 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
     @app.get("/api/simple/live")
     async def simple_live_info(request: Request):
         """即時字幕只能在自己的電腦上開（要抓這台電腦播出來的聲音）"""
+        args = live_args() if live_args else None
+        mode = args[args.index("--mode") + 1] if args and "--mode" in args[:-1] else ""
         return {"ok": True, "local": bool(is_local(request)), "available": start_live is not None,
                 "running": bool(live_running and live_running()),
+                "mode": mode, "is_file": bool(args and "--input" in args),
                 "scenarios": [{k: s[k] for k in ("id", "title", "flag")} | {"can_bidi": bool(s["bidi"])}
                               for s in LIVE_SCENARIOS]}
 

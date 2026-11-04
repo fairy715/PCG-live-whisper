@@ -62,7 +62,8 @@ class SimpleFlow(unittest.TestCase):
         self.q = simple_routes.register(
             app, self.base, lambda r: self.local, _pw_hash, _pw_match, self.cfg,
             lambda c: self.cfg.write_text(json.dumps(c, ensure_ascii=False), encoding="utf-8"),
-            start_live=start_live, live_running=lambda: False)
+            start_live=start_live, live_running=lambda: False,
+            live_args=lambda: ["python", "translate_meeting.py", "--webui", "--mode", "id_zh"])
         self.c = TestClient(app)
         self.h = {"X-Client-Id": "browserA1234"}
 
@@ -164,6 +165,10 @@ class SimpleFlow(unittest.TestCase):
     def test_live(self):
         info = self.c.get("/api/simple/live").json()
         self.assertTrue(info["local"])
+        self.assertEqual(info["mode"], "id_zh")              # 精簡字幕頁顯示「印尼文 ↔ 中文」用
+        page = self.c.get("/simple/live").text
+        self.assertIn("/ws", page)
+        self.assertIn("only_mine", page)
         r = self.c.post("/api/simple/live", json={"scenario": "vi", "speak": True, "topic": "週會"}).json()
         self.assertEqual(r["mode"], "vi_zh")
         self.assertEqual(self.started[-1]["mode"], "vi_zh")

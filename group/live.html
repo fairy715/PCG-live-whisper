@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<!-- PCG 集團版：精簡字幕畫面（/simple/live）。字幕內容來自 WebUI 的 /ws 即時推送（transcription 事件）。
+     「我要看的語言」：每一句用看的人選的語言大字顯示（雙向會議裡，兩種語言的版本都有）。
+     介面五種語言，與簡易頁面共用 localStorage 的 pcg_lang -->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCG Live Subtitles</title>
+<link rel="icon" href="/favicon.png">
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--text:#1d2330;--dim:#5d6676;--line:#dde1e7;--accent:#1f6feb;--accent-ink:#fff;--accent-soft:#e7f0ff;
+  --me:#e3f4ea;--me-line:#1a7f37;--err:#cf222e;--warn:#9a6700;--fs:22px}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1218;--card:#171b23;--text:#e6e9ef;--dim:#98a1b2;--line:#2a303b;--accent:#4c8dff;--accent-ink:#0b0e13;
+  --accent-soft:#1a2740;--me:#13261b;--me-line:#4ac26b;--err:#ff6b6b;--warn:#d4a72c}}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);display:flex;flex-direction:column;
+  font:16px/1.5 -apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei","Noto Sans TC","Noto Sans Devanagari","Nirmala UI",sans-serif}
+header{flex:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--card)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--dim);flex:none}
+.dot.on{background:#2da44e;box-shadow:0 0 0 4px rgba(45,164,78,.2)}
+.st{font-weight:700}
+.mode{color:var(--dim);font-size:14px}
+.sp{flex:1}
+select,button{font:inherit}
+select{color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 8px}
+.ic{appearance:none;border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:10px;padding:6px 10px;cursor:pointer;font-weight:600;min-width:44px}
+main{flex:1;overflow-y:auto;padding:16px}
+.msgs{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.m{max-width:80%;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:12px;padding:10px 14px}
+.m.me{align-self:flex-end;background:var(--me);border-left-color:var(--me-line)}
+.m .p{font-size:var(--fs);font-weight:600;line-height:1.35}
+.m .s{font-size:calc(var(--fs) * .68);color:var(--dim);margin-top:4px}
+.m .t{font-size:12px;color:var(--dim);margin-bottom:2px}
+.tag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:0 5px;margin-right:6px;background:var(--bg);color:var(--dim);vertical-align:middle}
+.empty{color:var(--dim);text-align:center;margin-top:20vh;font-size:18px}
+/* 字幕模式：黑底大字、只留最新兩句 */
+body.sub main{background:#000}
+body.sub .m{display:none;max-width:none;background:none;border:0;text-align:center;align-self:stretch}
+body.sub .m:nth-last-child(-n+2){display:block}
+body.sub .m .p{color:#ffd400;font-size:calc(var(--fs) * 1.6)}
+body.sub .m .s{color:#ddd;font-size:calc(var(--fs) * .9)}
+body.sub .m .t{display:none}
+body.sub .msgs{min-height:100%;justify-content:flex-end;padding-bottom:4vh}
+body.sub .empty{color:#888}
+footer{flex:none;display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 16px;border-top:1px solid var(--line);background:var(--card)}
+.btn{appearance:none;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn.stop{background:var(--err);color:#fff}
+.btn.ghost{background:none;border:1.5px solid var(--accent);color:var(--accent)}
+.chk{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--dim);cursor:pointer}
+.banner{max-width:980px;margin:0 auto 12px;border-radius:12px;padding:12px 14px;background:var(--accent-soft);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.banner.end{background:#fff4d6;color:var(--warn)}
+@media (prefers-color-scheme:dark){.banner.end{background:#2a2310}}
+[hidden]{display:none!important}
+@media (max-width:560px){.m{max-width:94%}header .mode{width:100%;order:9}}
+</style>
+</head>
+<body>
+<header>
+  <span class="dot" id="dot"></span><span class="st" id="st"></span><span class="mode" id="mode"></span>
+  <span class="sp"></span>
+  <label title=""><span class="sr" hidden></span><select id="langSel" aria-label="Language"></select></label>
+  <button class="ic" id="fsDn" type="button" aria-label="A-">A−</button><button class="ic" id="fsUp" type="button" aria-label="A+">A+</button>
+</header>
+<main id="main">
+  <div class="banner end" id="endBanner" hidden><span id="endText"></span><a class="btn ghost" href="/simple" id="backBtn"></a></div>
+  <div class="msgs" id="msgs"><div class="empty" id="empty"></div></div>
+</main>
+<footer>
+  <button class="btn stop" id="stopBtn" type="button"></button>
+  <button class="btn ghost" id="pauseBtn" type="button"></button>
+  <button class="btn ghost" id="modeBtn" type="button"></button>
+  <button class="btn ghost" id="ovlBtn" type="button"></button>
+  <label class="chk"><input type="checkbox" id="onlyMine"><span id="onlyMineL"></span></label>
+</footer>
+
+<script>
+const LANGS=[['zh','繁體中文'],['en','English'],['id','Bahasa Indonesia'],['vi','Tiếng Việt'],['hi','हिन्दी']];
+const I18N={
+zh:{running:'字幕進行中',waiting:'等待字幕…',paused:'已暫停',ended:'字幕已結束',empty:'開始說話後，字幕會出現在這裡',stop:'停止',pause:'暫停',resume:'繼續',
+  to_sub:'字幕模式',to_chat:'對話模式',overlay:'懸浮字幕',only_mine:'只顯示我的語言',back:'回到首頁',confirm_stop:'確定要停止字幕？',
+  pw:'請輸入觀看密碼（向 IT 詢問）',reconnect:'連線中斷，重新連線中…',ovl_fail:'懸浮字幕開不起來',fail:'（翻譯失敗）',
+  n_zh:'中文',n_en:'英文',n_ja:'日文',n_ko:'韓文',n_id:'印尼文',n_vi:'越南文',n_hi:'印地語',tr:'{a}轉錄'},
+en:{running:'Subtitles running',waiting:'Waiting for subtitles…',paused:'Paused',ended:'Subtitles ended',empty:'Subtitles will appear here when someone speaks',stop:'Stop',pause:'Pause',resume:'Resume',
+  to_sub:'Subtitle view',to_chat:'Chat view',overlay:'Floating subtitles',only_mine:'Only my language',back:'Back to home',confirm_stop:'Stop the subtitles?',
+  pw:'Enter the viewing password (ask IT)',reconnect:'Connection lost, reconnecting…',ovl_fail:'Could not open floating subtitles',fail:'(translation failed)',
+  n_zh:'Chinese',n_en:'English',n_ja:'Japanese',n_ko:'Korean',n_id:'Indonesian',n_vi:'Vietnamese',n_hi:'Hindi',tr:'{a} transcription'},
+id:{running:'Subtitle berjalan',waiting:'Menunggu subtitle…',paused:'Dijeda',ended:'Subtitle selesai',empty:'Subtitle akan muncul di sini saat ada yang berbicara',stop:'Berhenti',pause:'Jeda',resume:'Lanjut',
+  to_sub:'Tampilan subtitle',to_chat:'Tampilan obrolan',overlay:'Subtitle mengambang',only_mine:'Hanya bahasa saya',back:'Kembali ke beranda',confirm_stop:'Hentikan subtitle?',
+  pw:'Masukkan kata sandi menonton (tanyakan IT)',reconnect:'Koneksi terputus, menyambung ulang…',ovl_fail:'Subtitle mengambang tidak bisa dibuka',fail:'(gagal diterjemahkan)',
+  n_zh:'Mandarin',n_en:'Inggris',n_ja:'Jepang',n_ko:'Korea',n_id:'Indonesia',n_vi:'Vietnam',n_hi:'Hindi',tr:'Transkripsi {a}'},
+vi:{running:'Đang hiện phụ đề',waiting:'Đang chờ phụ đề…',paused:'Đã tạm dừng',ended:'Phụ đề đã kết thúc',empty:'Phụ đề sẽ hiện ở đây khi có người nói',stop:'Dừng',pause:'Tạm dừng',resume:'Tiếp tục',
+  to_sub:'Chế độ phụ đề',to_chat:'Chế độ hội thoại',overlay:'Phụ đề nổi',only_mine:'Chỉ ngôn ngữ của tôi',back:'Về trang chính',confirm_stop:'Dừng phụ đề?',
+  pw:'Nhập mật khẩu xem (hỏi IT)',reconnect:'Mất kết nối, đang kết nối lại…',ovl_fail:'Không mở được phụ đề nổi',fail:'(dịch thất bại)',
+  n_zh:'tiếng Trung',n_en:'tiếng Anh',n_ja:'tiếng Nhật',n_ko:'tiếng Hàn',n_id:'tiếng Indonesia',n_vi:'tiếng Việt',n_hi:'tiếng Hindi',tr:'Ghi {a}'},
+hi:{running:'सबटाइटल चल रहे हैं',waiting:'सबटाइटल का इंतज़ार…',paused:'रुका हुआ',ended:'सबटाइटल बंद हो गए',empty:'कोई बोलेगा तो सबटाइटल यहाँ दिखेंगे',stop:'रोकें',pause:'विराम',resume:'जारी रखें',
+  to_sub:'सबटाइटल व्यू',to_chat:'चैट व्यू',overlay:'तैरते सबटाइटल',only_mine:'केवल मेरी भाषा',back:'होम पर लौटें',confirm_stop:'सबटाइटल बंद करें?',
+  pw:'देखने का पासवर्ड डालें (IT से पूछें)',reconnect:'कनेक्शन टूटा, दोबारा जुड़ रहा है…',ovl_fail:'तैरते सबटाइटल नहीं खुल सके',fail:'(अनुवाद असफल)',
+  n_zh:'चीनी',n_en:'अंग्रेज़ी',n_ja:'जापानी',n_ko:'कोरियाई',n_id:'इंडोनेशियाई',n_vi:'वियतनामी',n_hi:'हिंदी',tr:'{a} ट्रांसक्रिप्शन'}};
+
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function pickLang(){const s=store.get('pcg_lang');if(s&&I18N[s])return s;for(const l of navigator.languages||[]){const c=(l||'').toLowerCase().split('-')[0];if(I18N[c])return c}return 'zh'}
+let lang=pickLang();
+const t=(k,v={})=>String(I18N[lang][k]??I18N.zh[k]??k).replace(/\{(\w+)\}/g,(_,x)=>v[x]??'');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// 字幕事件的語言標籤 → 語言代碼（台語辨識結果是漢字，當中文看）
+const LABEL={'中':'zh','台':'zh','EN':'en','日':'ja','韓':'ko','ID':'id','VI':'vi','HI':'hi'};
+
+let state={running:false,paused:false,ended:false,local:false,mode:''},events=[],sub=store.get('pcg_live_sub')==='1';
+let fs=+store.get('pcg_live_fs')||22,onlyMine=store.get('pcg_live_only')==='1',token=sessionStorage.getItem('pcg_view')||'';
+
+function modeName(m){
+  if(!m)return '';
+  let x;
+  if((x=m.match(/^([a-z]+)_zh$/)))return `${t('n_'+x[1])} ↔ ${t('n_zh')}`;
+  if((x=m.match(/^([a-z]+)2([a-z]+)$/)))return `${t('n_'+(x[1]==='nan'?'zh':x[1]))} → ${t('n_'+x[2])}`;
+  if(I18N.zh['n_'+m])return t('tr',{a:t('n_'+m)});
+  return m;
+}
+/* 我要看的語言：這一句有我的語言的版本就大字顯示它，另一個版本小字；沒有就譯文大字 */
+function pick(ev){
+  const a={lang:LABEL[ev.src_lang]||'',text:ev.src_text||'',tag:ev.src_lang||''};
+  const b=ev.dst_text?{lang:LABEL[ev.dst_lang]||'',text:ev.dst_text,tag:ev.dst_lang||''}:null;
+  if(!b)return [a,null];
+  if(a.lang===lang)return [a,b];
+  if(b.lang===lang)return [b,a];
+  return [b,a];
+}
+function render(){
+  const box=$('msgs');
+  if(!events.length){box.innerHTML=`<div class="empty">${esc(t('empty'))}</div>`;return}
+  box.innerHTML=events.map(ev=>{
+    const [p,s]=pick(ev),me=ev.source==='mic';
+    const sec=s&&!onlyMine?`<div class="s"><span class="tag">${esc(s.tag)}</span>${esc(s.text)}</div>`:'';
+    return `<div class="m${me?' me':''}"><div class="t">${esc(ev.timestamp||'')}</div><div class="p"><span class="tag">${esc(p.tag)}</span>${esc(p.text==='（翻譯失敗）'?t('fail'):p.text)}</div>${sec}</div>`;
+  }).join('');
+  const m=$('main');if(stick)m.scrollTop=m.scrollHeight;
+}
+/* 半句換整句（與 WebUI 同一條規則）：同一路 30 秒內、比較長、開頭大致相同 → 取代上一句 */
+const norm=s=>String(s||'').toLowerCase().replace(/[^0-9a-zऀ-ॿÀ-ỹ぀-ヿ㐀-鿿가-힯]/g,'');
+function finishes(o,n){o=norm(o);n=norm(n);if(o.length<2||n.length<=o.length)return false;let k=0;while(k<o.length&&o[k]===n[k])k++;
+  const tail=/[぀-ヿ㐀-鿿가-힯]/.test(o)?2:4;return k>=2&&k*2>=o.length&&(k*10>=o.length*7||k>=o.length-tail)}
+let stick=true;$('main').addEventListener('scroll',()=>{const m=$('main');stick=m.scrollHeight-m.scrollTop-m.clientHeight<80});
+function add(ev){
+  if(!ev.src_text&&!ev.dst_text)return;
+  ev._t=Date.now();
+  for(let i=events.length-1;i>=0&&i>=events.length-6;i--){
+    const p=events[i];
+    if(p.source===ev.source&&ev._t-p._t<30000&&finishes(p.src_text,ev.src_text)){events[i]=ev;render();return}
+    if(p.source===ev.source)break;
+  }
+  events.push(ev);if(events.length>400)events.splice(0,events.length-400);
+  state.running=true;state.ended=false;paint();render();
+}
+function paint(){
+  document.documentElement.lang=lang==='zh'?'zh-Hant':lang;
+  $('dot').classList.toggle('on',state.running&&!state.ended&&!state.paused);
+  $('st').textContent=t(state.ended?'ended':state.paused?'paused':state.running?'running':'waiting');
+  $('mode').textContent=modeName(state.mode);
+  $('stopBtn').textContent=t('stop');$('pauseBtn').textContent=t(state.paused?'resume':'pause');
+  $('modeBtn').textContent=t(sub?'to_chat':'to_sub');$('ovlBtn').textContent=t('overlay');$('onlyMineL').textContent=t('only_mine');
+  $('endText').textContent=t('ended');$('backBtn').textContent=t('back');$('endBanner').hidden=!state.ended;
+  // 遠端觀看（唯讀）不能停止、暫停、開懸浮字幕
+  for(const id of ['stopBtn','pauseBtn','ovlBtn'])$(id).hidden=!state.local||state.ended;
+  document.body.classList.toggle('sub',sub);document.documentElement.style.setProperty('--fs',fs+'px');
+  $('onlyMine').checked=onlyMine;
+}
+$('langSel').innerHTML=LANGS.map(([c,n])=>`<option value="${c}">${n}</option>`).join('');$('langSel').value=lang;
+$('langSel').onchange=()=>{lang=$('langSel').value;store.set('pcg_lang',lang);paint();render()};
+$('fsUp').onclick=()=>{fs=Math.min(64,fs+2);store.set('pcg_live_fs',fs);paint()};
+$('fsDn').onclick=()=>{fs=Math.max(14,fs-2);store.set('pcg_live_fs',fs);paint()};
+$('modeBtn').onclick=()=>{sub=!sub;store.set('pcg_live_sub',sub?'1':'0');paint();render()};
+$('onlyMine').onchange=()=>{onlyMine=$('onlyMine').checked;store.set('pcg_live_only',onlyMine?'1':'0');render()};
+$('ovlBtn').onclick=async()=>{try{const r=await(await fetch('/api/reopen-overlay',{method:'POST'})).json();if(!r.ok)alert(t('ovl_fail'))}catch(e){alert(t('ovl_fail'))}};
+$('stopBtn').onclick=()=>{if(confirm(t('confirm_stop')))send({action:'stop'})};
+$('pauseBtn').onclick=()=>{state.paused=!state.paused;send({action:state.paused?'pause':'resume'});paint()};
+
+let ws=null,retry=null;
+function send(o){if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}
+function conn(){
+  const url=(location.protocol==='https:'?'wss:':'ws:')+'//'+location.host+'/ws'+(token?'?token='+encodeURIComponent(token):'');
+  ws=new WebSocket(url);
+  ws.onopen=()=>{if(retry){clearTimeout(retry);retry=null}};
+  ws.onmessage=e=>{let ev;try{ev=JSON.parse(e.data)}catch(x){return}
+    if(ev.type==='transcription')add(ev);
+    else if(ev.type==='started'){state.running=true;state.ended=false;state.mode=ev.mode||state.mode;paint()}
+    else if(ev.type==='stopped'||ev.type==='disconnected'){state.ended=true;state.running=false;paint()}};
+  ws.onclose=e=>{
+    if(e.code===4001){const p=prompt(t('pw'));if(p===null)return;token=p;sessionStorage.setItem('pcg_view',p);return conn()}
+    if(!state.ended){$('st').textContent=t('reconnect');$('dot').classList.remove('on')}
+    retry=setTimeout(conn,3000);
+  };
+}
+(async()=>{
+  try{const j=await(await fetch('/api/simple/live')).json();state.local=!!j.local;state.running=!!j.running;state.mode=j.mode||'';state.ended=!j.running&&false}catch(e){}
+  paint();render();conn();
+})();
+</script>
+</body>
+</html>
