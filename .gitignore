@@ -43,3 +43,6 @@ api_data/
 tts_voices/
 tts_tmp/
 tts_data/
+
+# PCG 集團版：簡易頁面的工作紀錄與執行紀錄（含同仁的檔名、會議主題）
+group_data/

@@ -2619,6 +2619,20 @@ def _running_webui_url(port):
     return None
 
 
+# ─── PCG 集團版：給一般同仁用的簡易頁面（/simple）。程式都在 group/simple_routes.py ───
+try:
+    from group import simple_routes as _pcg_simple
+
+    async def _pcg_start_live(body):
+        await asyncio.to_thread(_start_proc, _build_args(body))
+
+    _pcg_simple.register(app, BASE_DIR, _is_local, _pw_hash, _pw_match, CONFIG_FILE, _write_config,
+                         start_live=_pcg_start_live,
+                         live_running=lambda: _proc is not None and _proc.poll() is None)
+except ImportError as _pcg_e:          # group/ 不在（例如只複製了上游的檔案）：簡易頁面不提供，其他照舊
+    print(f"  [提示] 簡易頁面未載入：{_pcg_e}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="jt-live-whisper WebUI")
     parser.add_argument("--port", type=int, default=WEB_PORT, help=f"HTTP port (預設 {WEB_PORT})")

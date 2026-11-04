@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<!-- PCG 集團版：給一般同仁用的簡易頁面。後端見 group/simple_routes.py -->
+<html lang="zh-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCG 會議翻譯</title>
+<link rel="icon" href="/favicon.png">
+<style>
+:root{
+  --bg:#f5f6f8;--card:#fff;--text:#1d2330;--dim:#5d6676;--line:#dde1e7;
+  --accent:#1f6feb;--accent-ink:#fff;--accent-soft:#e7f0ff;
+  --ok:#1a7f37;--ok-soft:#e6f4ea;--warn:#9a6700;--warn-soft:#fff4d6;--err:#cf222e;--err-soft:#ffebe9;
+  --radius:14px;--shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0f1218;--card:#171b23;--text:#e6e9ef;--dim:#98a1b2;--line:#2a303b;
+  --accent:#4c8dff;--accent-ink:#0b0e13;--accent-soft:#1a2740;
+  --ok:#4ac26b;--ok-soft:#14261b;--warn:#d4a72c;--warn-soft:#2a2310;--err:#ff6b6b;--err-soft:#2d1517;
+  --shadow:none;
+}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system,"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:24px 16px 64px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+header h1{font-size:22px;margin:0;font-weight:700}
+header .sub{color:var(--dim);font-size:14px}
+.tabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--line)}
+.tab{appearance:none;background:none;border:0;border-bottom:3px solid transparent;padding:10px 6px;margin-right:16px;
+  font:inherit;font-size:17px;font-weight:600;color:var(--dim);cursor:pointer}
+.tab[aria-selected=true]{color:var(--text);border-bottom-color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
+.step{font-size:15px;font-weight:700;margin:0 0 12px;display:flex;align-items:center;gap:8px}
+.step b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.opt{position:relative;display:flex;gap:12px;align-items:center;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;cursor:pointer;background:var(--card)}
+.opt input{position:absolute;opacity:0;pointer-events:none}
+.opt:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.opt:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.flag{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:10px;background:var(--bg);font-weight:700;font-size:14px}
+.opt .t{font-weight:600;line-height:1.3}
+.opt .s{color:var(--dim);font-size:13px;line-height:1.3}
+.drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:130px;border:2px dashed var(--line);
+  border-radius:12px;text-align:center;padding:16px;cursor:pointer;color:var(--dim)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+.drop .big{font-size:17px;color:var(--text);font-weight:600}
+.drop.has .big{color:var(--accent)}
+label.field{display:block;margin-top:14px;font-size:14px;color:var(--dim)}
+input[type=text],input[type=number],input[type=password]{width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+  background:var(--bg);color:var(--text);font:inherit}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>label{flex:1 1 220px}
+.check{display:flex;gap:10px;align-items:flex-start;margin-top:14px;cursor:pointer}
+.check input{width:20px;height:20px;margin-top:3px;flex:none}
+.check small{display:block;color:var(--dim);font-size:13px}
+.btn{appearance:none;border:0;border-radius:12px;padding:14px 22px;font:inherit;font-weight:700;font-size:17px;cursor:pointer;
+  background:var(--accent);color:var(--accent-ink);width:100%;margin-top:18px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:none;color:var(--accent);border:1.5px solid var(--accent);width:auto;font-size:15px;padding:8px 14px;margin:0}
+.btn.small{width:auto;font-size:14px;padding:8px 14px;margin:0}
+.note{font-size:14px;color:var(--dim);margin:8px 0 0}
+.banner{border-radius:12px;padding:12px 14px;font-size:15px;margin-bottom:16px}
+.banner.info{background:var(--accent-soft)}
+.banner.warn{background:var(--warn-soft);color:var(--warn)}
+.banner.err{background:var(--err-soft);color:var(--err)}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:12px;display:none}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.jobs h2{font-size:18px;margin:28px 0 12px}
+.job{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:start}
+.job .name{font-weight:600;word-break:break-all}
+.job .meta{color:var(--dim);font-size:13px}
+.chip{display:inline-block;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600;white-space:nowrap}
+.chip.queued{background:var(--bg);color:var(--dim)}
+.chip.running{background:var(--accent-soft);color:var(--accent)}
+.chip.done{background:var(--ok-soft);color:var(--ok)}
+.chip.failed,.chip.cancelled{background:var(--err-soft);color:var(--err)}
+.outs{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.outs a{display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid var(--line);color:var(--text);text-decoration:none;font-size:14px}
+.outs a.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.err-msg{grid-column:1/-1;color:var(--err);font-size:14px}
+.empty{color:var(--dim);text-align:center;padding:24px}
+dialog{border:0;border-radius:var(--radius);padding:24px;background:var(--card);color:var(--text);width:min(380px,92vw)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+[hidden]{display:none!important}
+@media (max-width:520px){.grid{grid-template-columns:1fr 1fr}.opt{padding:10px}.flag{width:34px;height:34px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>PCG 會議翻譯</h1>
+      <div class="sub">即時字幕、錄音轉會議紀錄。所有語音與文字都在公司自己的伺服器處理，不會送到外部。</div>
+    </div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tabLive" aria-controls="pLive" aria-selected="false">即時字幕</button>
+    <button class="tab" role="tab" id="tabFile" aria-controls="pFile" aria-selected="false">錄音 → 會議紀錄</button>
+  </div>
+
+  <!-- 即時字幕 -->
+  <section id="pLive" role="tabpanel" hidden>
+    <div id="liveRemote" class="banner warn" hidden>
+      即時字幕要在<strong>自己的電腦</strong>上開：它翻譯的是這台電腦播出來的聲音（Teams、Zoom、YouTube…）。<br>
+      請 IT 幫你的電腦安裝 PCG-live-whisper，之後點桌面捷徑「PCG 會議翻譯」就能用。<br>
+      在這台電腦上，你可以先用上方的「錄音 → 會議紀錄」。
+    </div>
+    <div id="liveRunning" class="banner info" hidden>
+      字幕正在進行中。<button class="btn ghost" id="openLive" type="button">打開字幕畫面</button>
+    </div>
+    <div id="liveForm">
+      <div class="card">
+        <p class="step"><b>1</b>對方說什麼語言？</p>
+        <div class="grid" id="liveScenarios"></div>
+        <label class="check"><input type="checkbox" id="liveSpeak">
+          <span>我也要說話（雙向）<small>用麥克風：我說中文，會翻成對方的語言顯示出來。請戴耳機，避免把對方的聲音錄進麥克風。</small></span></label>
+        <label class="check"><input type="checkbox" id="liveOverlay">
+          <span>字幕浮在所有視窗最上面<small>開會軟體全螢幕時也看得到字幕</small></span></label>
+        <label class="field">會議主題（選填，可提高專有名詞的翻譯準確度）
+          <input type="text" id="liveTopic" maxlength="60" placeholder="例：中爪新廠設備驗收"></label>
+        <button class="btn" id="liveStart" type="button" disabled>開始即時字幕</button>
+        <p class="note">開始後會切到字幕畫面；要結束時按畫面上的「停止」。第一次開始需要十幾秒準備。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 錄音 → 會議紀錄 -->
+  <section id="pFile" role="tabpanel" hidden>
+    <form id="fileForm" class="card">
+      <p class="step"><b>1</b>選擇錄音或影片檔</p>
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="選擇錄音檔">
+        <div class="big" id="dropText">點這裡選檔，或把檔案拖進來</div>
+        <div id="dropHint">mp3、m4a、wav、mp4 等格式；Teams／Zoom 的會議錄影也可以</div>
+      </div>
+      <input type="file" id="fileInput" accept="audio/*,video/*,.m4a,.mp3,.wav,.mp4,.mkv,.webm,.flac,.ogg,.aac,.wma,.mov" hidden>
+
+      <p class="step" style="margin-top:22px"><b>2</b>錄音裡主要說什麼語言？</p>
+      <div class="grid" id="fileScenarios"></div>
+      <p class="note">每一種都會產出<strong>中文會議紀錄</strong>（決議、待辦、風險）和逐字稿。同一段錄音請選講最多的語言；中文和外語各半的會議，選外語那一個會比較完整。</p>
+
+      <div class="row">
+        <label class="field">會議主題（選填）
+          <input type="text" id="fileTopic" maxlength="60" placeholder="例：印度廠週會"></label>
+        <label class="field">幾個人講話（選填，不確定就空白）
+          <input type="number" id="fileSpeakers" min="1" max="20" inputmode="numeric"></label>
+      </div>
+      <button class="btn" id="fileSubmit" type="submit" disabled>送出</button>
+      <div class="bar" id="upBar"><i></i></div>
+      <p class="note" id="fileNote">送出後可以關掉這個頁面，回來時結果會在下方。一小時的會議大約要 10～30 分鐘。</p>
+    </form>
+
+    <div class="jobs">
+      <h2>我送出的錄音</h2>
+      <div id="jobList"><div class="empty">還沒有送出任何錄音</div></div>
+    </div>
+  </section>
+</div>
+
+<dialog id="pwDlg">
+  <form method="dialog" id="pwForm">
+    <h3 style="margin-top:0">請輸入同仁密碼</h3>
+    <p class="note" style="margin-top:0">密碼請向 IT 詢問。</p>
+    <input type="password" id="pwInput" autocomplete="current-password" required>
+    <p class="note" id="pwErr" style="color:var(--err)" hidden>密碼不正確</p>
+    <button class="btn" type="submit">確定</button>
+  </form>
+</dialog>
+
+<script>
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+let clientId=store.get('pcg_client');
+if(!clientId||!/^[A-Za-z0-9_-]{8,64}$/.test(clientId)){clientId=Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>b.toString(16).padStart(2,'0')).join('');store.set('pcg_client',clientId)}
+let token=store.get('pcg_token')||'';
+const hdr=()=>({'X-Client-Id':clientId,'X-Simple-Token':token});
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function api(path,opt={}){
+  const r=await fetch(path,{...opt,headers:{...hdr(),...(opt.headers||{})}});
+  const j=await r.json().catch(()=>({ok:false,error:'伺服器沒有回應'}));
+  if(r.status===401&&j.need_password){await askPassword();return api(path,opt)}
+  return j;
+}
+function askPassword(){
+  return new Promise(res=>{
+    const d=$('pwDlg');$('pwErr').hidden=!token;$('pwInput').value='';d.showModal();
+    $('pwForm').onsubmit=()=>{token=$('pwInput').value;store.set('pcg_token',token);res()};
+  });
+}
+
+/* 分頁 */
+function showTab(which){
+  for(const [t,p] of [['tabLive','pLive'],['tabFile','pFile']]){
+    const on=p===which;$(t).setAttribute('aria-selected',on);$(p).hidden=!on;
+  }
+  store.set('pcg_tab',which);
+}
+$('tabLive').onclick=()=>showTab('pLive');$('tabFile').onclick=()=>showTab('pFile');
+
+function cards(el,list,name,onPick){
+  el.innerHTML=list.map((s,i)=>`<label class="opt"><input type="radio" name="${name}" value="${esc(s.id)}">
+    <span class="flag">${esc(s.flag)}</span><span><span class="t">${esc(s.title)}</span>${s.subtitle?`<br><span class="s">${esc(s.subtitle)}</span>`:''}</span></label>`).join('');
+  el.addEventListener('change',onPick);
+}
+const picked=name=>document.querySelector(`input[name=${name}]:checked`)?.value;
+
+/* 即時字幕 */
+let liveScen=[];
+async function initLive(){
+  const j=await api('/api/simple/live');
+  liveScen=j.scenarios||[];
+  cards($('liveScenarios'),liveScen,'live',()=>{
+    const s=liveScen.find(x=>x.id===picked('live'));
+    $('liveSpeak').disabled=!s?.can_bidi;if(!s?.can_bidi)$('liveSpeak').checked=false;
+    $('liveStart').disabled=!s;store.set('pcg_live',picked('live'));
+  });
+  const last=store.get('pcg_live');const el=last&&document.querySelector(`input[name=live][value="${CSS.escape(last)}"]`);
+  if(el){el.checked=true;el.dispatchEvent(new Event('change',{bubbles:true}))}
+  $('liveRemote').hidden=j.local;$('liveForm').hidden=!j.local;$('liveRunning').hidden=!j.running;
+  return j;
+}
+$('openLive').onclick=()=>{location.href='/'};
+$('liveStart').onclick=async()=>{
+  $('liveStart').disabled=true;$('liveStart').textContent='準備中…';
+  const j=await api('/api/simple/live',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({scenario:picked('live'),speak:$('liveSpeak').checked,overlay:$('liveOverlay').checked,topic:$('liveTopic').value})});
+  if(j.ok){location.href='/';return}
+  alert(j.error||'啟動失敗');$('liveStart').disabled=false;$('liveStart').textContent='開始即時字幕';
+};
+
+/* 錄音 → 會議紀錄 */
+let file=null;
+function setFile(f){
+  file=f||null;
+  $('drop').classList.toggle('has',!!file);
+  $('dropText').textContent=file?file.name:'點這裡選檔，或把檔案拖進來';
+  $('dropHint').textContent=file?`${(file.size/1048576).toFixed(1)} MB，點這裡可以換一個檔案`:'mp3、m4a、wav、mp4 等格式；Teams／Zoom 的會議錄影也可以';
+  updSubmit();
+}
+function updSubmit(){$('fileSubmit').disabled=!(file&&picked('file'))}
+const drop=$('drop');
+drop.onclick=()=>$('fileInput').click();
+drop.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('fileInput').click()}};
+$('fileInput').onchange=e=>setFile(e.target.files[0]);
+drop.ondragover=e=>{e.preventDefault();drop.classList.add('over')};
+drop.ondragleave=()=>drop.classList.remove('over');
+drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');setFile(e.dataTransfer.files[0])};
+
+$('fileForm').onsubmit=e=>{
+  e.preventDefault();if(!file||!picked('file'))return;
+  const fd=new FormData();fd.append('file',file);fd.append('scenario',picked('file'));
+  fd.append('topic',$('fileTopic').value);fd.append('speakers',$('fileSpeakers').value);
+  const x=new XMLHttpRequest();x.open('POST','/api/simple/jobs');
+  for(const [k,v] of Object.entries(hdr()))x.setRequestHeader(k,v);
+  const bar=$('upBar');bar.style.display='block';$('fileSubmit').disabled=true;$('fileSubmit').textContent='上傳中…';
+  x.upload.onprogress=ev=>{if(ev.lengthComputable)bar.firstElementChild.style.width=(ev.loaded/ev.total*100)+'%'};
+  x.onload=async()=>{
+    bar.style.display='none';bar.firstElementChild.style.width='0';$('fileSubmit').textContent='送出';
+    let j={};try{j=JSON.parse(x.responseText)}catch(err){}
+    if(x.status===401&&j.need_password){await askPassword();$('fileForm').requestSubmit();return}
+    if(!j.ok){alert(j.error||'上傳失敗');updSubmit();return}
+    setFile(null);$('fileInput').value='';$('fileTopic').value='';$('fileSpeakers').value='';
+    loadJobs();
+  };
+  x.onerror=()=>{bar.style.display='none';$('fileSubmit').textContent='送出';updSubmit();alert('上傳失敗：連不到伺服器')};
+  x.send(fd);
+};
+
+const STATE={queued:'排隊中',running:'處理中',done:'完成',failed:'失敗',cancelled:'已取消'};
+const fmtTime=t=>t?new Date(t*1000).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+const keys={};
+async function loadJobs(){
+  const j=await api('/api/simple/jobs');if(!j.ok)return;
+  const list=j.jobs||[];
+  if(!list.length){$('jobList').innerHTML='<div class="empty">還沒有送出任何錄音</div>';return}
+  for(const job of list)if(job.state==='done'&&!keys[job.id]){const k=await api(`/api/simple/jobs/${job.id}/link`);if(k.ok)keys[job.id]=k.key}
+  $('jobList').innerHTML=list.map(job=>{
+    let st=STATE[job.state]||job.state,extra='';
+    if(job.state==='queued')st+=job.ahead?`（前面還有 ${job.ahead} 件）`:'';
+    if(job.state==='running'){const m=Math.max(1,Math.round((Date.now()/1000-job.started)/60));st=`${job.stage||'處理中'}・${m} 分鐘`}
+    if(job.state==='done')extra=`<div class="outs">${(job.outputs||[]).map(o=>
+      `<a class="${o.style}" target="_blank" rel="noopener" href="/simple/files/${job.id}/${encodeURIComponent(o.name)}?k=${encodeURIComponent(keys[job.id]||'')}">${esc(o.label)}</a>`).join('')}</div>`;
+    if(job.state==='failed')extra=`<div class="err-msg">${esc(job.error)}（工作編號 ${esc(job.id)}）</div>`;
+    const cancel=(job.state==='queued'||job.state==='running')?`<button class="btn ghost small" data-cancel="${esc(job.id)}" type="button">取消</button>`:'';
+    return `<div class="card job"><div><div class="name">${esc(job.file)}</div>
+      <div class="meta">${esc(job.scenario_title)}${job.topic?'・'+esc(job.topic):''}・${fmtTime(job.created)}</div></div>
+      <div style="text-align:right"><span class="chip ${job.state}">${esc(st)}</span>${cancel?'<div style="margin-top:6px">'+cancel+'</div>':''}</div>${extra}</div>`;
+  }).join('');
+}
+$('jobList').onclick=async e=>{
+  const id=e.target.dataset?.cancel;if(!id)return;
+  if(!confirm('確定要取消這件工作？'))return;
+  await api(`/api/simple/jobs/${id}/cancel`,{method:'POST'});loadJobs();
+};
+
+(async()=>{
+  const cfg=await api('/api/simple/config');
+  if(!cfg.ok){$('jobList').innerHTML=`<div class="banner err">${esc(cfg.error||'讀取設定失敗')}</div>`;return}
+  cards($('fileScenarios'),cfg.scenarios,'file',updSubmit);
+  const live=await initLive();
+  showTab(store.get('pcg_tab')||(live.local?'pLive':'pFile'));
+  loadJobs();setInterval(()=>{if(!$('pFile').hidden&&!document.hidden)loadJobs()},4000);
+})();
+</script>
+</body>
+</html>
