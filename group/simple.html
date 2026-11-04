@@ -141,7 +141,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 
       <p class="step" style="margin-top:22px"><b>2</b><span data-t="step_lang"></span></p>
       <div class="grid" id="fileScenarios"></div>
-      <p class="note" data-t-html="lang_note"></p>
+      <p class="note" id="langNote" data-t-html="lang_note"></p>
 
       <div class="row">
         <label class="field"><span data-t="topic_file"></span>
@@ -151,7 +151,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
       </div>
       <button class="btn" id="fileSubmit" type="submit" disabled data-t="submit"></button>
       <div class="bar" id="upBar"><i></i></div>
-      <p class="note" data-t="file_note"></p>
+      <p class="note" id="fileNote" data-t="file_note"></p>
     </form>
 
     <div class="jobs">
@@ -190,6 +190,8 @@ zh:{
   drop_has:'{size} MB，點這裡可以換一個檔案',
   step_lang:'錄音裡主要說什麼語言？',
   lang_note:'每一種都會產出<strong>中文會議紀錄</strong>（決議、待辦、風險）和逐字稿。同一段錄音請選講最多的語言；中文和外語各半的會議，選外語那一個會比較完整。',
+  lang_note_local:'這台電腦是本機模式：產出<strong>翻譯好的逐字稿</strong>和字幕檔（AI 會議紀錄要等公司的 GPU 伺服器上線）。同一段錄音請選講最多的語言。',
+  file_note_local:'送出後可以關掉這個頁面，回來時結果會在下方。本機處理比較慢，一小時的會議可能要 30～60 分鐘，處理時電腦會變慢。',
   topic_file:'會議主題（選填）',topic_file_ph:'例：印度廠週會',speakers:'幾個人講話（選填，不確定就空白）',
   submit:'送出',uploading:'上傳中…',file_note:'送出後可以關掉這個頁面，回來時結果會在下方。一小時的會議大約要 10～30 分鐘。',
   my_jobs:'我送出的錄音',no_jobs:'還沒有送出任何錄音',
@@ -222,6 +224,8 @@ en:{
   drop_has:'{size} MB — click to choose another file',
   step_lang:'What language is mostly spoken in the recording?',
   lang_note:'Every option produces <strong>Chinese meeting minutes</strong> (decisions, action items, risks) and a transcript. Pick the language spoken most; for meetings half in Chinese and half in another language, picking the other language gives more complete results.',
+  lang_note_local:'This computer runs in local mode: you get a <strong>translated transcript</strong> and subtitle files (AI meeting minutes will be available once the company GPU server is online). Pick the language spoken most.',
+  file_note_local:'You can close this page after submitting; results will appear below. Local processing is slower: a one-hour meeting may take 30–60 minutes, and the computer will be slower meanwhile.',
   topic_file:'Meeting topic (optional)',topic_file_ph:'e.g. India plant weekly meeting',speakers:'Number of speakers (optional, leave blank if unsure)',
   submit:'Submit',uploading:'Uploading…',file_note:'You can close this page after submitting; results will appear below when you come back. A one-hour meeting takes about 10–30 minutes.',
   my_jobs:'My recordings',no_jobs:'No recordings submitted yet',
@@ -254,6 +258,8 @@ id:{
   drop_has:'{size} MB — klik untuk mengganti file',
   step_lang:'Bahasa apa yang paling banyak dipakai dalam rekaman?',
   lang_note:'Setiap pilihan menghasilkan <strong>notulen rapat berbahasa Mandarin</strong> (keputusan, tindak lanjut, risiko) dan transkrip. Pilih bahasa yang paling banyak dipakai; untuk rapat setengah Mandarin setengah bahasa lain, pilih bahasa lain itu agar hasilnya lebih lengkap.',
+  lang_note_local:'Komputer ini memakai mode lokal: hasilnya <strong>transkrip yang sudah diterjemahkan</strong> dan file subtitle (notulen rapat AI tersedia setelah server GPU perusahaan aktif). Pilih bahasa yang paling banyak dipakai.',
+  file_note_local:'Setelah dikirim, halaman ini boleh ditutup; hasil akan muncul di bawah. Proses lokal lebih lambat: rapat satu jam bisa butuh 30–60 menit, dan komputer akan terasa lebih lambat selama proses.',
   topic_file:'Topik rapat (opsional)',topic_file_ph:'mis. Rapat mingguan pabrik India',speakers:'Jumlah pembicara (opsional, kosongkan jika tidak yakin)',
   submit:'Kirim',uploading:'Mengunggah…',file_note:'Setelah dikirim, halaman ini boleh ditutup; hasil akan muncul di bawah saat Anda kembali. Rapat satu jam butuh sekitar 10–30 menit.',
   my_jobs:'Rekaman saya',no_jobs:'Belum ada rekaman yang dikirim',
@@ -286,6 +292,8 @@ vi:{
   drop_has:'{size} MB — bấm để chọn tệp khác',
   step_lang:'Trong bản ghi chủ yếu nói tiếng gì?',
   lang_note:'Mỗi lựa chọn đều tạo <strong>biên bản cuộc họp bằng tiếng Trung</strong> (quyết định, việc cần làm, rủi ro) và bản ghi lời nói. Hãy chọn ngôn ngữ được nói nhiều nhất; cuộc họp nửa tiếng Trung nửa tiếng khác thì chọn tiếng khác để kết quả đầy đủ hơn.',
+  lang_note_local:'Máy này chạy ở chế độ cục bộ: kết quả là <strong>bản ghi lời nói đã dịch</strong> và tệp phụ đề (biên bản cuộc họp AI sẽ có khi máy chủ GPU của công ty hoạt động). Hãy chọn ngôn ngữ được nói nhiều nhất.',
+  file_note_local:'Sau khi gửi có thể đóng trang này; kết quả sẽ hiện ở bên dưới. Xử lý cục bộ chậm hơn: cuộc họp một giờ có thể mất 30–60 phút, và máy sẽ chậm hơn trong lúc xử lý.',
   topic_file:'Chủ đề cuộc họp (không bắt buộc)',topic_file_ph:'VD: Họp tuần nhà máy Ấn Độ',speakers:'Số người nói (không bắt buộc, để trống nếu không chắc)',
   submit:'Gửi',uploading:'Đang tải lên…',file_note:'Sau khi gửi có thể đóng trang này; kết quả sẽ hiện ở bên dưới khi bạn quay lại. Cuộc họp một giờ mất khoảng 10–30 phút.',
   my_jobs:'Bản ghi của tôi',no_jobs:'Chưa gửi bản ghi nào',
@@ -318,6 +326,8 @@ hi:{
   drop_has:'{size} MB — दूसरी फ़ाइल चुनने के लिए क्लिक करें',
   step_lang:'रिकॉर्डिंग में ज़्यादातर कौन-सी भाषा बोली गई है?',
   lang_note:'हर विकल्प से <strong>चीनी भाषा में मीटिंग मिनट्स</strong> (फ़ैसले, कार्य-सूची, जोखिम) और ट्रांसक्रिप्ट बनते हैं। जो भाषा सबसे ज़्यादा बोली गई हो वही चुनें; आधी चीनी और आधी दूसरी भाषा वाली मीटिंग में दूसरी भाषा चुनने से नतीजा ज़्यादा पूरा मिलता है।',
+  lang_note_local:'यह कंप्यूटर लोकल मोड में है: आपको <strong>अनुवादित ट्रांसक्रिप्ट</strong> और सबटाइटल फ़ाइलें मिलेंगी (AI मीटिंग मिनट्स कंपनी का GPU सर्वर चालू होने के बाद मिलेंगे)। जो भाषा सबसे ज़्यादा बोली गई हो वही चुनें।',
+  file_note_local:'भेजने के बाद यह पेज बंद कर सकते हैं; नतीजे नीचे दिखेंगे। लोकल प्रोसेसिंग धीमी है: एक घंटे की मीटिंग में 30–60 मिनट लग सकते हैं, और इस दौरान कंप्यूटर धीमा रहेगा।',
   topic_file:'मीटिंग का विषय (वैकल्पिक)',topic_file_ph:'जैसे: इंडिया प्लांट साप्ताहिक मीटिंग',speakers:'कितने लोग बोल रहे हैं (वैकल्पिक, पक्का न हो तो खाली छोड़ें)',
   submit:'भेजें',uploading:'अपलोड हो रहा है…',file_note:'भेजने के बाद यह पेज बंद कर सकते हैं; लौटने पर नतीजे नीचे दिखेंगे। एक घंटे की मीटिंग में लगभग 10–30 मिनट लगते हैं।',
   my_jobs:'मेरी रिकॉर्डिंग',no_jobs:'अभी तक कोई रिकॉर्डिंग नहीं भेजी गई',
@@ -510,6 +520,7 @@ $('jobList').onclick=async e=>{
   const cfg=await api('/api/simple/config');
   if(!cfg.ok){$('jobList').innerHTML=`<div class="banner err">${esc(errText(cfg))}</div>`;return}
   fileScen=cfg.scenarios||[];
+  if(cfg.minutes===false){$('langNote').dataset.tHtml='lang_note_local';$('fileNote').dataset.t='file_note_local';applyLang()}
   const live=await initLive();
   showTab(store.get('pcg_tab')||(live.local?'pLive':'pFile'));
   loadJobs();setInterval(()=>{if(!$('pFile').hidden&&!document.hidden)loadJobs()},4000);

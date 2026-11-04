@@ -630,6 +630,17 @@ for _nd in _nllb_search_dirs:
         NLLB_MODEL_DIR = _nd
         break
 
+# 集團版：本機離線翻譯改用 M2M100 418M（MIT 授權，可商用；NLLB 是 CC-BY-NC 非商業）。
+# 找到 M2M100 模型時，原本所有「NLLB 本機離線翻譯」的選項、判斷、建立都改用它（見 NllbTranslator.__new__），
+# 上游十幾處 NLLB 的程式不必改。模型位置：環境變數 PCG_M2M_DIR，或安裝資料夾的 models/m2m100_418m
+M2M_MODEL_DIR = os.environ.get("PCG_M2M_DIR") or os.path.join(SCRIPT_DIR, "models", "m2m100_418m")
+LOCAL_MT_IS_M2M = os.path.isfile(os.path.join(M2M_MODEL_DIR, "model.bin"))
+if LOCAL_MT_IS_M2M:
+    NLLB_MODEL_DIR = M2M_MODEL_DIR
+LOCAL_MT_NAME = "M2M100 本機離線" if LOCAL_MT_IS_M2M else "NLLB 本機離線"
+LOCAL_MT_DESC = ("支援中英日韓、印尼文、越南文、印地語，免 LLM 伺服器；MIT 授權可商用" if LOCAL_MT_IS_M2M
+                 else "支援中日韓英，品質一般；模型非商業授權（CC-BY-NC 4.0）")
+
 # 跨平台 Loopback 裝置偵測
 _LOOPBACK_LABEL = ("WASAPI Loopback" if IS_WINDOWS
                    else "PipeWire / PulseAudio 系統音訊" if IS_LINUX
@@ -5618,6 +5629,14 @@ class ArgosTranslator:
 class NllbTranslator:
     """使用 NLLB 600M (CTranslate2) 離線多語言翻譯"""
 
+    LABEL = "NLLB"
+
+    def __new__(cls, *args, **kwargs):
+        # 集團版：有 M2M100 模型時一律改用它（可商用），呼叫端照舊寫 NllbTranslator(...)
+        if cls is NllbTranslator and LOCAL_MT_IS_M2M:
+            cls = M2M100Translator
+        return super().__new__(cls)
+
     _LANG_MAP = {
         "en": "eng_Latn",
         "zh": "zho_Hant",
@@ -5728,6 +5747,47 @@ class NllbTranslator:
         if self.direction in ("en2zh", "ja2zh", "ko2zh") or self.direction in tuple(f"{L}2zh" for L in _XL_CODES):
             return _s2twp_safe(result)
         return result
+
+
+class M2M100Translator(NllbTranslator):
+    """集團版：M2M100 418M（CTranslate2 int8，CPU）離線翻譯。MIT 授權，可商用。
+    一個模型涵蓋中、英、日、韓、印尼、越南、印地語互譯；沒有獨立顯示卡的電腦一句約 1 秒。
+    斷句、重複偵測、簡轉繁沿用 NllbTranslator；只換語言代碼、載入方式與 beam 大小"""
+
+    LABEL = "M2M100"
+    _LANG_MAP = {"en": "__en__", "zh": "__zh__", "ja": "__ja__", "ko": "__ko__",
+                 "id": "__id__", "vi": "__vi__", "hi": "__hi__"}
+    BEAM_SIZE = 2          # CPU 上即時字幕要快；5 會慢一倍以上，品質差異不大
+
+    def __init__(self, direction="en2zh"):
+        src_key, tgt_key = self._DIRECTION_MAP.get(direction, ("en", "zh"))
+        self.src_lang = self._LANG_MAP[src_key]
+        self.tgt_lang = self._LANG_MAP[tgt_key]
+        self.direction = direction
+        self.model = "M2M100"
+        print(f"{C_DIM}正在載入 M2M100 離線翻譯模型...{RESET}", end=" ", flush=True)
+        _webui_send({"type": "progress", "stage": "載入中", "detail": "M2M100 離線翻譯模型"})
+        spm = os.path.join(M2M_MODEL_DIR, "sentencepiece.bpe.model")
+        if not os.path.isfile(spm):
+            raise FileNotFoundError(f"M2M100 模型缺少 sentencepiece.bpe.model：{M2M_MODEL_DIR}")
+        self.sp = sentencepiece.SentencePieceProcessor()
+        self.sp.Load(spm)
+        # 執行緒：保留一半核心給語音辨識（即時字幕兩者同時在跑）
+        _threads = max(1, (os.cpu_count() or 4) // 2)
+        self.ct2 = ctranslate2.Translator(M2M_MODEL_DIR, device="cpu", compute_type="int8",
+                                          intra_threads=_threads)
+        print(f"{C_OK}{BOLD}完成！{RESET}")
+
+    def _translate_short(self, text):
+        tokens = self.sp.Encode(text, out_type=str)
+        results = self.ct2.translate_batch(
+            [[self.src_lang] + tokens + ["</s>"]],
+            target_prefix=[[self.tgt_lang]],
+            beam_size=self.BEAM_SIZE,
+            no_repeat_ngram_size=4,
+            max_decoding_length=256,
+        )
+        return self.sp.Decode(results[0].hypotheses[0][1:])     # 去掉開頭的語言代碼
 
 
 def _is_private_host(host):
@@ -7029,7 +7089,7 @@ def select_translator(init_host=None, init_port=None, mode="en2zh"):
             _argos_ok = mode == "en2zh" and os.path.isdir(ARGOS_PKG_PATH)
             _offline_opts = []
             if _nllb_ok:
-                _offline_opts.append(("NLLB 本機離線", "支援中日韓英，品質一般；模型非商業授權（CC-BY-NC 4.0）", "nllb"))
+                _offline_opts.append((LOCAL_MT_NAME, LOCAL_MT_DESC, "nllb"))
             if _argos_ok:
                 _offline_opts.append(("Argos 本機離線", "僅英翻中，品質一般", "argos"))
             if len(_offline_opts) == 0:
@@ -7086,7 +7146,7 @@ def select_translator(init_host=None, init_port=None, mode="en2zh"):
         for model_name in sorted(available_models):
             options.append((model_name, "", "llm", model_name))
     if os.path.isdir(NLLB_MODEL_DIR):
-        options.append(("NLLB 本機離線", "支援中日韓英，品質一般，免 LLM 伺服器；模型非商業授權（CC-BY-NC 4.0）", "nllb", None))
+        options.append((LOCAL_MT_NAME, LOCAL_MT_DESC, "nllb", None))
     if mode == "en2zh" and os.path.isdir(ARGOS_PKG_PATH):
         options.append(("Argos 本機離線", "僅英翻中，品質一般，免 LLM 伺服器", "argos", None))
 
@@ -7527,7 +7587,7 @@ def _input_interactive_menu(args):
 
                 # 加入本機離線翻譯選項
                 if os.path.isdir(NLLB_MODEL_DIR):
-                    translate_models.append(("NLLB 本機離線翻譯", "支援中日韓英互譯，免 LLM 伺服器；模型非商業授權（CC-BY-NC 4.0）", "nllb"))
+                    translate_models.append((LOCAL_MT_NAME + "翻譯", LOCAL_MT_DESC, "nllb"))
                 if mode_key == "en2zh" and os.path.isdir(ARGOS_PKG_PATH):
                     translate_models.append(("Argos 本機離線翻譯", "僅英翻中，免 LLM 伺服器", "argos"))
 
@@ -8116,7 +8176,7 @@ def run_stream(capture_id: int, translator, model_name: str, model_path: str,
     _webui_send({"type": "started", "mode": mode})
 
     # 設定底部固定狀態列（快捷鍵提示 + 即時資訊）
-    _tr_model = translator.model if isinstance(translator, OllamaTranslator) else ("NLLB" if isinstance(translator, NllbTranslator) else ("Argos" if isinstance(translator, ArgosTranslator) else ""))
+    _tr_model = translator.model if isinstance(translator, OllamaTranslator) else (getattr(translator, "LABEL", "NLLB") if isinstance(translator, NllbTranslator) else ("Argos" if isinstance(translator, ArgosTranslator) else ""))
     _tr_loc = "伺服器" if isinstance(translator, OllamaTranslator) else ("本機" if isinstance(translator, (ArgosTranslator, NllbTranslator)) else "")
     setup_status_bar(mode, model_name=model_name, asr_location="本機",
                      translate_model=_tr_model, translate_location=_tr_loc)
@@ -8799,7 +8859,7 @@ def run_stream_moonshine(capture_id: int, translator, moonshine_model_name: str,
     _webui_send({"type": "started", "mode": mode})
 
     # 設定狀態列
-    _tr_model = translator.model if isinstance(translator, OllamaTranslator) else ("NLLB" if isinstance(translator, NllbTranslator) else ("Argos" if isinstance(translator, ArgosTranslator) else ""))
+    _tr_model = translator.model if isinstance(translator, OllamaTranslator) else (getattr(translator, "LABEL", "NLLB") if isinstance(translator, NllbTranslator) else ("Argos" if isinstance(translator, ArgosTranslator) else ""))
     _tr_loc = "伺服器" if isinstance(translator, OllamaTranslator) else ("本機" if isinstance(translator, (ArgosTranslator, NllbTranslator)) else "")
     setup_status_bar(mode, model_name=f"Moonshine {moonshine_model_name}", asr_location="本機",
                      translate_model=_tr_model, translate_location=_tr_loc)
@@ -9297,7 +9357,7 @@ def run_stream_remote(capture_id: int, translator, model_name: str,
     _webui_send({"type": "progress", "stage": "", "detail": ""})
     _webui_send({"type": "started", "mode": mode})
 
-    _tr_model = translator.model if isinstance(translator, OllamaTranslator) else ("NLLB" if isinstance(translator, NllbTranslator) else ("Argos" if isinstance(translator, ArgosTranslator) else ""))
+    _tr_model = translator.model if isinstance(translator, OllamaTranslator) else (getattr(translator, "LABEL", "NLLB") if isinstance(translator, NllbTranslator) else ("Argos" if isinstance(translator, ArgosTranslator) else ""))
     _tr_loc = "伺服器" if isinstance(translator, OllamaTranslator) else ("本機" if isinstance(translator, (ArgosTranslator, NllbTranslator)) else "")
     setup_status_bar(mode, model_name=model_name, asr_location="伺服器",
                      translate_model=_tr_model, translate_location=_tr_loc)
@@ -10004,7 +10064,7 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
     print(f"\n{C_OK}{BOLD}開始監聽...{RESET} {C_WHITE}{listen_hints.get(mode, '')}{RESET}\n\n", flush=True)
     _webui_send({"type": "started", "mode": mode})
 
-    _tr_model = translator.model if isinstance(translator, OllamaTranslator) else ("NLLB" if isinstance(translator, NllbTranslator) else ("Argos" if isinstance(translator, ArgosTranslator) else ""))
+    _tr_model = translator.model if isinstance(translator, OllamaTranslator) else (getattr(translator, "LABEL", "NLLB") if isinstance(translator, NllbTranslator) else ("Argos" if isinstance(translator, ArgosTranslator) else ""))
     _tr_loc = "伺服器" if isinstance(translator, OllamaTranslator) else ("本機" if isinstance(translator, (ArgosTranslator, NllbTranslator)) else "")
     setup_status_bar(mode, model_name=f"Whisper {model_name}", asr_location="本機",
                      translate_model=_tr_model, translate_location=_tr_loc)
@@ -11295,7 +11355,7 @@ def run_stream_bidirectional(lb_device_id, mic_device_id,
     _webui_send({"type": "progress", "stage": "", "detail": ""})
     _webui_send({"type": "started", "mode": mode})
 
-    _tr_model = translator_lb.model if isinstance(translator_lb, OllamaTranslator) else ("NLLB" if isinstance(translator_lb, NllbTranslator) else "")
+    _tr_model = translator_lb.model if isinstance(translator_lb, OllamaTranslator) else (getattr(translator_lb, "LABEL", "NLLB") if isinstance(translator_lb, NllbTranslator) else "")
     _tr_loc = "伺服器" if isinstance(translator_lb, OllamaTranslator) else ("本機" if isinstance(translator_lb, NllbTranslator) else "")
     setup_status_bar(mode, model_name=f"Whisper {model_name}", asr_location="本機",
                      translate_model=_tr_model, translate_location=_tr_loc)
@@ -19236,8 +19296,9 @@ def parse_args():
         "-d", "--device", type=int, metavar="ID",
         help="音訊裝置 ID (數字，可用 --list-devices 查詢)")
     parser.add_argument(
-        "-e", "--engine", choices=["llm", "argos", "nllb"], metavar="ENGINE",
-        help="翻譯引擎 (llm / argos / nllb；nllb 的模型為非商業授權 CC-BY-NC 4.0)")
+        "-e", "--engine", choices=["llm", "argos", "nllb", "m2m"], metavar="ENGINE",
+        help="翻譯引擎 (llm / argos / nllb / m2m；nllb 的模型為非商業授權 CC-BY-NC 4.0；"
+             "m2m＝集團版的 M2M100 本機離線翻譯，MIT 授權)")
     parser.add_argument(
         "--llm-model", metavar="NAME", dest="ollama_model",
         help=f"LLM 翻譯模型名稱 (預設 {DEFAULT_TRANSLATE_MODEL}，伺服器沒有時改用 qwen2.5:14b)")
@@ -19671,6 +19732,12 @@ def _confirm_start(cli_cmd):
 def main():
     global _diarize_engine
     args = parse_args()
+    # 集團版：-e m2m 就是「本機離線翻譯」，走原本 nllb 的路徑（NllbTranslator 會改用 M2M100）
+    if getattr(args, "engine", None) == "m2m":
+        if not LOCAL_MT_IS_M2M:
+            print(f"[錯誤] 找不到 M2M100 模型（{M2M_MODEL_DIR}），請用集團版的安裝程式安裝", file=sys.stderr)
+            sys.exit(1)
+        args.engine = "nllb"
     if (args.speak_me or args.speak_them) and (args.mode not in _INTERP_MODES or args.input or args.tts_file or args.tts_text):
         # 只有命令列的英中雙向即時模式會接口譯；其他情況靜靜忽略的話，使用者會以為有在念（畫面選的要真的生效）
         print(f"{C_ERR}[錯誤] --speak-me／--speak-them 要搭配即時的 --mode en_zh（英中雙向）{RESET}", file=sys.stderr)

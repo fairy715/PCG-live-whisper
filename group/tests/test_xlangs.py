@@ -196,3 +196,61 @@ class Summary(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LocalM2M(unittest.TestCase):
+    """本機離線翻譯 M2M100：有模型時 NllbTranslator 一律改用它；送進模型的 token 格式要對"""
+
+    def setUp(self):
+        import tempfile
+        self.dir = tempfile.mkdtemp()
+        open(os.path.join(self.dir, "sentencepiece.bpe.model"), "w").close()
+        self.calls = []
+        calls = self.calls
+
+        class SP:
+            def Load(self, p): pass
+            def Encode(self, text, out_type=str): return ["▁" + w for w in text.split()]
+            def Decode(self, toks): return "".join(toks).replace("▁", " ").strip()
+
+        class CT2:
+            def __init__(self, path, **kw): calls.append(("init", path, kw))
+            def translate_batch(self, src, **kw):
+                calls.append(("batch", src, kw))
+                return [types.SimpleNamespace(hypotheses=[kw["target_prefix"][0] + ["我們", "明天", "开会"]])]
+
+        self.saved = (t.LOCAL_MT_IS_M2M, t.M2M_MODEL_DIR, getattr(t.sentencepiece, "SentencePieceProcessor", None),
+                      getattr(t.ctranslate2, "Translator", None))
+        t.LOCAL_MT_IS_M2M, t.M2M_MODEL_DIR = True, self.dir
+        t.sentencepiece.SentencePieceProcessor = SP
+        t.ctranslate2.Translator = CT2
+
+    def tearDown(self):
+        t.LOCAL_MT_IS_M2M, t.M2M_MODEL_DIR, sp, ct = self.saved
+        t.sentencepiece.SentencePieceProcessor = sp
+        t.ctranslate2.Translator = ct
+
+    def test_redirect_and_tokens(self):
+        tr = t.NllbTranslator(direction="id2zh")
+        self.assertIsInstance(tr, t.M2M100Translator)
+        self.assertEqual(tr.LABEL, "M2M100")
+        out = tr.translate("Kita rapat besok")
+        _, src, kw = next(c for c in self.calls if c[0] == "batch")
+        self.assertEqual(src, [["__id__", "▁Kita", "▁rapat", "▁besok", "</s>"]])
+        self.assertEqual(kw["target_prefix"], [["__zh__"]])
+        self.assertEqual(kw["beam_size"], 2)
+        _, path, ikw = next(c for c in self.calls if c[0] == "init")
+        self.assertEqual((path, ikw["device"], ikw["compute_type"]), (self.dir, "cpu", "int8"))
+        self.assertEqual(out, "我們明天開會")      # 去掉語言代碼、簡轉繁（M2M100 的中文多半是簡體）
+        self.assertNotIn("__zh__", out)
+
+    def test_all_new_directions_have_codes(self):
+        for L in LANGS:
+            for d in (f"{L}2zh", f"zh2{L}", f"{L}2en", f"en2{L}"):
+                src, tgt = t.M2M100Translator._DIRECTION_MAP[d]
+                self.assertIn(src, t.M2M100Translator._LANG_MAP)
+                self.assertIn(tgt, t.M2M100Translator._LANG_MAP)
+
+    def test_upstream_nllb_untouched_without_m2m(self):
+        t.LOCAL_MT_IS_M2M = False
+        self.assertIs(type(t.NllbTranslator.__new__(t.NllbTranslator)), t.NllbTranslator)

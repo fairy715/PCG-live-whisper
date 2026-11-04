@@ -84,7 +84,8 @@ class SimpleFlow(unittest.TestCase):
         self.fail(f"工作沒有結束：{j}")
 
     def test_full_flow(self):
-        self.assertIn("PCG 會議翻譯", self.c.get("/simple").text)
+        self.cfg.write_text(json.dumps({"pcg_simple": {"backend": "server"}}), encoding="utf-8")
+        self.assertIn("PCG", self.c.get("/simple").text)
         cfg = self.c.get("/api/simple/config", headers=self.h).json()
         self.assertIn("id2zh", [s["id"] for s in cfg["scenarios"]])
         r = self.submit(topic="中爪新廠", speakers="3").json()
@@ -111,6 +112,7 @@ class SimpleFlow(unittest.TestCase):
         self.assertEqual(self.c.get(f"/api/simple/jobs/{r['id']}/link", headers=other).status_code, 404)
 
     def test_chinese_meeting_has_no_translation_engine(self):
+        self.cfg.write_text(json.dumps({"pcg_simple": {"backend": "server"}}), encoding="utf-8")
         jid = self.submit(scenario="zh").json()["id"]
         self.wait(jid)
         self.assertNotIn("-e llm", (self.base / "args.txt").read_text(encoding="utf-8"))
@@ -149,12 +151,26 @@ class SimpleFlow(unittest.TestCase):
         ok = self.c.get("/api/simple/jobs", headers={**self.h, "X-Simple-Token": "pcg123"})
         self.assertEqual(ok.status_code, 200)
 
+    def test_local_backend_default(self):
+        """沒有設定 backend＝本機模式：小模型、M2M100、不做摘要、強制本機辨識"""
+        jid = self.submit().json()["id"]
+        self.wait(jid)
+        args = (self.base / "args.txt").read_text(encoding="utf-8")
+        for want in ("-e m2m", "-m small", "--local-asr"):
+            self.assertIn(want, args)
+        self.assertNotIn("--summarize", args)
+        self.assertFalse(self.c.get("/api/simple/config", headers=self.h).json()["minutes"])
+
     def test_live(self):
         info = self.c.get("/api/simple/live").json()
         self.assertTrue(info["local"])
         r = self.c.post("/api/simple/live", json={"scenario": "vi", "speak": True, "topic": "週會"}).json()
         self.assertEqual(r["mode"], "vi_zh")
         self.assertEqual(self.started[-1]["mode"], "vi_zh")
+        self.assertEqual(self.started[-1]["engine"], "nllb")     # 本機模式：走 nllb 路徑（集團版改用 M2M100）
+        self.assertTrue(self.started[-1]["local_asr"])
+        self.cfg.write_text(json.dumps({"pcg_simple": {"backend": "server"}}), encoding="utf-8")
+        self.c.post("/api/simple/live", json={"scenario": "vi"})
         self.assertEqual(self.started[-1]["engine"], "llm")
         r = self.c.post("/api/simple/live", json={"scenario": "zh", "speak": True}).json()
         self.assertEqual(r["mode"], "zh")                     # 中文沒有雙向

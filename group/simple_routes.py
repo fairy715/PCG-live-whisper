@@ -72,6 +72,24 @@ _OUTPUT_KINDS = [
 ]
 
 
+def profile(s):
+    """混合模式：依 pcg_simple.backend 決定怎麼跑。
+    - "local"（預設，沒有 GPU 伺服器時）：全部在這台電腦的 CPU 上跑。辨識用小模型、翻譯用 M2M100（可商用），
+      不產出 AI 會議紀錄（摘要要大模型，CPU 太慢、品質太差）；只出翻譯好的逐字稿與字幕檔
+    - "server"：辨識交給 GPU 伺服器（config.json 的 remote_whisper）、翻譯與會議紀錄交給 LLM 伺服器（llm_host）
+    IT 之後有了 GPU 伺服器，把 backend 改成 "server"、填好兩台伺服器的位址就切過去，同仁電腦不用重裝"""
+    local = (s.get("backend") or "local") != "server"
+    if local:
+        return {"backend": "local", "engine": "m2m", "summarize": False,
+                "file_model": s.get("local_file_model") or "small",
+                "live_model": s.get("local_live_model") or "small",
+                "diarize": bool(s.get("diarize", False)), "local_asr": True}
+    return {"backend": "server", "engine": "llm", "summarize": True,
+            "file_model": s.get("asr_model") or "large-v3-turbo",
+            "live_model": s.get("live_model") or s.get("asr_model") or "large-v3-turbo",
+            "diarize": bool(s.get("diarize", True)), "local_asr": False}
+
+
 def _strip_name(name):
     """上傳檔名只留檔名本身，去掉目錄成分與危險字元；副檔名必須是音訊／影片"""
     base = os.path.basename((name or "").replace("\\", "/")).strip()
@@ -214,16 +232,20 @@ class SimpleQueue:
 
     def _args(self, job):
         s = self.settings()
+        pf = profile(s)
         args = [sys.executable, str(self.base / "translate_meeting.py"),
-                "--input", job["path"], "--mode", job["mode"],
-                "-m", s.get("asr_model") or "large-v3-turbo", "--summarize"]
+                "--input", job["path"], "--mode", job["mode"], "-m", pf["file_model"]]
+        if pf["summarize"]:
+            args.append("--summarize")
+            if s.get("summary_model"):
+                args += ["--summary-model", s["summary_model"]]
+        if pf["local_asr"]:
+            args.append("--local-asr")
         if job["mode"] not in ("zh", "en", "ja", "ko", "id", "vi", "hi"):
-            args += ["-e", "llm"]
-            if s.get("llm_model"):
+            args += ["-e", pf["engine"]]
+            if pf["engine"] == "llm" and s.get("llm_model"):
                 args += ["--llm-model", s["llm_model"]]
-        if s.get("summary_model"):
-            args += ["--summary-model", s["summary_model"]]
-        if s.get("diarize", True):
+        if pf["diarize"]:
             args.append("--diarize")
             if job.get("speakers"):
                 args += ["--num-speakers", str(int(job["speakers"]))]
@@ -382,9 +404,10 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         owner, err = auth(request)
         if err:
             return err
+        pf = profile(settings())
         return {"ok": True, "scenarios": [{k: s.get(k, "") for k in ("id", "title", "subtitle", "flag")}
                                           for s in scenarios()],
-                "max_upload_mb": _MAX_UPLOAD_MB}
+                "max_upload_mb": _MAX_UPLOAD_MB, "backend": pf["backend"], "minutes": pf["summarize"]}
 
     @app.get("/api/simple/jobs")
     async def simple_jobs(request: Request):
@@ -492,11 +515,14 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         except (OSError, ValueError):
             cfg = {}
         last = cfg.get("webui_last") or {}
+        pf = profile(s)
         start = {
             "mode": mode,
-            "model": s.get("live_model") or s.get("asr_model") or "large-v3-turbo",
+            "model": pf["live_model"],
             "scene": s.get("live_scene") or "meeting",
-            "engine": "llm" if mode != "zh" else None,
+            # 本機模式：WebUI 的 nllb 路徑在集團版會改用 M2M100（見 translate_meeting.py 的 NllbTranslator.__new__）
+            "engine": None if mode == "zh" else ("llm" if pf["engine"] == "llm" else "nllb"),
+            "local_asr": pf["local_asr"],
             # 沒填時主程式用 config.json 的 llm_host（IT 設定好的 LLM 伺服器）
             "llm_host": last.get("llm_host") or "",
             "llm_model": s.get("llm_model") or last.get("llm_model") or "",
