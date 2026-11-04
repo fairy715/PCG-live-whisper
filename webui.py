@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """jt-live-whisper WebUI — 瀏覽器介面（設定 + 即時字幕）
 
+修改聲明（Apache License 2.0 第 4(b) 條）：本檔案已由 PCG 集團版修改，
+加入印尼文、越南文、印地語模式；修改處以「集團版」註解標示。修改清單見 group/README.md。
+
 啟動方式：
     ./start.sh --webui           # 透過啟動腳本
     python3 webui.py             # 直接啟動
@@ -1114,6 +1117,12 @@ def _get_config():
         {"value": "zh", "label": "中文轉錄", "group": "轉錄"},
         {"value": "ja", "label": "日文轉錄", "group": "轉錄"},
         {"value": "ko", "label": "韓文轉錄", "group": "轉錄"},
+        # 集團版：印尼文、越南文、印地語（每種語言一組）
+        *[{"value": v, "label": lb, "group": grp}
+          for code, grp, short in (("id", "印尼文", "印尼"), ("vi", "越南文", "越"), ("hi", "印地語", "印地"))
+          for v, lb in ((f"{code}2zh", f"{short}翻中字幕"), (f"zh2{code}", f"中翻{short}字幕"),
+                        (f"{code}_zh", f"{short}中雙向字幕"), (code, f"{grp}轉錄"),
+                        (f"{code}2en", f"{short}翻英字幕"), (f"en2{code}", f"英翻{short}字幕"))],
         {"value": "nan", "label": "台語轉錄", "group": "轉錄"},
         {"value": "nan2en", "label": "台翻英字幕", "group": "單向翻譯"},
         {"value": "record", "label": "純錄音", "group": "其他"},
@@ -1785,7 +1794,7 @@ def _build_args(body: dict) -> list:
     args.extend(["-s", scene])
     engine = body.get("engine")
     llm_host = (body.get("llm_host") or "").strip()
-    if engine and mode not in ("en", "zh", "ja", "ko", "nan"):
+    if engine and mode not in ("en", "zh", "ja", "ko", "nan", "id", "vi", "hi"):
         args.extend(["-e", engine])
         if engine == "llm":
             llm_model = body.get("llm_model", "")
