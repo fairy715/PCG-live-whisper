@@ -61,13 +61,14 @@ _SESSION_RE = re.compile(r"記錄檔\s+(\S+?)/?\s*$")
 _ID_RE = re.compile(r"^[A-Za-z0-9_-]{8,64}$")
 
 # 產出檔的顯示名稱（依檔名開頭判斷，排序也照這個順序）
+# kind 是給畫面翻譯用的代碼（多國語言），label 是中文的備用名稱
 _OUTPUT_KINDS = [
-    ("摘要", ".html", "會議紀錄（網頁）", "primary"),
-    ("摘要", ".txt", "會議紀錄（文字檔）", ""),
-    ("時間逐字稿", ".html", "逐字稿（可點時間播放錄音）", ""),
-    ("時間逐字稿", ".txt", "逐字稿（文字檔）", ""),
-    ("時間逐字稿", ".srt", "字幕檔 SRT", ""),
-    ("時間逐字稿", ".vtt", "字幕檔 VTT", ""),
+    ("摘要", ".html", "會議紀錄（網頁）", "primary", "minutes_html"),
+    ("摘要", ".txt", "會議紀錄（文字檔）", "", "minutes_txt"),
+    ("時間逐字稿", ".html", "逐字稿（可點時間播放錄音）", "", "transcript_html"),
+    ("時間逐字稿", ".txt", "逐字稿（文字檔）", "", "transcript_txt"),
+    ("時間逐字稿", ".srt", "字幕檔 SRT", "", "srt"),
+    ("時間逐字稿", ".vtt", "字幕檔 VTT", "", "vtt"),
 ]
 
 
@@ -106,7 +107,8 @@ class SimpleQueue:
             return {}
         for j in jobs.values():
             if j.get("state") == "running":      # 上次處理到一半伺服器就重新啟動了
-                j.update(state="failed", error="處理途中伺服器重新啟動，請重新送出", finished=time.time())
+                j.update(state="failed", error="處理途中伺服器重新啟動，請重新送出", error_code="restarted",
+                         finished=time.time())
         return jobs
 
     def _save(self):
@@ -144,8 +146,9 @@ class SimpleQueue:
             for j in sorted(self.jobs.values(), key=lambda j: j["created"], reverse=True):
                 if j["owner"] != owner:
                     continue
-                item = {k: j[k] for k in ("id", "file", "scenario_title", "topic", "state", "created",
-                                          "started", "finished", "error", "stage")}
+                item = {k: j.get(k, "") for k in ("id", "file", "scenario", "scenario_title", "topic", "state",
+                                                  "created", "started", "finished", "error", "error_code",
+                                                  "stage")}
                 if j["state"] == "queued":
                     item["ahead"] = pos[j["id"]] - 1 + (1 if running else 0)
                 if j["state"] == "done":
@@ -178,13 +181,13 @@ class SimpleQueue:
         if not d:
             return []
         files = []
-        for prefix, ext, label, style in _OUTPUT_KINDS:
+        for prefix, ext, label, style, kind in _OUTPUT_KINDS:
             for f in sorted(d.iterdir()):
                 # 檔名像「印尼翻中_摘要_會議_20261104.html」「印尼翻中_時間逐字稿_會議_….srt」
                 is_kind = ("_摘要" in f.name or f.name.startswith("摘要")) if prefix == "摘要" \
                     else ("時間逐字稿" in f.name and "摘要" not in f.name)
                 if f.suffix.lower() == ext and is_kind and not any(x["name"] == f.name for x in files):
-                    files.append({"name": f.name, "label": label, "style": style,
+                    files.append({"name": f.name, "label": label, "style": style, "kind": kind,
                                   "size_kb": round(f.stat().st_size / 1024, 1)})
         return files
 
@@ -205,7 +208,7 @@ class SimpleQueue:
             if not queued:
                 return None
             j = queued[0]
-            j.update(state="running", started=time.time(), stage="準備中")
+            j.update(state="running", started=time.time(), stage="prepare")
             self._save()
             return dict(j)
 
@@ -282,29 +285,31 @@ class SimpleQueue:
             if j.get("cancel"):
                 j.update(state="cancelled", error="已取消")
             elif rc == 0 and self.outputs(j):
-                j.update(state="done", stage="完成")
+                j.update(state="done", stage="done")
             else:
-                j.update(state="failed", error=_error_of(tail, rc))
+                code, msg = _error_of(tail, rc)
+                j.update(state="failed", error=msg, error_code=code)
             self._save()
 
 
 def _stage_of(line):
-    """從主程式的輸出猜目前在做什麼（給同仁看的進度，不求精確）"""
-    for key, label in (("轉檔", "轉檔中"), ("講者辨識", "辨識講者中"), ("Diariz", "辨識講者中"),
-                       ("翻譯", "翻譯中"), ("校正", "校正逐字稿中"), ("會議分析", "整理會議紀錄中"),
-                       ("摘要", "整理會議紀錄中"), ("辨識", "語音辨識中"), ("處理完成", "收尾中")):
+    """從主程式的輸出猜目前在做什麼（給同仁看的進度，不求精確）。回傳代碼，畫面依語言顯示"""
+    for key, code in (("轉檔", "convert"), ("講者辨識", "diarize"), ("Diariz", "diarize"),
+                      ("翻譯", "translate"), ("校正", "correct"), ("會議分析", "summary"),
+                      ("摘要", "summary"), ("辨識", "asr"), ("處理完成", "finishing")):
         if key in line:
-            return label
+            return code
     return ""
 
 
 def _error_of(tail, rc):
+    """回傳 (代碼, 細節)：代碼給畫面翻譯，細節是主程式的原文（給 IT 查問題）"""
     for line in reversed(tail):
         if "[錯誤]" in line or "Error" in line or "錯誤" in line:
-            return re.sub(r"^\[錯誤\]\s*", "", line)[:200]
+            return "detail", re.sub(r"^\[錯誤\]\s*", "", line)[:200]
     if rc == 0:
-        return "處理完成但沒有產出檔案：可能是錄音的語言選錯，或錄音沒有人聲"
-    return f"處理失敗（錯誤碼 {rc}），請把這件工作的編號告訴 IT"
+        return "no_output", "處理完成但沒有產出檔案：可能是錄音的語言選錯，或錄音沒有人聲"
+    return "failed", f"處理失敗（錯誤碼 {rc}），請把這件工作的編號告訴 IT"
 
 
 def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path, write_config,
@@ -360,10 +365,12 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         ensure()                       # 先把設定檔的明文密碼換成雜湊，否則剛設好密碼後的第一個請求會不用密碼就通過
         h = settings().get("password_hash", "")
         if h and not is_local(request) and not pw_match(request.headers.get("X-Simple-Token", ""), h):
-            return None, JSONResponse({"ok": False, "need_password": True, "error": "請輸入同仁密碼"}, status_code=401)
+            return None, JSONResponse({"ok": False, "need_password": True, "code": "need_password",
+                                       "error": "請輸入同仁密碼"}, status_code=401)
         owner = request.headers.get("X-Client-Id", "")
         if not _ID_RE.match(owner):
-            return None, JSONResponse({"ok": False, "error": "瀏覽器代號不正確，請重新整理頁面"}, status_code=400)
+            return None, JSONResponse({"ok": False, "code": "bad_client", "error": "瀏覽器代號不正確，請重新整理頁面"},
+                                    status_code=400)
         return owner, None
 
     @app.get("/simple", response_class=HTMLResponse)
@@ -394,10 +401,11 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             return err
         sc = next((s for s in scenarios() if s.get("id") == scenario), None)
         if not sc:
-            return JSONResponse({"ok": False, "error": "請選擇錄音的語言"}, status_code=400)
+            return JSONResponse({"ok": False, "code": "pick_language", "error": "請選擇錄音的語言"}, status_code=400)
         name = _strip_name(file.filename)
         if not name:
-            return JSONResponse({"ok": False, "error": "只接受錄音或影片檔（mp3、m4a、wav、mp4…）"}, status_code=400)
+            return JSONResponse({"ok": False, "code": "bad_file", "error": "只接受錄音或影片檔（mp3、m4a、wav、mp4…）"},
+                                status_code=400)
         spk = int(speakers) if speakers.strip().isdigit() and 1 <= int(speakers) <= 20 else None
         dest_dir = queue.upload_dir / (time.strftime("%Y%m%d_%H%M%S") + "_" + secrets.token_hex(3))
         dest_dir.mkdir(parents=True)
@@ -416,7 +424,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         except ValueError as e:
             dest.unlink(missing_ok=True)
             dest_dir.rmdir()
-            return JSONResponse({"ok": False, "error": str(e)}, status_code=413)
+            return JSONResponse({"ok": False, "code": "too_large", "error": str(e)}, status_code=413)
         jid = queue.add(owner, name, dest, sc, topic.strip()[:60], spk)
         return {"ok": True, "id": jid}
 
@@ -468,15 +476,15 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
     @app.post("/api/simple/live")
     async def simple_live_start(request: Request, body: dict = {}):
         if not is_local(request):
-            return JSONResponse({"ok": False, "error": "即時字幕要在自己的電腦上開：請在這台電腦安裝 PCG-live-whisper，"
+            return JSONResponse({"ok": False, "code": "live_remote", "error": "即時字幕要在自己的電腦上開：請在這台電腦安裝 PCG-live-whisper，"
                                                        "用桌面捷徑開啟"}, status_code=403)
         if start_live is None:
-            return JSONResponse({"ok": False, "error": "這個版本不支援即時字幕"}, status_code=503)
+            return JSONResponse({"ok": False, "code": "live_unavailable", "error": "這個版本不支援即時字幕"}, status_code=503)
         if live_running and live_running():
             return {"ok": True, "already": True}
         sc = next((x for x in LIVE_SCENARIOS if x["id"] == body.get("scenario")), None)
         if not sc:
-            return JSONResponse({"ok": False, "error": "請選擇對方說的語言"}, status_code=400)
+            return JSONResponse({"ok": False, "code": "pick_language", "error": "請選擇對方說的語言"}, status_code=400)
         s = settings()
         mode = sc["bidi"] if (body.get("speak") and sc["bidi"]) else sc["mode"]
         try:
@@ -500,7 +508,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         try:
             await start_live(start)
         except Exception as e:
-            return JSONResponse({"ok": False, "error": f"啟動失敗：{e}"}, status_code=500)
+            return JSONResponse({"ok": False, "code": "live_failed", "error": f"啟動失敗：{e}"}, status_code=500)
         return {"ok": True, "mode": mode}
 
     return queue

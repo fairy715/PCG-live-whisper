@@ -1933,6 +1933,15 @@ offer_breezy_on_upgrade() {
 }
 
 do_upgrade() {
+    # PCG 集團版：升級會從原作者的 GitHub 下載、蓋掉集團版的修改（新語言、簡易頁面）。改用 git pull 更新
+    if [ -f "$SCRIPT_DIR/group/simple_routes.py" ] && [ -z "${PCG_ALLOW_UPSTREAM_UPGRADE:-}" ]; then
+        echo ""
+        echo -e "  ${C_WARN}[PCG 集團版] 不能用 --upgrade：它會下載原作者的版本，蓋掉集團版的修改${NC}"
+        echo -e "  ${C_WHITE}請改用：${NC}"
+        echo -e "    ${C_OK}cd \"$SCRIPT_DIR\" && git pull && ./install.sh${NC}"
+        echo -e "  ${C_DIM}（git pull 取得集團版的更新；./install.sh 補齊新版需要的套件。說明見 group/INSTALL.md）${NC}"
+        return 1
+    fi
     section "從 GitHub 升級程式"
 
     # 升級一律用「新版」的清單（2026-10-10）：以前跑的是舊版安裝程式、只複製舊版清單上的檔案，

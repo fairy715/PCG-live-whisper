@@ -969,6 +969,15 @@ if ($LocalTTS) {
     if ($ok) { exit 0 } else { exit 1 }
 }
 
+if ($Upgrade -and (Test-Path (Join-Path $SCRIPT_DIR "group\simple_routes.py")) -and -not $env:PCG_ALLOW_UPSTREAM_UPGRADE) {
+    # PCG 集團版：升級會從原作者的 GitHub 下載、蓋掉集團版的修改（新語言、簡易頁面）。改用 git pull 更新
+    Write-Host ""
+    Write-Host "  [PCG 集團版] 不能用 -Upgrade：它會下載原作者的版本，蓋掉集團版的修改" -ForegroundColor Yellow
+    Write-Host "  請改用：" -ForegroundColor White
+    Write-Host "    cd `"$SCRIPT_DIR`"; git pull; .\install.ps1" -ForegroundColor Green
+    Write-Host "  （git pull 取得集團版的更新；.\install.ps1 補齊新版需要的套件。說明見 group\INSTALL.md）" -ForegroundColor DarkGray
+    exit 1
+}
 if ($Upgrade) {
     # 升級要更新的檔案清單（與 install.sh 的 _UPGRADE_FILES 一致）。
     # 原本補檔與升級各自維護一份且內容不同，漏掉 README.md / CHANGELOG.md，

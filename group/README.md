@@ -43,6 +43,11 @@
 ### 給一般同仁用的簡易頁面（`/simple`）
 
 原本的 WebUI 選項很多，適合 IT；一般同仁改用簡易頁面：`http://<伺服器>:19781/simple`。
+**安裝與架構說明見 [INSTALL.md](INSTALL.md)。**
+
+畫面支援**繁體中文、English、Bahasa Indonesia、Tiếng Việt、हिन्दी**：依瀏覽器語言自動選擇，右上角可切換（記在瀏覽器裡）。
+文字都在 `simple.html` 的 `I18N` 對照表；`node group/tests/check_i18n.js` 檢查每種語言的詞條是否齊全。
+產出的會議紀錄目前一律是中文；按「開始」後切到的字幕畫面沿用完整 WebUI，介面仍是中文。
 程式都在 `group/`（`simple_routes.py`、`simple.html`），`webui.py` 只多一小段把它掛上去。
 
 | 分頁 | 同仁要做的事 | 在哪裡用 |
@@ -78,6 +83,7 @@
 - REST API（`jtlw_api/`）的語言清單還沒加這三種語言
 - 雙向語音口譯（念出來）仍只支援英中雙向
 - 台語模式（Breeze-ASR-26）、Qwen3-ASR 不適用這三種語言
+- 原作者的 `--upgrade` 會蓋掉集團版：已在 `install.sh`、`install.ps1` 擋下，改用 `git pull`（見 INSTALL.md）
 - 安裝程式建立的桌面捷徑仍然打開完整 WebUI；同仁電腦請先用書籤 `http://localhost:19781/simple`
 - 簡易頁面的即時字幕畫面沿用完整 WebUI 的字幕頁（按鈕較多），之後可以再做精簡版
 

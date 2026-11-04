@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<!-- PCG 集團版：給一般同仁用的簡易頁面。後端見 group/simple_routes.py -->
-<html lang="zh-TW">
+<!-- PCG 集團版：給一般同仁用的簡易頁面。後端見 group/simple_routes.py。
+     多國語言：所有文字在下方 I18N 對照表（zh 繁體中文、en、id 印尼文、vi 越南文、hi 印地語）；
+     新增語言只要在 I18N 加一組、在 LANGS 加一列 -->
+<html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PCG 會議翻譯</title>
+<title>PCG Meeting Translator</title>
 <link rel="icon" href="/favicon.png">
 <style>
 :root{
@@ -20,18 +22,21 @@
   --shadow:none;
 }}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system,"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:16px/1.6 -apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei","Noto Sans TC","Noto Sans Devanagari","Nirmala UI",sans-serif}
 .wrap{max-width:860px;margin:0 auto;padding:24px 16px 64px}
-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px}
 header h1{font-size:22px;margin:0;font-weight:700}
 header .sub{color:var(--dim);font-size:14px}
-.tabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--line)}
-.tab{appearance:none;background:none;border:0;border-bottom:3px solid transparent;padding:10px 6px;margin-right:16px;
+.lang{flex:none;display:flex;align-items:center;gap:6px;color:var(--dim);font-size:14px}
+.lang select{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 8px}
+.tabs{display:flex;flex-wrap:wrap;gap:0 16px;margin-bottom:20px;border-bottom:1px solid var(--line)}
+.tab{appearance:none;background:none;border:0;border-bottom:3px solid transparent;padding:10px 6px;
   font:inherit;font-size:17px;font-weight:600;color:var(--dim);cursor:pointer}
 .tab[aria-selected=true]{color:var(--text);border-bottom-color:var(--accent)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
 .step{font-size:15px;font-weight:700;margin:0 0 12px;display:flex;align-items:center;gap:8px}
-.step b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:13px}
+.step b{flex:none;display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:13px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
 .opt{position:relative;display:flex;gap:12px;align-items:center;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;cursor:pointer;background:var(--card)}
 .opt input{position:absolute;opacity:0;pointer-events:none}
@@ -43,7 +48,7 @@ header .sub{color:var(--dim);font-size:14px}
 .drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:130px;border:2px dashed var(--line);
   border-radius:12px;text-align:center;padding:16px;cursor:pointer;color:var(--dim)}
 .drop.over{border-color:var(--accent);background:var(--accent-soft)}
-.drop .big{font-size:17px;color:var(--text);font-weight:600}
+.drop .big{font-size:17px;color:var(--text);font-weight:600;word-break:break-all}
 .drop.has .big{color:var(--accent)}
 label.field{display:block;margin-top:14px;font-size:14px;color:var(--dim)}
 input[type=text],input[type=number],input[type=password]{width:100%;margin-top:6px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
@@ -69,7 +74,7 @@ input[type=text],input[type=number],input[type=password]{width:100%;margin-top:6
 .job{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:start}
 .job .name{font-weight:600;word-break:break-all}
 .job .meta{color:var(--dim);font-size:13px}
-.chip{display:inline-block;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600;white-space:nowrap}
+.chip{display:inline-block;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600}
 .chip.queued{background:var(--bg);color:var(--dim)}
 .chip.running{background:var(--accent-soft);color:var(--accent)}
 .chip.done{background:var(--ok-soft);color:var(--ok)}
@@ -78,49 +83,48 @@ input[type=text],input[type=number],input[type=password]{width:100%;margin-top:6
 .outs a{display:inline-block;padding:8px 12px;border-radius:10px;border:1px solid var(--line);color:var(--text);text-decoration:none;font-size:14px}
 .outs a.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
 .err-msg{grid-column:1/-1;color:var(--err);font-size:14px}
+.err-msg small{display:block;color:var(--dim)}
 .empty{color:var(--dim);text-align:center;padding:24px}
 dialog{border:0;border-radius:var(--radius);padding:24px;background:var(--card);color:var(--text);width:min(380px,92vw)}
 dialog::backdrop{background:rgba(0,0,0,.4)}
 [hidden]{display:none!important}
-@media (max-width:520px){.grid{grid-template-columns:1fr 1fr}.opt{padding:10px}.flag{width:34px;height:34px}}
+@media (max-width:520px){.grid{grid-template-columns:1fr 1fr}.opt{padding:10px;gap:8px}.flag{width:34px;height:34px}header{flex-direction:column}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div>
-      <h1>PCG 會議翻譯</h1>
-      <div class="sub">即時字幕、錄音轉會議紀錄。所有語音與文字都在公司自己的伺服器處理，不會送到外部。</div>
+      <h1 data-t="title"></h1>
+      <div class="sub" data-t="tagline"></div>
     </div>
+    <label class="lang"><span aria-hidden="true">🌐</span>
+      <select id="langSel" aria-label="Language"></select></label>
   </header>
 
   <div class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tabLive" aria-controls="pLive" aria-selected="false">即時字幕</button>
-    <button class="tab" role="tab" id="tabFile" aria-controls="pFile" aria-selected="false">錄音 → 會議紀錄</button>
+    <button class="tab" role="tab" id="tabLive" aria-controls="pLive" aria-selected="false" data-t="tab_live"></button>
+    <button class="tab" role="tab" id="tabFile" aria-controls="pFile" aria-selected="false" data-t="tab_file"></button>
   </div>
 
   <!-- 即時字幕 -->
   <section id="pLive" role="tabpanel" hidden>
-    <div id="liveRemote" class="banner warn" hidden>
-      即時字幕要在<strong>自己的電腦</strong>上開：它翻譯的是這台電腦播出來的聲音（Teams、Zoom、YouTube…）。<br>
-      請 IT 幫你的電腦安裝 PCG-live-whisper，之後點桌面捷徑「PCG 會議翻譯」就能用。<br>
-      在這台電腦上，你可以先用上方的「錄音 → 會議紀錄」。
-    </div>
+    <div id="liveRemote" class="banner warn" hidden data-t-html="live_remote"></div>
     <div id="liveRunning" class="banner info" hidden>
-      字幕正在進行中。<button class="btn ghost" id="openLive" type="button">打開字幕畫面</button>
+      <span data-t="live_running"></span> <button class="btn ghost" id="openLive" type="button" data-t="open_live"></button>
     </div>
     <div id="liveForm">
       <div class="card">
-        <p class="step"><b>1</b>對方說什麼語言？</p>
+        <p class="step"><b>1</b><span data-t="step_live_lang"></span></p>
         <div class="grid" id="liveScenarios"></div>
         <label class="check"><input type="checkbox" id="liveSpeak">
-          <span>我也要說話（雙向）<small>用麥克風：我說中文，會翻成對方的語言顯示出來。請戴耳機，避免把對方的聲音錄進麥克風。</small></span></label>
+          <span><span data-t="speak_t"></span><small data-t="speak_s"></small></span></label>
         <label class="check"><input type="checkbox" id="liveOverlay">
-          <span>字幕浮在所有視窗最上面<small>開會軟體全螢幕時也看得到字幕</small></span></label>
-        <label class="field">會議主題（選填，可提高專有名詞的翻譯準確度）
-          <input type="text" id="liveTopic" maxlength="60" placeholder="例：中爪新廠設備驗收"></label>
-        <button class="btn" id="liveStart" type="button" disabled>開始即時字幕</button>
-        <p class="note">開始後會切到字幕畫面；要結束時按畫面上的「停止」。第一次開始需要十幾秒準備。</p>
+          <span><span data-t="overlay_t"></span><small data-t="overlay_s"></small></span></label>
+        <label class="field"><span data-t="topic_live"></span>
+          <input type="text" id="liveTopic" maxlength="60" data-t-ph="topic_live_ph"></label>
+        <button class="btn" id="liveStart" type="button" disabled data-t="start_live"></button>
+        <p class="note" data-t="live_note"></p>
       </div>
     </div>
   </section>
@@ -128,57 +132,245 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
   <!-- 錄音 → 會議紀錄 -->
   <section id="pFile" role="tabpanel" hidden>
     <form id="fileForm" class="card">
-      <p class="step"><b>1</b>選擇錄音或影片檔</p>
-      <div class="drop" id="drop" tabindex="0" role="button" aria-label="選擇錄音檔">
-        <div class="big" id="dropText">點這裡選檔，或把檔案拖進來</div>
-        <div id="dropHint">mp3、m4a、wav、mp4 等格式；Teams／Zoom 的會議錄影也可以</div>
+      <p class="step"><b>1</b><span data-t="step_file"></span></p>
+      <div class="drop" id="drop" tabindex="0" role="button">
+        <div class="big" id="dropText"></div>
+        <div id="dropHint"></div>
       </div>
       <input type="file" id="fileInput" accept="audio/*,video/*,.m4a,.mp3,.wav,.mp4,.mkv,.webm,.flac,.ogg,.aac,.wma,.mov" hidden>
 
-      <p class="step" style="margin-top:22px"><b>2</b>錄音裡主要說什麼語言？</p>
+      <p class="step" style="margin-top:22px"><b>2</b><span data-t="step_lang"></span></p>
       <div class="grid" id="fileScenarios"></div>
-      <p class="note">每一種都會產出<strong>中文會議紀錄</strong>（決議、待辦、風險）和逐字稿。同一段錄音請選講最多的語言；中文和外語各半的會議，選外語那一個會比較完整。</p>
+      <p class="note" data-t-html="lang_note"></p>
 
       <div class="row">
-        <label class="field">會議主題（選填）
-          <input type="text" id="fileTopic" maxlength="60" placeholder="例：印度廠週會"></label>
-        <label class="field">幾個人講話（選填，不確定就空白）
+        <label class="field"><span data-t="topic_file"></span>
+          <input type="text" id="fileTopic" maxlength="60" data-t-ph="topic_file_ph"></label>
+        <label class="field"><span data-t="speakers"></span>
           <input type="number" id="fileSpeakers" min="1" max="20" inputmode="numeric"></label>
       </div>
-      <button class="btn" id="fileSubmit" type="submit" disabled>送出</button>
+      <button class="btn" id="fileSubmit" type="submit" disabled data-t="submit"></button>
       <div class="bar" id="upBar"><i></i></div>
-      <p class="note" id="fileNote">送出後可以關掉這個頁面，回來時結果會在下方。一小時的會議大約要 10～30 分鐘。</p>
+      <p class="note" data-t="file_note"></p>
     </form>
 
     <div class="jobs">
-      <h2>我送出的錄音</h2>
-      <div id="jobList"><div class="empty">還沒有送出任何錄音</div></div>
+      <h2 data-t="my_jobs"></h2>
+      <div id="jobList"></div>
     </div>
   </section>
 </div>
 
 <dialog id="pwDlg">
   <form method="dialog" id="pwForm">
-    <h3 style="margin-top:0">請輸入同仁密碼</h3>
-    <p class="note" style="margin-top:0">密碼請向 IT 詢問。</p>
+    <h3 style="margin-top:0" data-t="pw_title"></h3>
+    <p class="note" style="margin-top:0" data-t="pw_hint"></p>
     <input type="password" id="pwInput" autocomplete="current-password" required>
-    <p class="note" id="pwErr" style="color:var(--err)" hidden>密碼不正確</p>
-    <button class="btn" type="submit">確定</button>
+    <p class="note" id="pwErr" style="color:var(--err)" hidden data-t="pw_wrong"></p>
+    <button class="btn" type="submit" data-t="ok"></button>
   </form>
 </dialog>
 
 <script>
+/* ── 多國語言 ─────────────────────────────────────────────── */
+const LANGS=[['zh','繁體中文','zh-TW'],['en','English','en-US'],['id','Bahasa Indonesia','id-ID'],['vi','Tiếng Việt','vi-VN'],['hi','हिन्दी','hi-IN']];
+const I18N={
+zh:{
+  title:'PCG 會議翻譯',tagline:'即時字幕、錄音轉會議紀錄。所有語音與文字都在公司自己的伺服器處理，不會送到外部。',
+  tab_live:'即時字幕',tab_file:'錄音 → 會議紀錄',
+  live_remote:'即時字幕要在<strong>自己的電腦</strong>上開：它翻譯的是這台電腦播出來的聲音（Teams、Zoom、YouTube…）。<br>請 IT 幫你的電腦安裝 PCG-live-whisper，再打開 <code>http://localhost:19781/simple</code>。<br>在這台電腦上，你可以先用「錄音 → 會議紀錄」。',
+  live_running:'字幕正在進行中。',open_live:'打開字幕畫面',
+  step_live_lang:'對方說什麼語言？',
+  speak_t:'我也要說話（雙向）',speak_s:'用麥克風：我說中文，會翻成對方的語言顯示出來。請戴耳機，避免把對方的聲音錄進麥克風。',
+  overlay_t:'字幕浮在所有視窗最上面',overlay_s:'開會軟體全螢幕時也看得到字幕',
+  topic_live:'會議主題（選填，可提高專有名詞的翻譯準確度）',topic_live_ph:'例：中爪新廠設備驗收',
+  start_live:'開始即時字幕',preparing:'準備中…',
+  live_note:'開始後會切到字幕畫面（目前只有中文介面）；要結束時按畫面上的「停止」。第一次開始需要十幾秒準備。',
+  step_file:'選擇錄音或影片檔',drop_big:'點這裡選檔，或把檔案拖進來',drop_hint:'mp3、m4a、wav、mp4 等格式；Teams／Zoom 的會議錄影也可以',
+  drop_has:'{size} MB，點這裡可以換一個檔案',
+  step_lang:'錄音裡主要說什麼語言？',
+  lang_note:'每一種都會產出<strong>中文會議紀錄</strong>（決議、待辦、風險）和逐字稿。同一段錄音請選講最多的語言；中文和外語各半的會議，選外語那一個會比較完整。',
+  topic_file:'會議主題（選填）',topic_file_ph:'例：印度廠週會',speakers:'幾個人講話（選填，不確定就空白）',
+  submit:'送出',uploading:'上傳中…',file_note:'送出後可以關掉這個頁面，回來時結果會在下方。一小時的會議大約要 10～30 分鐘。',
+  my_jobs:'我送出的錄音',no_jobs:'還沒有送出任何錄音',
+  st_queued:'排隊中',st_running:'處理中',st_done:'完成',st_failed:'失敗',st_cancelled:'已取消',
+  ahead:'（前面還有 {n} 件）',minutes:'{n} 分鐘',
+  sg_prepare:'準備中',sg_convert:'轉檔中',sg_asr:'語音辨識中',sg_diarize:'辨識講者中',sg_translate:'翻譯中',sg_correct:'校正逐字稿中',sg_summary:'整理會議紀錄中',sg_finishing:'收尾中',
+  o_minutes_html:'會議紀錄（網頁）',o_minutes_txt:'會議紀錄（文字檔）',o_transcript_html:'逐字稿（可點時間播放錄音）',o_transcript_txt:'逐字稿（文字檔）',o_srt:'字幕檔 SRT',o_vtt:'字幕檔 VTT',
+  cancel:'取消',confirm_cancel:'確定要取消這件工作？',job_id:'工作編號',
+  pw_title:'請輸入同仁密碼',pw_hint:'密碼請向 IT 詢問。',pw_wrong:'密碼不正確',ok:'確定',
+  e_restarted:'處理途中伺服器重新啟動，請重新送出',e_no_output:'沒有產出結果：可能是錄音的語言選錯，或錄音裡沒有人聲',e_failed:'處理失敗，請把工作編號告訴 IT',e_detail:'處理失敗，請把工作編號告訴 IT',
+  e_bad_file:'只接受錄音或影片檔（mp3、m4a、wav、mp4…）',e_too_large:'檔案太大',e_pick_language:'請選擇語言',e_bad_client:'請重新整理頁面',
+  e_live_remote:'即時字幕要在自己的電腦上開',e_live_unavailable:'這個版本不支援即時字幕',e_live_failed:'啟動失敗，請聯絡 IT',e_network:'連不到伺服器',e_generic:'發生錯誤',
+  mtg:'{lang}會議',
+  lv_id:'對方說印尼文',lv_vi:'對方說越南文',lv_hi:'對方說印地語',lv_en:'對方說英文',lv_ja:'對方說日文',lv_ko:'對方說韓文',lv_zh:'大家都說中文',
+  fs_zh:'中文',fs_id2zh:'印尼文',fs_vi2zh:'越南文',fs_hi2zh:'印地語',fs_en2zh:'英文',fs_ja2zh:'日文',fs_ko2zh:'韓文',
+  fs_sub_zh:'中文逐字稿',fs_sub:'翻成中文',fs_sub_hi2zh:'印度・翻成中文'
+},
+en:{
+  title:'PCG Meeting Translator',tagline:'Live subtitles and recording-to-minutes. All audio and text are processed on company servers and never leave the company.',
+  tab_live:'Live subtitles',tab_file:'Recording → Minutes',
+  live_remote:'Live subtitles must run on <strong>your own computer</strong>: they translate the sound this computer plays (Teams, Zoom, YouTube…).<br>Ask IT to install PCG-live-whisper on your computer, then open <code>http://localhost:19781/simple</code>.<br>On this computer you can use “Recording → Minutes” for now.',
+  live_running:'Subtitles are running.',open_live:'Open subtitle screen',
+  step_live_lang:'What language do the others speak?',
+  speak_t:'I will speak too (two-way)',speak_s:'Uses your microphone: when you speak Chinese, it is translated into their language. Please wear headphones so the microphone does not pick up the other side.',
+  overlay_t:'Keep subtitles on top of all windows',overlay_s:'Subtitles stay visible even when the meeting app is full screen',
+  topic_live:'Meeting topic (optional, improves translation of technical terms)',topic_live_ph:'e.g. Central Java plant equipment acceptance',
+  start_live:'Start live subtitles',preparing:'Preparing…',
+  live_note:'The subtitle screen opens after you start (its controls are in Chinese for now); press “停止” (Stop) to end. The first start takes about 10–20 seconds.',
+  step_file:'Choose a recording or video file',drop_big:'Click to choose a file, or drag it here',drop_hint:'mp3, m4a, wav, mp4 and more; Teams / Zoom meeting recordings work too',
+  drop_has:'{size} MB — click to choose another file',
+  step_lang:'What language is mostly spoken in the recording?',
+  lang_note:'Every option produces <strong>Chinese meeting minutes</strong> (decisions, action items, risks) and a transcript. Pick the language spoken most; for meetings half in Chinese and half in another language, picking the other language gives more complete results.',
+  topic_file:'Meeting topic (optional)',topic_file_ph:'e.g. India plant weekly meeting',speakers:'Number of speakers (optional, leave blank if unsure)',
+  submit:'Submit',uploading:'Uploading…',file_note:'You can close this page after submitting; results will appear below when you come back. A one-hour meeting takes about 10–30 minutes.',
+  my_jobs:'My recordings',no_jobs:'No recordings submitted yet',
+  st_queued:'Queued',st_running:'Processing',st_done:'Done',st_failed:'Failed',st_cancelled:'Cancelled',
+  ahead:' ({n} ahead of you)',minutes:'{n} min',
+  sg_prepare:'Preparing',sg_convert:'Converting',sg_asr:'Recognizing speech',sg_diarize:'Identifying speakers',sg_translate:'Translating',sg_correct:'Proofreading transcript',sg_summary:'Writing minutes',sg_finishing:'Finishing',
+  o_minutes_html:'Minutes (web page)',o_minutes_txt:'Minutes (text)',o_transcript_html:'Transcript (click a time to play)',o_transcript_txt:'Transcript (text)',o_srt:'Subtitles SRT',o_vtt:'Subtitles VTT',
+  cancel:'Cancel',confirm_cancel:'Cancel this job?',job_id:'Job ID',
+  pw_title:'Enter the staff password',pw_hint:'Ask IT for the password.',pw_wrong:'Incorrect password',ok:'OK',
+  e_restarted:'The server restarted during processing. Please submit again',e_no_output:'No result: the language may be wrong, or there is no speech in the recording',e_failed:'Processing failed. Please give the job ID to IT',e_detail:'Processing failed. Please give the job ID to IT',
+  e_bad_file:'Only audio or video files are accepted (mp3, m4a, wav, mp4…)',e_too_large:'The file is too large',e_pick_language:'Please choose a language',e_bad_client:'Please reload the page',
+  e_live_remote:'Live subtitles must run on your own computer',e_live_unavailable:'Live subtitles are not available in this version',e_live_failed:'Could not start. Please contact IT',e_network:'Cannot reach the server',e_generic:'Something went wrong',
+  mtg:'{lang} meeting',
+  lv_id:'Indonesian',lv_vi:'Vietnamese',lv_hi:'Hindi',lv_en:'English',lv_ja:'Japanese',lv_ko:'Korean',lv_zh:'Everyone speaks Chinese',
+  fs_zh:'Chinese',fs_id2zh:'Indonesian',fs_vi2zh:'Vietnamese',fs_hi2zh:'Hindi',fs_en2zh:'English',fs_ja2zh:'Japanese',fs_ko2zh:'Korean',
+  fs_sub_zh:'Chinese transcript',fs_sub:'Translated to Chinese',fs_sub_hi2zh:'India · to Chinese'
+},
+id:{
+  title:'Penerjemah Rapat PCG',tagline:'Subtitle langsung dan rekaman menjadi notulen. Semua suara dan teks diproses di server perusahaan dan tidak dikirim ke luar.',
+  tab_live:'Subtitle langsung',tab_file:'Rekaman → Notulen',
+  live_remote:'Subtitle langsung harus dijalankan di <strong>komputer Anda sendiri</strong>: yang diterjemahkan adalah suara yang diputar komputer ini (Teams, Zoom, YouTube…).<br>Minta IT memasang PCG-live-whisper di komputer Anda, lalu buka <code>http://localhost:19781/simple</code>.<br>Di komputer ini, Anda bisa memakai “Rekaman → Notulen” terlebih dahulu.',
+  live_running:'Subtitle sedang berjalan.',open_live:'Buka layar subtitle',
+  step_live_lang:'Lawan bicara memakai bahasa apa?',
+  speak_t:'Saya juga akan berbicara (dua arah)',speak_s:'Memakai mikrofon: saat saya berbicara bahasa Mandarin, akan diterjemahkan ke bahasa lawan bicara. Gunakan headphone agar suara lawan bicara tidak masuk ke mikrofon.',
+  overlay_t:'Subtitle selalu di atas semua jendela',overlay_s:'Subtitle tetap terlihat saat aplikasi rapat layar penuh',
+  topic_live:'Topik rapat (opsional, membantu menerjemahkan istilah teknis)',topic_live_ph:'mis. Serah terima mesin pabrik Jawa Tengah',
+  start_live:'Mulai subtitle langsung',preparing:'Menyiapkan…',
+  live_note:'Setelah dimulai, layar subtitle akan terbuka (tombolnya saat ini masih berbahasa Mandarin); tekan “停止” (Berhenti) untuk selesai. Persiapan pertama sekitar 10–20 detik.',
+  step_file:'Pilih file rekaman atau video',drop_big:'Klik untuk memilih file, atau seret ke sini',drop_hint:'mp3, m4a, wav, mp4, dll.; rekaman rapat Teams / Zoom juga bisa',
+  drop_has:'{size} MB — klik untuk mengganti file',
+  step_lang:'Bahasa apa yang paling banyak dipakai dalam rekaman?',
+  lang_note:'Setiap pilihan menghasilkan <strong>notulen rapat berbahasa Mandarin</strong> (keputusan, tindak lanjut, risiko) dan transkrip. Pilih bahasa yang paling banyak dipakai; untuk rapat setengah Mandarin setengah bahasa lain, pilih bahasa lain itu agar hasilnya lebih lengkap.',
+  topic_file:'Topik rapat (opsional)',topic_file_ph:'mis. Rapat mingguan pabrik India',speakers:'Jumlah pembicara (opsional, kosongkan jika tidak yakin)',
+  submit:'Kirim',uploading:'Mengunggah…',file_note:'Setelah dikirim, halaman ini boleh ditutup; hasil akan muncul di bawah saat Anda kembali. Rapat satu jam butuh sekitar 10–30 menit.',
+  my_jobs:'Rekaman saya',no_jobs:'Belum ada rekaman yang dikirim',
+  st_queued:'Mengantre',st_running:'Diproses',st_done:'Selesai',st_failed:'Gagal',st_cancelled:'Dibatalkan',
+  ahead:' ({n} antrean di depan)',minutes:'{n} menit',
+  sg_prepare:'Menyiapkan',sg_convert:'Mengonversi',sg_asr:'Mengenali suara',sg_diarize:'Mengenali pembicara',sg_translate:'Menerjemahkan',sg_correct:'Memeriksa transkrip',sg_summary:'Menyusun notulen',sg_finishing:'Menyelesaikan',
+  o_minutes_html:'Notulen (halaman web)',o_minutes_txt:'Notulen (teks)',o_transcript_html:'Transkrip (klik waktu untuk memutar)',o_transcript_txt:'Transkrip (teks)',o_srt:'Subtitle SRT',o_vtt:'Subtitle VTT',
+  cancel:'Batal',confirm_cancel:'Batalkan pekerjaan ini?',job_id:'ID pekerjaan',
+  pw_title:'Masukkan kata sandi karyawan',pw_hint:'Tanyakan kata sandi kepada IT.',pw_wrong:'Kata sandi salah',ok:'OK',
+  e_restarted:'Server dimulai ulang saat memproses. Silakan kirim lagi',e_no_output:'Tidak ada hasil: mungkin bahasanya salah, atau tidak ada suara orang dalam rekaman',e_failed:'Gagal diproses. Berikan ID pekerjaan kepada IT',e_detail:'Gagal diproses. Berikan ID pekerjaan kepada IT',
+  e_bad_file:'Hanya file audio atau video (mp3, m4a, wav, mp4…)',e_too_large:'File terlalu besar',e_pick_language:'Silakan pilih bahasa',e_bad_client:'Silakan muat ulang halaman',
+  e_live_remote:'Subtitle langsung harus dijalankan di komputer Anda sendiri',e_live_unavailable:'Versi ini tidak mendukung subtitle langsung',e_live_failed:'Gagal memulai. Hubungi IT',e_network:'Tidak dapat terhubung ke server',e_generic:'Terjadi kesalahan',
+  mtg:'Rapat {lang}',
+  lv_id:'Bahasa Indonesia',lv_vi:'Bahasa Vietnam',lv_hi:'Bahasa Hindi',lv_en:'Bahasa Inggris',lv_ja:'Bahasa Jepang',lv_ko:'Bahasa Korea',lv_zh:'Semua berbahasa Mandarin',
+  fs_zh:'Mandarin',fs_id2zh:'Indonesia',fs_vi2zh:'Vietnam',fs_hi2zh:'Hindi',fs_en2zh:'Inggris',fs_ja2zh:'Jepang',fs_ko2zh:'Korea',
+  fs_sub_zh:'Transkrip Mandarin',fs_sub:'Ke bahasa Mandarin',fs_sub_hi2zh:'India · ke Mandarin'
+},
+vi:{
+  title:'Phiên dịch cuộc họp PCG',tagline:'Phụ đề trực tiếp và chuyển bản ghi âm thành biên bản. Mọi âm thanh và văn bản đều được xử lý trên máy chủ của công ty, không gửi ra ngoài.',
+  tab_live:'Phụ đề trực tiếp',tab_file:'Ghi âm → Biên bản',
+  live_remote:'Phụ đề trực tiếp phải chạy trên <strong>máy tính của bạn</strong>: nó dịch âm thanh mà máy tính này phát ra (Teams, Zoom, YouTube…).<br>Hãy nhờ IT cài PCG-live-whisper cho máy của bạn, rồi mở <code>http://localhost:19781/simple</code>.<br>Trên máy này, bạn có thể dùng “Ghi âm → Biên bản” trước.',
+  live_running:'Phụ đề đang chạy.',open_live:'Mở màn hình phụ đề',
+  step_live_lang:'Người kia nói tiếng gì?',
+  speak_t:'Tôi cũng sẽ nói (hai chiều)',speak_s:'Dùng micro: khi tôi nói tiếng Trung, sẽ được dịch sang tiếng của người kia. Hãy đeo tai nghe để micro không thu tiếng của bên kia.',
+  overlay_t:'Phụ đề luôn nằm trên mọi cửa sổ',overlay_s:'Vẫn thấy phụ đề khi ứng dụng họp ở chế độ toàn màn hình',
+  topic_live:'Chủ đề cuộc họp (không bắt buộc, giúp dịch thuật ngữ chuyên ngành chính xác hơn)',topic_live_ph:'VD: Nghiệm thu thiết bị nhà máy',
+  start_live:'Bắt đầu phụ đề trực tiếp',preparing:'Đang chuẩn bị…',
+  live_note:'Sau khi bắt đầu sẽ chuyển sang màn hình phụ đề (các nút hiện chỉ có tiếng Trung); bấm “停止” (Dừng) để kết thúc. Lần đầu cần khoảng 10–20 giây để chuẩn bị.',
+  step_file:'Chọn tệp ghi âm hoặc video',drop_big:'Bấm để chọn tệp, hoặc kéo tệp vào đây',drop_hint:'mp3, m4a, wav, mp4…; bản ghi cuộc họp Teams / Zoom cũng được',
+  drop_has:'{size} MB — bấm để chọn tệp khác',
+  step_lang:'Trong bản ghi chủ yếu nói tiếng gì?',
+  lang_note:'Mỗi lựa chọn đều tạo <strong>biên bản cuộc họp bằng tiếng Trung</strong> (quyết định, việc cần làm, rủi ro) và bản ghi lời nói. Hãy chọn ngôn ngữ được nói nhiều nhất; cuộc họp nửa tiếng Trung nửa tiếng khác thì chọn tiếng khác để kết quả đầy đủ hơn.',
+  topic_file:'Chủ đề cuộc họp (không bắt buộc)',topic_file_ph:'VD: Họp tuần nhà máy Ấn Độ',speakers:'Số người nói (không bắt buộc, để trống nếu không chắc)',
+  submit:'Gửi',uploading:'Đang tải lên…',file_note:'Sau khi gửi có thể đóng trang này; kết quả sẽ hiện ở bên dưới khi bạn quay lại. Cuộc họp một giờ mất khoảng 10–30 phút.',
+  my_jobs:'Bản ghi của tôi',no_jobs:'Chưa gửi bản ghi nào',
+  st_queued:'Đang chờ',st_running:'Đang xử lý',st_done:'Hoàn tất',st_failed:'Thất bại',st_cancelled:'Đã hủy',
+  ahead:' (còn {n} việc phía trước)',minutes:'{n} phút',
+  sg_prepare:'Đang chuẩn bị',sg_convert:'Đang chuyển đổi',sg_asr:'Đang nhận dạng giọng nói',sg_diarize:'Đang nhận dạng người nói',sg_translate:'Đang dịch',sg_correct:'Đang hiệu đính bản ghi',sg_summary:'Đang soạn biên bản',sg_finishing:'Đang hoàn tất',
+  o_minutes_html:'Biên bản (trang web)',o_minutes_txt:'Biên bản (văn bản)',o_transcript_html:'Bản ghi lời nói (bấm thời gian để phát)',o_transcript_txt:'Bản ghi lời nói (văn bản)',o_srt:'Phụ đề SRT',o_vtt:'Phụ đề VTT',
+  cancel:'Hủy',confirm_cancel:'Hủy công việc này?',job_id:'Mã công việc',
+  pw_title:'Nhập mật khẩu nhân viên',pw_hint:'Hãy hỏi IT để lấy mật khẩu.',pw_wrong:'Mật khẩu không đúng',ok:'OK',
+  e_restarted:'Máy chủ đã khởi động lại khi đang xử lý. Vui lòng gửi lại',e_no_output:'Không có kết quả: có thể chọn sai ngôn ngữ, hoặc bản ghi không có giọng người',e_failed:'Xử lý thất bại. Hãy gửi mã công việc cho IT',e_detail:'Xử lý thất bại. Hãy gửi mã công việc cho IT',
+  e_bad_file:'Chỉ nhận tệp âm thanh hoặc video (mp3, m4a, wav, mp4…)',e_too_large:'Tệp quá lớn',e_pick_language:'Vui lòng chọn ngôn ngữ',e_bad_client:'Vui lòng tải lại trang',
+  e_live_remote:'Phụ đề trực tiếp phải chạy trên máy tính của bạn',e_live_unavailable:'Phiên bản này không hỗ trợ phụ đề trực tiếp',e_live_failed:'Không khởi động được. Hãy liên hệ IT',e_network:'Không kết nối được máy chủ',e_generic:'Đã xảy ra lỗi',
+  mtg:'Họp tiếng {lang}',
+  lv_id:'Tiếng Indonesia',lv_vi:'Tiếng Việt',lv_hi:'Tiếng Hindi',lv_en:'Tiếng Anh',lv_ja:'Tiếng Nhật',lv_ko:'Tiếng Hàn',lv_zh:'Mọi người đều nói tiếng Trung',
+  fs_zh:'Trung',fs_id2zh:'Indonesia',fs_vi2zh:'Việt',fs_hi2zh:'Hindi',fs_en2zh:'Anh',fs_ja2zh:'Nhật',fs_ko2zh:'Hàn',
+  fs_sub_zh:'Bản ghi tiếng Trung',fs_sub:'Dịch sang tiếng Trung',fs_sub_hi2zh:'Ấn Độ · sang tiếng Trung'
+},
+hi:{
+  title:'PCG मीटिंग अनुवादक',tagline:'लाइव सबटाइटल और रिकॉर्डिंग से मीटिंग मिनट्स। सारी आवाज़ और टेक्स्ट कंपनी के अपने सर्वर पर प्रोसेस होते हैं, बाहर नहीं भेजे जाते।',
+  tab_live:'लाइव सबटाइटल',tab_file:'रिकॉर्डिंग → मिनट्स',
+  live_remote:'लाइव सबटाइटल <strong>आपके अपने कंप्यूटर</strong> पर चलाने होंगे: यह इसी कंप्यूटर पर चल रही आवाज़ (Teams, Zoom, YouTube…) का अनुवाद करता है।<br>IT से अपने कंप्यूटर पर PCG-live-whisper इंस्टॉल करवाएँ, फिर <code>http://localhost:19781/simple</code> खोलें।<br>इस कंप्यूटर पर अभी आप “रिकॉर्डिंग → मिनट्स” का उपयोग कर सकते हैं।',
+  live_running:'सबटाइटल चल रहे हैं।',open_live:'सबटाइटल स्क्रीन खोलें',
+  step_live_lang:'सामने वाले कौन-सी भाषा बोलते हैं?',
+  speak_t:'मैं भी बोलूँगा (दो-तरफ़ा)',speak_s:'माइक्रोफ़ोन से: जब मैं चीनी बोलूँ, तो सामने वाले की भाषा में अनुवाद दिखेगा। कृपया हेडफ़ोन लगाएँ, ताकि सामने वाले की आवाज़ माइक्रोफ़ोन में न जाए।',
+  overlay_t:'सबटाइटल सभी विंडो के ऊपर रखें',overlay_s:'मीटिंग ऐप फ़ुल स्क्रीन होने पर भी सबटाइटल दिखते रहें',
+  topic_live:'मीटिंग का विषय (वैकल्पिक, तकनीकी शब्दों का अनुवाद बेहतर होता है)',topic_live_ph:'जैसे: प्लांट उपकरण स्वीकृति',
+  start_live:'लाइव सबटाइटल शुरू करें',preparing:'तैयारी हो रही है…',
+  live_note:'शुरू करने के बाद सबटाइटल स्क्रीन खुलेगी (उसके बटन अभी चीनी में हैं); बंद करने के लिए “停止” (रोकें) दबाएँ। पहली बार तैयारी में लगभग 10–20 सेकंड लगते हैं।',
+  step_file:'रिकॉर्डिंग या वीडियो फ़ाइल चुनें',drop_big:'फ़ाइल चुनने के लिए क्लिक करें, या यहाँ खींचकर लाएँ',drop_hint:'mp3, m4a, wav, mp4 आदि; Teams / Zoom मीटिंग रिकॉर्डिंग भी चलेगी',
+  drop_has:'{size} MB — दूसरी फ़ाइल चुनने के लिए क्लिक करें',
+  step_lang:'रिकॉर्डिंग में ज़्यादातर कौन-सी भाषा बोली गई है?',
+  lang_note:'हर विकल्प से <strong>चीनी भाषा में मीटिंग मिनट्स</strong> (फ़ैसले, कार्य-सूची, जोखिम) और ट्रांसक्रिप्ट बनते हैं। जो भाषा सबसे ज़्यादा बोली गई हो वही चुनें; आधी चीनी और आधी दूसरी भाषा वाली मीटिंग में दूसरी भाषा चुनने से नतीजा ज़्यादा पूरा मिलता है।',
+  topic_file:'मीटिंग का विषय (वैकल्पिक)',topic_file_ph:'जैसे: इंडिया प्लांट साप्ताहिक मीटिंग',speakers:'कितने लोग बोल रहे हैं (वैकल्पिक, पक्का न हो तो खाली छोड़ें)',
+  submit:'भेजें',uploading:'अपलोड हो रहा है…',file_note:'भेजने के बाद यह पेज बंद कर सकते हैं; लौटने पर नतीजे नीचे दिखेंगे। एक घंटे की मीटिंग में लगभग 10–30 मिनट लगते हैं।',
+  my_jobs:'मेरी रिकॉर्डिंग',no_jobs:'अभी तक कोई रिकॉर्डिंग नहीं भेजी गई',
+  st_queued:'कतार में',st_running:'प्रोसेस हो रहा है',st_done:'पूरा हुआ',st_failed:'असफल',st_cancelled:'रद्द',
+  ahead:' (आपसे पहले {n})',minutes:'{n} मिनट',
+  sg_prepare:'तैयारी',sg_convert:'फ़ाइल बदली जा रही है',sg_asr:'आवाज़ पहचानी जा रही है',sg_diarize:'वक्ता पहचाने जा रहे हैं',sg_translate:'अनुवाद हो रहा है',sg_correct:'ट्रांसक्रिप्ट जाँची जा रही है',sg_summary:'मिनट्स तैयार हो रहे हैं',sg_finishing:'पूरा किया जा रहा है',
+  o_minutes_html:'मिनट्स (वेब पेज)',o_minutes_txt:'मिनट्स (टेक्स्ट)',o_transcript_html:'ट्रांसक्रिप्ट (समय पर क्लिक करके सुनें)',o_transcript_txt:'ट्रांसक्रिप्ट (टेक्स्ट)',o_srt:'सबटाइटल SRT',o_vtt:'सबटाइटल VTT',
+  cancel:'रद्द करें',confirm_cancel:'यह काम रद्द करें?',job_id:'काम आईडी',
+  pw_title:'कर्मचारी पासवर्ड डालें',pw_hint:'पासवर्ड IT से पूछें।',pw_wrong:'पासवर्ड गलत है',ok:'ठीक है',
+  e_restarted:'प्रोसेसिंग के दौरान सर्वर दोबारा शुरू हुआ। कृपया फिर से भेजें',e_no_output:'कोई नतीजा नहीं: शायद भाषा गलत चुनी गई, या रिकॉर्डिंग में आवाज़ नहीं है',e_failed:'प्रोसेसिंग असफल रही। काम आईडी IT को बताएँ',e_detail:'प्रोसेसिंग असफल रही। काम आईडी IT को बताएँ',
+  e_bad_file:'केवल ऑडियो या वीडियो फ़ाइलें (mp3, m4a, wav, mp4…)',e_too_large:'फ़ाइल बहुत बड़ी है',e_pick_language:'कृपया भाषा चुनें',e_bad_client:'कृपया पेज रीलोड करें',
+  e_live_remote:'लाइव सबटाइटल अपने कंप्यूटर पर ही चलाएँ',e_live_unavailable:'इस संस्करण में लाइव सबटाइटल उपलब्ध नहीं हैं',e_live_failed:'शुरू नहीं हो सका। IT से संपर्क करें',e_network:'सर्वर से कनेक्ट नहीं हो पा रहा',e_generic:'कुछ गड़बड़ हुई',
+  mtg:'{lang} मीटिंग',
+  lv_id:'इंडोनेशियाई',lv_vi:'वियतनामी',lv_hi:'हिंदी',lv_en:'अंग्रेज़ी',lv_ja:'जापानी',lv_ko:'कोरियाई',lv_zh:'सभी चीनी बोलते हैं',
+  fs_zh:'चीनी',fs_id2zh:'इंडोनेशियाई',fs_vi2zh:'वियतनामी',fs_hi2zh:'हिंदी',fs_en2zh:'अंग्रेज़ी',fs_ja2zh:'जापानी',fs_ko2zh:'कोरियाई',
+  fs_sub_zh:'चीनी ट्रांसक्रिप्ट',fs_sub:'चीनी में अनुवाद',fs_sub_hi2zh:'भारत · चीनी में'
+}};
+
 const $=id=>document.getElementById(id);
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+function pickLang(){
+  const saved=store.get('pcg_lang');if(saved&&I18N[saved])return saved;
+  for(const l of navigator.languages||[navigator.language||'']){const c=(l||'').toLowerCase().split('-')[0];if(I18N[c])return c}
+  return 'zh';
+}
+let lang=pickLang();
+const t=(k,v={})=>String((I18N[lang]&&I18N[lang][k])??I18N.zh[k]??k).replace(/\{(\w+)\}/g,(_,x)=>v[x]??'');
+const locale=()=>(LANGS.find(l=>l[0]===lang)||LANGS[0])[2];
+function applyLang(){
+  document.documentElement.lang=lang==='zh'?'zh-Hant':lang;
+  document.title=t('title');
+  document.querySelectorAll('[data-t]').forEach(el=>{el.textContent=t(el.dataset.t)});
+  document.querySelectorAll('[data-t-html]').forEach(el=>{el.innerHTML=t(el.dataset.tHtml)});   // 只放對照表裡自己寫的 HTML
+  document.querySelectorAll('[data-t-ph]').forEach(el=>{el.placeholder=t(el.dataset.tPh)});
+  renderScenarios();setFile(file);renderJobs();
+}
+const sel=$('langSel');
+sel.innerHTML=LANGS.map(([c,n])=>`<option value="${c}">${n}</option>`).join('');
+sel.value=lang;
+sel.onchange=()=>{lang=sel.value;store.set('pcg_lang',lang);applyLang()};
+
+/* ── 共用 ─────────────────────────────────────────────── */
 let clientId=store.get('pcg_client');
 if(!clientId||!/^[A-Za-z0-9_-]{8,64}$/.test(clientId)){clientId=Array.from(crypto.getRandomValues(new Uint8Array(12)),b=>b.toString(16).padStart(2,'0')).join('');store.set('pcg_client',clientId)}
 let token=store.get('pcg_token')||'';
 const hdr=()=>({'X-Client-Id':clientId,'X-Simple-Token':token});
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const errText=j=>j&&j.code&&I18N.zh['e_'+j.code]?t('e_'+j.code):(lang==='zh'&&j&&j.error?j.error:t('e_generic'));
 
 async function api(path,opt={}){
-  const r=await fetch(path,{...opt,headers:{...hdr(),...(opt.headers||{})}});
-  const j=await r.json().catch(()=>({ok:false,error:'伺服器沒有回應'}));
+  let r;
+  try{r=await fetch(path,{...opt,headers:{...hdr(),...(opt.headers||{})}})}catch(e){return{ok:false,code:'network'}}
+  const j=await r.json().catch(()=>({ok:false,code:'network'}));
   if(r.status===401&&j.need_password){await askPassword();return api(path,opt)}
   return j;
 }
@@ -189,56 +381,65 @@ function askPassword(){
   });
 }
 
-/* 分頁 */
+/* ── 分頁 ─────────────────────────────────────────────── */
 function showTab(which){
-  for(const [t,p] of [['tabLive','pLive'],['tabFile','pFile']]){
-    const on=p===which;$(t).setAttribute('aria-selected',on);$(p).hidden=!on;
-  }
+  for(const [tb,p] of [['tabLive','pLive'],['tabFile','pFile']]){const on=p===which;$(tb).setAttribute('aria-selected',on);$(p).hidden=!on}
   store.set('pcg_tab',which);
 }
 $('tabLive').onclick=()=>showTab('pLive');$('tabFile').onclick=()=>showTab('pFile');
 
-function cards(el,list,name,onPick){
-  el.innerHTML=list.map((s,i)=>`<label class="opt"><input type="radio" name="${name}" value="${esc(s.id)}">
-    <span class="flag">${esc(s.flag)}</span><span><span class="t">${esc(s.title)}</span>${s.subtitle?`<br><span class="s">${esc(s.subtitle)}</span>`:''}</span></label>`).join('');
-  el.addEventListener('change',onPick);
+/* 情境卡片：標題依語言翻譯（IT 自訂、對照表沒有的情境沿用伺服器給的名稱） */
+let liveScen=[],fileScen=[];
+const liveTitle=s=>I18N.zh['lv_'+s.id]?t('lv_'+s.id):s.title;
+const fileTitle=s=>I18N.zh['fs_'+s.id]?t('fs_'+s.id):s.title;
+const fileSub=s=>I18N.zh['fs_'+s.id]?(I18N.zh['fs_sub_'+s.id]?t('fs_sub_'+s.id):t('fs_sub')):(s.subtitle||'');
+function cardsHtml(list,name,title,sub){
+  const cur=document.querySelector(`input[name=${name}]:checked`)?.value;
+  return list.map(s=>`<label class="opt"><input type="radio" name="${name}" value="${esc(s.id)}"${s.id===cur?' checked':''}>
+    <span class="flag">${esc(s.flag)}</span><span><span class="t">${esc(title(s))}</span>${sub&&sub(s)?`<br><span class="s">${esc(sub(s))}</span>`:''}</span></label>`).join('');
+}
+function renderScenarios(){
+  $('liveScenarios').innerHTML=cardsHtml(liveScen,'live',liveTitle);
+  $('fileScenarios').innerHTML=cardsHtml(fileScen,'file',fileTitle,fileSub);
 }
 const picked=name=>document.querySelector(`input[name=${name}]:checked`)?.value;
 
-/* 即時字幕 */
-let liveScen=[];
+/* ── 即時字幕 ─────────────────────────────────────────── */
+function onLivePick(){
+  const s=liveScen.find(x=>x.id===picked('live'));
+  $('liveSpeak').disabled=!s?.can_bidi;if(!s?.can_bidi)$('liveSpeak').checked=false;
+  $('liveStart').disabled=!s;if(s)store.set('pcg_live',s.id);
+}
+$('liveScenarios').addEventListener('change',onLivePick);
 async function initLive(){
   const j=await api('/api/simple/live');
-  liveScen=j.scenarios||[];
-  cards($('liveScenarios'),liveScen,'live',()=>{
-    const s=liveScen.find(x=>x.id===picked('live'));
-    $('liveSpeak').disabled=!s?.can_bidi;if(!s?.can_bidi)$('liveSpeak').checked=false;
-    $('liveStart').disabled=!s;store.set('pcg_live',picked('live'));
-  });
+  liveScen=j.scenarios||[];renderScenarios();
   const last=store.get('pcg_live');const el=last&&document.querySelector(`input[name=live][value="${CSS.escape(last)}"]`);
-  if(el){el.checked=true;el.dispatchEvent(new Event('change',{bubbles:true}))}
-  $('liveRemote').hidden=j.local;$('liveForm').hidden=!j.local;$('liveRunning').hidden=!j.running;
+  if(el)el.checked=true;onLivePick();
+  $('liveRemote').hidden=!!j.local;$('liveForm').hidden=!j.local;$('liveRunning').hidden=!j.running;
   return j;
 }
 $('openLive').onclick=()=>{location.href='/'};
 $('liveStart').onclick=async()=>{
-  $('liveStart').disabled=true;$('liveStart').textContent='準備中…';
+  const b=$('liveStart');b.disabled=true;b.textContent=t('preparing');
   const j=await api('/api/simple/live',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({scenario:picked('live'),speak:$('liveSpeak').checked,overlay:$('liveOverlay').checked,topic:$('liveTopic').value})});
   if(j.ok){location.href='/';return}
-  alert(j.error||'啟動失敗');$('liveStart').disabled=false;$('liveStart').textContent='開始即時字幕';
+  alert(errText(j));b.disabled=false;b.textContent=t('start_live');
 };
 
-/* 錄音 → 會議紀錄 */
+/* ── 錄音 → 會議紀錄 ──────────────────────────────────── */
 let file=null;
 function setFile(f){
   file=f||null;
   $('drop').classList.toggle('has',!!file);
-  $('dropText').textContent=file?file.name:'點這裡選檔，或把檔案拖進來';
-  $('dropHint').textContent=file?`${(file.size/1048576).toFixed(1)} MB，點這裡可以換一個檔案`:'mp3、m4a、wav、mp4 等格式；Teams／Zoom 的會議錄影也可以';
+  $('drop').setAttribute('aria-label',t('step_file'));
+  $('dropText').textContent=file?file.name:t('drop_big');
+  $('dropHint').textContent=file?t('drop_has',{size:(file.size/1048576).toFixed(1)}):t('drop_hint');
   updSubmit();
 }
 function updSubmit(){$('fileSubmit').disabled=!(file&&picked('file'))}
+$('fileScenarios').addEventListener('change',updSubmit);
 const drop=$('drop');
 drop.onclick=()=>$('fileInput').click();
 drop.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('fileInput').click()}};
@@ -253,51 +454,62 @@ $('fileForm').onsubmit=e=>{
   fd.append('topic',$('fileTopic').value);fd.append('speakers',$('fileSpeakers').value);
   const x=new XMLHttpRequest();x.open('POST','/api/simple/jobs');
   for(const [k,v] of Object.entries(hdr()))x.setRequestHeader(k,v);
-  const bar=$('upBar');bar.style.display='block';$('fileSubmit').disabled=true;$('fileSubmit').textContent='上傳中…';
+  const bar=$('upBar'),btn=$('fileSubmit');bar.style.display='block';btn.disabled=true;btn.textContent=t('uploading');
+  const done=()=>{bar.style.display='none';bar.firstElementChild.style.width='0';btn.textContent=t('submit')};
   x.upload.onprogress=ev=>{if(ev.lengthComputable)bar.firstElementChild.style.width=(ev.loaded/ev.total*100)+'%'};
   x.onload=async()=>{
-    bar.style.display='none';bar.firstElementChild.style.width='0';$('fileSubmit').textContent='送出';
-    let j={};try{j=JSON.parse(x.responseText)}catch(err){}
+    done();let j={};try{j=JSON.parse(x.responseText)}catch(err){}
     if(x.status===401&&j.need_password){await askPassword();$('fileForm').requestSubmit();return}
-    if(!j.ok){alert(j.error||'上傳失敗');updSubmit();return}
+    if(!j.ok){alert(errText(j));updSubmit();return}
     setFile(null);$('fileInput').value='';$('fileTopic').value='';$('fileSpeakers').value='';
     loadJobs();
   };
-  x.onerror=()=>{bar.style.display='none';$('fileSubmit').textContent='送出';updSubmit();alert('上傳失敗：連不到伺服器')};
+  x.onerror=()=>{done();updSubmit();alert(t('e_network'))};
   x.send(fd);
 };
 
-const STATE={queued:'排隊中',running:'處理中',done:'完成',failed:'失敗',cancelled:'已取消'};
-const fmtTime=t=>t?new Date(t*1000).toLocaleString('zh-TW',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
-const keys={};
+let jobs=[];const keys={};
+const fmtTime=s=>s?new Date(s*1000).toLocaleString(locale(),{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+function jobTitle(job){
+  const s=fileScen.find(x=>x.id===job.scenario);
+  return s&&I18N.zh['fs_'+s.id]?t('mtg',{lang:fileTitle(s)}):job.scenario_title;
+}
 async function loadJobs(){
   const j=await api('/api/simple/jobs');if(!j.ok)return;
-  const list=j.jobs||[];
-  if(!list.length){$('jobList').innerHTML='<div class="empty">還沒有送出任何錄音</div>';return}
-  for(const job of list)if(job.state==='done'&&!keys[job.id]){const k=await api(`/api/simple/jobs/${job.id}/link`);if(k.ok)keys[job.id]=k.key}
-  $('jobList').innerHTML=list.map(job=>{
-    let st=STATE[job.state]||job.state,extra='';
-    if(job.state==='queued')st+=job.ahead?`（前面還有 ${job.ahead} 件）`:'';
-    if(job.state==='running'){const m=Math.max(1,Math.round((Date.now()/1000-job.started)/60));st=`${job.stage||'處理中'}・${m} 分鐘`}
+  jobs=j.jobs||[];
+  for(const job of jobs)if(job.state==='done'&&!keys[job.id]){const k=await api(`/api/simple/jobs/${job.id}/link`);if(k.ok)keys[job.id]=k.key}
+  renderJobs();
+}
+function renderJobs(){
+  if(!jobs.length){$('jobList').innerHTML=`<div class="empty">${esc(t('no_jobs'))}</div>`;return}
+  $('jobList').innerHTML=jobs.map(job=>{
+    let st=t('st_'+job.state),extra='';
+    if(job.state==='queued'&&job.ahead)st+=t('ahead',{n:job.ahead});
+    if(job.state==='running'){const m=Math.max(1,Math.round((Date.now()/1000-job.started)/60));st=`${job.stage?t('sg_'+job.stage):t('st_running')} · ${t('minutes',{n:m})}`}
     if(job.state==='done')extra=`<div class="outs">${(job.outputs||[]).map(o=>
-      `<a class="${o.style}" target="_blank" rel="noopener" href="/simple/files/${job.id}/${encodeURIComponent(o.name)}?k=${encodeURIComponent(keys[job.id]||'')}">${esc(o.label)}</a>`).join('')}</div>`;
-    if(job.state==='failed')extra=`<div class="err-msg">${esc(job.error)}（工作編號 ${esc(job.id)}）</div>`;
-    const cancel=(job.state==='queued'||job.state==='running')?`<button class="btn ghost small" data-cancel="${esc(job.id)}" type="button">取消</button>`:'';
+      `<a class="${esc(o.style)}" target="_blank" rel="noopener" href="/simple/files/${encodeURIComponent(job.id)}/${encodeURIComponent(o.name)}?k=${encodeURIComponent(keys[job.id]||'')}">${esc(I18N.zh['o_'+o.kind]?t('o_'+o.kind):o.label)}</a>`).join('')}</div>`;
+    if(job.state==='failed'){
+      const msg=job.error_code&&I18N.zh['e_'+job.error_code]?t('e_'+job.error_code):t('e_failed');
+      const detail=job.error_code==='detail'&&job.error?`<small>${esc(job.error)}</small>`:'';
+      extra=`<div class="err-msg">${esc(msg)}（${esc(t('job_id'))} ${esc(job.id)}）${detail}</div>`;
+    }
+    const cancel=(job.state==='queued'||job.state==='running')?`<button class="btn ghost small" data-cancel="${esc(job.id)}" type="button">${esc(t('cancel'))}</button>`:'';
     return `<div class="card job"><div><div class="name">${esc(job.file)}</div>
-      <div class="meta">${esc(job.scenario_title)}${job.topic?'・'+esc(job.topic):''}・${fmtTime(job.created)}</div></div>
-      <div style="text-align:right"><span class="chip ${job.state}">${esc(st)}</span>${cancel?'<div style="margin-top:6px">'+cancel+'</div>':''}</div>${extra}</div>`;
+      <div class="meta">${esc(jobTitle(job))}${job.topic?' · '+esc(job.topic):''} · ${esc(fmtTime(job.created))}</div></div>
+      <div style="text-align:right"><span class="chip ${esc(job.state)}">${esc(st)}</span>${cancel?'<div style="margin-top:6px">'+cancel+'</div>':''}</div>${extra}</div>`;
   }).join('');
 }
 $('jobList').onclick=async e=>{
   const id=e.target.dataset?.cancel;if(!id)return;
-  if(!confirm('確定要取消這件工作？'))return;
-  await api(`/api/simple/jobs/${id}/cancel`,{method:'POST'});loadJobs();
+  if(!confirm(t('confirm_cancel')))return;
+  await api(`/api/simple/jobs/${encodeURIComponent(id)}/cancel`,{method:'POST'});loadJobs();
 };
 
 (async()=>{
+  applyLang();
   const cfg=await api('/api/simple/config');
-  if(!cfg.ok){$('jobList').innerHTML=`<div class="banner err">${esc(cfg.error||'讀取設定失敗')}</div>`;return}
-  cards($('fileScenarios'),cfg.scenarios,'file',updSubmit);
+  if(!cfg.ok){$('jobList').innerHTML=`<div class="banner err">${esc(errText(cfg))}</div>`;return}
+  fileScen=cfg.scenarios||[];
   const live=await initLive();
   showTab(store.get('pcg_tab')||(live.local?'pLive':'pFile'));
   loadJobs();setInterval(()=>{if(!$('pFile').hidden&&!document.hidden)loadJobs()},4000);
