@@ -179,5 +179,67 @@ class SimpleFlow(unittest.TestCase):
         self.assertEqual(self.c.post("/api/simple/live", json={"scenario": "id"}).status_code, 403)
 
 
+class AdminPage(SimpleFlow):
+    """IT 設定頁：一律要 IT 密碼、第一次只能在本機設定、存檔寫成主程式讀得懂的格式"""
+
+    def post(self, path, body, token=None):
+        return self.c.post(path, json=body, headers={"X-IT-Token": token} if token else {})
+
+    def test_first_password_local_only(self):
+        self.local = False
+        r = self.c.get("/api/simple/admin/state").json()
+        self.assertEqual((r["code"], r["can_set"]), ("it_password_unset", False))
+        self.assertEqual(self.post("/api/simple/admin/password", {"new": "itpass1"}).status_code, 403)
+        self.local = True
+        self.assertTrue(self.c.get("/api/simple/admin/state").json()["can_set"])
+        self.assertEqual(self.post("/api/simple/admin/password", {"new": "123"}).status_code, 400)
+        self.assertTrue(self.post("/api/simple/admin/password", {"new": "itpass1"}).json()["ok"])
+        # 設好之後本機也要密碼（同仁就坐在這台電腦前）
+        self.assertEqual(self.c.get("/api/simple/admin/state").status_code, 401)
+        self.assertEqual(self.c.get("/api/simple/admin/state", headers={"X-IT-Token": "wrong"}).status_code, 401)
+        st = self.c.get("/api/simple/admin/state", headers={"X-IT-Token": "itpass1"}).json()
+        self.assertEqual(st["state"]["backend"], "local")
+        # 改密碼要舊密碼
+        self.assertEqual(self.post("/api/simple/admin/password", {"new": "newpass2"}).status_code, 401)
+        self.assertTrue(self.post("/api/simple/admin/password", {"new": "newpass2"}, "itpass1").json()["ok"])
+
+    def test_save_switches_to_server(self):
+        self.post("/api/simple/admin/password", {"new": "itpass1"})
+        tok = "itpass1"
+        r = self.post("/api/simple/admin/save", {"backend": "server", "gpu_host": "", "llm_host": "10.0.0.5"}, tok)
+        self.assertEqual(r.json()["code"], "need_servers")
+        r = self.post("/api/simple/admin/save", {"backend": "server", "gpu_host": "10.0.0.5; rm -rf /",
+                                                  "llm_host": "10.0.0.5"}, tok)
+        self.assertEqual(r.json()["code"], "bad_host")
+        r = self.post("/api/simple/admin/save", {
+            "backend": "server", "gpu_host": "10.0.0.5", "gpu_port": 8978, "llm_host": "10.0.0.6", "llm_port": 11434,
+            "llm_model": "gemma4:26b", "diarize": True, "staff_password": "staff99"}, tok).json()
+        self.assertTrue(r["ok"], r)
+        cfg = json.loads(self.cfg.read_text(encoding="utf-8"))
+        # 主程式讀的就是這幾個欄位（translate_meeting.py 的 REMOTE_WHISPER_CONFIG、OLLAMA_HOST/PORT）
+        self.assertEqual(cfg["remote_whisper"], {"host": "10.0.0.5", "whisper_port": 8978})
+        self.assertEqual((cfg["llm_host"], cfg["llm_port"]), ("10.0.0.6", 11434))
+        self.assertEqual(cfg["pcg_simple"]["backend"], "server")
+        self.assertEqual(cfg["pcg_simple"]["password_hash"], "h:staff99")
+        self.assertTrue(cfg["pcg_simple"]["it_password_hash"])
+        # 存完下一件工作就用伺服器模式
+        jid = self.submit().json()["id"]
+        self.wait(jid)
+        args = (self.base / "args.txt").read_text(encoding="utf-8")
+        self.assertIn("--summarize", args)
+        self.assertIn("-e llm --llm-model gemma4:26b", args)
+        # 切回本機
+        r = self.post("/api/simple/admin/save", {"backend": "local", "gpu_host": "10.0.0.5", "llm_host": "10.0.0.6",
+                                                  "local_live_model": "base"}, tok).json()
+        self.assertEqual((r["state"]["backend"], r["state"]["local_live_model"]), ("local", "base"))
+
+    def test_connection_test_reports_failures(self):
+        self.post("/api/simple/admin/password", {"new": "itpass1"})
+        r = self.post("/api/simple/admin/test", {"gpu_host": "127.0.0.1", "gpu_port": 1,
+                                                  "llm_host": "127.0.0.1", "llm_port": 1}, "itpass1").json()
+        self.assertFalse(r["gpu"]["ok"])
+        self.assertFalse(r["llm"]["ok"])
+
+
 if __name__ == "__main__":
     unittest.main()

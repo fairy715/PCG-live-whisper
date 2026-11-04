@@ -510,11 +510,6 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             return JSONResponse({"ok": False, "code": "pick_language", "error": "請選擇對方說的語言"}, status_code=400)
         s = settings()
         mode = sc["bidi"] if (body.get("speak") and sc["bidi"]) else sc["mode"]
-        try:
-            cfg = json.loads(config_file.read_text(encoding="utf-8")) if config_file.exists() else {}
-        except (OSError, ValueError):
-            cfg = {}
-        last = cfg.get("webui_last") or {}
         pf = profile(s)
         start = {
             "mode": mode,
@@ -523,9 +518,9 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             # 本機模式：WebUI 的 nllb 路徑在集團版會改用 M2M100（見 translate_meeting.py 的 NllbTranslator.__new__）
             "engine": None if mode == "zh" else ("llm" if pf["engine"] == "llm" else "nllb"),
             "local_asr": pf["local_asr"],
-            # 沒填時主程式用 config.json 的 llm_host（IT 設定好的 LLM 伺服器）
-            "llm_host": last.get("llm_host") or "",
-            "llm_model": s.get("llm_model") or last.get("llm_model") or "",
+            # 不帶 llm_host：主程式用 config.json 的 llm_host／llm_port（IT 在 /simple/admin 設定）
+            "llm_host": "",
+            "llm_model": s.get("llm_model") or "",
             "topic": (body.get("topic") or "").strip()[:60],
             "record": bool(s.get("live_record", False)),
             "denoise": True,
@@ -536,5 +531,151 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         except Exception as e:
             return JSONResponse({"ok": False, "code": "live_failed", "error": f"啟動失敗：{e}"}, status_code=500)
         return {"ok": True, "mode": mode}
+
+    # ─── IT 設定頁（/simple/admin）：切換本機／伺服器、填伺服器位址、測試連線、設定密碼 ───
+    # 一律要 IT 密碼（同仁就坐在這台電腦前，「本機」不能當成 IT）。還沒設定時，只能在本機設定第一組密碼
+    admin_html = Path(__file__).with_name("admin.html")
+
+    def read_cfg():
+        try:
+            return json.loads(config_file.read_text(encoding="utf-8")) if config_file.exists() else {}
+        except (OSError, ValueError):
+            return {}
+
+    def admin_auth(request: Request):
+        h = (read_cfg().get("pcg_simple") or {}).get("it_password_hash", "")
+        if not h:
+            return JSONResponse({"ok": False, "code": "it_password_unset",
+                                 "error": "還沒有設定 IT 密碼"}, status_code=401)
+        if not pw_match(request.headers.get("X-IT-Token", ""), h):
+            return JSONResponse({"ok": False, "code": "it_password_wrong", "error": "IT 密碼不正確"}, status_code=401)
+        return None
+
+    def admin_state():
+        cfg = read_cfg()
+        s = cfg.get("pcg_simple") or {}
+        rw = cfg.get("remote_whisper") or {}
+        return {"backend": "server" if s.get("backend") == "server" else "local",
+                "gpu_host": rw.get("host", ""), "gpu_port": rw.get("whisper_port", 8978),
+                "llm_host": cfg.get("llm_host", ""), "llm_port": cfg.get("llm_port", 11434),
+                "llm_model": s.get("llm_model", ""), "summary_model": s.get("summary_model", ""),
+                "asr_model": s.get("asr_model", "large-v3-turbo"),
+                "local_file_model": s.get("local_file_model", "small"),
+                "local_live_model": s.get("local_live_model", "small"),
+                "diarize": bool(s.get("diarize", s.get("backend") == "server")),
+                "staff_password_set": bool(s.get("password_hash") or s.get("password")),
+                "m2m_installed": (base_dir / "models" / "m2m100_418m" / "model.bin").is_file()}
+
+    @app.get("/simple/admin", response_class=HTMLResponse)
+    async def admin_page():
+        return HTMLResponse(admin_html.read_text(encoding="utf-8"))
+
+    @app.get("/api/simple/admin/state")
+    async def admin_get(request: Request):
+        ensure()
+        h = (read_cfg().get("pcg_simple") or {}).get("it_password_hash", "")
+        if not h:
+            return {"ok": False, "code": "it_password_unset", "can_set": bool(is_local(request))}
+        err = admin_auth(request)
+        if err:
+            return err
+        return {"ok": True, "state": admin_state()}
+
+    @app.post("/api/simple/admin/password")
+    async def admin_password(request: Request, body: dict = {}):
+        new = str(body.get("new") or "").strip()
+        if len(new) < 6:
+            return JSONResponse({"ok": False, "code": "too_short", "error": "密碼至少 6 個字"}, status_code=400)
+        cfg = read_cfg()
+        s = cfg.setdefault("pcg_simple", {})
+        if s.get("it_password_hash"):
+            err = admin_auth(request)               # 改密碼：要知道舊的（放在 X-IT-Token）
+            if err:
+                return err
+        elif not is_local(request):
+            return JSONResponse({"ok": False, "code": "local_only",
+                                 "error": "第一次設定 IT 密碼只能在這台電腦上操作"}, status_code=403)
+        s["it_password_hash"] = pw_hash(new)
+        write_config(cfg)
+        return {"ok": True}
+
+    def _probe(url, timeout=4):
+        import urllib.request
+        with urllib.request.urlopen(url, timeout=timeout) as r:
+            return json.loads(r.read().decode("utf-8", "replace") or "{}")
+
+    @app.post("/api/simple/admin/test")
+    async def admin_test(request: Request, body: dict = {}):
+        """測試 GPU 伺服器（語音辨識服務的 /health）與 LLM 伺服器（Ollama 或 OpenAI 相容），回傳可選的模型"""
+        err = admin_auth(request)
+        if err:
+            return err
+        import asyncio
+        out = {"ok": True}
+        gh, gp = str(body.get("gpu_host") or "").strip(), int(body.get("gpu_port") or 8978)
+        if gh:
+            try:
+                h = await asyncio.to_thread(_probe, f"http://{gh}:{gp}/health")
+                out["gpu"] = {"ok": True, "detail": " / ".join(str(h.get(k)) for k in ("backend", "device", "version")
+                                                               if h.get(k))}
+            except Exception as e:
+                out["gpu"] = {"ok": False, "detail": f"{type(e).__name__}: {e}"[:200]}
+        lh, lp = str(body.get("llm_host") or "").strip(), int(body.get("llm_port") or 11434)
+        if lh:
+            try:
+                tags = await asyncio.to_thread(_probe, f"http://{lh}:{lp}/api/tags")
+                models = [m.get("name") for m in tags.get("models", []) if m.get("name")]
+                out["llm"] = {"ok": True, "type": "Ollama", "models": models}
+            except Exception as e1:
+                try:
+                    data = await asyncio.to_thread(_probe, f"http://{lh}:{lp}/v1/models")
+                    out["llm"] = {"ok": True, "type": "OpenAI 相容",
+                                  "models": [m.get("id") for m in data.get("data", []) if m.get("id")]}
+                except Exception:
+                    out["llm"] = {"ok": False, "detail": f"{type(e1).__name__}: {e1}"[:200]}
+        return out
+
+    @app.post("/api/simple/admin/save")
+    async def admin_save(request: Request, body: dict = {}):
+        err = admin_auth(request)
+        if err:
+            return err
+        backend = "server" if body.get("backend") == "server" else "local"
+        gh, lh = str(body.get("gpu_host") or "").strip(), str(body.get("llm_host") or "").strip()
+        if backend == "server" and not (gh and lh):
+            return JSONResponse({"ok": False, "code": "need_servers",
+                                 "error": "伺服器模式要填 GPU 伺服器與 LLM 伺服器的位址"}, status_code=400)
+        for host in (gh, lh):
+            if host and not re.fullmatch(r"[A-Za-z0-9.\-:\[\]]{1,253}", host):
+                return JSONResponse({"ok": False, "code": "bad_host", "error": f"位址格式不正確：{host}"},
+                                    status_code=400)
+        cfg = read_cfg()
+        s = cfg.setdefault("pcg_simple", {})
+        s["backend"] = backend
+        for k in ("llm_model", "summary_model", "asr_model", "local_file_model", "local_live_model"):
+            if k in body:
+                v = str(body.get(k) or "").strip()[:120]
+                if v:
+                    s[k] = v
+                else:
+                    s.pop(k, None)
+        s["diarize"] = bool(body.get("diarize"))
+        if gh:
+            rw = cfg.get("remote_whisper") if isinstance(cfg.get("remote_whisper"), dict) else {}
+            rw.update(host=gh, whisper_port=int(body.get("gpu_port") or 8978))
+            cfg["remote_whisper"] = rw
+        elif "remote_whisper" in cfg and backend == "local" and body.get("clear_gpu"):
+            cfg.pop("remote_whisper")
+        if lh:
+            cfg["llm_host"], cfg["llm_port"] = lh, int(body.get("llm_port") or 11434)
+        sp = str(body.get("staff_password") or "").strip()
+        if sp:
+            s["password_hash"] = pw_hash(sp)
+            s.pop("password", None)
+        elif body.get("clear_staff_password"):
+            s.pop("password_hash", None)
+            s.pop("password", None)
+        write_config(cfg)
+        return {"ok": True, "state": admin_state()}
 
     return queue

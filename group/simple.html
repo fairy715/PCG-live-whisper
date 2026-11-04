@@ -87,6 +87,15 @@ input[type=text],input[type=number],input[type=password]{width:100%;margin-top:6
 .empty{color:var(--dim);text-align:center;padding:24px}
 dialog{border:0;border-radius:var(--radius);padding:24px;background:var(--card);color:var(--text);width:min(380px,92vw)}
 dialog::backdrop{background:rgba(0,0,0,.4)}
+.hdr-right{flex:none;display:flex;align-items:center;gap:8px}
+.foot{margin-top:28px;text-align:center;font-size:13px}.foot a{color:var(--dim)}
+/* 導覽 */
+.tour-spot{position:fixed;z-index:50;border-radius:12px;box-shadow:0 0 0 4px var(--accent),0 0 0 9999px rgba(0,0,0,.55);pointer-events:none;transition:all .25s}
+.tour-tip{position:fixed;z-index:51;width:min(340px,calc(100vw - 32px));background:var(--card);color:var(--text);border-radius:14px;padding:16px;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.tour-tip p{margin:0 0 12px;font-size:15px}
+.tour-tip .n{color:var(--dim);font-size:13px}
+.tour-tip .b{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.tour-tip .b .skip{margin-right:auto;background:none;border:0;color:var(--dim);font:inherit;font-size:14px;cursor:pointer;padding:6px}
 [hidden]{display:none!important}
 @media (max-width:520px){.grid{grid-template-columns:1fr 1fr}.opt{padding:10px;gap:8px}.flag{width:34px;height:34px}header{flex-direction:column}}
 </style>
@@ -98,8 +107,11 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
       <h1 data-t="title"></h1>
       <div class="sub" data-t="tagline"></div>
     </div>
-    <label class="lang"><span aria-hidden="true">🌐</span>
-      <select id="langSel" aria-label="Language"></select></label>
+    <div class="hdr-right">
+      <button class="btn ghost small" id="tourBtn" type="button" data-t="tour_btn"></button>
+      <label class="lang"><span aria-hidden="true">🌐</span>
+        <select id="langSel" aria-label="Language"></select></label>
+    </div>
   </header>
 
   <div class="tabs" role="tablist">
@@ -159,6 +171,14 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
       <div id="jobList"></div>
     </div>
   </section>
+  <div class="foot"><a href="/simple/admin" data-t="it_link"></a></div>
+</div>
+
+<div class="tour-spot" id="tourSpot" hidden></div>
+<div class="tour-tip" id="tourTip" role="dialog" aria-live="polite" hidden>
+  <div class="n" id="tourN"></div><p id="tourText"></p>
+  <div class="b"><button class="skip" id="tourSkip" type="button"></button>
+    <button class="btn ghost small" id="tourPrev" type="button"></button><button class="btn small" id="tourNext" type="button"></button></div>
 </div>
 
 <dialog id="pwDlg">
@@ -176,6 +196,16 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 const LANGS=[['zh','繁體中文','zh-TW'],['en','English','en-US'],['id','Bahasa Indonesia','id-ID'],['vi','Tiếng Việt','vi-VN'],['hi','हिन्दी','hi-IN']];
 const I18N={
 zh:{
+  tour_btn:'導覽',tour_next:'下一步',tour_prev:'上一步',tour_skip:'略過',tour_done:'開始使用',tour_n:'第 {i} 步，共 {n} 步',it_link:'IT 設定',
+  tr_lang:'先選你看得懂的語言，整個畫面會跟著換。',
+  tr_tabs:'這裡有兩個功能：「即時字幕」在開會時看翻譯，「錄音 → 會議紀錄」把錄好的檔案轉成文字。',
+  tr_live_lang:'開會前，先選「對方說什麼語言」。',
+  tr_live_speak:'如果你也要說話（例如說中文給對方看翻譯），勾這個。記得戴耳機。',
+  tr_live_start:'按這裡開始，畫面會切到字幕。結束時按字幕畫面上的「停止」。',
+  tr_file_drop:'會後有錄音或 Teams 錄影？點這裡選檔，或直接把檔案拖進來。',
+  tr_file_lang:'選錄音裡主要說的語言。',
+  tr_file_submit:'按送出就可以去忙別的，處理好會出現在下面。',
+  tr_jobs:'送出的錄音都在這裡：看進度、下載逐字稿和字幕檔。導覽想再看一次，按右上角「導覽」。',
   title:'PCG 會議翻譯',tagline:'即時字幕、錄音轉會議紀錄。所有語音與文字都在公司自己的伺服器處理，不會送到外部。',
   tab_live:'即時字幕',tab_file:'錄音 → 會議紀錄',
   live_remote:'即時字幕要在<strong>自己的電腦</strong>上開：它翻譯的是這台電腦播出來的聲音（Teams、Zoom、YouTube…）。<br>請 IT 幫你的電腦安裝 PCG-live-whisper，再打開 <code>http://localhost:19781/simple</code>。<br>在這台電腦上，你可以先用「錄音 → 會議紀錄」。',
@@ -210,6 +240,16 @@ zh:{
   fs_sub_zh:'中文逐字稿',fs_sub:'翻成中文',fs_sub_hi2zh:'印度・翻成中文'
 },
 en:{
+  tour_btn:'Tour',tour_next:'Next',tour_prev:'Back',tour_skip:'Skip',tour_done:'Get started',tour_n:'Step {i} of {n}',it_link:'IT settings',
+  tr_lang:'First, choose a language you read; the whole page switches to it.',
+  tr_tabs:'Two features: “Live subtitles” shows translations during a meeting; “Recording → Minutes” turns a recorded file into text.',
+  tr_live_lang:'Before the meeting, choose the language the others speak.',
+  tr_live_speak:'If you will speak too (for example, Chinese translated for the others), tick this. Wear headphones.',
+  tr_live_start:'Click here to start; the subtitle screen opens. Press “停止” (Stop) on that screen to end.',
+  tr_file_drop:'Have a recording or a Teams video after the meeting? Click here to choose it, or drag it in.',
+  tr_file_lang:'Choose the language mostly spoken in the recording.',
+  tr_file_submit:'Click Submit and get on with your work; the result will appear below.',
+  tr_jobs:'Your recordings are listed here: see progress and download the transcript and subtitles. To see this tour again, click “Tour” at the top right.',
   title:'PCG Meeting Translator',tagline:'Live subtitles and recording-to-minutes. All audio and text are processed on company servers and never leave the company.',
   tab_live:'Live subtitles',tab_file:'Recording → Minutes',
   live_remote:'Live subtitles must run on <strong>your own computer</strong>: they translate the sound this computer plays (Teams, Zoom, YouTube…).<br>Ask IT to install PCG-live-whisper on your computer, then open <code>http://localhost:19781/simple</code>.<br>On this computer you can use “Recording → Minutes” for now.',
@@ -244,6 +284,16 @@ en:{
   fs_sub_zh:'Chinese transcript',fs_sub:'Translated to Chinese',fs_sub_hi2zh:'India · to Chinese'
 },
 id:{
+  tour_btn:'Panduan',tour_next:'Berikutnya',tour_prev:'Kembali',tour_skip:'Lewati',tour_done:'Mulai',tour_n:'Langkah {i} dari {n}',it_link:'Pengaturan IT',
+  tr_lang:'Pertama, pilih bahasa yang Anda pahami; seluruh halaman akan berganti bahasa.',
+  tr_tabs:'Ada dua fitur: “Subtitle langsung” menampilkan terjemahan saat rapat; “Rekaman → Notulen” mengubah file rekaman menjadi teks.',
+  tr_live_lang:'Sebelum rapat, pilih bahasa yang dipakai lawan bicara.',
+  tr_live_speak:'Jika Anda juga akan berbicara (misalnya bahasa Mandarin yang diterjemahkan untuk lawan bicara), centang ini. Gunakan headphone.',
+  tr_live_start:'Klik di sini untuk mulai; layar subtitle akan terbuka. Tekan “停止” (Berhenti) di layar itu untuk selesai.',
+  tr_file_drop:'Punya rekaman atau video Teams setelah rapat? Klik di sini untuk memilihnya, atau seret file ke sini.',
+  tr_file_lang:'Pilih bahasa yang paling banyak dipakai dalam rekaman.',
+  tr_file_submit:'Klik Kirim lalu lanjutkan pekerjaan Anda; hasilnya akan muncul di bawah.',
+  tr_jobs:'Rekaman Anda ada di sini: lihat progres dan unduh transkrip serta subtitle. Untuk melihat panduan lagi, klik “Panduan” di kanan atas.',
   title:'Penerjemah Rapat PCG',tagline:'Subtitle langsung dan rekaman menjadi notulen. Semua suara dan teks diproses di server perusahaan dan tidak dikirim ke luar.',
   tab_live:'Subtitle langsung',tab_file:'Rekaman → Notulen',
   live_remote:'Subtitle langsung harus dijalankan di <strong>komputer Anda sendiri</strong>: yang diterjemahkan adalah suara yang diputar komputer ini (Teams, Zoom, YouTube…).<br>Minta IT memasang PCG-live-whisper di komputer Anda, lalu buka <code>http://localhost:19781/simple</code>.<br>Di komputer ini, Anda bisa memakai “Rekaman → Notulen” terlebih dahulu.',
@@ -278,6 +328,16 @@ id:{
   fs_sub_zh:'Transkrip Mandarin',fs_sub:'Ke bahasa Mandarin',fs_sub_hi2zh:'India · ke Mandarin'
 },
 vi:{
+  tour_btn:'Hướng dẫn',tour_next:'Tiếp',tour_prev:'Quay lại',tour_skip:'Bỏ qua',tour_done:'Bắt đầu',tour_n:'Bước {i}/{n}',it_link:'Cài đặt IT',
+  tr_lang:'Trước tiên, chọn ngôn ngữ bạn đọc được; cả trang sẽ đổi theo.',
+  tr_tabs:'Có hai chức năng: “Phụ đề trực tiếp” hiện bản dịch trong cuộc họp; “Ghi âm → Biên bản” chuyển tệp ghi âm thành văn bản.',
+  tr_live_lang:'Trước cuộc họp, chọn ngôn ngữ mà người kia nói.',
+  tr_live_speak:'Nếu bạn cũng sẽ nói (ví dụ nói tiếng Trung để dịch cho người kia), hãy đánh dấu ô này. Nhớ đeo tai nghe.',
+  tr_live_start:'Bấm vào đây để bắt đầu; màn hình phụ đề sẽ mở ra. Bấm “停止” (Dừng) trên màn hình đó để kết thúc.',
+  tr_file_drop:'Có bản ghi âm hoặc video Teams sau cuộc họp? Bấm vào đây để chọn, hoặc kéo tệp vào.',
+  tr_file_lang:'Chọn ngôn ngữ được nói nhiều nhất trong bản ghi.',
+  tr_file_submit:'Bấm Gửi rồi làm việc khác; kết quả sẽ hiện ở bên dưới.',
+  tr_jobs:'Các bản ghi của bạn ở đây: xem tiến độ và tải bản ghi lời nói, phụ đề. Muốn xem lại hướng dẫn, bấm “Hướng dẫn” ở góc trên bên phải.',
   title:'Phiên dịch cuộc họp PCG',tagline:'Phụ đề trực tiếp và chuyển bản ghi âm thành biên bản. Mọi âm thanh và văn bản đều được xử lý trên máy chủ của công ty, không gửi ra ngoài.',
   tab_live:'Phụ đề trực tiếp',tab_file:'Ghi âm → Biên bản',
   live_remote:'Phụ đề trực tiếp phải chạy trên <strong>máy tính của bạn</strong>: nó dịch âm thanh mà máy tính này phát ra (Teams, Zoom, YouTube…).<br>Hãy nhờ IT cài PCG-live-whisper cho máy của bạn, rồi mở <code>http://localhost:19781/simple</code>.<br>Trên máy này, bạn có thể dùng “Ghi âm → Biên bản” trước.',
@@ -312,6 +372,16 @@ vi:{
   fs_sub_zh:'Bản ghi tiếng Trung',fs_sub:'Dịch sang tiếng Trung',fs_sub_hi2zh:'Ấn Độ · sang tiếng Trung'
 },
 hi:{
+  tour_btn:'गाइड',tour_next:'आगे',tour_prev:'पीछे',tour_skip:'छोड़ें',tour_done:'शुरू करें',tour_n:'चरण {i} / {n}',it_link:'IT सेटिंग',
+  tr_lang:'पहले वह भाषा चुनें जो आप पढ़ते हैं; पूरा पेज उसी भाषा में हो जाएगा।',
+  tr_tabs:'दो सुविधाएँ हैं: “लाइव सबटाइटल” मीटिंग के दौरान अनुवाद दिखाता है; “रिकॉर्डिंग → मिनट्स” रिकॉर्ड की गई फ़ाइल को टेक्स्ट में बदलता है।',
+  tr_live_lang:'मीटिंग से पहले, चुनें कि सामने वाले कौन-सी भाषा बोलते हैं।',
+  tr_live_speak:'अगर आप भी बोलेंगे (जैसे चीनी, जिसका अनुवाद सामने वालों को दिखे), तो इसे चुनें। हेडफ़ोन लगाएँ।',
+  tr_live_start:'शुरू करने के लिए यहाँ क्लिक करें; सबटाइटल स्क्रीन खुलेगी। बंद करने के लिए उस स्क्रीन पर “停止” (रोकें) दबाएँ।',
+  tr_file_drop:'मीटिंग के बाद रिकॉर्डिंग या Teams वीडियो है? चुनने के लिए यहाँ क्लिक करें, या फ़ाइल यहाँ खींचकर लाएँ।',
+  tr_file_lang:'रिकॉर्डिंग में सबसे ज़्यादा बोली गई भाषा चुनें।',
+  tr_file_submit:'भेजें दबाएँ और अपना काम करें; नतीजा नीचे दिखेगा।',
+  tr_jobs:'आपकी रिकॉर्डिंग यहाँ हैं: प्रगति देखें और ट्रांसक्रिप्ट व सबटाइटल डाउनलोड करें। गाइड दोबारा देखने के लिए ऊपर दाईं ओर “गाइड” दबाएँ।',
   title:'PCG मीटिंग अनुवादक',tagline:'लाइव सबटाइटल और रिकॉर्डिंग से मीटिंग मिनट्स। सारी आवाज़ और टेक्स्ट कंपनी के अपने सर्वर पर प्रोसेस होते हैं, बाहर नहीं भेजे जाते।',
   tab_live:'लाइव सबटाइटल',tab_file:'रिकॉर्डिंग → मिनट्स',
   live_remote:'लाइव सबटाइटल <strong>आपके अपने कंप्यूटर</strong> पर चलाने होंगे: यह इसी कंप्यूटर पर चल रही आवाज़ (Teams, Zoom, YouTube…) का अनुवाद करता है।<br>IT से अपने कंप्यूटर पर PCG-live-whisper इंस्टॉल करवाएँ, फिर <code>http://localhost:19781/simple</code> खोलें।<br>इस कंप्यूटर पर अभी आप “रिकॉर्डिंग → मिनट्स” का उपयोग कर सकते हैं।',
@@ -363,6 +433,7 @@ function applyLang(){
   document.querySelectorAll('[data-t-html]').forEach(el=>{el.innerHTML=t(el.dataset.tHtml)});   // 只放對照表裡自己寫的 HTML
   document.querySelectorAll('[data-t-ph]').forEach(el=>{el.placeholder=t(el.dataset.tPh)});
   renderScenarios();setFile(file);renderJobs();
+  if(!$('tourTip').hidden)tourShow();
 }
 const sel=$('langSel');
 sel.innerHTML=LANGS.map(([c,n])=>`<option value="${c}">${n}</option>`).join('');
@@ -515,14 +586,61 @@ $('jobList').onclick=async e=>{
   await api(`/api/simple/jobs/${encodeURIComponent(id)}/cancel`,{method:'POST'});loadJobs();
 };
 
+/* ── 導覽（第一次打開自動開始；右上角「導覽」可再看）──────────── */
+const TOUR=[
+  {el:'langSel',key:'tr_lang'},
+  {el:'.tabs',key:'tr_tabs'},
+  {el:'liveScenarios',key:'tr_live_lang',tab:'pLive',needLocal:true},
+  {el:'liveSpeak',key:'tr_live_speak',tab:'pLive',needLocal:true,box:'label'},
+  {el:'liveStart',key:'tr_live_start',tab:'pLive',needLocal:true},
+  {el:'drop',key:'tr_file_drop',tab:'pFile'},
+  {el:'fileScenarios',key:'tr_file_lang',tab:'pFile'},
+  {el:'fileSubmit',key:'tr_file_submit',tab:'pFile'},
+  {el:'jobList',key:'tr_jobs',tab:'pFile'}];
+let tourSteps=[],tourI=0,tourTabBefore=null,isLocal=false;
+const tourEl=st=>{let e=st.el.startsWith('.')?document.querySelector(st.el):$(st.el);if(e&&st.box)e=e.closest(st.box)||e;return e};
+function tourStart(){
+  tourSteps=TOUR.filter(st=>!st.needLocal||isLocal);tourI=0;
+  tourTabBefore=$('pFile').hidden?'pLive':'pFile';
+  $('tourSpot').hidden=$('tourTip').hidden=false;tourShow();
+}
+function tourEnd(){
+  $('tourSpot').hidden=$('tourTip').hidden=true;store.set('pcg_tour_done','1');
+  if(tourTabBefore)showTab(tourTabBefore);
+}
+function tourShow(){
+  const st=tourSteps[tourI];if(!st)return tourEnd();
+  if(st.tab)showTab(st.tab);
+  const e=tourEl(st);if(!e){tourI++;return tourShow()}
+  e.scrollIntoView({block:'center',behavior:'instant'});
+  requestAnimationFrame(()=>{
+    const r=e.getBoundingClientRect(),pad=6,spot=$('tourSpot'),tip=$('tourTip');
+    Object.assign(spot.style,{left:(r.left-pad)+'px',top:(r.top-pad)+'px',width:(r.width+pad*2)+'px',height:(r.height+pad*2)+'px'});
+    $('tourN').textContent=t('tour_n',{i:tourI+1,n:tourSteps.length});$('tourText').textContent=t(st.key);
+    $('tourSkip').textContent=t('tour_skip');$('tourPrev').textContent=t('tour_prev');$('tourPrev').hidden=tourI===0;
+    $('tourNext').textContent=t(tourI===tourSteps.length-1?'tour_done':'tour_next');
+    const th=tip.offsetHeight,below=r.bottom+pad+12,vw=innerWidth;
+    tip.style.top=(below+th<innerHeight?below:Math.max(12,r.top-pad-12-th))+'px';
+    tip.style.left=Math.min(Math.max(16,r.left),vw-tip.offsetWidth-16)+'px';
+    $('tourNext').focus();
+  });
+}
+$('tourNext').onclick=()=>{tourI++;tourShow()};
+$('tourPrev').onclick=()=>{tourI=Math.max(0,tourI-1);tourShow()};
+$('tourSkip').onclick=tourEnd;
+$('tourBtn').onclick=tourStart;
+addEventListener('keydown',e=>{if($('tourTip').hidden)return;if(e.key==='Escape')tourEnd();if(e.key==='ArrowRight')$('tourNext').click();if(e.key==='ArrowLeft'&&tourI>0)$('tourPrev').click()});
+addEventListener('resize',()=>{if(!$('tourTip').hidden)tourShow()});
+
 (async()=>{
   applyLang();
   const cfg=await api('/api/simple/config');
   if(!cfg.ok){$('jobList').innerHTML=`<div class="banner err">${esc(errText(cfg))}</div>`;return}
   fileScen=cfg.scenarios||[];
   if(cfg.minutes===false){$('langNote').dataset.tHtml='lang_note_local';$('fileNote').dataset.t='file_note_local';applyLang()}
-  const live=await initLive();
+  const live=await initLive();isLocal=!!live.local;
   showTab(store.get('pcg_tab')||(live.local?'pLive':'pFile'));
+  if(!store.get('pcg_tour_done'))setTimeout(tourStart,400);
   loadJobs();setInterval(()=>{if(!$('pFile').hidden&&!document.hidden)loadJobs()},4000);
 })();
 </script>

@@ -70,31 +70,18 @@ bash install.sh --server
 - 最後問 GPU 伺服器：填 ② 的位址，自動透過 SSH 安裝 GPU 語音辨識服務
 - LLM 伺服器：在 WebUI（`http://應用伺服器:19781`，用管理密碼）設定 ② 的 Ollama 位址，或直接寫在 `config.json` 的 `llm_host`
 
-### 簡易頁面設定（`~/Apps/jt-live-whisper/config.json`）
+### IT 設定頁（不用改設定檔）
 
-在原本的設定檔裡加一段（全部可省略）：
+打開 `http://應用伺服器:19781/simple/admin`（簡易頁面最下方的「IT 設定」）：
 
-```json
-"pcg_simple": {
-  "password": "同仁共用密碼",
-  "asr_model": "large-v3-turbo",
-  "live_model": "large-v3-turbo",
-  "llm_model": "gemma4:26b",
-  "summary_model": "",
-  "diarize": true,
-  "keep_days": 14
-}
-```
+1. **第一次使用**：在這台電腦上打開，設定 IT 密碼（至少 6 個字）。之後進入都要輸入，本機也一樣
+2. **運作模式**：本機模式（CPU，M2M100 翻譯，不產出 AI 會議紀錄）／伺服器模式（GPU 伺服器＋大模型伺服器，產出 AI 會議紀錄）
+3. **伺服器位址**：填 GPU 伺服器與大模型伺服器 → 按「測試連線」→ 會列出伺服器上的模型可以選
+4. **同仁密碼**：從別台電腦連進來時要輸入（本機不用）
+5. 按「儲存」：下一次開始字幕或處理錄音就生效，不用重新啟動
 
-改完重新啟動服務：
-
-```bash
-sudo systemctl restart jt-live-whisper-webui
-```
-
-- `password`：遠端連進來要輸入；第一次有人使用時自動換成雜湊，設定檔裡不會留明文
-- 建議再到 WebUI 的「安全設定」限制來源 IP（只允許公司網段）
-- 安裝完成後可執行 `./install.sh --doctor` 檢查 GPU 伺服器與 LLM 的連線
+設定存在同一個 `config.json`（密碼都是雜湊），格式與原作者的程式相同。
+建議另外到完整 WebUI 的「安全設定」限制來源 IP（只允許公司網段）。
 
 **同仁的網址：`http://應用伺服器:19781/simple`**（完整版 WebUI 在 `/`，給 IT 用）
 

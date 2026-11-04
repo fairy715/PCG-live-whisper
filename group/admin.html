@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<!-- PCG 集團版：IT 設定頁（/simple/admin）。後端見 group/simple_routes.py 的 admin_*。
+     介面語言：繁體中文、English（給 IT；同仁用的簡易頁面另有五種語言） -->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PCG IT Settings</title>
+<link rel="icon" href="/favicon.png">
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--text:#1d2330;--dim:#5d6676;--line:#dde1e7;--accent:#1f6feb;--accent-ink:#fff;--accent-soft:#e7f0ff;
+  --ok:#1a7f37;--ok-soft:#e6f4ea;--err:#cf222e;--err-soft:#ffebe9;--warn:#9a6700;--warn-soft:#fff4d6;--radius:14px}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1218;--card:#171b23;--text:#e6e9ef;--dim:#98a1b2;--line:#2a303b;--accent:#4c8dff;--accent-ink:#0b0e13;
+  --accent-soft:#1a2740;--ok:#4ac26b;--ok-soft:#14261b;--err:#ff6b6b;--err-soft:#2d1517;--warn:#d4a72c;--warn-soft:#2a2310}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:24px 16px 64px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
+h1{font-size:22px;margin:0}
+.sub{color:var(--dim);font-size:14px}
+select,input[type=text],input[type=password],input[type=number]{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
+header select{width:auto;background:var(--card);padding:6px 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.card h2{font-size:17px;margin:0 0 12px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{display:block;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer}
+.mode:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.mode input{margin-right:6px}
+.mode b{font-size:16px}
+.mode small{display:block;color:var(--dim);margin-top:4px;font-size:13px;line-height:1.4}
+.row{display:grid;grid-template-columns:1fr 120px;gap:10px}
+label.f{display:block;margin-top:12px;font-size:14px;color:var(--dim)}
+label.f>input,label.f>select{margin-top:4px}
+.check{display:flex;gap:8px;align-items:center;margin-top:14px;cursor:pointer}
+.check input{width:18px;height:18px}
+.btn{appearance:none;border:0;border-radius:12px;padding:12px 20px;font:inherit;font-weight:700;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:none;color:var(--accent);border:1.5px solid var(--accent);padding:9px 16px;font-weight:600}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+.res{font-size:14px;margin-top:10px;padding:10px 12px;border-radius:10px}
+.res.ok{background:var(--ok-soft);color:var(--ok)}.res.err{background:var(--err-soft);color:var(--err)}.res.warn{background:var(--warn-soft);color:var(--warn)}
+.note{font-size:13px;color:var(--dim);margin:6px 0 0}
+[hidden]{display:none!important}
+@media (max-width:560px){.modes{grid-template-columns:1fr}.row{grid-template-columns:1fr 90px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><h1 data-t="title"></h1><div class="sub" data-t="tagline"></div></div>
+    <select id="langSel" aria-label="Language"><option value="zh">繁體中文</option><option value="en">English</option></select>
+  </header>
+
+  <!-- 登入／第一次設定密碼 -->
+  <section id="pLogin" class="card" hidden>
+    <h2 id="loginTitle"></h2>
+    <p class="note" id="loginNote"></p>
+    <label class="f"><span data-t="it_password"></span><input type="password" id="pw1" autocomplete="current-password"></label>
+    <label class="f" id="pw2Wrap" hidden><span data-t="it_password_again"></span><input type="password" id="pw2" autocomplete="new-password"></label>
+    <div class="actions"><button class="btn" id="loginBtn" type="button"></button></div>
+    <div id="loginRes" class="res err" hidden></div>
+  </section>
+
+  <form id="pMain" hidden>
+    <div class="card">
+      <h2 data-t="mode_title"></h2>
+      <div class="modes">
+        <label class="mode"><input type="radio" name="backend" value="local"><b data-t="mode_local"></b><small data-t="mode_local_s"></small></label>
+        <label class="mode"><input type="radio" name="backend" value="server"><b data-t="mode_server"></b><small data-t="mode_server_s"></small></label>
+      </div>
+      <div id="m2mWarn" class="res warn" hidden data-t="m2m_missing"></div>
+    </div>
+
+    <div class="card" id="cServer">
+      <h2 data-t="servers_title"></h2>
+      <div class="row">
+        <label class="f"><span data-t="gpu_host"></span><input type="text" id="gpuHost" placeholder="192.168.1.50"></label>
+        <label class="f"><span data-t="port"></span><input type="number" id="gpuPort" min="1" max="65535"></label>
+      </div>
+      <div class="row">
+        <label class="f"><span data-t="llm_host"></span><input type="text" id="llmHost" placeholder="192.168.1.50"></label>
+        <label class="f"><span data-t="port"></span><input type="number" id="llmPort" min="1" max="65535"></label>
+      </div>
+      <div class="actions"><button class="btn ghost" id="testBtn" type="button" data-t="test"></button></div>
+      <div id="testRes"></div>
+      <label class="f"><span data-t="llm_model"></span><input type="text" id="llmModel" list="modelList" placeholder="gemma4:26b"></label>
+      <label class="f"><span data-t="summary_model"></span><input type="text" id="sumModel" list="modelList" data-t-ph="default_ph"></label>
+      <datalist id="modelList"></datalist>
+      <label class="f"><span data-t="asr_model"></span>
+        <select id="asrModel"><option>large-v3-turbo</option><option>large-v3</option><option>medium</option></select></label>
+    </div>
+
+    <div class="card" id="cLocal">
+      <h2 data-t="local_title"></h2>
+      <div class="row" style="grid-template-columns:1fr 1fr">
+        <label class="f"><span data-t="live_model"></span>
+          <select id="liveModel"><option value="base">base</option><option value="small">small</option><option value="medium">medium</option></select></label>
+        <label class="f"><span data-t="file_model"></span>
+          <select id="fileModel"><option value="base">base</option><option value="small">small</option><option value="medium">medium</option><option value="large-v3-turbo">large-v3-turbo</option></select></label>
+      </div>
+      <p class="note" data-t="local_models_note"></p>
+    </div>
+
+    <div class="card">
+      <h2 data-t="other_title"></h2>
+      <label class="check"><input type="checkbox" id="diarize"><span data-t="diarize"></span></label>
+      <p class="note" data-t="diarize_note"></p>
+      <label class="f"><span id="staffPwLabel"></span><input type="password" id="staffPw" autocomplete="new-password" data-t-ph="staff_pw_ph"></label>
+      <label class="check" id="clearStaffWrap" hidden><input type="checkbox" id="clearStaff"><span data-t="clear_staff_pw"></span></label>
+    </div>
+
+    <div class="actions">
+      <button class="btn" type="submit" data-t="save"></button>
+      <a href="/simple" data-t="back"></a>
+      <button class="btn ghost" id="chgPwBtn" type="button" data-t="change_it_pw" style="margin-left:auto"></button>
+    </div>
+    <div id="saveRes" hidden></div>
+  </form>
+</div>
+
+<script>
+const I18N={
+zh:{title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式、設定伺服器位址。存檔後立即生效，同仁電腦不用重裝。',
+  it_password:'IT 密碼',it_password_again:'再輸入一次',login:'登入',set_pw_title:'設定 IT 密碼',set_pw_note:'第一次使用，請設定 IT 密碼（至少 6 個字）。之後進入這一頁都要輸入。同仁不需要知道這組密碼。',
+  login_title:'IT 登入',login_note:'這一頁只給 IT 使用。',set_pw_btn:'設定密碼',pw_mismatch:'兩次輸入的密碼不一樣',
+  local_only:'第一次設定 IT 密碼只能在這台電腦上操作',pw_wrong:'IT 密碼不正確',too_short:'密碼至少 6 個字',
+  mode_title:'運作模式',mode_local:'本機模式',mode_local_s:'全部在這台電腦的 CPU 上跑，不需要伺服器、不連網。翻譯用 M2M100；不產出 AI 會議紀錄。',
+  mode_server:'伺服器模式',mode_server_s:'辨識交給 GPU 伺服器、翻譯與會議紀錄交給大模型伺服器。品質好、速度快，會產出 AI 會議紀錄。',
+  m2m_missing:'這台電腦沒有安裝本機翻譯模型（M2M100）：本機模式的翻譯不能用。請用集團版離線安裝包重新安裝。',
+  servers_title:'伺服器',gpu_host:'GPU 伺服器（語音辨識）位址',llm_host:'大模型伺服器（Ollama）位址',port:'Port',test:'測試連線',testing:'測試中…',
+  gpu_ok:'GPU 伺服器連線正常',gpu_fail:'GPU 伺服器連不上',llm_ok:'大模型伺服器連線正常（{type}，{n} 個模型）',llm_fail:'大模型伺服器連不上',
+  llm_model:'翻譯模型',summary_model:'會議紀錄（摘要）模型',default_ph:'留空＝主程式預設',asr_model:'辨識模型（GPU 伺服器）',
+  local_title:'本機模式的辨識模型',live_model:'即時字幕',file_model:'錄音檔',
+  local_models_note:'沒有獨立顯示卡的電腦：即時字幕建議 small（base 較快但錯字多）；錄音檔不趕時間可以用 medium，較準但要久很多。',
+  other_title:'其他',diarize:'區分講者（講者辨識）',diarize_note:'會議紀錄會標出誰說了什麼。本機模式下會讓處理時間再多一些。',
+  staff_pw:'同仁密碼（從別台電腦連進來時要輸入）',staff_pw_set:'同仁密碼：已設定（要改才填）',staff_pw_ph:'留空＝不變更',clear_staff_pw:'取消同仁密碼（不需要密碼）',
+  save:'儲存',saved:'已儲存，下一次開始字幕或處理錄音就會使用新設定',back:'回到簡易頁面',change_it_pw:'變更 IT 密碼',
+  new_it_pw:'請輸入新的 IT 密碼（至少 6 個字）',pw_changed:'IT 密碼已變更',
+  need_servers:'伺服器模式要填 GPU 伺服器與大模型伺服器的位址',bad_host:'位址格式不正確',error:'發生錯誤'},
+en:{title:'PCG Meeting Translator: IT settings',tagline:'Switch between local and server mode and set server addresses. Changes take effect immediately; no reinstall needed.',
+  it_password:'IT password',it_password_again:'Enter it again',login:'Sign in',set_pw_title:'Set the IT password',set_pw_note:'First use: set an IT password (at least 6 characters). It will be required to open this page. Staff do not need it.',
+  login_title:'IT sign-in',login_note:'This page is for IT only.',set_pw_btn:'Set password',pw_mismatch:'The two passwords do not match',
+  local_only:'The first IT password can only be set on this computer',pw_wrong:'Incorrect IT password',too_short:'At least 6 characters',
+  mode_title:'Mode',mode_local:'Local mode',mode_local_s:'Everything runs on this computer’s CPU: no server, no internet. Translation uses M2M100; no AI meeting minutes.',
+  mode_server:'Server mode',mode_server_s:'Speech recognition on the GPU server; translation and minutes on the LLM server. Better quality, faster, with AI meeting minutes.',
+  m2m_missing:'The local translation model (M2M100) is not installed on this computer, so translation will not work in local mode. Reinstall with the offline package.',
+  servers_title:'Servers',gpu_host:'GPU server (speech recognition) address',llm_host:'LLM server (Ollama) address',port:'Port',test:'Test connection',testing:'Testing…',
+  gpu_ok:'GPU server is reachable',gpu_fail:'Cannot reach the GPU server',llm_ok:'LLM server is reachable ({type}, {n} models)',llm_fail:'Cannot reach the LLM server',
+  llm_model:'Translation model',summary_model:'Minutes (summary) model',default_ph:'Blank = program default',asr_model:'Recognition model (GPU server)',
+  local_title:'Recognition models in local mode',live_model:'Live subtitles',file_model:'Recordings',
+  local_models_note:'Computers without a dedicated GPU: use small for live subtitles (base is faster but less accurate); medium is more accurate for recordings but much slower.',
+  other_title:'Other',diarize:'Identify speakers (diarization)',diarize_note:'Shows who said what. Adds processing time in local mode.',
+  staff_pw:'Staff password (required when connecting from another computer)',staff_pw_set:'Staff password: set (fill in only to change)',staff_pw_ph:'Blank = unchanged',clear_staff_pw:'Remove the staff password',
+  save:'Save',saved:'Saved. New settings apply the next time subtitles start or a recording is processed',back:'Back to the simple page',change_it_pw:'Change IT password',
+  new_it_pw:'Enter a new IT password (at least 6 characters)',pw_changed:'IT password changed',
+  need_servers:'Server mode needs both the GPU server and the LLM server addresses',bad_host:'Invalid address',error:'Something went wrong'}};
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+let lang=store.get('pcg_lang')==='zh'||!store.get('pcg_lang')?'zh':'en';
+const t=(k,v={})=>String(I18N[lang][k]??I18N.zh[k]??k).replace(/\{(\w+)\}/g,(_,x)=>v[x]??'');
+let token=sessionStorage.getItem('pcg_it')||'',state=null,firstTime=false;
+function applyLang(){
+  document.documentElement.lang=lang==='zh'?'zh-Hant':'en';document.title=t('title');
+  document.querySelectorAll('[data-t]').forEach(e=>{e.textContent=t(e.dataset.t)});
+  document.querySelectorAll('[data-t-ph]').forEach(e=>{e.placeholder=t(e.dataset.tPh)});
+  $('loginTitle').textContent=t(firstTime?'set_pw_title':'login_title');$('loginNote').textContent=t(firstTime?'set_pw_note':'login_note');
+  $('loginBtn').textContent=t(firstTime?'set_pw_btn':'login');
+  $('staffPwLabel').textContent=t(state&&state.staff_password_set?'staff_pw_set':'staff_pw');
+}
+$('langSel').value=lang;$('langSel').onchange=()=>{lang=$('langSel').value;applyLang()};
+async function api(path,body){
+  const r=await fetch(path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json','X-IT-Token':token},body:body?JSON.stringify(body):undefined});
+  return r.json().catch(()=>({ok:false}));
+}
+const errMsg=j=>j&&j.code&&I18N.zh[j.code]?t(j.code):(j&&j.code==='it_password_wrong'?t('pw_wrong'):t('error'));
+
+async function load(){
+  const j=await api('/api/simple/admin/state');
+  if(j.ok){state=j.state;showMain();return}
+  firstTime=j.code==='it_password_unset';
+  $('pLogin').hidden=false;$('pMain').hidden=true;$('pw2Wrap').hidden=!firstTime;
+  if(firstTime&&!j.can_set){$('loginRes').hidden=false;$('loginRes').textContent=t('local_only');$('loginBtn').disabled=true}
+  applyLang();
+}
+$('loginBtn').onclick=async()=>{
+  const p=$('pw1').value,res=$('loginRes');res.hidden=true;
+  if(firstTime){
+    if(p!==$('pw2').value){res.hidden=false;res.textContent=t('pw_mismatch');return}
+    const j=await api('/api/simple/admin/password',{new:p});
+    if(!j.ok){res.hidden=false;res.textContent=errMsg(j);return}
+  }
+  token=p;sessionStorage.setItem('pcg_it',token);
+  const j=await api('/api/simple/admin/state');
+  if(!j.ok){res.hidden=false;res.textContent=t('pw_wrong');return}
+  state=j.state;showMain();
+};
+$('pw1').onkeydown=e=>{if(e.key==='Enter')$('loginBtn').click()};
+
+function showMain(){
+  $('pLogin').hidden=true;$('pMain').hidden=false;
+  document.querySelector(`input[name=backend][value=${state.backend}]`).checked=true;
+  $('gpuHost').value=state.gpu_host||'';$('gpuPort').value=state.gpu_port||8978;
+  $('llmHost').value=state.llm_host||'';$('llmPort').value=state.llm_port||11434;
+  $('llmModel').value=state.llm_model||'';$('sumModel').value=state.summary_model||'';
+  $('asrModel').value=state.asr_model||'large-v3-turbo';
+  $('liveModel').value=state.local_live_model||'small';$('fileModel').value=state.local_file_model||'small';
+  $('diarize').checked=!!state.diarize;$('clearStaffWrap').hidden=!state.staff_password_set;
+  modeVis();applyLang();
+}
+function modeVis(){
+  const server=document.querySelector('input[name=backend]:checked')?.value==='server';
+  $('cLocal').hidden=server;$('m2mWarn').hidden=server||state.m2m_installed;
+}
+document.querySelectorAll('input[name=backend]').forEach(r=>r.onchange=modeVis);
+
+$('testBtn').onclick=async()=>{
+  const b=$('testBtn');b.disabled=true;b.textContent=t('testing');$('testRes').innerHTML='';
+  const j=await api('/api/simple/admin/test',{gpu_host:$('gpuHost').value,gpu_port:$('gpuPort').value,llm_host:$('llmHost').value,llm_port:$('llmPort').value});
+  b.disabled=false;b.textContent=t('test');
+  const out=[];
+  if(j.gpu)out.push([j.gpu.ok,j.gpu.ok?t('gpu_ok')+(j.gpu.detail?`（${j.gpu.detail}）`:''):`${t('gpu_fail')}：${j.gpu.detail}`]);
+  if(j.llm){out.push([j.llm.ok,j.llm.ok?t('llm_ok',{type:j.llm.type,n:j.llm.models.length}):`${t('llm_fail')}：${j.llm.detail}`]);
+    if(j.llm.ok)$('modelList').innerHTML=j.llm.models.map(m=>`<option value="${m.replace(/"/g,'&quot;')}">`).join('')}
+  if(!j.ok&&!out.length)out.push([false,errMsg(j)]);
+  for(const [ok,msg] of out){const d=document.createElement('div');d.className='res '+(ok?'ok':'err');d.textContent=msg;$('testRes').appendChild(d)}
+};
+
+$('pMain').onsubmit=async e=>{
+  e.preventDefault();
+  const j=await api('/api/simple/admin/save',{
+    backend:document.querySelector('input[name=backend]:checked').value,
+    gpu_host:$('gpuHost').value,gpu_port:$('gpuPort').value,llm_host:$('llmHost').value,llm_port:$('llmPort').value,
+    llm_model:$('llmModel').value,summary_model:$('sumModel').value,asr_model:$('asrModel').value,
+    local_live_model:$('liveModel').value,local_file_model:$('fileModel').value,diarize:$('diarize').checked,
+    staff_password:$('staffPw').value,clear_staff_password:$('clearStaff').checked});
+  const r=$('saveRes');r.hidden=false;r.className='res '+(j.ok?'ok':'err');r.textContent=j.ok?t('saved'):errMsg(j);
+  if(j.ok){state=j.state;$('staffPw').value='';$('clearStaff').checked=false;$('clearStaffWrap').hidden=!state.staff_password_set;applyLang()}
+};
+$('chgPwBtn').onclick=async()=>{
+  const p=prompt(t('new_it_pw'));if(!p)return;
+  const j=await api('/api/simple/admin/password',{new:p});
+  if(j.ok){token=p;sessionStorage.setItem('pcg_it',token);alert(t('pw_changed'))}else alert(errMsg(j));
+};
+applyLang();load();
+</script>
+</body>
+</html>
