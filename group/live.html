@@ -52,6 +52,12 @@ footer{flex:none;display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:
 .banner{max-width:980px;margin:0 auto 12px;border-radius:12px;padding:12px 14px;background:var(--accent-soft);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .banner.end{background:#fff4d6;color:var(--warn)}
 @media (prefers-color-scheme:dark){.banner.end{background:#2a2310}}
+dialog{border:0;border-radius:16px;padding:22px;background:var(--card);color:var(--text);width:min(420px,94vw)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.qr{display:block;width:240px;height:240px;margin:8px auto;background:#fff;border-radius:12px;padding:8px}
+.url{font-family:ui-monospace,Consolas,monospace;font-size:15px;word-break:break-all;background:var(--bg);border-radius:8px;padding:8px 10px;margin:6px 0}
+.note{font-size:14px;color:var(--dim);margin:8px 0}
+.warn{color:var(--warn)}
 [hidden]{display:none!important}
 @media (max-width:560px){.m{max-width:94%}header .mode{width:100%;order:9}}
 </style>
@@ -72,31 +78,46 @@ footer{flex:none;display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:
   <button class="btn ghost" id="pauseBtn" type="button"></button>
   <button class="btn ghost" id="modeBtn" type="button"></button>
   <button class="btn ghost" id="ovlBtn" type="button"></button>
+  <button class="btn ghost" id="shareBtn" type="button"></button>
   <label class="chk"><input type="checkbox" id="onlyMine"><span id="onlyMineL"></span></label>
 </footer>
+
+<dialog id="shareDlg">
+  <h3 style="margin:0 0 6px" id="shTitle"></h3>
+  <p class="note warn" id="shOff" hidden></p>
+  <div id="shBody">
+    <p class="note" id="shScan"></p>
+    <img class="qr" id="shQr" alt="QR">
+    <div id="shUrls"></div>
+    <p class="note" id="shPw"></p>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+    <button class="btn ghost" id="shCopy" type="button"></button><button class="btn" id="shClose" type="button"></button>
+  </div>
+</dialog>
 
 <script>
 const LANGS=[['zh','繁體中文'],['en','English'],['id','Bahasa Indonesia'],['vi','Tiếng Việt'],['hi','हिन्दी']];
 const I18N={
-zh:{running:'字幕進行中',waiting:'等待字幕…',paused:'已暫停',ended:'字幕已結束',empty:'開始說話後，字幕會出現在這裡',stop:'停止',pause:'暫停',resume:'繼續',
+zh:{share:'分享',share_title:'讓其他人用手機看字幕',share_scan:'用手機相機掃描，或在瀏覽器輸入下面的網址（要連同一個公司網路）。每個人可以選自己的語言。',share_copy:'複製網址',copied:'已複製',close:'關閉',share_pw:'打開時要輸入同仁密碼。',share_nopw:'注意：沒有設定同仁密碼，同一個網路上的人都看得到。請 IT 在設定頁設定。',share_off:'IT 還沒有開啟「允許其他電腦或手機連進來看字幕」。請 IT 到「IT 設定」開啟。',share_restart:'已開啟分享，但要把程式完全關掉再開一次才會生效。',share_noip:'找不到這台電腦的網路位址，請確認有連上公司網路。',running:'字幕進行中',waiting:'等待字幕…',paused:'已暫停',ended:'字幕已結束',empty:'開始說話後，字幕會出現在這裡',stop:'停止',pause:'暫停',resume:'繼續',
   to_sub:'字幕模式',to_chat:'對話模式',overlay:'懸浮字幕',only_mine:'只顯示我的語言',back:'回到首頁',confirm_stop:'確定要停止字幕？',
-  pw:'請輸入觀看密碼（向 IT 詢問）',reconnect:'連線中斷，重新連線中…',ovl_fail:'懸浮字幕開不起來',fail:'（翻譯失敗）',
+  pw:'請輸入同仁密碼（向 IT 詢問）',reconnect:'連線中斷，重新連線中…',ovl_fail:'懸浮字幕開不起來',fail:'（翻譯失敗）',
   n_zh:'中文',n_en:'英文',n_ja:'日文',n_ko:'韓文',n_id:'印尼文',n_vi:'越南文',n_hi:'印地語',tr:'{a}轉錄'},
-en:{running:'Subtitles running',waiting:'Waiting for subtitles…',paused:'Paused',ended:'Subtitles ended',empty:'Subtitles will appear here when someone speaks',stop:'Stop',pause:'Pause',resume:'Resume',
+en:{share:'Share',share_title:'Let others watch on their phones',share_scan:'Scan with a phone camera, or type the address below in a browser (same company network). Everyone can choose their own language.',share_copy:'Copy address',copied:'Copied',close:'Close',share_pw:'Viewers will be asked for the staff password.',share_nopw:'Note: no staff password is set, so anyone on the same network can watch. Ask IT to set one.',share_off:'IT has not turned on “Allow other computers and phones to view subtitles”. Ask IT to enable it in IT settings.',share_restart:'Sharing is on, but the program must be fully closed and reopened first.',share_noip:'This computer has no network address. Check that it is connected to the company network.',running:'Subtitles running',waiting:'Waiting for subtitles…',paused:'Paused',ended:'Subtitles ended',empty:'Subtitles will appear here when someone speaks',stop:'Stop',pause:'Pause',resume:'Resume',
   to_sub:'Subtitle view',to_chat:'Chat view',overlay:'Floating subtitles',only_mine:'Only my language',back:'Back to home',confirm_stop:'Stop the subtitles?',
-  pw:'Enter the viewing password (ask IT)',reconnect:'Connection lost, reconnecting…',ovl_fail:'Could not open floating subtitles',fail:'(translation failed)',
+  pw:'Enter the staff password (ask IT)',reconnect:'Connection lost, reconnecting…',ovl_fail:'Could not open floating subtitles',fail:'(translation failed)',
   n_zh:'Chinese',n_en:'English',n_ja:'Japanese',n_ko:'Korean',n_id:'Indonesian',n_vi:'Vietnamese',n_hi:'Hindi',tr:'{a} transcription'},
-id:{running:'Subtitle berjalan',waiting:'Menunggu subtitle…',paused:'Dijeda',ended:'Subtitle selesai',empty:'Subtitle akan muncul di sini saat ada yang berbicara',stop:'Berhenti',pause:'Jeda',resume:'Lanjut',
+id:{share:'Bagikan',share_title:'Biarkan orang lain menonton di ponsel',share_scan:'Pindai dengan kamera ponsel, atau ketik alamat di bawah di browser (jaringan perusahaan yang sama). Setiap orang dapat memilih bahasanya sendiri.',share_copy:'Salin alamat',copied:'Tersalin',close:'Tutup',share_pw:'Penonton akan diminta kata sandi karyawan.',share_nopw:'Perhatian: kata sandi karyawan belum diatur, jadi siapa pun di jaringan yang sama bisa menonton. Minta IT mengaturnya.',share_off:'IT belum mengaktifkan “Izinkan komputer dan ponsel lain menonton subtitle”. Minta IT mengaktifkannya di Pengaturan IT.',share_restart:'Berbagi sudah aktif, tetapi program harus ditutup sepenuhnya lalu dibuka lagi.',share_noip:'Komputer ini tidak punya alamat jaringan. Pastikan terhubung ke jaringan perusahaan.',running:'Subtitle berjalan',waiting:'Menunggu subtitle…',paused:'Dijeda',ended:'Subtitle selesai',empty:'Subtitle akan muncul di sini saat ada yang berbicara',stop:'Berhenti',pause:'Jeda',resume:'Lanjut',
   to_sub:'Tampilan subtitle',to_chat:'Tampilan obrolan',overlay:'Subtitle mengambang',only_mine:'Hanya bahasa saya',back:'Kembali ke beranda',confirm_stop:'Hentikan subtitle?',
-  pw:'Masukkan kata sandi menonton (tanyakan IT)',reconnect:'Koneksi terputus, menyambung ulang…',ovl_fail:'Subtitle mengambang tidak bisa dibuka',fail:'(gagal diterjemahkan)',
+  pw:'Masukkan kata sandi karyawan (tanyakan IT)',reconnect:'Koneksi terputus, menyambung ulang…',ovl_fail:'Subtitle mengambang tidak bisa dibuka',fail:'(gagal diterjemahkan)',
   n_zh:'Mandarin',n_en:'Inggris',n_ja:'Jepang',n_ko:'Korea',n_id:'Indonesia',n_vi:'Vietnam',n_hi:'Hindi',tr:'Transkripsi {a}'},
-vi:{running:'Đang hiện phụ đề',waiting:'Đang chờ phụ đề…',paused:'Đã tạm dừng',ended:'Phụ đề đã kết thúc',empty:'Phụ đề sẽ hiện ở đây khi có người nói',stop:'Dừng',pause:'Tạm dừng',resume:'Tiếp tục',
+vi:{share:'Chia sẻ',share_title:'Cho người khác xem trên điện thoại',share_scan:'Quét bằng camera điện thoại, hoặc nhập địa chỉ bên dưới vào trình duyệt (cùng mạng công ty). Mỗi người có thể chọn ngôn ngữ của mình.',share_copy:'Sao chép địa chỉ',copied:'Đã sao chép',close:'Đóng',share_pw:'Người xem sẽ được yêu cầu nhập mật khẩu nhân viên.',share_nopw:'Lưu ý: chưa đặt mật khẩu nhân viên, nên ai cùng mạng cũng xem được. Hãy nhờ IT đặt mật khẩu.',share_off:'IT chưa bật “Cho phép máy tính và điện thoại khác xem phụ đề”. Hãy nhờ IT bật trong Cài đặt IT.',share_restart:'Đã bật chia sẻ, nhưng cần đóng hẳn chương trình rồi mở lại.',share_noip:'Máy này không có địa chỉ mạng. Hãy kiểm tra kết nối mạng công ty.',running:'Đang hiện phụ đề',waiting:'Đang chờ phụ đề…',paused:'Đã tạm dừng',ended:'Phụ đề đã kết thúc',empty:'Phụ đề sẽ hiện ở đây khi có người nói',stop:'Dừng',pause:'Tạm dừng',resume:'Tiếp tục',
   to_sub:'Chế độ phụ đề',to_chat:'Chế độ hội thoại',overlay:'Phụ đề nổi',only_mine:'Chỉ ngôn ngữ của tôi',back:'Về trang chính',confirm_stop:'Dừng phụ đề?',
-  pw:'Nhập mật khẩu xem (hỏi IT)',reconnect:'Mất kết nối, đang kết nối lại…',ovl_fail:'Không mở được phụ đề nổi',fail:'(dịch thất bại)',
+  pw:'Nhập mật khẩu nhân viên (hỏi IT)',reconnect:'Mất kết nối, đang kết nối lại…',ovl_fail:'Không mở được phụ đề nổi',fail:'(dịch thất bại)',
   n_zh:'tiếng Trung',n_en:'tiếng Anh',n_ja:'tiếng Nhật',n_ko:'tiếng Hàn',n_id:'tiếng Indonesia',n_vi:'tiếng Việt',n_hi:'tiếng Hindi',tr:'Ghi {a}'},
-hi:{running:'सबटाइटल चल रहे हैं',waiting:'सबटाइटल का इंतज़ार…',paused:'रुका हुआ',ended:'सबटाइटल बंद हो गए',empty:'कोई बोलेगा तो सबटाइटल यहाँ दिखेंगे',stop:'रोकें',pause:'विराम',resume:'जारी रखें',
+hi:{share:'शेयर करें',share_title:'दूसरों को फ़ोन पर सबटाइटल दिखाएँ',share_scan:'फ़ोन कैमरे से स्कैन करें, या ब्राउज़र में नीचे का पता डालें (एक ही कंपनी नेटवर्क)। हर कोई अपनी भाषा चुन सकता है।',share_copy:'पता कॉपी करें',copied:'कॉपी हो गया',close:'बंद करें',share_pw:'देखने वालों से कर्मचारी पासवर्ड पूछा जाएगा।',share_nopw:'ध्यान दें: कर्मचारी पासवर्ड सेट नहीं है, इसलिए एक ही नेटवर्क पर कोई भी देख सकता है। IT से सेट करवाएँ।',share_off:'IT ने “दूसरे कंप्यूटर और फ़ोन को सबटाइटल देखने दें” चालू नहीं किया है। IT से IT सेटिंग में चालू करवाएँ।',share_restart:'शेयरिंग चालू है, लेकिन पहले प्रोग्राम को पूरी तरह बंद करके फिर खोलना होगा।',share_noip:'इस कंप्यूटर का नेटवर्क पता नहीं मिला। कंपनी नेटवर्क से कनेक्शन जाँचें।',running:'सबटाइटल चल रहे हैं',waiting:'सबटाइटल का इंतज़ार…',paused:'रुका हुआ',ended:'सबटाइटल बंद हो गए',empty:'कोई बोलेगा तो सबटाइटल यहाँ दिखेंगे',stop:'रोकें',pause:'विराम',resume:'जारी रखें',
   to_sub:'सबटाइटल व्यू',to_chat:'चैट व्यू',overlay:'तैरते सबटाइटल',only_mine:'केवल मेरी भाषा',back:'होम पर लौटें',confirm_stop:'सबटाइटल बंद करें?',
-  pw:'देखने का पासवर्ड डालें (IT से पूछें)',reconnect:'कनेक्शन टूटा, दोबारा जुड़ रहा है…',ovl_fail:'तैरते सबटाइटल नहीं खुल सके',fail:'(अनुवाद असफल)',
+  pw:'कर्मचारी पासवर्ड डालें (IT से पूछें)',reconnect:'कनेक्शन टूटा, दोबारा जुड़ रहा है…',ovl_fail:'तैरते सबटाइटल नहीं खुल सके',fail:'(अनुवाद असफल)',
   n_zh:'चीनी',n_en:'अंग्रेज़ी',n_ja:'जापानी',n_ko:'कोरियाई',n_id:'इंडोनेशियाई',n_vi:'वियतनामी',n_hi:'हिंदी',tr:'{a} ट्रांसक्रिप्शन'}};
 
 const $=id=>document.getElementById(id);
@@ -109,7 +130,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const LABEL={'中':'zh','台':'zh','EN':'en','日':'ja','韓':'ko','ID':'id','VI':'vi','HI':'hi'};
 
 let state={running:false,paused:false,ended:false,local:false,mode:''},events=[],sub=store.get('pcg_live_sub')==='1';
-let fs=+store.get('pcg_live_fs')||22,onlyMine=store.get('pcg_live_only')==='1',token=sessionStorage.getItem('pcg_view')||'';
+let fs=+store.get('pcg_live_fs')||22,onlyMine=store.get('pcg_live_only')==='1',token=store.get('pcg_token')||'';   // 同仁密碼（與簡易頁面共用）
 
 function modeName(m){
   if(!m)return '';
@@ -163,7 +184,9 @@ function paint(){
   $('modeBtn').textContent=t(sub?'to_chat':'to_sub');$('ovlBtn').textContent=t('overlay');$('onlyMineL').textContent=t('only_mine');
   $('endText').textContent=t('ended');$('backBtn').textContent=t('back');$('endBanner').hidden=!state.ended;
   // 遠端觀看（唯讀）不能停止、暫停、開懸浮字幕
+  $('shareBtn').textContent=t('share');
   for(const id of ['stopBtn','pauseBtn','ovlBtn'])$(id).hidden=!state.local||state.ended;
+  $('shareBtn').hidden=!state.local;
   document.body.classList.toggle('sub',sub);document.documentElement.style.setProperty('--fs',fs+'px');
   $('onlyMine').checked=onlyMine;
 }
@@ -177,6 +200,25 @@ $('ovlBtn').onclick=async()=>{try{const r=await(await fetch('/api/reopen-overlay
 $('stopBtn').onclick=()=>{if(confirm(t('confirm_stop')))send({action:'stop'})};
 $('pauseBtn').onclick=()=>{state.paused=!state.paused;send({action:state.paused?'pause':'resume'});paint()};
 
+/* 分享：QR Code＋網址（只在收音的這台電腦上） */
+let shareUrl='';
+$('shareBtn').onclick=async()=>{
+  let j={};try{j=await(await fetch('/api/simple/share')).json()}catch(e){}
+  $('shTitle').textContent=t('share_title');$('shCopy').textContent=t('share_copy');$('shClose').textContent=t('close');
+  const off=!j.allowed?t('share_off'):!j.bound?t('share_restart'):!(j.urls||[]).length?t('share_noip'):'';
+  $('shOff').hidden=!off;$('shOff').textContent=off;$('shBody').hidden=!!off;$('shCopy').hidden=!!off;
+  if(!off){
+    shareUrl=j.urls[0];
+    $('shScan').textContent=t('share_scan');
+    $('shQr').src='/api/simple/share/qr.svg?u='+encodeURIComponent(shareUrl);
+    $('shUrls').innerHTML=j.urls.map(u=>`<div class="url">${esc(u)}</div>`).join('');
+    $('shPw').textContent=t(j.password_set?'share_pw':'share_nopw');$('shPw').classList.toggle('warn',!j.password_set);
+  }
+  $('shareDlg').showModal();
+};
+$('shClose').onclick=()=>$('shareDlg').close();
+$('shCopy').onclick=async()=>{try{await navigator.clipboard.writeText(shareUrl);$('shCopy').textContent=t('copied')}catch(e){prompt('',shareUrl)}};
+
 let ws=null,retry=null;
 function send(o){if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}
 function conn(){
@@ -188,7 +230,7 @@ function conn(){
     else if(ev.type==='started'){state.running=true;state.ended=false;state.mode=ev.mode||state.mode;paint()}
     else if(ev.type==='stopped'||ev.type==='disconnected'){state.ended=true;state.running=false;paint()}};
   ws.onclose=e=>{
-    if(e.code===4001){const p=prompt(t('pw'));if(p===null)return;token=p;sessionStorage.setItem('pcg_view',p);return conn()}
+    if(e.code===4001){const p=prompt(t('pw'));if(p===null)return;token=p;store.set('pcg_token',p);return conn()}
     if(!state.ended){$('st').textContent=t('reconnect');$('dot').classList.remove('on')}
     retry=setTimeout(conn,3000);
   };

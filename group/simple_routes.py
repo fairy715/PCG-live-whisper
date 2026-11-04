@@ -335,11 +335,11 @@ def _error_of(tail, rc):
 
 
 def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path, write_config,
-             start_live=None, live_running=None, live_args=None):
+             start_live=None, live_running=None, live_args=None, set_view_password=None):
     """把簡易版的路由掛到 WebUI 的 FastAPI app 上（webui.py 呼叫）。
     start_live(body)：用 WebUI 原本的方式啟動即時字幕；live_running()：WebUI 是否正在跑"""
     from fastapi import File, Form, Request, UploadFile
-    from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
+    from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 
     def settings():
         try:
@@ -492,6 +492,54 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 j["dl_key"] = secrets.token_urlsafe(18)
                 queue._save()
             return {"ok": True, "key": j["dl_key"]}
+
+    def _lan_ips():
+        """這台電腦在區網上的 IPv4（給別台電腦連進來用）"""
+        import socket
+        ips = []
+        try:
+            for info in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET):
+                ips.append(info[4][0])
+        except OSError:
+            pass
+        try:                                  # 預設路由那張網卡（不會真的送封包）
+            s_ = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s_.connect(("10.255.255.255", 1))
+            ips.insert(0, s_.getsockname()[0])
+            s_.close()
+        except OSError:
+            pass
+        out = []
+        for ip in ips:
+            if ip not in out and not ip.startswith(("127.", "169.254.")):
+                out.append(ip)
+        return out
+
+    @app.get("/api/simple/share")
+    async def simple_share(request: Request):
+        """分享字幕（只在這台電腦上）：別台電腦要用的網址、目前能不能連進來、有沒有密碼"""
+        if not is_local(request):
+            return JSONResponse({"ok": False, "code": "local_only"}, status_code=403)
+        cfg = read_cfg()
+        s = cfg.get("pcg_simple") or {}
+        port = request.url.port or 19781
+        bound_all = (os.environ.get("PCG_WEBUI_HOST") or "0.0.0.0") not in ("127.0.0.1", "localhost", "::1")
+        return {"ok": True, "allowed": bool(s.get("allow_remote_view")), "bound": bound_all,
+                "password_set": bool(s.get("password_hash") or (cfg.get("webui_passwords") or {}).get("read_sha256")),
+                "urls": [f"http://{ip}:{port}/simple/live" for ip in _lan_ips()]}
+
+    @app.get("/api/simple/share/qr.svg")
+    async def simple_share_qr(request: Request, u: str = ""):
+        """QR Code（SVG，本機產生、不連網）。只接受這台電腦自己的分享網址"""
+        if not is_local(request) or not re.fullmatch(r"http://[0-9.]{7,15}:\d{2,5}/simple/live", u):
+            return JSONResponse({"ok": False}, status_code=400)
+        try:
+            import qrcode
+            import qrcode.image.svg
+        except ImportError:
+            return JSONResponse({"ok": False, "code": "no_qrcode"}, status_code=404)
+        img = qrcode.make(u, image_factory=qrcode.image.svg.SvgPathImage, box_size=10, border=2)
+        return Response(img.to_string(), media_type="image/svg+xml", headers={"Cache-Control": "no-store"})
 
     @app.get("/api/simple/live")
     async def simple_live_info(request: Request):
@@ -679,13 +727,22 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         if lh:
             cfg["llm_host"], cfg["llm_port"] = lh, int(body.get("llm_port") or 11434)
         sp = str(body.get("staff_password") or "").strip()
+        view_hash = None
         if sp:
-            s["password_hash"] = pw_hash(sp)
+            s["password_hash"] = view_hash = pw_hash(sp)
             s.pop("password", None)
         elif body.get("clear_staff_password"):
             s.pop("password_hash", None)
             s.pop("password", None)
+            view_hash = ""
+        if view_hash is not None:
+            # 同仁密碼也是「觀看字幕」的密碼（WebUI 的唯讀密碼，/ws 用它驗證）：同一組，IT 只要設一次
+            wp = cfg.get("webui_passwords") if isinstance(cfg.get("webui_passwords"), dict) else {}
+            wp["read_sha256"] = view_hash
+            cfg["webui_passwords"] = wp
         write_config(cfg)
+        if view_hash is not None and set_view_password:
+            set_view_password(view_hash)
         return {"ok": True, "state": admin_state()}
 
     return queue

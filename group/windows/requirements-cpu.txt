@@ -23,3 +23,5 @@ PyAudioWPatch
 webrtcvad-wheels
 # 講者辨識（resemblyzer）需要；PyPI 上的 Windows 版就是 CPU 版
 torch
+# 字幕分享的 QR Code（純 Python，產生 SVG，不需要 Pillow）
+qrcode

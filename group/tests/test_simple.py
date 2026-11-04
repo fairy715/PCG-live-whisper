@@ -54,6 +54,7 @@ class SimpleFlow(unittest.TestCase):
         self.cfg = self.base / "config.json"
         self.local = True
         self.started = []
+        self.view_pw = []
         app = FastAPI()
 
         async def start_live(body):
@@ -63,7 +64,8 @@ class SimpleFlow(unittest.TestCase):
             app, self.base, lambda r: self.local, _pw_hash, _pw_match, self.cfg,
             lambda c: self.cfg.write_text(json.dumps(c, ensure_ascii=False), encoding="utf-8"),
             start_live=start_live, live_running=lambda: False,
-            live_args=lambda: ["python", "translate_meeting.py", "--webui", "--mode", "id_zh"])
+            live_args=lambda: ["python", "translate_meeting.py", "--webui", "--mode", "id_zh"],
+            set_view_password=self.view_pw.append)
         self.c = TestClient(app)
         self.h = {"X-Client-Id": "browserA1234"}
 
@@ -237,6 +239,46 @@ class AdminPage(SimpleFlow):
         r = self.post("/api/simple/admin/save", {"backend": "local", "gpu_host": "10.0.0.5", "llm_host": "10.0.0.6",
                                                   "local_live_model": "base"}, tok).json()
         self.assertEqual((r["state"]["backend"], r["state"]["local_live_model"]), ("local", "base"))
+
+    def test_staff_password_is_view_password(self):
+        """同仁密碼＝看分享字幕的密碼：寫進 WebUI 的唯讀密碼（設定檔與執行中的記憶體）"""
+        self.post("/api/simple/admin/password", {"new": "itpass1"})
+        self.post("/api/simple/admin/save", {"backend": "local", "staff_password": "staff99"}, "itpass1")
+        cfg = json.loads(self.cfg.read_text(encoding="utf-8"))
+        self.assertEqual(cfg["webui_passwords"]["read_sha256"], "h:staff99")
+        self.assertEqual(self.view_pw[-1], "h:staff99")
+        self.post("/api/simple/admin/save", {"backend": "local", "clear_staff_password": True}, "itpass1")
+        cfg = json.loads(self.cfg.read_text(encoding="utf-8"))
+        self.assertEqual(cfg["webui_passwords"]["read_sha256"], "")
+        self.assertEqual(self.view_pw[-1], "")
+        # 其他設定存檔（沒動密碼）不會改到觀看密碼
+        n = len(self.view_pw)
+        self.post("/api/simple/admin/save", {"backend": "local"}, "itpass1")
+        self.assertEqual(len(self.view_pw), n)
+
+    def test_share(self):
+        import os as _os
+        r = self.c.get("/api/simple/share").json()
+        self.assertFalse(r["allowed"])                       # 預設沒開放
+        self.post("/api/simple/admin/password", {"new": "itpass1"})
+        self.post("/api/simple/admin/save", {"backend": "local", "allow_remote_view": True,
+                                              "staff_password": "staff99"}, "itpass1")
+        _os.environ["PCG_WEBUI_HOST"] = "127.0.0.1"         # 開放了但程式還沒重開
+        try:
+            self.assertFalse(self.c.get("/api/simple/share").json()["bound"])
+        finally:
+            _os.environ.pop("PCG_WEBUI_HOST", None)
+        r = self.c.get("/api/simple/share").json()
+        self.assertTrue(r["allowed"] and r["bound"] and r["password_set"])
+        for u in r["urls"]:
+            self.assertRegex(u, r"^http://[0-9.]+:\d+/simple/live$")
+        qr = self.c.get("/api/simple/share/qr.svg", params={"u": "http://192.168.1.23:19781/simple/live"})
+        self.assertEqual(qr.status_code, 200)
+        self.assertIn("<svg", qr.text)
+        # 只產生這台電腦自己的字幕網址（不能拿來做任意 QR Code）
+        self.assertEqual(self.c.get("/api/simple/share/qr.svg", params={"u": "http://evil.example/"}).status_code, 400)
+        self.local = False
+        self.assertEqual(self.c.get("/api/simple/share").status_code, 403)
 
     def test_connection_test_reports_failures(self):
         self.post("/api/simple/admin/password", {"new": "itpass1"})

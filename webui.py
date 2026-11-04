@@ -2623,13 +2623,19 @@ def _running_webui_url(port):
 try:
     from group import simple_routes as _pcg_simple
 
+    def _pcg_set_view_password(hashed):
+        """同仁密碼＝觀看字幕的密碼：寫進 WebUI 的唯讀密碼（記憶體；設定檔由呼叫端一起寫）"""
+        _webui_passwords["read"] = hashed or ""
+        _logs_sessions.clear()
+
     async def _pcg_start_live(body):
         await asyncio.to_thread(_start_proc, _build_args(body))
 
     _pcg_simple.register(app, BASE_DIR, _is_local, _pw_hash, _pw_match, CONFIG_FILE, _write_config,
                          start_live=_pcg_start_live,
                          live_running=lambda: _proc is not None and _proc.poll() is None,
-                         live_args=lambda: list(_proc.args) if _proc is not None and _proc.poll() is None else None)
+                         live_args=lambda: list(_proc.args) if _proc is not None and _proc.poll() is None else None,
+                         set_view_password=_pcg_set_view_password)
 except ImportError as _pcg_e:          # group/ 不在（例如只複製了上游的檔案）：簡易頁面不提供，其他照舊
     print(f"  [提示] 簡易頁面未載入：{_pcg_e}")
 
