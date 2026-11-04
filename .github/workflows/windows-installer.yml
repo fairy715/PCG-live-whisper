@@ -63,6 +63,8 @@ jobs:
     timeout-minutes: 60
     env:
       APP: C:\PCGtest
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: utf-8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

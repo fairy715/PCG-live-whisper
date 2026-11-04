@@ -48,6 +48,15 @@ PIP_PLATFORM = ["--platform", "win_amd64", "--python-version", "3.12", "--implem
                 "--abi", "cp312", "--only-binary=:all:"]
 
 
+def _utf8_console():
+    """英文、印尼文版 Windows 的命令列不是 UTF-8，印中文會整個當掉（2026-11-04 GitHub Actions 實測）"""
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
+
+
 def step(msg):
     print(f"\n== {msg}", flush=True)
 
@@ -195,6 +204,7 @@ def write_manifest(out, models):
 
 
 def main():
+    _utf8_console()
     ap = argparse.ArgumentParser(description="製作 PCG 集團版的 Windows 離線資源包")
     ap.add_argument("--out", default="PCG-offline", help="輸出資料夾（預設 PCG-offline）")
     ap.add_argument("--models", default="small",

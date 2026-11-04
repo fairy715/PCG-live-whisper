@@ -75,6 +75,11 @@ def translations(quick):
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):          # 非中文版 Windows 的命令列印中文會當掉
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
     ap = argparse.ArgumentParser()
     ap.add_argument("--quick", action="store_true")
     a = ap.parse_args()
