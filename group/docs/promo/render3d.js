@@ -1,7 +1,7 @@
-// 逐格錄動畫（30fps），加上配樂，輸出 MP4：node render3d.js <zh|id> <配樂.wav> <輸出.mp4> [頁面，預設 promo3d.html] [秒數，預設 60.5]
+// 逐格錄動畫（30fps），加上配樂，輸出 MP4：node render3d.js <zh|id|vi> <配樂.wav> <輸出.mp4> [頁面，預設 promo-ad.html] [秒數，預設 48.5]
 const {chromium}=require('playwright');const path=require('path');const {spawn}=require('child_process');
 (async()=>{
-  const [lang,music,out,page='promo3d.html',dur='60.5']=process.argv.slice(2);const FPS=30,DUR=+dur;
+  const [lang,music,out,page='promo-ad.html',dur='48.5']=process.argv.slice(2);const FPS=30,DUR=+dur;
   const ff=spawn('ffmpeg',['-loglevel','error','-y','-f','image2pipe','-framerate',String(FPS),'-i','-','-i',music,
     '-c:v','libx264','-preset','medium','-crf','20','-pix_fmt','yuv420p','-c:a','aac','-b:a','160k','-shortest','-movflags','+faststart',out],{stdio:['pipe','inherit','inherit']});
   const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1280,height:720}});

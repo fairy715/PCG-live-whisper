@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>PCG AI Meeting Translator</title>
 <!-- 廣告版（48 秒，1280×720）：問題 → 揭曉 → 線上課 → 手機 → 教室 → 會後紀錄 → 信任 → 行動呼籲。
-     所有段落放在同一個 3D 空間，鏡頭在段落之間飛行。?lang=zh|id；畫面由 seek(秒) 決定，render3d.js 逐格錄 -->
+     所有段落放在同一個 3D 空間，鏡頭在段落之間飛行。?lang=zh|id|vi；畫面由 seek(秒) 決定，render3d.js 逐格錄 -->
 <style>
 :root{--accent:#4c9dff;--ok:#3ecf8e;--ink:#f3f6fb;--dim:#a9b8d3;--warn:#ffb547}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -22,9 +22,9 @@ html,body{width:1280px;height:720px;overflow:hidden;background:#050b18;color:var
 .subh{position:absolute;left:0;right:0;top:118px;text-align:center;font-size:22px;color:var(--dim)}
 .av{border-radius:50%;display:grid;place-items:center;font-weight:900;color:#0b1a33}
 .av.t{background:#ffd166}.av.b{background:#7bdff2}
-.bub{position:absolute;max-width:430px;border-radius:22px;padding:18px 22px;font-size:26px;font-weight:800;background:#fff;color:#1d2330;box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.bub{position:absolute;max-width:470px;white-space:nowrap;border-radius:22px;padding:18px 22px;font-size:26px;font-weight:800;background:#fff;color:#1d2330;box-shadow:0 20px 50px rgba(0,0,0,.45)}
 .lg{display:inline-block;font-size:13px;font-weight:900;border-radius:6px;padding:2px 7px;color:#fff;vertical-align:3px;margin-right:6px}
-.lg.zh{background:#e5484d}.lg.id{background:#1f6feb}
+.lg.zh{background:#e5484d}.lg.id,.lg.vi{background:#1f6feb}
 .slam{position:absolute;left:0;right:0;top:520px;text-align:center;font-size:56px;font-weight:900;letter-spacing:.02em}
 .qm{position:absolute;font-size:46px;font-weight:900;color:var(--warn)}
 .logo{width:170px;height:170px;border-radius:42px;background:linear-gradient(135deg,#4c9dff,#3ecf8e);display:grid;place-items:center;font-size:58px;font-weight:900;color:#fff;
@@ -82,10 +82,10 @@ html,body{width:1280px;height:720px;overflow:hidden;background:#050b18;color:var
   <div class="st" id="st0">
     <div class="av t" id="a0t" style="position:absolute;left:180px;top:250px;width:130px;height:130px;font-size:44px">林</div>
     <div class="av b" id="a0b" style="position:absolute;left:970px;top:250px;width:130px;height:130px;font-size:44px">B</div>
-    <div style="position:absolute;left:150px;top:395px;width:190px;text-align:center;font-size:19px;color:var(--dim)" id="n0t"></div>
-    <div style="position:absolute;left:940px;top:395px;width:190px;text-align:center;font-size:19px;color:var(--dim)" id="n0b"></div>
+    <div style="position:absolute;left:105px;top:395px;width:280px;text-align:center;font-size:19px;color:var(--dim)" id="n0t"></div>
+    <div style="position:absolute;left:895px;top:395px;width:280px;text-align:center;font-size:19px;color:var(--dim)" id="n0b"></div>
     <div class="bub" id="b0a" style="left:330px;top:150px"><span class="lg zh">中</span>設備要先關電源，再做安全檢查。</div>
-    <div class="bub" id="b0b" style="left:600px;top:290px;max-width:350px"><span class="lg id">ID</span>Maaf… maksudnya apa?</div>
+    <div class="bub" id="b0b" style="left:560px;top:290px;max-width:420px"><span class="lg id">ID</span>Maaf… maksudnya apa?</div>
     <div class="qm" id="q1" style="left:1080px;top:200px">?</div><div class="qm" id="q2" style="left:1120px;top:240px;font-size:34px">?</div><div class="qm" id="q3" style="left:250px;top:180px;font-size:40px">?</div>
     <div class="slam" id="slam"></div>
   </div>
@@ -153,7 +153,8 @@ html,body{width:1280px;height:720px;overflow:hidden;background:#050b18;color:var
 <div id="flash"></div><div id="fade"></div>
 
 <script>
-const LANG=(new URLSearchParams(location.search).get('lang')||'zh')==='id'?'id':'zh';
+const LANG=['zh','id','vi'].includes(new URLSearchParams(location.search).get('lang'))?new URLSearchParams(location.search).get('lang'):'zh';
+const FL=LANG==='vi'?'vi':'id';  // 故事裡外國同事說的語言：越南文版換成越南同事 Minh
 const X={
 zh:{n0t:'林老師・台灣',n0b:'Budi・印尼',slam:'聽不懂，會就白開了。',name:'PCG AI 會議翻譯',tag:'讓每個人都聽得懂',
  h2:'線上課，雙向字幕',s2:'選對方的語言，按開始',cap2:'老師說中文、學生說印尼文，字幕即時互翻',
@@ -164,7 +165,19 @@ id:{n0t:'Guru Lin ・ Taiwan',n0b:'Budi ・ Indonesia',slam:'Tidak paham, rapat 
  h2:'Kelas online, subtitle dua arah',s2:'Pilih bahasa lawan bicara, tekan Mulai',cap2:'Guru berbahasa Mandarin, siswa menjawab bahasa Indonesia — langsung diterjemahkan',
  h3:'Pindai, langsung di ponsel',s3:'Setiap orang membaca bahasanya sendiri',h4:'Kelas pelatihan: cukup satu mikrofon',s4:'Setiap kalimat dikenali otomatis: Mandarin atau Indonesia',det:'Deteksi otomatis: ',lzh:'Mandarin',lid:'Bahasa Indonesia',seT:'Guru Lin',seB:'Budi',
  h5:'Setelah kelas, notulen langsung jadi',s5:'Unggah rekaman → transkrip, keputusan, tindak lanjut',doc:['Notulen','Keputusan','Mesin baru mulai uji produksi Senin depan','Tindak lanjut','Siapkan materi pelatihan (Guru Lin, 12/11)','Periksa daftar keselamatan (Budi, 10/11)','Risiko','Suku cadang mungkin terlambat'],
- t:['Tanpa internet','Tanpa server','5 bahasa'],t4:'Instalasi offline ・ Tanpa hak admin ・ Pembaruan sekali klik',line:'Bahasa bukan lagi penghalang.',cta:'Hubungi IT untuk pemasangan'}}[LANG];
+ t:['Tanpa internet','Tanpa server','5 bahasa'],t4:'Instalasi offline ・ Tanpa hak admin ・ Pembaruan sekali klik',line:'Bahasa bukan lagi penghalang.',cta:'Hubungi IT untuk pemasangan'},
+vi:{n0t:'Giảng viên Lin ・ Đài Loan',n0b:'Minh ・ Việt Nam',slam:'Không hiểu thì họp cũng vô ích.',name:'Phiên dịch cuộc họp AI PCG',tag:'Ai cũng hiểu được nhau',
+ h2:'Lớp học online, phụ đề hai chiều',s2:'Chọn ngôn ngữ của người kia, bấm Bắt đầu',cap2:'Giảng viên nói tiếng Trung, học viên trả lời tiếng Việt — dịch ngay lập tức',
+ h3:'Quét mã, xem ngay trên điện thoại',s3:'Mỗi người đọc ngôn ngữ của mình',h4:'Phòng đào tạo: chỉ cần một micro',s4:'Tự nhận biết từng câu: tiếng Trung hay tiếng Việt',det:'Tự nhận biết: ',lzh:'Tiếng Trung',lid:'Tiếng Việt',seT:'Giảng viên Lin',seB:'Minh',
+ h5:'Sau buổi học, biên bản tự động xong',s5:'Tải bản ghi âm lên → bản ghi lời, quyết định, việc cần làm',doc:['Biên bản họp','Quyết định','Máy mới chạy thử từ thứ Hai tuần sau','Việc cần làm','Chuẩn bị tài liệu đào tạo (GV Lin, 12/11)','Kiểm tra danh sách an toàn (Minh, 10/11)','Rủi ro','Phụ tùng có thể về trễ'],
+ t:['Không cần internet','Không cần máy chủ','5 ngôn ngữ'],t4:'Cài đặt offline ・ Không cần quyền admin ・ Cập nhật một chạm',line:'Ngôn ngữ không còn là khoảng cách.',cta:'Liên hệ IT để cài đặt'}}[LANG];
+// 外國同事（印尼 Budi／越南 Minh）的台詞
+const F={id:{av:'B',hook:'Maaf… maksudnya apa?',l2:['Matikan listrik dulu, lalu periksa keselamatan.','Apakah sarung tangan juga wajib?','Ya, sarung tangan dan helm wajib.'],
+  room:['Silakan semua memakai helm.','Helm disimpan di mana?','Di rak dekat pintu.'],click:[110,150]},
+ vi:{av:'M',hook:'Xin lỗi… nghĩa là gì ạ?',l2:['Tắt nguồn thiết bị trước, rồi kiểm tra an toàn.','Găng tay cũng bắt buộc phải đeo ạ?','Đúng, phải đeo cả găng tay và mũ bảo hộ.'],
+  room:['Mọi người hãy đội mũ bảo hộ.','Mũ bảo hộ để ở đâu ạ?','Để trên kệ cạnh cửa.'],click:[205,150]}}[FL];
+document.querySelectorAll('.av.b').forEach(e=>e.textContent=F.av);
+
 const $=id=>document.getElementById(id);
 for(const k of ['n0t','n0b','h2','s2','h3','s3','h4','s4','h5','s5','seT','seB','t4']) $(k).textContent=X[k];
 $('slam').textContent=X.slam;$('name1').innerHTML=[...X.name].map(c=>`<span style="display:inline-block">${c===' '?'&nbsp;':c}</span>`).join('');
@@ -172,16 +185,18 @@ $('tag1').textContent=X.tag;$('cap2').innerHTML=`<i></i>${X.cap2}`;$('line7').te
 ['t1','t2','t3'].forEach((k,i)=>$(k).textContent=X.t[i]);
 $('ui').src=`ui-${LANG}.png`;
 const D=X.doc;$('doc').innerHTML=`<h4>${D[0]}</h4><div class="k">${D[1]}</div><div class="dl">• ${D[2]}</div><div class="k">${D[3]}</div><div class="dl">• ${D[4]}</div><div class="dl">• ${D[5]}</div><div class="k">${D[6]}</div><div class="dl">• ${D[7]}</div>`;
-const tag=l=>`<span class="lg ${l}">${l==='zh'?'中':'ID'}</span>`;
-const L2=[['zh','設備要先關電源，再做安全檢查。','id','Matikan listrik dulu, lalu periksa keselamatan.'],
-          ['id','Apakah sarung tangan juga wajib?','zh','手套也一定要戴嗎？'],
-          ['zh','對，手套和安全帽都要。','id','Ya, sarung tangan dan helm wajib.']];
+const tag=l=>`<span class="lg ${l}">${l==='zh'?'中':l.toUpperCase()}</span>`;
+$('b0b').innerHTML=`${tag(FL)}${F.hook}`;
+if(LANG==='vi'){['t1','t2','t3'].forEach(k=>$(k).style.fontSize='34px');$('line7').style.fontSize='58px';$('name1').style.fontSize='58px'}
+const L2=[['zh','設備要先關電源，再做安全檢查。',FL,F.l2[0]],
+          [FL,F.l2[1],'zh','手套也一定要戴嗎？'],
+          ['zh','對，手套和安全帽都要。',FL,F.l2[2]]];
 $('cards2').innerHTML=L2.map((x,i)=>`<div class="card" id="c2${i}" style="left:690px;top:${200+i*128}px"><div class="o">${tag(x[0])}${x[1]}</div><div class="t">${tag(x[2])}<span id="c2t${i}"></span></div></div>`).join('');
 L2.forEach((x,i)=>$('lm'+i).innerHTML=`${tag(x[0])}${x[1]}<b>${x[3]}</b>`);
-const PH=[['id','Ya, sarung tangan dan helm wajib.'],['zh','對，手套和安全帽都要。'],['id','Ya, sarung tangan dan helm wajib.'],['zh','對，手套和安全帽都要。'],['id','Ya, sarung tangan dan helm wajib.']];
+const PH=[[FL,F.l2[2]],['zh','對，手套和安全帽都要。'],[FL,F.l2[2]],['zh','對，手套和安全帽都要。'],[FL,F.l2[2]]];
 $('phones').innerHTML=PH.map((p,i)=>`<div class="phone" id="ph${i}" style="left:${560+i*130}px;top:${215+Math.abs(i-2)*18}px"><div class="ln">${tag(p[0])}${p[1]}</div></div>`).join('');
 (function(){const q=$('qr');const p='111111101100000110101110100101110100101110110101110100101111111101000000011010110101101011001011011101011100101011000001011110101011';for(let i=0;i<81;i++){const c=document.createElement('i');if(p[i%p.length]==='0')c.className='w';q.insertBefore(c,$('scan'))}})();
-const ROOM=[['zh','請大家戴上安全帽。','Silakan semua memakai helm.'],['id','Helm disimpan di mana?','安全帽要放在哪裡？'],['zh','放在門口的架子上。','Di rak dekat pintu.']];
+const ROOM=[['zh','請大家戴上安全帽。',F.room[0]],[FL,F.room[1],'安全帽要放在哪裡？'],['zh','放在門口的架子上。',F.room[2]]];
 $('wave').innerHTML=[...Array(36)].map(()=>'<i></i>').join('');
 
 // ── 工具 ──
@@ -227,9 +242,9 @@ function seek(t){
   {const lo=eo(P(t,10,11));css($('lap'),lo,`perspective(1400px) rotateY(${18-lo*6}deg) rotateX(4deg) translateX(${(1-lo)*-200}px)`);
    $('lid').style.transform=`perspective(1400px) rotateX(${(1-eio(P(t,10.3,11.2)))*-80}deg)`;
    // 游標點「對方說印尼文」（真實畫面上的位置），然後切到字幕畫面
-   const cp=eio(P(t,11.2,12.2));const cx=360-cp*(360-110),cy=250-cp*(250-150);
+   const cp=eio(P(t,11.2,12.2));const [kx,ky]=F.click;const cx=360-cp*(360-kx),cy=250-cp*(250-ky);
    css($('cur'),t>11.1&&t<13.2?1:0,`translate(${cx}px,${cy}px)`);
-   const rp=P(t,12.3,12.9);css($('rip'),t>12.3&&t<12.9?1-rp:0,`translate(${110+10}px,${150+10}px) scale(${.3+rp*1.4})`);
+   const rp=P(t,12.3,12.9);css($('rip'),t>12.3&&t<12.9?1-rp:0,`translate(${kx+10}px,${ky+10}px) scale(${.3+rp*1.4})`);
    css($('ui'),1);$('ui').style.transform=`translateY(${-P(t,11,11.8)*0}px)`;
    const lv=P(t,13,13.5);$('liveV').style.opacity=lv;
    ['lm0','lm1','lm2'].forEach((m,i)=>{const p=eo(P(t,13.6+i*2,14.1+i*2));css($(m),p,`translateY(${(1-p)*20}px)`)});
@@ -247,7 +262,7 @@ function seek(t){
    [$('r1'),$('r2')].forEach((r,i)=>{const ph=(t*1.1+i*.5)%1;r.style.transform=`translate(-50%,-50%) scale(${.15+ph*1.5})`;r.style.opacity=t>25?(1-ph)*.8:0});
    if(cur>=0){const [l,o,tr]=ROOM[cur];$('pO').textContent=o;type($('pT'),tr,P(t,S[cur]+.4,S[cur]+(l==='zh'?1.6:1.1)));
      $('det').textContent=X.det+(l==='zh'?X.lzh:X.lid);const f=P(t,S[cur],S[cur]+.35);$('det').style.transform=`perspective(600px) rotateX(${(1-eo(f))*90}deg)`;
-     const pu=.75+.25*Math.sin(t*6);$('hT').style.opacity=l==='zh'?pu:0;$('hB').style.opacity=l==='id'?pu:0;}
+     const pu=.75+.25*Math.sin(t*6);$('hT').style.opacity=l==='zh'?pu:0;$('hB').style.opacity=l!=='zh'?pu:0;}
    else{$('pO').textContent='';$('pT').textContent='';$('det').textContent='';$('hT').style.opacity=0;$('hB').style.opacity=0}}
   // 5 會後 34–40
   {css($('h5'),eo(P(t,34.2,34.8)));css($('s5'),eo(P(t,34.5,35.1)));
