@@ -25,7 +25,7 @@ Subtitles: the trainer's Chinese → Chinese + Indonesian translation; the stude
 - **Share the screen** (works anywhere): tick "Subtitles always on top" and share your screen in Teams.
 - **Phones** (students on the company network): click "Share" under the subtitles; students scan the QR code, enter the staff password and choose their language. IT must first turn on "Allow other computers and phones to view subtitles".
 
-**Can the students install it too?** Yes, but it does not help much yet: on their computer they would need "the other side speaks Chinese → translate into Indonesian", which the simple page does not offer yet (all options translate into Chinese). Planned: options "the other side speaks Chinese → Indonesian / Vietnamese / Hindi / English".
+**Students want subtitles on their own computer** (from v2026.11.5.r9): install it on the student's computer too, open "Live subtitles", choose "**Chinese → Indonesian**" (also Vietnamese, Hindi, English) and click Start. Students only listen, so no two-way and no headphones needed. It picks up the trainer's voice from Teams and shows it in Indonesian; the trainer keeps two-way on. No screen sharing needed; everyone reads their own language.
 
 ## 2. Only understand what the other side says
 

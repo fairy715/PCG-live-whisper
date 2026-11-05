@@ -52,6 +52,11 @@ LIVE_SCENARIOS = [
     {"id": "ja", "title": "對方說日文", "flag": "日", "mode": "ja2zh", "bidi": "ja_zh"},
     {"id": "ko", "title": "對方說韓文", "flag": "韓", "mode": "ko2zh", "bidi": "ko_zh"},
     {"id": "zh", "title": "大家都說中文", "flag": "中", "mode": "zh", "bidi": None},
+    # 外語同仁自己的電腦：對方（例如老師）說中文，翻成自己的語言看
+    {"id": "zh2id", "title": "對方說中文，翻成印尼文", "flag": "→ID", "mode": "zh2id", "bidi": None},
+    {"id": "zh2vi", "title": "對方說中文，翻成越南文", "flag": "→VI", "mode": "zh2vi", "bidi": None},
+    {"id": "zh2hi", "title": "對方說中文，翻成印地語", "flag": "→HI", "mode": "zh2hi", "bidi": None},
+    {"id": "zh2en", "title": "對方說中文，翻成英文", "flag": "→EN", "mode": "zh2en", "bidi": None},
 ]
 
 _AUDIO_EXTS = {".mp3", ".wav", ".m4a", ".flac", ".ogg", ".mp4", ".mkv", ".webm", ".avi", ".aac", ".wma", ".mov"}

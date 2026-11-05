@@ -25,7 +25,7 @@ Phụ đề: tiếng Trung của giảng viên → tiếng Trung + bản dịch 
 - **Chia sẻ màn hình** (ở đâu cũng được): đánh dấu "Phụ đề luôn ở trên cùng" và chia sẻ màn hình trên Teams.
 - **Điện thoại** (học viên trong mạng công ty): bấm "Chia sẻ", học viên quét mã QR, nhập mật khẩu nhân viên và chọn ngôn ngữ. IT cần bật "Cho phép máy tính và điện thoại khác xem phụ đề".
 
-**Học viên có cài được không?** Được, nhưng hiện chưa hữu ích lắm: trên máy học viên cần "bên kia nói tiếng Trung → dịch sang tiếng Việt", lựa chọn này chưa có (mọi lựa chọn đều dịch sang tiếng Trung). Đang lên kế hoạch: thêm "bên kia nói tiếng Trung → tiếng Indonesia / Việt / Hindi / Anh".
+**Học viên muốn xem phụ đề trên máy của mình** (từ v2026.11.5.r9): cài ứng dụng trên máy học viên, mở "Phụ đề trực tiếp", chọn "**Tiếng Trung → Tiếng Việt**" (cũng có Indonesia, Hindi, Anh), bấm Bắt đầu. Học viên chỉ nghe nên không cần hai chiều và không cần tai nghe. Ứng dụng lấy giọng giảng viên từ Teams và hiển thị bằng tiếng Việt; máy giảng viên vẫn bật hai chiều. Không cần chia sẻ màn hình; mỗi người đọc ngôn ngữ của mình.
 
 ## 2. Chỉ cần hiểu bên kia nói gì
 

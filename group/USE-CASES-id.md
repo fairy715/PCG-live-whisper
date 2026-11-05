@@ -25,7 +25,7 @@ Subtitle: bahasa Mandarin pengajar → Mandarin + terjemahan Indonesia; bahasa I
 - **Bagikan layar** (di mana saja): centang "Subtitle selalu di atas" dan bagikan layar di Teams.
 - **Ponsel** (siswa di jaringan perusahaan): klik "Bagikan", siswa memindai kode QR, memasukkan kata sandi staf, lalu memilih bahasa. IT harus mengaktifkan "Izinkan komputer dan ponsel lain melihat subtitle".
 
-**Bolehkah siswa juga memasang?** Boleh, tetapi saat ini belum banyak membantu: di komputer siswa dibutuhkan "lawan bicara berbahasa Mandarin → diterjemahkan ke Indonesia", dan pilihan itu belum ada (semua pilihan menerjemahkan ke Mandarin). Direncanakan: pilihan "lawan bicara berbahasa Mandarin → Indonesia / Vietnam / Hindi / Inggris".
+**Siswa ingin melihat subtitle di komputer sendiri** (mulai v2026.11.5.r9): pasang aplikasi di komputer siswa, buka "Subtitle langsung", pilih "**Mandarin → Indonesia**" (juga ada Vietnam, Hindi, Inggris), klik Mulai. Siswa hanya mendengar, jadi tidak perlu dua arah dan tidak perlu headphone. Aplikasi menangkap suara pengajar dari Teams dan menampilkannya dalam bahasa Indonesia; komputer pengajar tetap memakai dua arah. Tidak perlu berbagi layar; setiap orang membaca bahasanya sendiri.
 
 ## 2. Hanya ingin memahami lawan bicara
 

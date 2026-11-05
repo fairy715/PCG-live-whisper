@@ -215,6 +215,11 @@ class SimpleFlow(unittest.TestCase):
         self.cfg.write_text(json.dumps({"pcg_simple": {"backend": "server"}}), encoding="utf-8")
         self.c.post("/api/simple/live", json={"scenario": "vi"})
         self.assertEqual(self.started[-1]["engine"], "llm")
+        # 外語同仁自己的電腦：對方說中文，翻成印尼文（單向，沒有雙向）
+        r = self.c.post("/api/simple/live", json={"scenario": "zh2id", "speak": True}).json()
+        self.assertEqual(r["mode"], "zh2id")
+        self.assertIsNotNone(self.started[-1]["engine"])
+        self.assertIn("zh2vi", [x["id"] for x in self.c.get("/api/simple/live").json()["scenarios"]])
         r = self.c.post("/api/simple/live", json={"scenario": "zh", "speak": True}).json()
         self.assertEqual(r["mode"], "zh")                     # 中文沒有雙向
         self.assertIsNone(self.started[-1]["engine"])
