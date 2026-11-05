@@ -6,6 +6,8 @@ Phiên bản mới nhất: **https://github.com/fairy715/PCG-live-whisper/releas
 
 Mỗi trang phát hành đều có hướng dẫn giống như vậy và cho biết có thể dùng gói cập nhật nhỏ hay không.
 
+Cách dùng cho họp trực tuyến, lớp học và biên bản: xem [các tình huống sử dụng](USE-CASES-vi.md).
+
 ## 1. Tải về
 
 1. Mở trang phát hành: https://github.com/fairy715/PCG-live-whisper/releases/latest

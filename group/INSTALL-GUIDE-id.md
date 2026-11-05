@@ -6,6 +6,8 @@ Versi terbaru: **https://github.com/fairy715/PCG-live-whisper/releases/latest**
 
 Setiap halaman rilis berisi petunjuk yang sama dan menjelaskan apakah pembaruan kecil dapat digunakan.
 
+Cara memakai untuk rapat online, kelas, dan notulen: lihat [contoh penggunaan](USE-CASES-id.md).
+
 ## 1. Unduh
 
 1. Buka halaman rilis: https://github.com/fairy715/PCG-live-whisper/releases/latest

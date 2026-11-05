@@ -6,6 +6,8 @@ Latest version: **https://github.com/fairy715/PCG-live-whisper/releases/latest**
 
 Each release page has the same instructions and says whether the small update can be used.
 
+How to use it for online meetings, classes and minutes: see [use cases](USE-CASES-en.md).
+
 ## 1. Download
 
 1. Open the release page: https://github.com/fairy715/PCG-live-whisper/releases/latest
