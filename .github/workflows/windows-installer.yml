@@ -104,6 +104,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: 語音端到端（Windows 語音合成 → 辨識 → 翻成印尼文）
+        timeout-minutes: 15
         shell: pwsh
         run: |
           Add-Type -AssemblyName System.Speech
@@ -112,17 +113,26 @@ jobs:
           $s.SetOutputToWaveFile($wav)
           $s.Speak("Good morning everyone. Today we will check the inventory of raw materials in the new factory. The machines will be installed next Friday.")
           $s.Dispose()
-          $env:HF_HUB_CACHE = "$env:APP\hf_cache"; $env:HF_HUB_OFFLINE = "1"; $env:PYTHONUTF8 = "1"; $env:PYTHONIOENCODING = "utf-8"
+          Write-Host ("語音檔：{0:N0} bytes" -f (Get-Item $wav).Length)
+          $env:HF_HUB_CACHE = "$env:APP\hf_cache"; $env:HF_HUB_OFFLINE = "1"
           $env:PATH = "$env:APP\tools\ffmpeg\bin;" + $env:PATH
-          Push-Location $env:APP
-          ("y`n" * 20) | & "$env:APP\python\python.exe" translate_meeting.py --input $wav --mode en2id -e m2m -m small --local-asr --no-vtt
-          Pop-Location
+          Set-Content -Path "$env:APP\yes.txt" -Value (@("y") * 30) -Encoding ascii
+          # 最多 10 分鐘：卡住時強制結束並印出最後的輸出，才看得出卡在哪裡
+          $p = Start-Process "$env:APP\python\python.exe" -WorkingDirectory $env:APP -NoNewWindow -PassThru `
+            -ArgumentList @("translate_meeting.py", "--input", "`"$wav`"", "--mode", "en2id", "-e", "m2m", "-m", "small", "--local-asr", "--no-vtt") `
+            -RedirectStandardInput "$env:APP\yes.txt" -RedirectStandardOutput "$env:APP\e2e_out.txt" -RedirectStandardError "$env:APP\e2e_err.txt"
+          $done = $p.WaitForExit(600000)
+          if (-not $done) { Write-Host "===== 逾時 10 分鐘，強制結束 ====="; Stop-Process -Id $p.Id -Force }
+          Write-Host "===== 輸出（最後 80 行）====="; Get-Content "$env:APP\e2e_out.txt" -Tail 80 -Encoding utf8
+          Write-Host "===== 錯誤輸出（最後 40 行）====="; Get-Content "$env:APP\e2e_err.txt" -Tail 40 -Encoding utf8
+          if (-not $done) { exit 1 }
           $t = Get-ChildItem "$env:APP\logs" -Recurse -Filter "英翻印尼_時間逐字稿_*.txt" | Select-Object -First 1
           if (-not $t) { Write-Host "找不到逐字稿"; exit 1 }
-          Get-Content $t.FullName -Encoding utf8
+          Write-Host "===== 逐字稿 ====="; Get-Content $t.FullName -Encoding utf8
           if (-not (Select-String -Path $t.FullName -Pattern '\[ID\]' -Encoding utf8 -Quiet)) { Write-Host "逐字稿沒有印尼文譯文"; exit 1 }
 
       - name: 啟動程式與網頁
+        if: ${{ !cancelled() }}
         shell: pwsh
         run: |
           powershell -NoProfile -ExecutionPolicy Bypass -File "$env:APP\group\windows\launch.ps1" -NoBrowser
