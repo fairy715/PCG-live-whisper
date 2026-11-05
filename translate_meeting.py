@@ -7547,7 +7547,7 @@ def _input_interactive_menu(args):
                 else:
                     print(f"{C_HIGHLIGHT}未偵測到 LLM 伺服器（{ollama_host}:{ollama_port}）{RESET}")
                     if os.path.isdir(NLLB_MODEL_DIR):
-                        print(f"  {C_OK}→ 改用 NLLB 本機離線翻譯（模型為非商業授權 CC-BY-NC 4.0）{RESET}")
+                        print(f"  {C_OK}→ 改用 {LOCAL_MT_NAME}翻譯（{LOCAL_MT_DESC}）{RESET}")
                         _use_nllb = True
                     elif mode_key == "en2zh" and os.path.isdir(ARGOS_PKG_PATH):
                         print(f"  {C_OK}→ 改用 Argos 本機離線翻譯{RESET}")
@@ -7557,7 +7557,7 @@ def _input_interactive_menu(args):
             else:
                 llm_models = []
                 if os.path.isdir(NLLB_MODEL_DIR):
-                    print(f"  {C_OK}→ NLLB 本機離線翻譯（模型為非商業授權 CC-BY-NC 4.0）{RESET}")
+                    print(f"  {C_OK}→ {LOCAL_MT_NAME}翻譯（{LOCAL_MT_DESC}）{RESET}")
                     _use_nllb = True
                 elif mode_key == "en2zh" and os.path.isdir(ARGOS_PKG_PATH):
                     print(f"  {C_OK}→ Argos 本機離線翻譯{RESET}")
@@ -7876,7 +7876,7 @@ def _input_interactive_menu(args):
         if ollama_model:
             print(f"  {C_OK}  翻譯模型: {ollama_model}{RESET}  {C_DIM}@ {ollama_host}:{ollama_port}{RESET}")
         elif _use_nllb:
-            print(f"  {C_OK}  翻譯引擎: NLLB 本機離線翻譯{RESET}")
+            print(f"  {C_OK}  翻譯引擎: {LOCAL_MT_NAME}翻譯{RESET}")
         elif _use_argos:
             print(f"  {C_OK}  翻譯引擎: Argos 本機離線翻譯{RESET}")
         if diarize_desc != "關閉" and use_remote_whisper:
@@ -8031,7 +8031,7 @@ def run_stream(capture_id: int, translator, model_name: str, model_path: str,
             _srv_type_label = "Ollama" if translator.server_type == "ollama" else "OpenAI 相容"
             print(f"  {C_OK}翻譯引擎: {translator.model} @ {translator.host}:{translator.port}（{_srv_type_label}）{RESET}")
         elif isinstance(translator, NllbTranslator):
-            print(f"  {C_OK}翻譯引擎: NLLB 本機離線{RESET}")
+            print(f"  {C_OK}翻譯引擎: {LOCAL_MT_NAME}{RESET}")
         elif isinstance(translator, ArgosTranslator):
             print(f"  {C_OK}翻譯引擎: Argos 本機離線{RESET}")
     print(f"  {C_DIM}翻譯記錄: logs/{log_filename}{RESET}")
@@ -8509,7 +8509,7 @@ def run_stream_moonshine(capture_id: int, translator, moonshine_model_name: str,
             _srv_type_label = "Ollama" if translator.server_type == "ollama" else "OpenAI 相容"
             print(f"  {C_OK}翻譯引擎: {translator.model} @ {translator.host}:{translator.port}（{_srv_type_label}）{RESET}")
         elif isinstance(translator, NllbTranslator):
-            print(f"  {C_OK}翻譯引擎: NLLB 本機離線{RESET}")
+            print(f"  {C_OK}翻譯引擎: {LOCAL_MT_NAME}{RESET}")
         elif isinstance(translator, ArgosTranslator):
             print(f"  {C_OK}翻譯引擎: Argos 本機離線{RESET}")
     print(f"  {C_DIM}翻譯記錄: logs/{log_filename}{RESET}")
@@ -9033,7 +9033,7 @@ def run_stream_remote(capture_id: int, translator, model_name: str,
             _srv_type_label = "Ollama" if translator.server_type == "ollama" else "OpenAI 相容"
             print(f"  {C_OK}翻譯引擎: {translator.model} @ {translator.host}:{translator.port}（{_srv_type_label}）{RESET}")
         elif isinstance(translator, NllbTranslator):
-            print(f"  {C_OK}翻譯引擎: NLLB 本機離線{RESET}")
+            print(f"  {C_OK}翻譯引擎: {LOCAL_MT_NAME}{RESET}")
         elif isinstance(translator, ArgosTranslator):
             print(f"  {C_OK}翻譯引擎: Argos 本機離線{RESET}")
     print(f"  {C_WHITE}音訊緩衝: {length_ms}ms / 步進 {step_ms}ms{RESET}")
@@ -9656,7 +9656,7 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
             _srv_type_label = "Ollama" if translator.server_type == "ollama" else "OpenAI 相容"
             print(f"  {C_OK}翻譯引擎: {translator.model} @ {translator.host}:{translator.port}（{_srv_type_label}）{RESET}")
         elif isinstance(translator, NllbTranslator):
-            print(f"  {C_OK}翻譯引擎: NLLB 本機離線{RESET}")
+            print(f"  {C_OK}翻譯引擎: {LOCAL_MT_NAME}{RESET}")
         elif isinstance(translator, ArgosTranslator):
             print(f"  {C_OK}翻譯引擎: Argos 本機離線{RESET}")
     print(f"  {C_WHITE}音訊緩衝: {length_ms}ms / 步進 {step_ms}ms{RESET}")
@@ -20131,7 +20131,7 @@ def main():
             if engine == "argos":
                 print(f"  {C_WHITE}翻譯模型    Argos 本機離線{RESET}")
             elif engine == "nllb":
-                print(f"  {C_WHITE}翻譯模型    NLLB 本機離線{RESET}")
+                print(f"  {C_WHITE}翻譯模型    {LOCAL_MT_NAME}{RESET}")
             else:
                 _srv_disp = f"{ollama_model} @ {host}:{port}"
                 print(f"  {C_WHITE}翻譯模型    {_srv_disp}{RESET}")
@@ -20351,12 +20351,15 @@ def main():
         if _output_files or _session_dirs:
             _webui_send({"type": "output_files", "files": _output_files, "dirs": _session_dirs})
 
+        # 集團版：簡易頁面在背景處理錄音（PCG_NONINTERACTIVE=1）時不開視窗、不等按鍵，處理完就結束，
+        # 否則第一件工作永遠停在「按 ESC 鍵退出」、後面排隊的全部卡住（2026-11-05 GitHub Actions 實測）
+        _pcg_batch = os.environ.get("PCG_NONINTERACTIVE") == "1"
         # 所有處理完成後一起開啟 HTML + 子目錄
-        for hp in html_to_open:
+        for hp in ([] if _pcg_batch else html_to_open):
             open_file_in_editor(hp)
         # 開啟每個 session 子目錄（Finder / Explorer）
         opened_dirs = set()
-        for _, _, sess_dir in log_paths:
+        for _, _, sess_dir in ([] if _pcg_batch else log_paths):
             if sess_dir and sess_dir not in opened_dirs:
                 opened_dirs.add(sess_dir)
                 open_file_in_editor(sess_dir)
@@ -20365,6 +20368,8 @@ def main():
             print(f"\n{C_HIGHLIGHT}沒有成功處理的檔案{RESET}")
             sys.exit(1)
 
+        if _pcg_batch:
+            sys.exit(0)
         print(f"\n{C_HIGHLIGHT}按 ESC 鍵退出{RESET}", flush=True)
         _wait_for_esc()
         sys.exit(0)

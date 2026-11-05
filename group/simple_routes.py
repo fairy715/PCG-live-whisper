@@ -267,7 +267,9 @@ class SimpleQueue:
         out_dir, tail = "", []
         rc = -1
         try:
-            env = dict(os.environ, PYTHONUNBUFFERED="1", PYTHONIOENCODING="utf-8")
+            # PCG_NONINTERACTIVE：處理完不開視窗、不等「按 ESC 鍵退出」（否則工作永遠不會結束）
+            env = dict(os.environ, PYTHONUNBUFFERED="1", PYTHONIOENCODING="utf-8", PYTHONUTF8="1",
+                       PCG_NONINTERACTIVE="1")
             with open(log_path, "w", encoding="utf-8") as log:
                 self.proc = subprocess.Popen(self._args(job), cwd=str(self.base), env=env,
                                              stdin=subprocess.PIPE, stdout=subprocess.PIPE,

@@ -114,7 +114,7 @@ jobs:
           $s.Speak("Good morning everyone. Today we will check the inventory of raw materials in the new factory. The machines will be installed next Friday.")
           $s.Dispose()
           Write-Host ("語音檔：{0:N0} bytes" -f (Get-Item $wav).Length)
-          $env:HF_HUB_CACHE = "$env:APP\hf_cache"; $env:HF_HUB_OFFLINE = "1"
+          $env:HF_HUB_CACHE = "$env:APP\hf_cache"; $env:HF_HUB_OFFLINE = "1"; $env:PCG_NONINTERACTIVE = "1"
           $env:PATH = "$env:APP\tools\ffmpeg\bin;" + $env:PATH
           Set-Content -Path "$env:APP\yes.txt" -Value (@("y") * 30) -Encoding ascii
           # 最多 10 分鐘：卡住時強制結束並印出最後的輸出，才看得出卡在哪裡
@@ -140,8 +140,30 @@ jobs:
             $r = Invoke-WebRequest "http://127.0.0.1:19781$u" -Headers @{ 'X-Client-Id' = 'ci-test-0001' } -UseBasicParsing
             Write-Host "$u → $($r.StatusCode)"
           }
-          $c = Invoke-RestMethod "http://127.0.0.1:19781/api/simple/config" -Headers @{ 'X-Client-Id' = 'ci-test-0001' }
+          $h = @{ 'X-Client-Id' = 'ci-test-0001' }
+          $c = Invoke-RestMethod "http://127.0.0.1:19781/api/simple/config" -Headers $h
           if ($c.backend -ne 'local') { throw "預設應為本機模式，實際：$($c.backend)" }
+          # 用簡易頁面的佇列實際處理一段錄音（同仁「錄音 → 會議紀錄」的完整路徑）
+          if (-not (Test-Path "$env:APP\e2e_meeting.wav")) {
+            Add-Type -AssemblyName System.Speech
+            $s = New-Object System.Speech.Synthesis.SpeechSynthesizer
+            $s.SetOutputToWaveFile("$env:APP\e2e_meeting.wav"); $s.Speak("We will check the inventory tomorrow morning."); $s.Dispose()
+          }
+          $r = Invoke-RestMethod "http://127.0.0.1:19781/api/simple/jobs" -Method Post -Headers $h `
+            -Form @{ file = Get-Item "$env:APP\e2e_meeting.wav"; scenario = 'en2zh'; topic = 'CI' }
+          Write-Host "送出工作 $($r.id)"
+          $job = $null
+          for ($i = 0; $i -lt 96; $i++) {
+            Start-Sleep -Seconds 5
+            $job = (Invoke-RestMethod "http://127.0.0.1:19781/api/simple/jobs" -Headers $h).jobs | Where-Object { $_.id -eq $r.id }
+            if ($job.state -in 'done','failed','cancelled') { break }
+          }
+          $job | ConvertTo-Json -Depth 5
+          if ($job.state -ne 'done') {
+            Get-Content "$env:APP\group_data\job_$($r.id).log" -Tail 60 -Encoding utf8 -ErrorAction SilentlyContinue
+            throw "簡易頁面的工作沒有完成：$($job.state) $($job.error)"
+          }
+          if (-not $job.outputs) { throw "工作完成但沒有產出檔" }
 
       - name: 收集紀錄
         if: always()
