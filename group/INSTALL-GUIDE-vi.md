@@ -37,6 +37,8 @@ Mỗi trang phát hành đều có hướng dẫn giống như vậy và cho bi�
 
 **Không cần** gỡ phiên bản cũ. Cài đặt, bản ghi âm và bản chép lời đều được giữ lại.
 
+* **Cập nhật một lần bấm (đơn giản nhất)**: trên máy có internet, hoặc khi IT đã thiết lập thư mục dùng chung, phía trên trang ứng dụng sẽ hiện thông báo "Có phiên bản mới". Bấm "Cập nhật ngay"; trang sẽ tự tải lại sau 1–2 phút.
+
 * **Gói cập nhật nhỏ** (`PCG-Update-….exe`, khoảng 10 MB): đóng Phiên dịch cuộc họp PCG → bấm đúp vào gói cập nhật → nếu cửa sổ màu xanh xuất hiện, "Thông tin thêm" → "Vẫn chạy" → xong trong khoảng 1 phút.
   * Nếu thông báo bản cập nhật này "cần thành phần mới, chỉ có trong bộ cài đầy đủ", hãy dùng bộ cài đầy đủ.
 * **Bộ cài đầy đủ**: chỉ cần cài đè lên phiên bản cũ.

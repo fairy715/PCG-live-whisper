@@ -130,6 +130,15 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <label class="check" id="clearStaffWrap" hidden><input type="checkbox" id="clearStaff"><span data-t="clear_staff_pw"></span></label>
     </div>
 
+    <div class="card">
+      <h2 data-t="upd_title"></h2>
+      <label class="check"><input type="checkbox" id="updCheck"><span data-t="upd_check"></span></label>
+      <label class="f"><span data-t="upd_who"></span>
+        <select id="updWho"><option value="staff" data-t="upd_who_staff"></option><option value="it" data-t="upd_who_it"></option></select></label>
+      <label class="f"><span data-t="upd_share"></span><input type="text" id="updShare" data-t-ph="upd_share_ph"></label>
+      <p class="note" data-t="upd_note"></p>
+    </div>
+
     <div class="actions">
       <button class="btn" type="submit" data-t="save"></button>
       <a href="/simple" data-t="back"></a>
@@ -171,6 +180,10 @@ zh:{title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式
   staff_pw:'同仁密碼（從別台電腦用簡易頁面、看分享的字幕時要輸入；這台電腦不用）',staff_pw_set:'同仁密碼：已設定（要改才填）',staff_pw_ph:'留空＝不變更',clear_staff_pw:'取消同仁密碼（不需要密碼）',
   save:'儲存',saved:'已儲存，下一次開始字幕或處理錄音就會使用新設定',back:'回到簡易頁面',change_it_pw:'變更 IT 密碼',
   new_it_pw:'請輸入新的 IT 密碼（至少 6 個字）',pw_changed:'IT 密碼已變更',
+  upd_title:'更新',upd_check:'自動檢查新版本（同仁頁面上方會出現「立即更新」）',upd_who:'誰可以按更新',
+  upd_who_staff:'同仁自己按（建議）',upd_who_it:'只有 IT（要輸入 IT 密碼）',upd_share:'公司共用資料夾（選填）',upd_share_ph:'例如 \\\\檔案伺服器\\PCG\\更新',
+  upd_note:'能上網的電腦會從 GitHub 發布頁取得小更新包。不能上網的電腦：把發布頁上的 PCG-Update-<版本>.exe（和同名的 .sha256 檔）放進這個資料夾，同仁電腦就能一鍵更新。只會安裝比目前新的小更新包，安裝前會比對檔案指紋；需要完整安裝檔的版本只會提示找 IT。',
+  bad_share:'共用資料夾路徑格式不正確',
   need_llm:'伺服器模式要填大模型的網址',bad_host:'位址格式不正確',bad_key:'API 金鑰格式不正確',error:'發生錯誤'},
 en:{title:'PCG Meeting Translator: IT settings',tagline:'Switch between local and server mode and set server addresses. Changes take effect immediately; no reinstall needed.',
   it_password:'IT password',it_password_again:'Enter it again',login:'Sign in',set_pw_title:'Set the IT password',set_pw_note:'First use: set an IT password (at least 6 characters). It will be required to open this page. Staff do not need it.',
@@ -202,6 +215,10 @@ en:{title:'PCG Meeting Translator: IT settings',tagline:'Switch between local an
   staff_pw:'Staff password (needed from other computers for the simple page and shared subtitles; not on this computer)',staff_pw_set:'Staff password: set (fill in only to change)',staff_pw_ph:'Blank = unchanged',clear_staff_pw:'Remove the staff password',
   save:'Save',saved:'Saved. New settings apply the next time subtitles start or a recording is processed',back:'Back to the simple page',change_it_pw:'Change IT password',
   new_it_pw:'Enter a new IT password (at least 6 characters)',pw_changed:'IT password changed',
+  upd_title:'Updates',upd_check:'Check for new versions (staff see “Update now” at the top of their page)',upd_who:'Who can update',
+  upd_who_staff:'Staff themselves (recommended)',upd_who_it:'IT only (IT password required)',upd_share:'Company shared folder (optional)',upd_share_ph:'e.g. \\\\fileserver\\PCG\\updates',
+  upd_note:'Computers with internet get the small update from the GitHub release page. For computers without internet, put PCG-Update-<version>.exe (and its .sha256 file) from the release page in this folder and staff can update with one click. Only newer small updates are installed, and the file fingerprint is checked first; versions that need the full installer only show “ask IT”.',
+  bad_share:'Invalid shared folder path',
   need_llm:'Server mode needs the LLM URL',bad_host:'Invalid address',bad_key:'Invalid API key',error:'Something went wrong'}};
 const $=id=>document.getElementById(id);
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
@@ -259,6 +276,7 @@ function showMain(){
   $('llmModel').value=state.llm_model||'';$('sumModel').value=state.summary_model||'';
   $('asrModel').value=state.asr_model||'large-v3-turbo';
   $('liveModel').value=state.local_live_model||'small';$('fileModel').value=state.local_file_model||'small';
+  $('updCheck').checked=state.update_check!==false;$('updWho').value=state.update_who||'staff';$('updShare').value=state.update_share||'';
   $('diarize').checked=!!state.diarize;$('remoteView').checked=!!state.allow_remote_view;$('clearStaffWrap').hidden=!state.staff_password_set;
   modeVis();applyLang();
 }
@@ -303,7 +321,8 @@ $('pMain').onsubmit=async e=>{
     llm_url:$('llmUrl').value,llm_api_style:$('llmStyle').value,llm_api_key:$('llmKey').value,clear_llm_api_key:$('clearKey').checked,
     llm_model:$('llmModel').value,summary_model:$('sumModel').value,asr_model:$('asrModel').value,
     local_live_model:$('liveModel').value,local_file_model:$('fileModel').value,diarize:$('diarize').checked,allow_remote_view:$('remoteView').checked,
-    staff_password:$('staffPw').value,clear_staff_password:$('clearStaff').checked});
+    staff_password:$('staffPw').value,clear_staff_password:$('clearStaff').checked,
+    update_check:$('updCheck').checked,update_who:$('updWho').value,update_share:$('updShare').value});
   const r=$('saveRes');r.hidden=false;r.className='res '+(j.ok?'ok':'err');r.textContent=j.ok?t('saved'):errMsg(j);
   if(j.ok){state=j.state;$('staffPw').value='';$('clearStaff').checked=false;$('clearStaffWrap').hidden=!state.staff_password_set;
     $('llmKey').value='';$('clearKey').checked=false;$('clearKeyWrap').hidden=!state.llm_api_key_set;applyLang()}

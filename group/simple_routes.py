@@ -412,7 +412,8 @@ def parse_llm(text, keep_v1=False):
 
 
 def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path, write_config,
-             start_live=None, live_running=None, live_args=None, set_view_password=None, gpu_alive=None):
+             start_live=None, live_running=None, live_args=None, set_view_password=None, gpu_alive=None,
+             update_hooks=None):
     """把簡易版的路由掛到 WebUI 的 FastAPI app 上（webui.py 呼叫）。
     start_live(body)：用 WebUI 原本的方式啟動即時字幕；live_running()：WebUI 是否正在跑"""
     from fastapi import File, Form, Request, UploadFile
@@ -702,6 +703,83 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             return JSONResponse({"ok": False, "code": "live_failed", "error": f"啟動失敗：{e}"}, status_code=500)
         return {"ok": True, "mode": mode}
 
+    # ─── 一鍵更新（小更新包）：來源是 IT 設定的共用資料夾，或 GitHub 發布頁（見 updater.py） ───
+    from group import updater as _upd
+    hooks = update_hooks or {}
+    _upd_cache = {"at": 0.0, "key": None, "result": None}
+    _upd_lock = threading.Lock()
+    _upd_busy = {"on": False}
+
+    def upd_settings():
+        s = settings()
+        return {"check": bool(s.get("update_check", True)), "who": "it" if s.get("update_who") == "it" else "staff",
+                "share": str(s.get("update_share") or "")}
+
+    def upd_check(force=False):
+        us = upd_settings()
+        cur = app_version(base_dir)["version"]
+        key = (cur, us["share"])
+        if not force and _upd_cache["key"] == key and time.time() - _upd_cache["at"] < 3600:
+            return _upd_cache["result"]
+        res = _upd.check(cur, share=us["share"], github_fetch=hooks.get("github_fetch"))
+        _upd_cache.update(at=time.time(), key=key, result=res)
+        return res
+
+    def busy_now():
+        if live_running and live_running():
+            return True
+        q = _state.get("q")
+        return bool(q) and any(j.get("state") == "running" for j in q.jobs.values())
+
+    @app.get("/api/simple/update")
+    async def update_info(request: Request):
+        """同仁頁面打開時問一次：有沒有新版、是小更新包還是要完整安裝檔、誰可以按"""
+        if not is_local(request):
+            return {"ok": True, "enabled": False}
+        us = upd_settings()
+        if not us["check"]:
+            return {"ok": True, "enabled": False}
+        import asyncio
+        res = await asyncio.to_thread(upd_check, request.query_params.get("force") == "1")
+        latest = res.get("latest") or {}
+        return {"ok": True, "enabled": True, "current": app_version(base_dir)["version"],
+                "available": bool(res.get("available")),
+                "latest": {k: latest.get(k) for k in ("version", "kind", "source", "notes_url")} if latest else None,
+                "who": us["who"], "installing": _upd_busy["on"]}
+
+    @app.post("/api/simple/update")
+    async def update_install(request: Request):
+        if not is_local(request):
+            return JSONResponse({"ok": False, "code": "update_remote", "error": "只能在這台電腦上更新"}, status_code=403)
+        if upd_settings()["who"] == "it":
+            err = admin_auth(request)
+            if err:
+                return err
+        if busy_now():
+            return JSONResponse({"ok": False, "code": "update_busy",
+                                 "error": "正在進行即時字幕或處理錄音，結束後再更新"}, status_code=409)
+        if not _upd_lock.acquire(blocking=False):
+            return JSONResponse({"ok": False, "code": "update_busy", "error": "已經在更新了"}, status_code=409)
+        try:
+            import asyncio
+            res = await asyncio.to_thread(upd_check, True)
+            latest = res.get("latest")
+            if not res.get("available") or not latest:
+                return JSONResponse({"ok": False, "code": "update_none", "error": "已經是最新版"}, status_code=409)
+            if latest.get("kind") != "patch":
+                return JSONResponse({"ok": False, "code": "update_full",
+                                     "error": "這一版需要完整安裝檔，請找 IT 更新"}, status_code=409)
+            try:
+                exe = await asyncio.to_thread(_upd.download, latest, base_dir / "group_data" / "updates",
+                                              hooks.get("opener"))
+                (hooks.get("launch") or _upd.launch)(exe)
+            except Exception as e:  # noqa: BLE001
+                return JSONResponse({"ok": False, "code": "update_failed", "error": str(e)[:300]}, status_code=500)
+            _upd_busy["on"] = True
+            return {"ok": True, "version": latest["version"]}
+        finally:
+            _upd_lock.release()
+
     # ─── IT 設定頁（/simple/admin）：切換本機／伺服器、填伺服器位址、測試連線、設定密碼 ───
     # 一律要 IT 密碼（同仁就坐在這台電腦前，「本機」不能當成 IT）。還沒設定時，只能在本機設定第一組密碼
     admin_html = Path(__file__).with_name("admin.html")
@@ -740,6 +818,9 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "staff_password_set": bool(s.get("password_hash") or s.get("password")),
                 "allow_remote_view": bool(s.get("allow_remote_view", False)),
                 "m2m_installed": (base_dir / "models" / "m2m100_418m" / "model.bin").is_file(),
+                "update_check": bool(s.get("update_check", True)),
+                "update_who": "it" if s.get("update_who") == "it" else "staff",
+                "update_share": str(s.get("update_share") or ""),
                 "version": app_version(base_dir)}
 
     @app.get("/simple/admin", response_class=HTMLResponse)
@@ -882,6 +963,18 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 else:
                     s.pop(k, None)
         s["diarize"] = bool(body.get("diarize"))
+        if "update_check" in body:
+            s["update_check"] = bool(body.get("update_check"))
+        if "update_who" in body:
+            s["update_who"] = "it" if body.get("update_who") == "it" else "staff"
+        if "update_share" in body:
+            share = str(body.get("update_share") or "").strip()
+            if len(share) > 260 or any(c in share for c in "\r\n\t\"<>|?*"):
+                return JSONResponse({"ok": False, "code": "bad_share", "error": "共用資料夾路徑格式不正確"}, status_code=400)
+            if share:
+                s["update_share"] = share
+            else:
+                s.pop("update_share", None)
         s["allow_remote_view"] = bool(body.get("allow_remote_view"))
         if gh:
             rw = cfg.get("remote_whisper") if isinstance(cfg.get("remote_whisper"), dict) else {}

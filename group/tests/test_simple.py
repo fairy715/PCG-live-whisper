@@ -56,6 +56,7 @@ class SimpleFlow(unittest.TestCase):
         self.started = []
         self.view_pw = []
         self.gpu_up = True
+        self.launched = []
         app = FastAPI()
 
         async def start_live(body):
@@ -66,9 +67,14 @@ class SimpleFlow(unittest.TestCase):
             lambda c: self.cfg.write_text(json.dumps(c, ensure_ascii=False), encoding="utf-8"),
             start_live=start_live, live_running=lambda: False,
             live_args=lambda: ["python", "translate_meeting.py", "--webui", "--mode", "id_zh"],
-            set_view_password=self.view_pw.append, gpu_alive=lambda h, p: self.gpu_up)
+            set_view_password=self.view_pw.append, gpu_alive=lambda h, p: self.gpu_up,
+            update_hooks={"github_fetch": self._no_github, "launch": self.launched.append})
         self.c = TestClient(app)
         self.h = {"X-Client-Id": "browserA1234"}
+
+    @staticmethod
+    def _no_github(url):
+        raise OSError("offline")
 
     def tearDown(self):
         shutil.rmtree(self.base, ignore_errors=True)
@@ -423,6 +429,41 @@ class AdminPage(SimpleFlow):
             self.assertEqual((r["llm"]["ok"], r["llm"]["style"], r["llm"]["models"]), (True, "openai", ["luna", "deepseek-pro"]))
         finally:
             srv.shutdown()
+
+    def test_one_click_update(self):
+        """一鍵更新：共用資料夾有較新的小更新包 → 同仁可以按；改成只有 IT 時要 IT 密碼；別台電腦不行"""
+        import hashlib
+        simple_routes._VERSION.clear()
+        (self.base / "group").mkdir(exist_ok=True)
+        (self.base / "group" / "version.json").write_text('{"version": "2026.11.5.r6"}', encoding="utf-8")
+        share = self.base / "share"
+        share.mkdir()
+        data = b"MZ patch"
+        (share / "PCG-Update-2026.11.5.r7.exe").write_bytes(data)
+        (share / "PCG-Update-2026.11.5.r7.exe.sha256").write_text(hashlib.sha256(data).hexdigest())
+        self.post("/api/simple/admin/password", {"new": "itpass1"})
+        self.post("/api/simple/admin/save", {"backend": "local", "update_share": str(share)}, "itpass1")
+        info = self.c.get("/api/simple/update?force=1").json()
+        self.assertTrue(info["available"], info)
+        self.assertEqual((info["latest"]["version"], info["latest"]["kind"], info["who"]), ("2026.11.5.r7", "patch", "staff"))
+        r = self.c.post("/api/simple/update", json={}).json()
+        self.assertTrue(r["ok"], r)
+        self.assertEqual(self.launched[-1].name, "PCG-Update-2026.11.5.r7.exe")
+        # 只有 IT
+        self.post("/api/simple/admin/save", {"backend": "local", "update_who": "it"}, "itpass1")
+        self.assertEqual(self.c.post("/api/simple/update", json={}).status_code, 401)
+        self.assertTrue(self.c.post("/api/simple/update", json={}, headers={"X-IT-Token": "itpass1"}).json()["ok"])
+        # 別台電腦：看不到、不能按
+        self.local = False
+        self.assertFalse(self.c.get("/api/simple/update").json()["enabled"])
+        self.assertEqual(self.c.post("/api/simple/update", json={}).status_code, 403)
+        self.local = True
+        # 關掉自動檢查
+        self.post("/api/simple/admin/save", {"backend": "local", "update_check": False}, "itpass1")
+        self.assertFalse(self.c.get("/api/simple/update").json()["enabled"])
+        self.assertEqual(self.post("/api/simple/admin/save", {"backend": "local", "update_share": "a\nb"}, "itpass1")
+                         .json()["code"], "bad_share")
+        simple_routes._VERSION.clear()
 
     def test_connection_test_reports_failures(self):
         self.post("/api/simple/admin/password", {"new": "itpass1"})

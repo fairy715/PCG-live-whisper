@@ -37,6 +37,8 @@ Each release page has the same instructions and says whether the small update ca
 
 You do **not** need to uninstall first. Settings, recordings and transcripts are kept.
 
+* **One-click update (easiest)**: on computers with internet, or where IT has set a shared folder, a "new version" notice appears at the top of the app page. Click "Update now"; the page reloads by itself after 1–2 minutes.
+
 * **Small update** (`PCG-Update-….exe`, about 10 MB): close PCG Meeting Translator → double-click the update → if the blue window appears, "More info" → "Run anyway" → done in about 1 minute.
   * If it says the update "needs new components that are only in the full installer", use the full installer instead.
 * **Full installer**: just install it over the old version.

@@ -120,6 +120,36 @@ jobs:
           "PREV=$prev" | Out-File -Append $env:GITHUB_ENV
           "PATCH_OK=$ok" | Out-File -Append $env:GITHUB_ENV
 
+      - name: 一鍵更新實測（從共用資料夾：下載、比對指紋、關掉程式、安裝、重新開啟）
+        shell: pwsh
+        run: |
+          # 還原上一步故意改壞的套件清單，假裝裝的是舊版
+          Copy-Item group\windows\requirements-cpu.txt C:\PCGtest\group\windows\requirements-cpu.txt -Force
+          [System.IO.File]::WriteAllText("C:\PCGtest\group\version.json", '{"version":"2026.1.1.r1"}')
+          $patch = Get-ChildItem dist -Filter "PCG-Update-*.exe" | Select-Object -First 1
+          $share = New-Item -ItemType Directory -Force "$env:RUNNER_TEMP\share"
+          Copy-Item $patch.FullName $share
+          (Get-FileHash $patch.FullName -Algorithm SHA256).Hash.ToLower() + "  " + $patch.Name | Out-File -Encoding ascii "$share\$($patch.Name).sha256"
+          $cfg = Get-Content C:\PCGtest\config.json -Raw | ConvertFrom-Json
+          $cfg.pcg_simple | Add-Member -NotePropertyName update_share -NotePropertyValue $share.FullName -Force
+          $cfg.pcg_simple | Add-Member -NotePropertyName update_check -NotePropertyValue $true -Force
+          [System.IO.File]::WriteAllText("C:\PCGtest\config.json", ($cfg | ConvertTo-Json -Depth 8), (New-Object System.Text.UTF8Encoding($false)))
+          powershell -NoProfile -ExecutionPolicy Bypass -File C:\PCGtest\group\windows\launch.ps1 -NoBrowser
+          $u = "http://127.0.0.1:19781/api/simple/update"
+          $info = Invoke-RestMethod "$u`?force=1" -TimeoutSec 60
+          Write-Host ("目前 {0}，最新 {1}（{2}，{3}）" -f $info.current, $info.latest.version, $info.latest.kind, $info.latest.source)
+          if (-not $info.available -or $info.latest.version -ne $env:VER) { throw "沒有找到共用資料夾裡的新版" }
+          $r = Invoke-RestMethod $u -Method Post -ContentType 'application/json' -Body '{}' -TimeoutSec 120
+          if (-not $r.ok) { throw "按下更新失敗：$($r | ConvertTo-Json)" }
+          $done = $false
+          for ($i = 0; $i -lt 80; $i++) {
+            Start-Sleep -Seconds 3
+            try { $c = Invoke-RestMethod $u -TimeoutSec 5; if ($c.current -eq $env:VER) { $done = $true; break } } catch { }
+          }
+          Get-Content C:\PCGtest\group_data\update.log -Encoding utf8 -ErrorAction SilentlyContinue | Select-Object -Last 6
+          if (-not $done) { throw "一鍵更新後程式沒有以新版重新開啟" }
+          Write-Host "一鍵更新：下載、比對指紋、安裝、自我檢查、重新開啟，全部完成（$env:VER）"
+
       - name: 發布到 GitHub Releases
         shell: pwsh
         env:
@@ -130,7 +160,11 @@ jobs:
           $mb = [math]::Round($exe.Length / 1MB)
           $files = @($exe.FullName)
           if ($env:PATCH_OK -eq "True") {
+            # 小更新包的指紋檔：IT 放到公司共用資料夾時一起放，同仁電腦安裝前會比對
+            $sha = "$($patch.FullName).sha256"
+            (Get-FileHash $patch.FullName -Algorithm SHA256).Hash.ToLower() + "  " + $patch.Name | Out-File -Encoding ascii $sha
             $files += $patch.FullName
+            $files += $sha
             $line = "``$($patch.Name)``（約 $([math]::Round($patch.Length / 1MB)) MB；已裝 $env:PREV 的電腦可以用）；如果出現「這次更新包含新的套件或模型」，改用完整安裝檔"
             $tested = "、套用小更新包"
             $lineEn = "``$($patch.Name)`` (about $([math]::Round($patch.Length / 1MB)) MB; works on computers with $env:PREV). If it says new components are needed, use the full installer"

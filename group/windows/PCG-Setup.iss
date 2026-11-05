@@ -136,6 +136,8 @@ Name: "{autoprograms}\{cm:ShortcutName}"; Filename: "{sys}\wscript.exe"; Paramet
 
 [Run]
 Filename: "{sys}\wscript.exe"; Parameters: """{app}\group\windows\launch.vbs"""; Description: "{cm:LaunchNow}"; Flags: postinstall nowait skipifsilent
+; 一鍵更新（/RELAUNCH=1）：裝完在背景重新開啟程式，不開新的瀏覽器分頁（原本那一頁會自己重新整理）
+Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File ""{app}\group\windows\launch.ps1"" -NoBrowser"; Flags: runhidden nowait; Check: WantRelaunch
 
 [UninstallRun]
 Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""Get-Process python -ErrorAction SilentlyContinue | Where-Object {{ $_.Path -like '{app}\python\*' } | Stop-Process -Force"""; Flags: runhidden; RunOnceId: "StopPCG"
@@ -155,6 +157,11 @@ Type: filesandordirs; Name: "{app}\jtlw_tts\__pycache__"
 [Code]
 var
   BundleDir: String;
+
+function WantRelaunch(): Boolean;
+begin
+  Result := ExpandConstant('{param:RELAUNCH|0}') = '1';
+end;
   PrevDir: String;
 
 { 已安裝的位置：PrivilegesRequired=lowest 寫在 HKCU；以系統管理員執行過的會在 HKLM }

@@ -37,6 +37,8 @@ Setiap halaman rilis berisi petunjuk yang sama dan menjelaskan apakah pembaruan 
 
 **Tidak perlu** menghapus versi lama. Pengaturan, rekaman, dan transkrip tetap disimpan.
 
+* **Pembaruan sekali klik (paling mudah)**: di komputer yang terhubung internet, atau jika IT sudah mengatur folder bersama, muncul pemberitahuan "Versi baru" di bagian atas halaman aplikasi. Klik "Perbarui sekarang"; halaman akan dimuat ulang otomatis setelah 1–2 menit.
+
 * **Pembaruan kecil** (`PCG-Update-….exe`, sekitar 10 MB): tutup Penerjemah Rapat PCG → klik dua kali file pembaruan → jika jendela biru muncul, "Info selengkapnya" → "Tetap jalankan" → selesai dalam sekitar 1 menit.
   * Jika muncul pesan bahwa pembaruan ini "memerlukan komponen baru yang hanya ada di penginstal lengkap", gunakan penginstal lengkap.
 * **Penginstal lengkap**: cukup instal di atas versi lama.
