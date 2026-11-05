@@ -2,11 +2,12 @@
 
 同仁電腦：Windows 10／11、64 位元，不需要獨立顯示卡（i5-1235U、16 GB 實際規劃），不需要網路、不需要系統管理員。
 
-## 給 IT：最簡單的方式（從 GitHub Releases 下載）
+## 給 IT：最簡單的方式（單一安裝檔）
 
-GitHub → Actions → 「發布安裝包」→ Run workflow，約 15 分鐘後在 **Releases** 出現三個檔案：
-Setup.exe、`PCG-offline-1-runtime.zip`、`PCG-offline-2-m2m100.zip`。下載後放到 Google Drive 或共用資料夾即可
-（兩個 zip 解壓縮到同一個資料夾，會合成 `PCG-offline`）。Releases 不會過期。
+GitHub → Actions →「發布安裝包」→ Run workflow，約 20 分鐘後 **Releases** 會出現
+`PCG-Meeting-Translator-Setup-版本.exe`：**資源包已經包在裡面，只要這一個檔案**。
+放到 Google Drive 或共用資料夾，同仁下載後點兩下安裝。發布前會先在乾淨的 Windows 上實際安裝、自我檢查。
+Releases 不會過期。
 
 ## 給 IT：自己製作與發放
 

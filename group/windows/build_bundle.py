@@ -34,7 +34,8 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PY_VERSION = "3.12.10"
 PY_URL = f"https://www.nuget.org/api/v2/package/python/{PY_VERSION}"
-FFMPEG_URL = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-lgpl.zip"
+# 共用函式庫版：ffmpeg.exe 與 ffprobe.exe 共用一組 DLL（靜態版兩個 exe 各帶一份，多約 170 MB）
+FFMPEG_URL = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-lgpl-shared.zip"
 M2M_CT2_REPO = "michaelfeil/ct2fast-m2m100_418M"       # 已轉好的 CTranslate2 格式
 M2M_SRC_REPO = "facebook/m2m100_418M"                   # 原始模型（MIT），取 sentencepiece 分詞檔；轉檔備援也用它
 # faster-whisper 的模型名稱 → Hugging Face repo（與 faster_whisper.utils._MODELS 相同）
@@ -134,6 +135,21 @@ def build_whisper(out, models):
             raise SystemExit(f"[錯誤] 不認得的辨識模型：{m}（可用：{', '.join(FW_REPOS)}）")
         step(f"語音辨識模型 {m}（{repo}）")
         snapshot_download(repo, cache_dir=str(out / "hf_cache"))
+    materialize_hf_cache(out / "hf_cache")
+
+
+def materialize_hf_cache(cache):
+    """Hugging Face 快取：snapshots 裡是指向 blobs 的捷徑（symlink）；Windows 不支援時會複製一份（模型變兩份）。
+    改成 snapshots 裡放實體檔案、刪掉 blobs：只有一份，而且在 Mac／Linux 做的資源包拷到 Windows 也能用
+    （離線載入只看 refs 與 snapshots）"""
+    for snap in cache.glob("models--*/snapshots/*"):
+        for f in snap.rglob("*"):
+            if f.is_symlink():
+                target = f.resolve()
+                f.unlink()
+                shutil.copy2(target, f)
+    for blobs in cache.glob("models--*/blobs"):
+        shutil.rmtree(blobs, ignore_errors=True)
 
 
 def build_m2m(out, convert=False):
@@ -184,7 +200,8 @@ def build_ffmpeg(out):
     with zipfile.ZipFile(zp) as z:
         for n in z.namelist():
             base = n.rsplit("/", 1)[-1]
-            if base in ("ffmpeg.exe", "ffprobe.exe") or (n.endswith("LICENSE.txt") and n.count("/") == 1):
+            in_bin = "/bin/" in n and (base.endswith(".dll") or base in ("ffmpeg.exe", "ffprobe.exe"))
+            if in_bin or (n.endswith("LICENSE.txt") and n.count("/") == 1):
                 with z.open(n) as src, open(bin_dir / base, "wb") as dst:
                     shutil.copyfileobj(src, dst)
     shutil.rmtree(tmp, ignore_errors=True)
@@ -209,6 +226,12 @@ def write_manifest(out, models):
                 "total_mb": round(sum(f["size"] for f in files.values()) / 1048576), "files": files}
     (out / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"   共 {len(files)} 個檔案、{manifest['total_mb']} MB", flush=True)
+    by_dir = {}
+    for rel, f in files.items():
+        top = "/".join(rel.split("/")[:2]) if rel.startswith(("models/", "tools/")) else rel.split("/")[0]
+        by_dir[top] = by_dir.get(top, 0) + f["size"]
+    for top, size in sorted(by_dir.items(), key=lambda x: -x[1]):
+        print(f"     {top:<28} {size / 1048576:8.0f} MB", flush=True)
 
 
 def main():
