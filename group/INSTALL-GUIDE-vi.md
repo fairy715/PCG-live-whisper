@@ -45,6 +45,9 @@ Cách dùng cho họp trực tuyến, lớp học và biên bản: xem [các tì
   * Nếu thông báo bản cập nhật này "cần thành phần mới, chỉ có trong bộ cài đầy đủ", hãy dùng bộ cài đầy đủ.
 * **Bộ cài đầy đủ**: chỉ cần cài đè lên phiên bản cũ.
 * IT triển khai hàng loạt (không hiện cửa sổ): thêm `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART` sau tên tệp exe.
+* Tệp `.sha256` trên trang phát hành là "dấu vân tay" của gói cập nhật, dùng để kiểm tra tệp đầy đủ và không bị thay đổi. **Nhân viên không cần tải tệp này.**
+  * Khi IT đặt gói cập nhật nhỏ vào thư mục dùng chung, hãy đặt tệp `.exe` và tệp `.sha256` cùng tên **cùng nhau**: cập nhật một lần bấm sẽ so dấu vân tay trước, không khớp thì không cài (ví dụ tải về bị đứt giữa chừng).
+  * Cập nhật một lần bấm từ GitHub không cần tệp này; chương trình đọc dấu vân tay trên trang phát hành.
 
 ## 5. Khi gặp sự cố
 

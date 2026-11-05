@@ -8,6 +8,7 @@
 |---|---|
 | 第一次安裝 | `{FULL}`（約 {FULL_MB} MB） |
 | 已經裝過，要更新 | {PATCH_LINE} |
+| `.sha256` 檔 | 不用下載（給 IT 核對檔案用，見「四、更新」） |
 
 ## 一、下載
 
@@ -43,6 +44,9 @@
   * 如果出現「這次更新包含新的套件或模型」，代表這次必須用完整安裝檔。
 * **完整安裝檔**：直接裝在舊版上面即可。
 * IT 大量派送（不跳任何視窗）：在 exe 後面加 `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART`。
+* 發布頁上的 `.sha256` 檔是更新包的「指紋」，用來確認檔案完整、沒被改過，**同仁不用下載**。
+  * IT 把小更新包放到公司共用資料夾時，`.exe` 和同名的 `.sha256` 要**一起放**：一鍵更新會先比對指紋，不符就不安裝（例如下載被截斷）。
+  * 從 GitHub 一鍵更新不需要這個檔，程式會直接讀發布頁上的指紋。
 
 ## 五、遇到問題
 
@@ -61,6 +65,7 @@
 |---|---|
 | First installation | `{FULL}` (about {FULL_MB} MB) |
 | Already installed, updating | {PATCH_LINE_EN} |
+| `.sha256` file | No need to download (for IT to check files, see "4. Update") |
 
 ## 1. Download
 
@@ -97,6 +102,9 @@ You do **not** need to uninstall first. Settings, recordings and transcripts are
   * If it says the update "needs new components that are only in the full installer", use the full installer instead.
 * **Full installer**: just install it over the old version.
 * IT mass deployment (no windows shown): add `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART` after the exe.
+* The `.sha256` file on the release page is the update's "fingerprint", used to check the file is complete and unchanged. **Staff do not need to download it.**
+  * When IT puts a small update on the shared folder, put the `.exe` and the `.sha256` file with the same name **together**: one-click update checks the fingerprint first and does not install if it does not match (for example, a cut-off download).
+  * One-click update from GitHub does not need this file; it reads the fingerprint from the release page.
 
 ## 5. Problems
 

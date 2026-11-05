@@ -45,6 +45,9 @@ Cara memakai untuk rapat online, kelas, dan notulen: lihat [contoh penggunaan](U
   * Jika muncul pesan bahwa pembaruan ini "memerlukan komponen baru yang hanya ada di penginstal lengkap", gunakan penginstal lengkap.
 * **Penginstal lengkap**: cukup instal di atas versi lama.
 * Distribusi massal oleh IT (tanpa jendela): tambahkan `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART` setelah nama file exe.
+* File `.sha256` di halaman rilis adalah "sidik jari" file pembaruan, untuk memastikan file lengkap dan tidak diubah. **Karyawan tidak perlu mengunduhnya.**
+  * Saat IT menaruh pembaruan kecil di folder bersama, taruh file `.exe` dan file `.sha256` dengan nama yang sama **bersamaan**: pembaruan sekali klik akan mencocokkan sidik jari dulu, dan tidak menginstal jika tidak cocok (misalnya unduhan terputus).
+  * Pembaruan sekali klik dari GitHub tidak memerlukan file ini; sidik jari dibaca langsung dari halaman rilis.
 
 ## 5. Jika ada masalah
 

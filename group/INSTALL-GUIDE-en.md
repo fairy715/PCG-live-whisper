@@ -45,6 +45,9 @@ You do **not** need to uninstall first. Settings, recordings and transcripts are
   * If it says the update "needs new components that are only in the full installer", use the full installer instead.
 * **Full installer**: just install it over the old version.
 * IT mass deployment (no windows shown): add `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART` after the exe.
+* The `.sha256` file on the release page is the update's "fingerprint", used to check the file is complete and unchanged. **Staff do not need to download it.**
+  * When IT puts a small update on the shared folder, put the `.exe` and the `.sha256` file with the same name **together**: one-click update checks the fingerprint first and does not install if it does not match (for example, a cut-off download).
+  * One-click update from GitHub does not need this file; it reads the fingerprint from the release page.
 
 ## 5. Problems
 
