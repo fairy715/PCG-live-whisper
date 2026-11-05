@@ -94,7 +94,7 @@
 - 雙向語音口譯（念出來）仍只支援英中雙向
 - 台語模式（Breeze-ASR-26）、Qwen3-ASR 不適用這三種語言
 - 原作者的 `--upgrade` 會蓋掉集團版：已在 `install.sh`、`install.ps1` 擋下，改用 `git pull`（見 INSTALL.md）
-- 安裝程式建立的桌面捷徑仍然打開完整 WebUI；同仁電腦請先用書籤 `http://localhost:19781/simple`
+- 用原作者的 `install.ps1`／`install.sh`（有網路、用 git 的安裝方式）建立的桌面捷徑會打開完整 WebUI，這種電腦要另外加書籤 `http://localhost:19781/simple`。**集團的離線安裝檔不受影響**：它建立的「PCG 會議翻譯」捷徑直接打開簡易頁面
 
 ## 測試
 
