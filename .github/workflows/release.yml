@@ -45,6 +45,9 @@ jobs:
         run: |
           $v = (Get-Date -Format 'yyyy.M.d') + '.r' + $env:GITHUB_RUN_NUMBER
           "VER=$v" | Out-File -Append $env:GITHUB_ENV
+          # 畫面上顯示的版本（簡易頁面、即時字幕、IT 設定頁）：同仁回報問題時對照用
+          $info = @{ version = $v; commit = $env:GITHUB_SHA.Substring(0, 7) } | ConvertTo-Json -Compress
+          [System.IO.File]::WriteAllText("group/version.json", $info, (New-Object System.Text.UTF8Encoding($false)))
           $bundle = (Resolve-Path dist/PCG-offline).Path
           & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$v" "/DEmbedBundle=$bundle" group\windows\PCG-Setup.iss
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -67,6 +70,8 @@ jobs:
           }
           Get-Content $log -Encoding utf8 | Select-Object -Last 15
           if (-not (Select-String -Path $log -Pattern '安裝完成' -Encoding utf8 -Quiet)) { exit 1 }
+          $ver = Get-Content C:\PCGtest\group\version.json -Raw | ConvertFrom-Json
+          if ($ver.version -ne $env:VER) { throw "裝好的版本是 $($ver.version)，應該是 $env:VER" }
           $env:HF_HUB_CACHE = "C:\PCGtest\hf_cache"; $env:HF_HUB_OFFLINE = "1"
           $env:PATH = "C:\PCGtest\tools\ffmpeg\bin;" + $env:PATH
           & C:\PCGtest\python\python.exe C:\PCGtest\group\windows\selftest.py

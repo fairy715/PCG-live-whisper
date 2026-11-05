@@ -343,6 +343,40 @@ def _error_of(tail, rc):
     return "failed", f"處理失敗（錯誤碼 {rc}），請把這件工作的編號告訴 IT"
 
 
+_VERSION = {}
+
+
+def app_version(base_dir: Path):
+    """顯示在畫面上的版本：安裝檔版本（發布流程寫進 group/version.json）、commit、原作者版本。
+    沒有 version.json（git 直接拿來用、CI 測試包）時顯示 dev＋commit"""
+    key = str(base_dir)
+    if key in _VERSION:
+        return _VERSION[key]
+    v = {"version": "dev", "commit": "", "upstream": ""}
+    try:
+        v.update({k: str(x) for k, x in json.loads((base_dir / "group" / "version.json").read_text(encoding="utf-8")).items()
+                  if k in v and x})
+    except (OSError, ValueError):
+        pass
+    if not v["commit"] and (base_dir / ".git").exists():
+        try:
+            v["commit"] = subprocess.run(["git", "-C", str(base_dir), "rev-parse", "--short", "HEAD"], capture_output=True,
+                                         text=True, timeout=5).stdout.strip()
+        except (OSError, subprocess.SubprocessError):
+            pass
+    try:
+        with open(base_dir / "translate_meeting.py", encoding="utf-8") as f:
+            for line in f:
+                m = re.match(r'APP_VERSION = "([^"]+)"', line)
+                if m:
+                    v["upstream"] = m.group(1)
+                    break
+    except OSError:
+        pass
+    _VERSION[key] = v
+    return v
+
+
 LLM_STYLES = ("openwebui", "openai")    # 沒設＝內部 Ollama／OpenAI 相容自動偵測（RTX Spark、自建伺服器）
 
 
@@ -483,7 +517,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         pf = profile(settings(), has_gpu())
         return {"ok": True, "scenarios": [{k: s.get(k, "") for k in ("id", "title", "subtitle", "flag")}
                                           for s in scenarios()],
-                "max_upload_mb": _MAX_UPLOAD_MB, "backend": pf["backend"], "minutes": pf["summarize"]}
+                "max_upload_mb": _MAX_UPLOAD_MB, "backend": pf["backend"], "minutes": pf["summarize"],
+                "version": app_version(base_dir)}
 
     @app.get("/api/simple/jobs")
     async def simple_jobs(request: Request):
@@ -619,7 +654,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         mode = args[args.index("--mode") + 1] if args and "--mode" in args[:-1] else ""
         return {"ok": True, "local": bool(is_local(request)), "available": start_live is not None,
                 "running": bool(live_running and live_running()),
-                "mode": mode, "is_file": bool(args and "--input" in args),
+                "mode": mode, "is_file": bool(args and "--input" in args), "version": app_version(base_dir),
                 "scenarios": [{k: s[k] for k in ("id", "title", "flag")} | {"can_bidi": bool(s["bidi"])}
                               for s in LIVE_SCENARIOS]}
 
@@ -696,7 +731,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "diarize": bool(s.get("diarize", s.get("backend") == "server" and bool(rw.get("host")))),
                 "staff_password_set": bool(s.get("password_hash") or s.get("password")),
                 "allow_remote_view": bool(s.get("allow_remote_view", False)),
-                "m2m_installed": (base_dir / "models" / "m2m100_418m" / "model.bin").is_file()}
+                "m2m_installed": (base_dir / "models" / "m2m100_418m" / "model.bin").is_file(),
+                "version": app_version(base_dir)}
 
     @app.get("/simple/admin", response_class=HTMLResponse)
     async def admin_page():

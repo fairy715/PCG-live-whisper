@@ -166,6 +166,21 @@ class SimpleFlow(unittest.TestCase):
         self.assertNotIn("--summarize", args)
         self.assertFalse(self.c.get("/api/simple/config", headers=self.h).json()["minutes"])
 
+    def test_version(self):
+        """畫面上的版本：安裝檔寫的 group/version.json；原作者版本從 translate_meeting.py 讀"""
+        simple_routes._VERSION.clear()
+        (self.base / "group").mkdir(exist_ok=True)
+        (self.base / "group" / "version.json").write_text('{"version": "2026.11.5.r5", "commit": "abc1234"}', encoding="utf-8")
+        with open(self.base / "translate_meeting.py", "a", encoding="utf-8") as f:
+            f.write('\nAPP_VERSION = "2.34.0"\n')
+        v = self.c.get("/api/simple/config", headers=self.h).json()["version"]
+        self.assertEqual(v, {"version": "2026.11.5.r5", "commit": "abc1234", "upstream": "2.34.0"})
+        self.assertEqual(self.c.get("/api/simple/live").json()["version"]["version"], "2026.11.5.r5")
+        simple_routes._VERSION.clear()
+        (self.base / "group" / "version.json").unlink()
+        self.assertEqual(self.c.get("/api/simple/config", headers=self.h).json()["version"]["version"], "dev")
+        simple_routes._VERSION.clear()
+
     def test_live(self):
         info = self.c.get("/api/simple/live").json()
         self.assertTrue(info["local"])

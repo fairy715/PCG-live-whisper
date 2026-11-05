@@ -48,6 +48,7 @@ footer{flex:none;display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:
 .btn{appearance:none;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
 .btn.stop{background:var(--err);color:#fff}
 .btn.ghost{background:none;border:1.5px solid var(--accent);color:var(--accent)}
+.ver{color:var(--dim);font-size:12px;cursor:copy;user-select:all}
 .chk{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--dim);cursor:pointer}
 .banner{max-width:980px;margin:0 auto 12px;border-radius:12px;padding:12px 14px;background:var(--accent-soft);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .banner.end{background:#fff4d6;color:var(--warn)}
@@ -80,6 +81,7 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
   <button class="btn ghost" id="ovlBtn" type="button"></button>
   <button class="btn ghost" id="shareBtn" type="button"></button>
   <label class="chk"><input type="checkbox" id="onlyMine"><span id="onlyMineL"></span></label>
+  <span id="ver" class="ver" style="margin-left:auto"></span>
 </footer>
 
 <dialog id="shareDlg">
@@ -97,6 +99,11 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 </dialog>
 
 <script>
+function showVer(v){const e=document.getElementById('ver');if(!e||!v)return;
+  const full=`PCG v${v.version}${v.commit?' ('+v.commit+')':''}${v.upstream?' · jt-live-whisper v'+v.upstream:''}`;
+  e.textContent='v'+v.version+(v.version==='dev'&&v.commit?' ('+v.commit+')':'');e.title=full;
+  e.onclick=()=>{try{navigator.clipboard.writeText(full)}catch(x){}}}
+
 const LANGS=[['zh','繁體中文'],['en','English'],['id','Bahasa Indonesia'],['vi','Tiếng Việt'],['hi','हिन्दी']];
 const I18N={
 zh:{share:'分享',share_title:'讓其他人用手機看字幕',share_scan:'用手機相機掃描，或在瀏覽器輸入下面的網址（要連同一個公司網路）。每個人可以選自己的語言。',share_copy:'複製網址',copied:'已複製',close:'關閉',share_pw:'打開時要輸入同仁密碼。',share_nopw:'注意：沒有設定同仁密碼，同一個網路上的人都看得到。請 IT 在設定頁設定。',share_off:'IT 還沒有開啟「允許其他電腦或手機連進來看字幕」。請 IT 到「IT 設定」開啟。',share_restart:'已開啟分享，但要把程式完全關掉再開一次才會生效。',share_noip:'找不到這台電腦的網路位址，請確認有連上公司網路。',running:'字幕進行中',waiting:'等待字幕…',paused:'已暫停',ended:'字幕已結束',empty:'開始說話後，字幕會出現在這裡',stop:'停止',pause:'暫停',resume:'繼續',
@@ -236,7 +243,7 @@ function conn(){
   };
 }
 (async()=>{
-  try{const j=await(await fetch('/api/simple/live')).json();state.local=!!j.local;state.running=!!j.running;state.mode=j.mode||'';state.ended=!j.running&&false}catch(e){}
+  try{const j=await(await fetch('/api/simple/live')).json();showVer(j.version);state.local=!!j.local;state.running=!!j.running;state.mode=j.mode||'';state.ended=!j.running&&false}catch(e){}
   paint();render();conn();
 })();
 </script>

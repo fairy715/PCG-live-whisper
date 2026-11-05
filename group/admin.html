@@ -18,6 +18,7 @@ body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 -apple-system
 header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
 h1{font-size:22px;margin:0}
 .sub{color:var(--dim);font-size:14px}
+.ver{color:var(--dim);font-size:12px;cursor:copy;user-select:all}
 select,input[type=text],input[type=password],input[type=number]{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
 header select{width:auto;background:var(--card);padding:6px 8px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:16px}
@@ -51,7 +52,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
 <body>
 <div class="wrap">
   <header>
-    <div><h1 data-t="title"></h1><div class="sub" data-t="tagline"></div></div>
+    <div><h1 data-t="title"></h1><div class="sub" data-t="tagline"></div><span id="ver" class="ver"></span></div>
     <select id="langSel" aria-label="Language"><option value="zh">繁體中文</option><option value="en">English</option></select>
   </header>
 
@@ -245,8 +246,12 @@ $('loginBtn').onclick=async()=>{
 };
 $('pw1').onkeydown=e=>{if(e.key==='Enter')$('loginBtn').click()};
 
+function showVer(v){const e=document.getElementById('ver');if(!e||!v)return;
+  const full=`PCG v${v.version}${v.commit?' ('+v.commit+')':''}${v.upstream?' · jt-live-whisper v'+v.upstream:''}`;
+  e.textContent='v'+v.version+(v.version==='dev'&&v.commit?' ('+v.commit+')':'');e.title=full;
+  e.onclick=()=>{try{navigator.clipboard.writeText(full)}catch(x){}}}
 function showMain(){
-  $('pLogin').hidden=true;$('pMain').hidden=false;
+  $('pLogin').hidden=true;$('pMain').hidden=false;showVer(state.version);
   document.querySelector(`input[name=backend][value=${state.backend}]`).checked=true;
   $('gpuHost').value=state.gpu_host||'';$('gpuPort').value=state.gpu_port||8978;
   $('llmUrl').value=state.llm_url||'';$('llmStyle').value=state.llm_url?(state.llm_api_style||'auto'):'openwebui';
