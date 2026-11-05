@@ -1810,6 +1810,8 @@ def _build_args(body: dict) -> list:
         args.append("--record")
     if body.get("mic"):
         args.append("--mic")
+    if body.get("room"):                 # 集團版教室模式（同一支麥克風，中文與對方語言互相翻譯）
+        args.append("--room")
     if body.get("denoise"):
         args.append("--denoise")
     if body.get("keep_awake") is False:              # 預設防止睡眠與鎖定；舊版前端沒送這一項＝照預設

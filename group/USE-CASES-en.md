@@ -33,15 +33,22 @@ Subtitles: the trainer's Chinese → Chinese + Indonesian translation; the stude
 
 Choose "**The other side speaks …**", do **not** tick "I will speak too", click Start. No headphones needed.
 
-## 3. Same meeting room or classroom, one microphone for everyone
+## 3. Same meeting room or classroom, one microphone (classroom mode)
 
-**Current limitation**: everyone's voice comes through the same microphone and is treated as Chinese, so Indonesian answers are recognized wrongly.
+> Example: the trainer and Indonesian students talk in the same classroom. (from v2026.11.5.r9)
 
-**For now**
-- **Translate only the trainer**: the trainer wears a headset microphone; choose "The other side speaks Indonesian" and tick "I will speak too". The trainer's Chinese is translated into Indonesian on the projector. Students' answers get no subtitles.
-- **After class**: record the class and use "Recording → Minutes". Choose the language spoken most.
+1. Connect a microphone that picks up the whole room (conference or desk microphone).
+2. "Live subtitles" → choose "**Indonesian**" → tick "**Classroom mode**" → Start. (Vietnamese, Hindi and English also work.)
+3. Project the subtitles, or let students scan the "Share" QR code.
 
-**Planned**: a "classroom mode" that detects whether each sentence is Chinese or Indonesian from one microphone and translates both ways.
+Each sentence is detected as Chinese or Indonesian automatically: Chinese → Chinese + Indonesian; Indonesian → Indonesian + Chinese.
+
+**Limitations**
+- Works best **one speaker at a time**; overlapping speech or mixed-language sentences are recognized poorly.
+- **Very short replies** ("ok", "ya") may be detected as the wrong language.
+- Subtitles are **a little slower** because each sentence's language is detected first.
+- Classroom mode uses this computer's recognition (not the GPU server) with the local model IT set.
+- "Classroom mode" and "I will speak too" are either/or: online class → "I will speak too" + headphones; same room → classroom mode.
 
 ## 4. Many people want to read subtitles on their phones
 

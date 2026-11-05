@@ -31,15 +31,22 @@ Subtitle: bahasa Mandarin pengajar → Mandarin + terjemahan Indonesia; bahasa I
 
 Pilih bahasa lawan bicara, **jangan** centang "Saya juga akan berbicara", klik Mulai. Tidak perlu headphone.
 
-## 3. Satu ruang rapat atau kelas, satu mikrofon untuk semua
+## 3. Satu ruang rapat atau kelas, satu mikrofon (mode kelas)
 
-**Keterbatasan saat ini**: semua suara masuk lewat mikrofon yang sama dan dianggap bahasa Mandarin, sehingga jawaban dalam bahasa Indonesia salah dikenali.
+> Contoh: pengajar dan siswa Indonesia berbicara di kelas yang sama. (mulai v2026.11.5.r9)
 
-**Sementara ini**
-- **Hanya menerjemahkan pengajar**: pengajar memakai headset; pilih "Bahasa Indonesia" dan centang "Saya juga akan berbicara". Bahasa Mandarin pengajar diterjemahkan ke Indonesia di proyektor. Jawaban siswa tidak mendapat subtitle.
-- **Setelah kelas**: rekam kelas dan gunakan "Rekaman → Notulen", pilih bahasa yang paling banyak dipakai.
+1. Pasang mikrofon yang bisa menangkap suara seluruh ruangan (mikrofon rapat atau mikrofon meja).
+2. "Subtitle langsung" → pilih "**Bahasa Indonesia**" → centang "**Mode kelas**" → Mulai. (Vietnam, Hindi, dan Inggris juga bisa.)
+3. Tampilkan subtitle di proyektor, atau siswa memindai kode QR dari "Bagikan".
 
-**Direncanakan**: "mode kelas" yang mengenali setiap kalimat Mandarin atau Indonesia dari satu mikrofon dan menerjemahkan dua arah.
+Setiap kalimat dikenali otomatis sebagai Mandarin atau Indonesia: Mandarin → Mandarin + terjemahan Indonesia; Indonesia → Indonesia + terjemahan Mandarin.
+
+**Keterbatasan**
+- Paling baik **satu orang berbicara bergantian**; bicara bersamaan atau kalimat campuran dikenali kurang baik.
+- **Jawaban sangat pendek** ("ok", "ya") bisa salah dikenali bahasanya.
+- Subtitle **sedikit lebih lambat** karena bahasa setiap kalimat dikenali dulu.
+- Mode kelas memakai pengenalan suara di komputer ini (bukan server GPU) dengan model lokal yang diatur IT.
+- "Mode kelas" dan "Saya juga akan berbicara" pilih salah satu: kelas online → "Saya juga akan berbicara" + headphone; satu ruangan → mode kelas.
 
 ## 4. Banyak orang ingin membaca subtitle di ponsel
 

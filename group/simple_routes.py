@@ -59,6 +59,9 @@ LIVE_SCENARIOS = [
     {"id": "zh2en", "title": "對方說中文，翻成英文", "flag": "→EN", "mode": "zh2en", "bidi": None},
 ]
 
+# 教室模式（同一支麥克風，中文與這些語言互相翻譯）可以用的情境
+ROOM_SCENARIOS = ("id", "vi", "hi", "en")
+
 _AUDIO_EXTS = {".mp3", ".wav", ".m4a", ".flac", ".ogg", ".mp4", ".mkv", ".webm", ".avi", ".aac", ".wma", ".mov"}
 _MAX_UPLOAD_MB = int(os.environ.get("PCG_SIMPLE_MAX_UPLOAD_MB", "2048"))
 _ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
@@ -669,7 +672,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         return {"ok": True, "local": bool(is_local(request)), "available": start_live is not None,
                 "running": bool(live_running and live_running()),
                 "mode": mode, "is_file": bool(args and "--input" in args), "version": app_version(base_dir),
-                "scenarios": [{k: s[k] for k in ("id", "title", "flag")} | {"can_bidi": bool(s["bidi"])}
+                "scenarios": [{k: s[k] for k in ("id", "title", "flag")}
+                              | {"can_bidi": bool(s["bidi"]), "can_room": s["id"] in ROOM_SCENARIOS}
                               for s in LIVE_SCENARIOS]}
 
     @app.post("/api/simple/live")
@@ -685,10 +689,15 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         if not sc:
             return JSONResponse({"ok": False, "code": "pick_language", "error": "請選擇對方說的語言"}, status_code=400)
         s = settings()
-        mode = sc["bidi"] if (body.get("speak") and sc["bidi"]) else sc["mode"]
+        room = bool(body.get("room")) and sc["id"] in ROOM_SCENARIOS
+        mode = sc["mode"] if room else (sc["bidi"] if (body.get("speak") and sc["bidi"]) else sc["mode"])
         pf = profile(s, has_gpu())
+        if room:
+            # 教室模式：每一句要先判斷語言，只做在這台電腦的辨識（GPU 伺服器不支援），用本機的即時字幕模型
+            pf = {**pf, "local_asr": True, "live_model": s.get("local_live_model") or "small"}
         start = {
             "mode": mode,
+            "room": room,
             "model": pf["live_model"],
             "scene": s.get("live_scene") or "meeting",
             # 本機模式：WebUI 的 nllb 路徑在集團版會改用 M2M100（見 translate_meeting.py 的 NllbTranslator.__new__）
@@ -706,7 +715,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             await start_live(start)
         except Exception as e:
             return JSONResponse({"ok": False, "code": "live_failed", "error": f"啟動失敗：{e}"}, status_code=500)
-        return {"ok": True, "mode": mode}
+        return {"ok": True, "mode": f"{sc['id']}_zh" if room else mode, "room": room}
 
     # ─── 一鍵更新（小更新包）：來源是 IT 設定的共用資料夾，或 GitHub 發布頁（見 updater.py） ───
     from group import updater as _upd

@@ -142,6 +142,8 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
         <div class="grid" id="liveScenarios"></div>
         <label class="check"><input type="checkbox" id="liveSpeak">
           <span><span data-t="speak_t"></span><small data-t="speak_s"></small></span></label>
+        <label class="check"><input type="checkbox" id="liveRoom">
+          <span><span data-t="room_t"></span><small data-t="room_s"></small></span></label>
         <label class="check"><input type="checkbox" id="liveOverlay">
           <span><span data-t="overlay_t"></span><small data-t="overlay_s"></small></span></label>
         <label class="field"><span data-t="topic_live"></span>
@@ -223,6 +225,7 @@ zh:{
   live_remote:'即時字幕要在<strong>自己的電腦</strong>上開：它翻譯的是這台電腦播出來的聲音（Teams、Zoom、YouTube…）。<br>請 IT 幫你的電腦安裝 PCG-live-whisper，再打開 <code>http://localhost:19781/simple</code>。<br>在這台電腦上，你可以先用「錄音 → 會議紀錄」。',
   live_running:'字幕正在進行中。',open_live:'打開字幕畫面',
   step_live_lang:'對方說什麼語言？',
+  room_t:'教室模式（同一間教室，一支麥克風）',room_s:'老師說中文、學生說對方的語言都可以：每一句自動判斷是哪一種語言，再翻成另一種。一次一個人講效果最好；很短的話（例如「好」）可能判斷錯。',
   speak_t:'我也要說話（雙向）',speak_s:'用麥克風：我說中文，會翻成對方的語言顯示出來。請戴耳機，避免把對方的聲音錄進麥克風。',
   overlay_t:'字幕浮在所有視窗最上面',overlay_s:'開會軟體全螢幕時也看得到字幕',
   topic_live:'會議主題（選填，可提高專有名詞的翻譯準確度）',topic_live_ph:'例：中爪新廠設備驗收',
@@ -268,6 +271,7 @@ en:{
   live_remote:'Live subtitles must run on <strong>your own computer</strong>: they translate the sound this computer plays (Teams, Zoom, YouTube…).<br>Ask IT to install PCG-live-whisper on your computer, then open <code>http://localhost:19781/simple</code>.<br>On this computer you can use “Recording → Minutes” for now.',
   live_running:'Subtitles are running.',open_live:'Open subtitle screen',
   step_live_lang:'What language do the others speak?',
+  room_t:'Classroom mode (same room, one microphone)',room_s:'Chinese and the other language can both be spoken: each sentence is detected automatically and translated into the other language. Works best one speaker at a time; very short replies may be detected wrongly.',
   speak_t:'I will speak too (two-way)',speak_s:'Uses your microphone: when you speak Chinese, it is translated into their language. Please wear headphones so the microphone does not pick up the other side.',
   overlay_t:'Keep subtitles on top of all windows',overlay_s:'Subtitles stay visible even when the meeting app is full screen',
   topic_live:'Meeting topic (optional, improves translation of technical terms)',topic_live_ph:'e.g. Central Java plant equipment acceptance',
@@ -313,6 +317,7 @@ id:{
   live_remote:'Subtitle langsung harus dijalankan di <strong>komputer Anda sendiri</strong>: yang diterjemahkan adalah suara yang diputar komputer ini (Teams, Zoom, YouTube…).<br>Minta IT memasang PCG-live-whisper di komputer Anda, lalu buka <code>http://localhost:19781/simple</code>.<br>Di komputer ini, Anda bisa memakai “Rekaman → Notulen” terlebih dahulu.',
   live_running:'Subtitle sedang berjalan.',open_live:'Buka layar subtitle',
   step_live_lang:'Lawan bicara memakai bahasa apa?',
+  room_t:'Mode kelas (satu ruangan, satu mikrofon)',room_s:'Bahasa Mandarin dan bahasa lain boleh dipakai bergantian: setiap kalimat dikenali otomatis lalu diterjemahkan ke bahasa lainnya. Paling baik satu orang berbicara bergantian; jawaban sangat pendek bisa salah dikenali.',
   speak_t:'Saya juga akan berbicara (dua arah)',speak_s:'Memakai mikrofon: saat saya berbicara bahasa Mandarin, akan diterjemahkan ke bahasa lawan bicara. Gunakan headphone agar suara lawan bicara tidak masuk ke mikrofon.',
   overlay_t:'Subtitle selalu di atas semua jendela',overlay_s:'Subtitle tetap terlihat saat aplikasi rapat layar penuh',
   topic_live:'Topik rapat (opsional, membantu menerjemahkan istilah teknis)',topic_live_ph:'mis. Serah terima mesin pabrik Jawa Tengah',
@@ -358,6 +363,7 @@ vi:{
   live_remote:'Phụ đề trực tiếp phải chạy trên <strong>máy tính của bạn</strong>: nó dịch âm thanh mà máy tính này phát ra (Teams, Zoom, YouTube…).<br>Hãy nhờ IT cài PCG-live-whisper cho máy của bạn, rồi mở <code>http://localhost:19781/simple</code>.<br>Trên máy này, bạn có thể dùng “Ghi âm → Biên bản” trước.',
   live_running:'Phụ đề đang chạy.',open_live:'Mở màn hình phụ đề',
   step_live_lang:'Người kia nói tiếng gì?',
+  room_t:'Chế độ lớp học (cùng phòng, một micro)',room_s:'Có thể nói tiếng Trung và ngôn ngữ kia: mỗi câu được tự nhận biết rồi dịch sang ngôn ngữ còn lại. Tốt nhất là từng người nói một; câu quá ngắn có thể bị nhận sai.',
   speak_t:'Tôi cũng sẽ nói (hai chiều)',speak_s:'Dùng micro: khi tôi nói tiếng Trung, sẽ được dịch sang tiếng của người kia. Hãy đeo tai nghe để micro không thu tiếng của bên kia.',
   overlay_t:'Phụ đề luôn nằm trên mọi cửa sổ',overlay_s:'Vẫn thấy phụ đề khi ứng dụng họp ở chế độ toàn màn hình',
   topic_live:'Chủ đề cuộc họp (không bắt buộc, giúp dịch thuật ngữ chuyên ngành chính xác hơn)',topic_live_ph:'VD: Nghiệm thu thiết bị nhà máy',
@@ -403,6 +409,7 @@ hi:{
   live_remote:'लाइव सबटाइटल <strong>आपके अपने कंप्यूटर</strong> पर चलाने होंगे: यह इसी कंप्यूटर पर चल रही आवाज़ (Teams, Zoom, YouTube…) का अनुवाद करता है।<br>IT से अपने कंप्यूटर पर PCG-live-whisper इंस्टॉल करवाएँ, फिर <code>http://localhost:19781/simple</code> खोलें।<br>इस कंप्यूटर पर अभी आप “रिकॉर्डिंग → मिनट्स” का उपयोग कर सकते हैं।',
   live_running:'सबटाइटल चल रहे हैं।',open_live:'सबटाइटल स्क्रीन खोलें',
   step_live_lang:'सामने वाले कौन-सी भाषा बोलते हैं?',
+  room_t:'कक्षा मोड (एक ही कमरा, एक माइक्रोफ़ोन)',room_s:'चीनी और दूसरी भाषा दोनों बोली जा सकती हैं: हर वाक्य की भाषा अपने आप पहचानी जाती है और दूसरी भाषा में अनुवाद होता है। एक समय में एक व्यक्ति बोले तो सबसे अच्छा; बहुत छोटे जवाब गलत पहचाने जा सकते हैं।',
   speak_t:'मैं भी बोलूँगा (दो-तरफ़ा)',speak_s:'माइक्रोफ़ोन से: जब मैं चीनी बोलूँ, तो सामने वाले की भाषा में अनुवाद दिखेगा। कृपया हेडफ़ोन लगाएँ, ताकि सामने वाले की आवाज़ माइक्रोफ़ोन में न जाए।',
   overlay_t:'सबटाइटल सभी विंडो के ऊपर रखें',overlay_s:'मीटिंग ऐप फ़ुल स्क्रीन होने पर भी सबटाइटल दिखते रहें',
   topic_live:'मीटिंग का विषय (वैकल्पिक, तकनीकी शब्दों का अनुवाद बेहतर होता है)',topic_live_ph:'जैसे: प्लांट उपकरण स्वीकृति',
@@ -535,9 +542,13 @@ const picked=name=>document.querySelector(`input[name=${name}]:checked`)?.value;
 function onLivePick(){
   const s=liveScen.find(x=>x.id===picked('live'));
   $('liveSpeak').disabled=!s?.can_bidi;if(!s?.can_bidi)$('liveSpeak').checked=false;
+  $('liveRoom').disabled=!s?.can_room;if(!s?.can_room)$('liveRoom').checked=false;
   $('liveStart').disabled=!s;if(s)store.set('pcg_live',s.id);
 }
 $('liveScenarios').addEventListener('change',onLivePick);
+// 「我也要說話」（耳機＋麥克風分流）與「教室模式」（同一支麥克風自動判斷）二選一
+$('liveSpeak').addEventListener('change',()=>{if($('liveSpeak').checked)$('liveRoom').checked=false});
+$('liveRoom').addEventListener('change',()=>{if($('liveRoom').checked)$('liveSpeak').checked=false});
 async function initLive(){
   const j=await api('/api/simple/live');
   liveScen=j.scenarios||[];renderScenarios();
@@ -550,7 +561,7 @@ $('openLive').onclick=()=>{location.href='/simple/live'};
 $('liveStart').onclick=async()=>{
   const b=$('liveStart');b.disabled=true;b.textContent=t('preparing');
   const j=await api('/api/simple/live',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({scenario:picked('live'),speak:$('liveSpeak').checked,overlay:$('liveOverlay').checked,topic:$('liveTopic').value})});
+    body:JSON.stringify({scenario:picked('live'),speak:$('liveSpeak').checked,room:$('liveRoom').checked,overlay:$('liveOverlay').checked,topic:$('liveTopic').value})});
   if(j.ok){location.href='/simple/live';return}
   alert(errText(j));b.disabled=false;b.textContent=t('start_live');
 };

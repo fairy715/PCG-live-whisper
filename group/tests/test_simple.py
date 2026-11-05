@@ -215,6 +215,11 @@ class SimpleFlow(unittest.TestCase):
         self.cfg.write_text(json.dumps({"pcg_simple": {"backend": "server"}}), encoding="utf-8")
         self.c.post("/api/simple/live", json={"scenario": "vi"})
         self.assertEqual(self.started[-1]["engine"], "llm")
+        # 教室模式：同一支麥克風，模式是「印尼文→中文」加 room，一定本機辨識；跟「我也要說話」二選一
+        r = self.c.post("/api/simple/live", json={"scenario": "id", "room": True, "speak": True}).json()
+        self.assertEqual((r["mode"], r["room"]), ("id_zh", True))
+        self.assertEqual((self.started[-1]["mode"], self.started[-1]["room"], self.started[-1]["local_asr"]), ("id2zh", True, True))
+        self.assertFalse(self.c.post("/api/simple/live", json={"scenario": "ja", "room": True}).json()["room"])
         # 外語同仁自己的電腦：對方說中文，翻成印尼文（單向，沒有雙向）
         r = self.c.post("/api/simple/live", json={"scenario": "zh2id", "speak": True}).json()
         self.assertEqual(r["mode"], "zh2id")

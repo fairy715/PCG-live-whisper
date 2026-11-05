@@ -235,6 +235,25 @@ class OpenWebUI(unittest.TestCase):
             run.assert_not_called()
             t._ssh_close_cm({"host": "127.0.0.1"})
 
+
+class ClassroomMode(unittest.TestCase):
+    """教室模式：Whisper 的語言機率只在「中文」與對方語言之間選；常見的誤判（印尼文→馬來文等）算在對方語言"""
+
+    def test_pick(self):
+        self.assertEqual(t._room_pick_lang([("zh", 0.8), ("id", 0.1)], "id"), "zh")
+        self.assertEqual(t._room_pick_lang([("ms", 0.5), ("id", 0.2), ("zh", 0.3)], "id"), "id")
+        self.assertEqual(t._room_pick_lang([("ur", 0.4), ("hi", 0.2), ("zh", 0.3)], "hi"), "hi")
+        self.assertEqual(t._room_pick_lang([("yue", 0.5), ("vi", 0.4)], "vi"), "zh")
+        self.assertEqual(t._room_pick_lang([("ja", 0.9), ("zh", 0.05), ("en", 0.04)], "en"), "zh")
+        self.assertEqual(t._room_pick_lang([], "id"), "zh")
+
+    def test_cli_flag(self):
+        sys.argv = ["translate_meeting.py", "--mode", "id2zh", "--room"]
+        try:
+            self.assertTrue(t.parse_args().room)
+        finally:
+            sys.argv = [sys.argv[0]]
+
 if __name__ == "__main__":
     unittest.main()
 

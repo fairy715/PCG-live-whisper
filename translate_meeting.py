@@ -9435,6 +9435,21 @@ def run_stream_remote(capture_id: int, translator, model_name: str,
     _cleanup_remote()
 
 
+# 集團版：教室模式（--room）。同一支麥克風，每一段先判斷是中文還是對方的語言，再往另一個方向翻譯。
+# Whisper 常把印尼文判成馬來文、爪哇文、巽他文，印地語判成烏爾都語等：同一組的機率加總後再比
+_ROOM_ALIASES = {"zh": ("zh", "yue"), "id": ("id", "ms", "jw", "su"), "vi": ("vi",),
+                 "hi": ("hi", "ur", "mr", "ne"), "en": ("en",)}
+_ROOM_LANGS = ("id", "vi", "hi", "en")
+
+
+def _room_pick_lang(all_probs, other):
+    """Whisper 的語言機率 [(語言, 機率), …] → "zh" 或 other（兩個裡面選一個，不會選到第三種語言）"""
+    probs = dict(all_probs or [])
+    zh = sum(probs.get(c, 0.0) for c in _ROOM_ALIASES["zh"])
+    ot = sum(probs.get(c, 0.0) for c in _ROOM_ALIASES.get(other, (other,)))
+    return "zh" if zh >= ot else other
+
+
 @_keep_awake_during
 def run_stream_local_whisper(capture_id: int, translator, model_name: str,
                              mode: str = "en2zh",
@@ -9442,7 +9457,8 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
                              record: bool = False, rec_device: int = None,
                              meeting_topic: str = None,
                              denoise: bool = False,
-                             use_mlx: bool = False):
+                             use_mlx: bool = False,
+                             room=None):
     """Python 端本機即時辨識：sounddevice / WASAPI Loopback / ScreenCaptureKit 擷取音訊
     → 本機 mlx-whisper（Apple Silicon GPU）或 faster-whisper 即時辨識。
     架構類似 run_stream_remote()，但用本機辨識取代遠端 HTTP 上傳。
@@ -9453,6 +9469,10 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
         _fw_av_compat()
 
     whisper_lang = _mode_whisper_lang(mode)
+    # 教室模式：room=(對方語言, 中文→對方語言的翻譯器)；mode 是「對方語言→中文」
+    room_lang, room_translator = (room if room else (None, None))
+    if room_lang and use_mlx:
+        use_mlx = False                       # 語言判斷用 faster-whisper
 
     # ── 翻譯記錄檔 ──
     from datetime import datetime
@@ -9772,6 +9792,8 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
                           "以下是繁体中文语音内容", "请使用繁体中文输出", "请使用繁体中文",
                           "以下は日本語の音声です"}
 
+    _room_tls = threading.local()   # 這一段判斷出的語言（同時有兩個辨識執行緒，不能共用一個變數）
+
     def local_transcribe(wav_path):
         """用 mlx-whisper / faster-whisper 辨識 WAV 檔，回傳 (segments_list, full_text, proc_time)"""
         t0 = time.monotonic()
@@ -9799,8 +9821,18 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
                     segments.append({"start": seg["start"], "end": seg["end"], "text": text})
                     texts.append(text)
         else:
+            _lang = whisper_lang
+            if room_lang:
+                # 先只做語言判斷（transcribe 在 language=None 時會先算各語言機率；不讀 segments 就不會真的辨識）
+                try:
+                    _, _det = fw_model.transcribe(wav_path, language=None, vad_filter=True)
+                    _lang = _room_pick_lang(getattr(_det, "all_language_probs", None)
+                                            or [(_det.language, _det.language_probability)], room_lang)
+                except Exception:              # 整段是靜音等：照「對方的語言」辨識
+                    _lang = whisper_lang
+                _room_tls.lang = _lang
             segments_iter, info = fw_model.transcribe(
-                wav_path, language=whisper_lang, beam_size=5, vad_filter=True)
+                wav_path, language=_lang, beam_size=5, vad_filter=True)
             for seg in segments_iter:
                 text = seg.text.strip()
                 if text:
@@ -9823,12 +9855,12 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
                 if entry is None:
                     break
                 _trans_next[0] += 1
-            src_text, result, elapsed, asr_elapsed = entry
+            src_text, result, elapsed, asr_elapsed, label_mode = entry
             if not result:
                 if not isinstance(result, _TranslateFailed):
                     continue                     # 被過濾掉的翻譯（幻覺、亂碼）：照舊整筆略過
                 result = "（翻譯失敗）"           # 出錯：原文照樣顯示（以前連原文都不見）
-            src_color, src_label, dst_color, dst_label = _MODE_LABELS[mode]
+            src_color, src_label, dst_color, dst_label = _MODE_LABELS[label_mode]
             with print_lock:
                 # 原文 + 辨識耗時
                 _print_with_badge(f"{src_color}[{src_label}] {src_text}{RESET}",
@@ -9850,14 +9882,15 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
                          "translate_time": round(elapsed, 1),
                          "timestamp": timestamp})
 
-    def translate_and_print(seq, src_text, _log_path, asr_elapsed=0):
+    def translate_and_print(seq, src_text, _log_path, asr_elapsed=0, _tr=None, _label_mode=None):
+        _tr = _tr or translator
         t0 = time.monotonic()
-        result = translator.translate(src_text)
+        result = _tr.translate(src_text)
         elapsed = time.monotonic() - t0
         if result:
-            result = _s2twp_safe(result) if not isinstance(translator, OllamaTranslator) else _to_traditional(result)
+            result = _s2twp_safe(result) if not isinstance(_tr, OllamaTranslator) else _to_traditional(result)
         with _trans_lock:
-            _trans_pending[seq] = (src_text, result, elapsed, asr_elapsed)
+            _trans_pending[seq] = (src_text, result, elapsed, asr_elapsed, _label_mode or mode)
         _drain_translations(_log_path)
 
     # ── 有序非同步辨識 ──
@@ -9886,7 +9919,7 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
             else:
                 segments, full_text, proc_time = local_transcribe(wav_path)
             with results_lock:
-                pending_results[seq] = (segments, full_text, proc_time)
+                pending_results[seq] = (segments, full_text, proc_time, getattr(_room_tls, "lang", None))
             # 首次辨識後檢查速度，太慢則建議更小模型
             if not _slow_warned[0] and proc_time > (length_ms / 1000.0) * 2:
                 _slow_warned[0] = True
@@ -9943,9 +9976,14 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
             next_display_seq[0] += 1
             if result is _TRANSCRIBE_FAILED:
                 continue
-            segments, full_text, proc_time = result
+            segments, full_text, proc_time, seg_lang = result
             if not full_text:
                 continue
+            # 教室模式：這一段是中文 → 用「中文→對方語言」的翻譯器、中文的過濾與標籤
+            room_zh = bool(room_lang) and seg_lang == "zh"
+            line_check = _is_zh_hallucination if room_zh else hallucination_check
+            line_tr = room_translator if room_zh else translator
+            line_mode = f"zh2{room_lang}" if room_zh else mode
             lines = []
             if segments:
                 for seg in segments:
@@ -9957,18 +9995,18 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
             for line in lines:
                 if not line:
                     continue
-                if mode in _ZH_INPUT_MODES:
+                if line_mode in _ZH_INPUT_MODES:
                     line = _s2twp_safe(line)
-                if hallucination_check(line):
+                if line_check(line):
                     continue
                 if is_duplicate(line):
                     continue
                 recent_texts.append(line.lower().strip())
-                if mode in _TRANSLATE_MODES and translator:
+                if mode in _TRANSLATE_MODES and line_tr:
                     seq = _trans_seq[0]; _trans_seq[0] += 1
                     threading.Thread(
                         target=translate_and_print,
-                        args=(seq, line, log_path, proc_time),
+                        args=(seq, line, log_path, proc_time, line_tr, line_mode),
                         daemon=True,
                     ).start()
                 else:
@@ -10069,8 +10107,12 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
         "ko": "說韓文即可看到字幕",
         **_xl_listen_hints(),            # 集團版
     }
-    print(f"\n{C_OK}{BOLD}開始監聽...{RESET} {C_WHITE}{listen_hints.get(mode, '')}{RESET}\n\n", flush=True)
-    _webui_send({"type": "started", "mode": mode})
+    _hint = listen_hints.get(mode, '')
+    if room_lang:
+        _hint = "教室模式：說中文或對方的語言都可以，會自動判斷、互相翻譯"
+    print(f"\n{C_OK}{BOLD}開始監聽...{RESET} {C_WHITE}{_hint}{RESET}\n\n", flush=True)
+    # 教室模式在畫面上顯示成雙向（例如「印尼文 ↔ 中文」）
+    _webui_send({"type": "started", "mode": f"{room_lang}_zh" if room_lang else mode})
 
     _tr_model = translator.model if isinstance(translator, OllamaTranslator) else (getattr(translator, "LABEL", "NLLB") if isinstance(translator, NllbTranslator) else ("Argos" if isinstance(translator, ArgosTranslator) else ""))
     _tr_loc = "伺服器" if isinstance(translator, OllamaTranslator) else ("本機" if isinstance(translator, (ArgosTranslator, NllbTranslator)) else "")
@@ -19358,6 +19400,9 @@ def parse_args():
         "--diarize-engine", choices=_DIARIZE_ENGINES, default="auto",
         help="講者辨識方法：auto（能用 Nemotron 就用，預設）、nemotron、legacy（resemblyzer）")
     parser.add_argument(
+        "--room", action="store_true",
+        help="集團版教室模式：同一支麥克風，每一句自動判斷是中文還是對方的語言，互相翻譯（--mode 用 id2zh／vi2zh／hi2zh／en2zh，本機辨識）")
+    parser.add_argument(
         "--mic", action="store_true",
         help="同時轉錄麥克風語音（ASR 負載加倍，改用 faster-whisper/mlx-whisper 雙路辨識）")
     parser.add_argument(
@@ -21090,6 +21135,26 @@ def main():
 
             s_host, s_port = host, port
 
+            # 集團版教室模式：本機 faster-whisper、預設麥克風、多一個「中文→對方語言」的翻譯器
+            _room = None
+            if getattr(args, "room", False):
+                _room_l = mode[:-3] if mode.endswith("2zh") else ""
+                if _room_l not in _ROOM_LANGS or not translator:
+                    print(f"[錯誤] 教室模式只支援 id2zh、vi2zh、hi2zh、en2zh 而且要有翻譯", file=sys.stderr)
+                    sys.exit(1)
+                _cli_use_local_fw = True
+                if args.device is None:
+                    _room_devs = _detect_bidi_devices()
+                    if _room_devs and _room_devs[2] is not None:
+                        capture_id = _room_devs[2]
+                if isinstance(translator, OllamaTranslator):
+                    _room_tr = OllamaTranslator(ollama_model, host, port, direction=f"zh2{_room_l}",
+                                                server_type=srv_type, meeting_topic=meeting_topic)
+                else:
+                    _room_tr = NllbTranslator(direction=f"zh2{_room_l}")
+                _room = (_room_l, _room_tr)
+                print(f"{C_DIM}教室模式：麥克風 {capture_id}，中文 ⇄ {_room_l}{RESET}")
+
             _asr_label = f"Whisper ({model_name})" + (" [faster-whisper]" if _cli_use_local_fw else "")
             mode_label = next(name for k, name, _ in MODE_PRESETS if k == mode)
             print(f"{C_DIM}模式: {mode_label} | ASR: {_asr_label} | 場景: {scene_key} | "
@@ -21108,7 +21173,7 @@ def main():
             if not _confirm_start(_build_cli_command(**_cli_kw)):
                 sys.exit(0)
             print()
-            if args.mic:
+            if args.mic and not _room:
                 # --mic 模式：切換到雙路架構（loopback + 麥克風）
                 bidi_devs = _detect_bidi_devices()
                 if not bidi_devs:
@@ -21153,7 +21218,8 @@ def main():
                                         record=args.record, rec_device=args.rec_device,
                                         meeting_topic=meeting_topic,
                                         denoise=args.denoise,
-                                        use_mlx=_local_asr_use_mlx(model_name, args))
+                                        use_mlx=_local_asr_use_mlx(model_name, args) and not _room,
+                                        room=_room)
             else:
                 run_stream(capture_id, translator, model_name, model_path, length_ms, step_ms, mode,
                            record=args.record, rec_device=args.rec_device,

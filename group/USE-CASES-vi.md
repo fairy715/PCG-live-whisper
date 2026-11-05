@@ -31,15 +31,22 @@ Phụ đề: tiếng Trung của giảng viên → tiếng Trung + bản dịch 
 
 Chọn ngôn ngữ của bên kia, **không** đánh dấu "Tôi cũng sẽ nói", bấm Bắt đầu. Không cần tai nghe.
 
-## 3. Cùng một phòng họp hoặc lớp học, một micro cho tất cả
+## 3. Cùng một phòng họp hoặc lớp học, một micro (chế độ lớp học)
 
-**Giới hạn hiện tại**: mọi giọng nói đều vào cùng một micro và bị coi là tiếng Trung, nên câu trả lời bằng tiếng Việt bị nhận dạng sai.
+> Ví dụ: giảng viên và học viên Việt Nam nói chuyện trong cùng lớp học. (từ v2026.11.5.r9)
 
-**Tạm thời**
-- **Chỉ dịch giảng viên**: giảng viên đeo micro tai nghe; chọn "Tiếng Việt" và đánh dấu "Tôi cũng sẽ nói". Tiếng Trung của giảng viên được dịch sang tiếng Việt trên máy chiếu. Câu trả lời của học viên không có phụ đề.
-- **Sau buổi học**: ghi âm buổi học rồi dùng "Bản ghi âm → Biên bản", chọn ngôn ngữ được nói nhiều nhất.
+1. Kết nối một micro thu được âm thanh cả phòng (micro hội nghị hoặc micro để bàn).
+2. "Phụ đề trực tiếp" → chọn "**Tiếng Việt**" → đánh dấu "**Chế độ lớp học**" → Bắt đầu. (Indonesia, Hindi và tiếng Anh cũng được.)
+3. Chiếu phụ đề lên máy chiếu, hoặc học viên quét mã QR từ "Chia sẻ".
 
-**Đang lên kế hoạch**: "chế độ lớp học" tự nhận biết từng câu là tiếng Trung hay tiếng Việt từ một micro và dịch hai chiều.
+Mỗi câu được tự nhận biết là tiếng Trung hay tiếng Việt: tiếng Trung → tiếng Trung + bản dịch tiếng Việt; tiếng Việt → tiếng Việt + bản dịch tiếng Trung.
+
+**Giới hạn**
+- Tốt nhất **từng người nói một**; nói chồng lên nhau hoặc câu trộn hai ngôn ngữ sẽ nhận dạng kém.
+- **Câu quá ngắn** ("ok", "vâng") có thể bị nhận sai ngôn ngữ.
+- Phụ đề **chậm hơn một chút** vì phải nhận biết ngôn ngữ của từng câu trước.
+- Chế độ lớp học dùng nhận dạng trên máy này (không dùng máy chủ GPU) với mô hình cục bộ do IT cài đặt.
+- "Chế độ lớp học" và "Tôi cũng sẽ nói" chỉ chọn một: học trực tuyến → "Tôi cũng sẽ nói" + tai nghe; cùng phòng → chế độ lớp học.
 
 ## 4. Nhiều người muốn xem phụ đề trên điện thoại
 
