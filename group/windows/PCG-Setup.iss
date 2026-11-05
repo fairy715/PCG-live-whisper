@@ -157,12 +157,12 @@ Type: filesandordirs; Name: "{app}\jtlw_tts\__pycache__"
 [Code]
 var
   BundleDir: String;
+  PrevDir: String;
 
 function WantRelaunch(): Boolean;
 begin
   Result := ExpandConstant('{param:RELAUNCH|0}') = '1';
 end;
-  PrevDir: String;
 
 { 已安裝的位置：PrivilegesRequired=lowest 寫在 HKCU；以系統管理員執行過的會在 HKLM }
 function FindPrevDir(): String;
