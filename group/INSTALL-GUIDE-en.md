@@ -1,6 +1,6 @@
 # PCG Meeting Translator: install and update guide
 
-[中文說明](安裝說明.md)
+[中文](安裝說明.md) · [English](INSTALL-GUIDE-en.md) · [Bahasa Indonesia](INSTALL-GUIDE-id.md) · [Tiếng Việt](INSTALL-GUIDE-vi.md)
 
 Latest version: **https://github.com/fairy715/PCG-live-whisper/releases/latest**
 

@@ -1,5 +1,7 @@
 ## PCG 會議翻譯 {VER}
 
+**Guide / Panduan / Hướng dẫn**：[English](https://github.com/fairy715/PCG-live-whisper/blob/main/group/INSTALL-GUIDE-en.md) · [Bahasa Indonesia](https://github.com/fairy715/PCG-live-whisper/blob/main/group/INSTALL-GUIDE-id.md) · [Tiếng Việt](https://github.com/fairy715/PCG-live-whisper/blob/main/group/INSTALL-GUIDE-vi.md)
+
 ### 要下載哪一個？
 
 | 情況 | 下載 |
