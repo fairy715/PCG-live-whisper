@@ -133,13 +133,15 @@ jobs:
             $files += $patch.FullName
             $line = "``$($patch.Name)``（約 $([math]::Round($patch.Length / 1MB)) MB；已裝 $env:PREV 的電腦可以用）；如果出現「這次更新包含新的套件或模型」，改用完整安裝檔"
             $tested = "、套用小更新包"
+            $lineEn = "``$($patch.Name)`` (about $([math]::Round($patch.Length / 1MB)) MB; works on computers with $env:PREV). If it says new components are needed, use the full installer"
           } else {
             $line = "這一版有新的套件或模型，請用完整安裝檔（直接裝在舊版上面，設定與錄音會保留）"
             $tested = ""
+            $lineEn = "This version has new packages or models: use the full installer (install over the old version; settings and recordings are kept)"
           }
           $notes = Get-Content group/windows/release-notes.md -Raw -Encoding utf8
           $vals = [ordered]@{
-            '{PATCH_LINE}' = $line; '{PATCH_TESTED}' = $tested; '{VER}' = $env:VER; '{FULL_MB}' = "$mb"
+            '{PATCH_LINE_EN}' = $lineEn; '{PATCH_LINE}' = $line; '{PATCH_TESTED}' = $tested; '{VER}' = $env:VER; '{FULL_MB}' = "$mb"
             '{FULL_GB}' = "$([math]::Round($exe.Length / 1GB, 2))"; '{FULL}' = $exe.Name
             '{MODELS}' = "${{ inputs.models }}"; '{COMMIT}' = $env:GITHUB_SHA.Substring(0, 7)
           }

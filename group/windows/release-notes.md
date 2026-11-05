@@ -48,5 +48,59 @@
 * 防毒軟體攔截：請 IT 把安裝資料夾加入例外。
 * 解除安裝：Windows「設定」→「應用程式」→「PCG Meeting Translator」→「解除安裝」。錄音、逐字稿、設定會留在資料夾裡，確定不要了再手動刪除。
 
+
+---
+
+# English
+
+### Which file do I download?
+
+| Situation | Download |
+|---|---|
+| First installation | `{FULL}` (about {FULL_MB} MB) |
+| Already installed, updating | {PATCH_LINE_EN} |
+
+## 1. Download
+
+1. Open the release page: this page
+2. Under "Assets" at the bottom of the page, click `{FULL}` (about {FULL_GB} GB).
+   * If the browser warns that the file "isn't commonly downloaded", choose "Keep" (Edge: click "…" → "Keep").
+   * The file is large: IT can also put it on a shared folder or Google Drive for you.
+
+## 2. Install
+
+1. Double-click the downloaded exe.
+2. A blue window "Windows protected your PC" appears:
+   * Click "More info", then "Run anyway".
+   * This always appears the first time because the installer has no code-signing certificate.
+3. If a language window appears, choose your language and click "OK" (usually it is chosen automatically from the Windows language).
+4. Install location: `D:\PCG-live-whisper` by default (`C:\PCG-live-whisper` if there is no D drive). Keep it and click "Next" → "Install".
+   * No administrator rights and no internet connection are needed.
+5. The window shows "Installing the runtime and models". This takes about 3–10 minutes. Do not close it.
+6. Done: tick "Open PCG Meeting Translator now" and click "Finish". A desktop shortcut is created (its name follows the installer language, e.g. "PCG Meeting Translator" or "Penerjemah Rapat PCG").
+
+## 3. First use
+
+1. Double-click the desktop shortcut. The browser opens the app page (`http://localhost:19781/simple`).
+2. A short guided tour runs the first time. Follow it once.
+3. You can switch the page language at the top right (中文 / English / Bahasa Indonesia / Tiếng Việt / हिन्दी).
+4. Live subtitles: choose the language the other person speaks → "Start". Recordings: upload → when processing is done, download the minutes.
+5. The version is shown at the bottom of the page (e.g. v{VER}). Include it when you report a problem (click it to copy).
+
+## 4. Update
+
+You do **not** need to uninstall first. Settings, recordings and transcripts are kept.
+
+* **Small update** (`PCG-Update-….exe`, about 10 MB): close PCG Meeting Translator → double-click the update → if the blue window appears, "More info" → "Run anyway" → done in about 1 minute.
+  * If it says the update "needs new components that are only in the full installer", use the full installer instead.
+* **Full installer**: just install it over the old version.
+* IT mass deployment (no windows shown): add `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART` after the exe.
+
+## 5. Problems
+
+* Installation failed: send `D:\PCG-live-whisper\group_data\install.log` (for a failed update: `update.log`) to IT.
+* Blocked by antivirus: ask IT to add the install folder as an exception.
+* Uninstall: Windows "Settings" → "Apps" → "PCG Meeting Translator" → "Uninstall". Recordings, transcripts and settings stay in the folder; delete it manually if you no longer need them.
+
 ---
 已在乾淨的 Windows 上實際安裝{PATCH_TESTED}並通過自我檢查（套件、模型、5 個翻譯方向）。語音辨識模型：{MODELS}；commit {COMMIT}

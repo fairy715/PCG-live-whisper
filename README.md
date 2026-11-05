@@ -1,6 +1,6 @@
 # jt-live-whisper v2.34.0
 
-> **PCG 集團版**：同仁請看 **[安裝與更新說明](group/安裝說明.md)**（下載：[最新版](https://github.com/fairy715/PCG-live-whisper/releases/latest)）；IT 請看 [group/INSTALL.md](group/INSTALL.md)。
+> **PCG 集團版**：同仁請看 **[安裝與更新說明](group/安裝說明.md)**（**[English guide](group/INSTALL-GUIDE-en.md)**）（下載：[最新版](https://github.com/fairy715/PCG-live-whisper/releases/latest)）；IT 請看 [group/INSTALL.md](group/INSTALL.md)。
 
 **100% 全地端 AI 語音工具箱**：即時轉錄、即時翻譯、錄音檔批次處理、講者辨識、會議摘要、台灣華語朗讀，所有 AI 模型皆在自有設備上執行，資料不經過任何雲端服務。
 
