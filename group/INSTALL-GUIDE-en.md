@@ -50,5 +50,8 @@ You do **not** need to uninstall first. Settings, recordings and transcripts are
 
 ## For IT
 
-* Servers, Open WebUI, API keys and passwords: change them in "IT settings" at the bottom of the app page. They take effect when saved; no reinstall is needed (details in [INSTALL.md](INSTALL.md), Chinese).
+* **IT settings page**: on the staff computer, click "IT settings" at the bottom of the app page, or open `http://localhost:19781/simple/admin`.
+  * First time: set an IT password on that computer (at least 6 characters). It is required every time after that. Staff do not need to know it.
+  * You can change: local/server mode, the LLM (group Open WebUI, internal server or external AI service) and API key, GPU server, recognition models, staff password, and whether other computers may view subtitles.
+  * Changes take effect when saved; no reinstall needed. Details in [INSTALL.md](INSTALL.md) (Chinese).
 * How the installer and the small update are built: [windows/README.md](windows/README.md) (Chinese).

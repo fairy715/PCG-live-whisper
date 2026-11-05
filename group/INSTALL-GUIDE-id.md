@@ -50,4 +50,7 @@ Setiap halaman rilis berisi petunjuk yang sama dan menjelaskan apakah pembaruan 
 
 ## Untuk IT
 
-* Server, Open WebUI, kunci API, dan kata sandi: ubah di "Pengaturan IT" di bagian bawah halaman aplikasi. Langsung berlaku setelah disimpan, tanpa instal ulang (detail di [INSTALL.md](INSTALL.md), bahasa Mandarin).
+* **Halaman Pengaturan IT**: di komputer staf, klik "Pengaturan IT" di bagian bawah halaman aplikasi, atau buka `http://localhost:19781/simple/admin`.
+  * Pertama kali: buat kata sandi IT di komputer tersebut (minimal 6 karakter). Setelah itu selalu diminta. Staf tidak perlu mengetahuinya.
+  * Yang dapat diubah: mode lokal/server, LLM (Open WebUI grup, server internal, atau layanan AI eksternal) dan kunci API, server GPU, model pengenalan suara, kata sandi staf, dan izin komputer lain untuk melihat subtitle.
+  * Langsung berlaku setelah disimpan, tanpa instal ulang. Detail di [INSTALL.md](INSTALL.md) (bahasa Mandarin).

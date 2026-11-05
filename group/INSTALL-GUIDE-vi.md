@@ -50,4 +50,7 @@ Mỗi trang phát hành đều có hướng dẫn giống như vậy và cho bi�
 
 ## Dành cho IT
 
-* Máy chủ, Open WebUI, khóa API và mật khẩu: thay đổi trong "Cài đặt IT" ở cuối trang ứng dụng. Có hiệu lực ngay khi lưu, không cần cài lại (chi tiết trong [INSTALL.md](INSTALL.md), tiếng Trung).
+* **Trang Cài đặt IT**: trên máy của nhân viên, bấm "Cài đặt IT" ở cuối trang ứng dụng, hoặc mở `http://localhost:19781/simple/admin`.
+  * Lần đầu: đặt mật khẩu IT trên máy đó (ít nhất 6 ký tự). Sau đó mỗi lần vào đều phải nhập. Nhân viên không cần biết mật khẩu này.
+  * Có thể thay đổi: chế độ máy cục bộ/máy chủ, mô hình ngôn ngữ lớn (Open WebUI của tập đoàn, máy chủ nội bộ hoặc dịch vụ AI bên ngoài) và khóa API, máy chủ GPU, mô hình nhận dạng giọng nói, mật khẩu nhân viên, cho phép máy khác xem phụ đề.
+  * Có hiệu lực ngay khi lưu, không cần cài lại. Chi tiết trong [INSTALL.md](INSTALL.md) (tiếng Trung).
