@@ -5836,8 +5836,12 @@ def _detect_llm_server(host, port):
     若只看狀態碼會把 LM Studio 的 /api/tags 誤判成 Ollama，之後改走 Ollama
     的 /api/generate 取不到 response 欄位而失敗。因此必須驗證回傳結構。
     """
+    # 集團版：設成 Open WebUI 時直接走 OpenAI 相容（路徑由 _llm_url 換成 /api/models）；它彙整多個後端，回應較慢
+    owui = _llm_api_style() == "openwebui"
     # 先嘗試 Ollama：回傳須為 {"models": [...]} 結構
     try:
+        if owui:
+            raise RuntimeError("skip")
         req = _llm_request(_llm_url(host, port, "/api/tags"))
         with urllib.request.urlopen(req, timeout=3) as resp:
             data = json.loads(resp.read())
@@ -5848,7 +5852,7 @@ def _detect_llm_server(host, port):
     # 再嘗試 OpenAI 相容：回傳須為 {"data": [...]} 結構（LM Studio 走這條）
     try:
         req = _llm_request(_llm_url(host, port, "/v1/models"))
-        with urllib.request.urlopen(req, timeout=3) as resp:
+        with urllib.request.urlopen(req, timeout=10 if owui else 3) as resp:
             data = json.loads(resp.read())
             if isinstance(data, dict) and isinstance(data.get("data"), list):
                 return "openai"
@@ -19521,8 +19525,27 @@ def _parse_llm_host(text, default_port=None):
     return host, port, None
 
 
+# 集團版：Open WebUI 的 OpenAI 相容 API 路徑不同（/api/chat/completions、/api/models，沒有 /v1）。
+# config.json 的 llm_api_style 設成 "openwebui"（IT 設定頁）時，所有呼叫在這裡換路徑；
+# 認證沿用 llm_api_key（Bearer，Open WebUI 的個人 API 金鑰）。其他設定照舊
+_OPENWEBUI_PATHS = {"/v1/chat/completions": "/api/chat/completions", "/v1/models": "/api/models"}
+
+
+def _llm_api_style():
+    """環境變數 JTLW_LLM_API_STYLE ＞ config.json 的 llm_api_style；每次讀（WebUI 常駐，IT 改設定不用重開）"""
+    v = os.environ.get("JTLW_LLM_API_STYLE", "").strip()
+    if not v:
+        try:
+            v = str(load_config().get("llm_api_style") or "")
+        except Exception:
+            v = ""
+    return v.strip().lower()
+
+
 def _llm_url(host, port, path):
     """LLM 伺服器上某支 API 的完整網址（path 以 / 開頭，例如 /api/tags、/v1/chat/completions）"""
+    if path in _OPENWEBUI_PATHS and _llm_api_style() == "openwebui":
+        path = _OPENWEBUI_PATHS.get(path, path)
     scheme, prefix = _LLM_EP.get((host, port), ("http", ""))
     hp = host if (scheme, port) in (("http", 80), ("https", 443)) else f"{host}:{port}"
     return f"{scheme}://{hp}{prefix}{path}"

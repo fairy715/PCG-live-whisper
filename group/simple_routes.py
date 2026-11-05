@@ -72,7 +72,7 @@ _OUTPUT_KINDS = [
 ]
 
 
-def profile(s):
+def profile(s, has_gpu=True):
     """混合模式：依 pcg_simple.backend 決定怎麼跑。
     - "local"（預設，沒有 GPU 伺服器時）：全部在這台電腦的 CPU 上跑。辨識用小模型、翻譯用 M2M100（可商用），
       不產出 AI 會議紀錄（摘要要大模型，CPU 太慢、品質太差）；只出翻譯好的逐字稿與字幕檔
@@ -81,6 +81,12 @@ def profile(s):
     local = (s.get("backend") or "local") != "server"
     if local:
         return {"backend": "local", "engine": "m2m", "summarize": False,
+                "file_model": s.get("local_file_model") or "small",
+                "live_model": s.get("local_live_model") or "small",
+                "diarize": bool(s.get("diarize", False)), "local_asr": True}
+    if not has_gpu:
+        # 伺服器模式但只接大模型伺服器（例如集團的 Open WebUI）：辨識留在這台電腦（小模型），翻譯與會議紀錄交給大模型
+        return {"backend": "server", "engine": "llm", "summarize": True,
                 "file_model": s.get("local_file_model") or "small",
                 "live_model": s.get("local_live_model") or "small",
                 "diarize": bool(s.get("diarize", False)), "local_asr": True}
@@ -103,9 +109,10 @@ def _strip_name(name):
 class SimpleQueue:
     """簡易版的工作佇列：一次處理一件，狀態存在 group_data/jobs.json（重新啟動後還看得到結果）"""
 
-    def __init__(self, base_dir: Path, settings_fn):
+    def __init__(self, base_dir: Path, settings_fn, has_gpu_fn=lambda: True):
         self.base = base_dir
         self.settings = settings_fn
+        self.has_gpu = has_gpu_fn
         self.data_dir = base_dir / "group_data"
         self.upload_dir = base_dir / "recordings" / "simple"
         self.data_dir.mkdir(exist_ok=True)
@@ -232,7 +239,7 @@ class SimpleQueue:
 
     def _args(self, job):
         s = self.settings()
-        pf = profile(s)
+        pf = profile(s, self.has_gpu())
         args = [sys.executable, str(self.base / "translate_meeting.py"),
                 "--input", job["path"], "--mode", job["mode"], "-m", pf["file_model"]]
         if pf["summarize"]:
@@ -336,12 +343,50 @@ def _error_of(tail, rc):
     return "failed", f"處理失敗（錯誤碼 {rc}），請把這件工作的編號告訴 IT"
 
 
+def parse_llm(text):
+    """大模型伺服器位址 → (base_url, host, port, None)；格式不對 → (None, None, None, 說明)。
+    可填「主機」「主機:連接埠」（Ollama，預設 11434）或完整網址 http(s)://主機[:連接埠][/路徑]（Open WebUI、反向代理）"""
+    s = (text or "").strip().rstrip("/")
+    if not s:
+        return None, None, None, "沒有填位址"
+    scheme, given = "http", False
+    low = s.lower()
+    if low.startswith(("http://", "https://")):
+        scheme, given = ("https" if low.startswith("https://") else "http"), True
+        s = s.split("://", 1)[1]
+    elif "://" in s:
+        return None, None, None, "只支援 http:// 或 https://"
+    hostport, _, path = s.partition("/")
+    path = ("/" + path.strip("/")) if path.strip("/") else ""
+    if path.lower().endswith("/v1"):
+        path = path[:-3]
+    if not re.fullmatch(r"[A-Za-z0-9._\-/~%]*", path):
+        return None, None, None, "路徑格式不正確"
+    m = re.fullmatch(r"(\[[0-9A-Fa-f:.]+\]|[A-Za-z0-9.\-]{1,253})(?::(\d{1,5}))?", hostport)
+    if not m:
+        return None, None, None, f"位址格式不正確：{text.strip()}"
+    host = m.group(1)
+    port = int(m.group(2)) if m.group(2) else ((443 if scheme == "https" else 80) if given else 11434)
+    if not 1 <= port <= 65535:
+        return None, None, None, f"連接埠 {port} 超出範圍"
+    hp = host if (scheme, port) in (("http", 80), ("https", 443)) else f"{host}:{port}"
+    return f"{scheme}://{hp}{path}", host, port, None
+
+
 def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path, write_config,
              start_live=None, live_running=None, live_args=None, set_view_password=None):
     """把簡易版的路由掛到 WebUI 的 FastAPI app 上（webui.py 呼叫）。
     start_live(body)：用 WebUI 原本的方式啟動即時字幕；live_running()：WebUI 是否正在跑"""
     from fastapi import File, Form, Request, UploadFile
     from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
+
+    def has_gpu():
+        try:
+            c = json.loads(config_file.read_text(encoding="utf-8")) if config_file.exists() else {}
+        except (OSError, ValueError):
+            c = {}
+        rw = c.get("remote_whisper")
+        return bool(isinstance(rw, dict) and rw.get("host"))
 
     def settings():
         try:
@@ -370,7 +415,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         with _state_lock:
             if "q" not in _state:
                 migrate_password()
-                _state["q"] = SimpleQueue(base_dir, settings)
+                _state["q"] = SimpleQueue(base_dir, settings, has_gpu)
         return _state["q"]
 
     class _LazyQueue:
@@ -411,7 +456,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         owner, err = auth(request)
         if err:
             return err
-        pf = profile(settings())
+        pf = profile(settings(), has_gpu())
         return {"ok": True, "scenarios": [{k: s.get(k, "") for k in ("id", "title", "subtitle", "flag")}
                                           for s in scenarios()],
                 "max_upload_mb": _MAX_UPLOAD_MB, "backend": pf["backend"], "minutes": pf["summarize"]}
@@ -568,7 +613,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             return JSONResponse({"ok": False, "code": "pick_language", "error": "請選擇對方說的語言"}, status_code=400)
         s = settings()
         mode = sc["bidi"] if (body.get("speak") and sc["bidi"]) else sc["mode"]
-        pf = profile(s)
+        pf = profile(s, has_gpu())
         start = {
             "mode": mode,
             "model": pf["live_model"],
@@ -616,11 +661,15 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         return {"backend": "server" if s.get("backend") == "server" else "local",
                 "gpu_host": rw.get("host", ""), "gpu_port": rw.get("whisper_port", 8978),
                 "llm_host": cfg.get("llm_host", ""), "llm_port": cfg.get("llm_port", 11434),
+                "llm_url": cfg.get("llm_url") or (f"{cfg['llm_host']}:{cfg.get('llm_port', 11434)}"
+                                                  if cfg.get("llm_host") else ""),
+                "llm_api_style": "openwebui" if cfg.get("llm_api_style") == "openwebui" else "auto",
+                "llm_api_key_set": bool(str(cfg.get("llm_api_key") or "").strip()),
                 "llm_model": s.get("llm_model", ""), "summary_model": s.get("summary_model", ""),
                 "asr_model": s.get("asr_model", "large-v3-turbo"),
                 "local_file_model": s.get("local_file_model", "small"),
                 "local_live_model": s.get("local_live_model", "small"),
-                "diarize": bool(s.get("diarize", s.get("backend") == "server")),
+                "diarize": bool(s.get("diarize", s.get("backend") == "server" and bool(rw.get("host")))),
                 "staff_password_set": bool(s.get("password_hash") or s.get("password")),
                 "allow_remote_view": bool(s.get("allow_remote_view", False)),
                 "m2m_installed": (base_dir / "models" / "m2m100_418m" / "model.bin").is_file()}
@@ -658,9 +707,9 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         write_config(cfg)
         return {"ok": True}
 
-    def _probe(url, timeout=4):
+    def _probe(url, timeout=4, headers=None):
         import urllib.request
-        with urllib.request.urlopen(url, timeout=timeout) as r:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=headers or {}), timeout=timeout) as r:
             return json.loads(r.read().decode("utf-8", "replace") or "{}")
 
     @app.post("/api/simple/admin/test")
@@ -679,19 +728,41 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                                                                if h.get(k))}
             except Exception as e:
                 out["gpu"] = {"ok": False, "detail": f"{type(e).__name__}: {e}"[:200]}
-        lh, lp = str(body.get("llm_host") or "").strip(), int(body.get("llm_port") or 11434)
-        if lh:
-            try:
-                tags = await asyncio.to_thread(_probe, f"http://{lh}:{lp}/api/tags")
-                models = [m.get("name") for m in tags.get("models", []) if m.get("name")]
-                out["llm"] = {"ok": True, "type": "Ollama", "models": models}
-            except Exception as e1:
+        raw = str(body.get("llm_url") or "").strip()
+        if not raw and body.get("llm_host"):
+            raw = f"{str(body['llm_host']).strip()}:{int(body.get('llm_port') or 11434)}"
+        if raw:
+            base, _h, _p, perr = parse_llm(raw)
+            if perr:
+                out["llm"] = {"ok": False, "detail": perr}
+                return out
+            key = str(body.get("llm_api_key") or "").strip() or str(read_cfg().get("llm_api_key") or "").strip()
+            hdr = {"Authorization": f"Bearer {key}"} if key else {}
+            style = "openwebui" if body.get("llm_api_style") == "openwebui" else "auto"
+
+            def ids(d):
+                return [m.get("id") for m in (d.get("data") or []) if isinstance(m, dict) and m.get("id")]
+            tries = ([("Open WebUI", "/api/models")] if style == "openwebui" else
+                     [("Ollama", "/api/tags"), ("OpenAI 相容", "/v1/models"), ("Open WebUI", "/api/models")])
+            first = None
+            for kind, path in tries:
                 try:
-                    data = await asyncio.to_thread(_probe, f"http://{lh}:{lp}/v1/models")
-                    out["llm"] = {"ok": True, "type": "OpenAI 相容",
-                                  "models": [m.get("id") for m in data.get("data", []) if m.get("id")]}
-                except Exception:
-                    out["llm"] = {"ok": False, "detail": f"{type(e1).__name__}: {e1}"[:200]}
+                    d = await asyncio.to_thread(_probe, base + path, 6, hdr)
+                    models = ([m.get("name") for m in d.get("models", []) if m.get("name")]
+                              if path == "/api/tags" else ids(d))
+                    if path == "/api/tags" and not d.get("models") and "models" not in d:
+                        raise ValueError("不是 Ollama")
+                    out["llm"] = {"ok": True, "type": kind, "models": models,
+                                  "style": "openwebui" if kind == "Open WebUI" else "auto"}
+                    break
+                except Exception as e:
+                    code = getattr(e, "code", None)
+                    if code in (401, 403):
+                        first = "API 金鑰不正確或沒有權限（Open WebUI：設定 → 帳號 → API 金鑰）"
+                    elif first is None:
+                        first = f"{type(e).__name__}: {e}"[:200]
+            else:
+                out["llm"] = {"ok": False, "detail": first or "連不上"}
         return out
 
     @app.post("/api/simple/admin/save")
@@ -700,14 +771,23 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         if err:
             return err
         backend = "server" if body.get("backend") == "server" else "local"
-        gh, lh = str(body.get("gpu_host") or "").strip(), str(body.get("llm_host") or "").strip()
-        if backend == "server" and not (gh and lh):
-            return JSONResponse({"ok": False, "code": "need_servers",
-                                 "error": "伺服器模式要填 GPU 伺服器與 LLM 伺服器的位址"}, status_code=400)
-        for host in (gh, lh):
-            if host and not re.fullmatch(r"[A-Za-z0-9.\-:\[\]]{1,253}", host):
-                return JSONResponse({"ok": False, "code": "bad_host", "error": f"位址格式不正確：{host}"},
-                                    status_code=400)
+        gh = str(body.get("gpu_host") or "").strip()
+        raw_llm = str(body.get("llm_url") or "").strip()
+        if not raw_llm and str(body.get("llm_host") or "").strip():
+            raw_llm = f"{str(body['llm_host']).strip()}:{int(body.get('llm_port') or 11434)}"
+        # 伺服器模式只一定要有大模型伺服器；GPU 伺服器選填（沒填＝語音辨識留在這台電腦）
+        if backend == "server" and not raw_llm:
+            return JSONResponse({"ok": False, "code": "need_llm",
+                                 "error": "伺服器模式要填大模型伺服器（例如集團的 Open WebUI 網址）"}, status_code=400)
+        if gh and not re.fullmatch(r"[A-Za-z0-9.\-:\[\]]{1,253}", gh):
+            return JSONResponse({"ok": False, "code": "bad_host", "error": f"位址格式不正確：{gh}"},
+                                status_code=400)
+        llm = None
+        if raw_llm:
+            base, lh, lp, perr = parse_llm(raw_llm)
+            if perr:
+                return JSONResponse({"ok": False, "code": "bad_host", "error": perr}, status_code=400)
+            llm = (base, lh, lp)
         cfg = read_cfg()
         s = cfg.setdefault("pcg_simple", {})
         s["backend"] = backend
@@ -724,10 +804,28 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             rw = cfg.get("remote_whisper") if isinstance(cfg.get("remote_whisper"), dict) else {}
             rw.update(host=gh, whisper_port=int(body.get("gpu_port") or 8978))
             cfg["remote_whisper"] = rw
-        elif "remote_whisper" in cfg and backend == "local" and body.get("clear_gpu"):
+        elif "remote_whisper" in cfg and (backend == "server" or body.get("clear_gpu")):
+            # 伺服器模式沒填 GPU 伺服器＝辨識在本機：拿掉舊的設定，畫面上看到的就是實際用的
             cfg.pop("remote_whisper")
-        if lh:
-            cfg["llm_host"], cfg["llm_port"] = lh, int(body.get("llm_port") or 11434)
+        if llm:
+            base, lh, lp = llm
+            cfg["llm_host"], cfg["llm_port"] = lh, lp
+            if base == f"http://{lh}:{lp}":
+                cfg.pop("llm_url", None)
+            else:
+                cfg["llm_url"] = base          # https、路徑：主程式從 llm_url 解析
+        if "llm_api_style" in body:
+            if body.get("llm_api_style") == "openwebui":
+                cfg["llm_api_style"] = "openwebui"
+            else:
+                cfg.pop("llm_api_style", None)
+        key = str(body.get("llm_api_key") or "").strip()
+        if key:
+            if len(key) > 512 or any(c.isspace() for c in key):
+                return JSONResponse({"ok": False, "code": "bad_key", "error": "API 金鑰格式不正確"}, status_code=400)
+            cfg["llm_api_key"] = key
+        elif body.get("clear_llm_api_key"):
+            cfg.pop("llm_api_key", None)
         sp = str(body.get("staff_password") or "").strip()
         view_hash = None
         if sp:

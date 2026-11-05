@@ -194,6 +194,25 @@ class Summary(unittest.TestCase):
         self.assertFalse(t._accept_correction("Chúng ta sẽ họp vào ngày mai", "We will meet tomorrow"))
 
 
+
+class OpenWebUI(unittest.TestCase):
+    """集團的 AI 都經 Open WebUI：llm_api_style＝openwebui 時 OpenAI 相容路徑換成 /api/…"""
+
+    def test_paths(self):
+        h, p, err = t._parse_llm_host("https://ai.example.com")
+        self.assertIsNone(err)
+        os.environ["JTLW_LLM_API_STYLE"] = "openwebui"
+        try:
+            self.assertEqual(t._llm_url(h, p, "/v1/chat/completions"), "https://ai.example.com/api/chat/completions")
+            self.assertEqual(t._llm_url(h, p, "/v1/models"), "https://ai.example.com/api/models")
+        finally:
+            os.environ.pop("JTLW_LLM_API_STYLE")
+        os.environ["JTLW_LLM_API_STYLE"] = "auto"
+        try:
+            self.assertEqual(t._llm_url(h, p, "/v1/models"), "https://ai.example.com/v1/models")
+        finally:
+            os.environ.pop("JTLW_LLM_API_STYLE")
+
 if __name__ == "__main__":
     unittest.main()
 

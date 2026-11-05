@@ -87,7 +87,8 @@ class SimpleFlow(unittest.TestCase):
         self.fail(f"工作沒有結束：{j}")
 
     def test_full_flow(self):
-        self.cfg.write_text(json.dumps({"pcg_simple": {"backend": "server"}}), encoding="utf-8")
+        self.cfg.write_text(json.dumps({"pcg_simple": {"backend": "server"},
+                                        "remote_whisper": {"host": "10.0.0.5", "whisper_port": 8978}}), encoding="utf-8")
         self.assertIn("PCG", self.c.get("/simple").text)
         cfg = self.c.get("/api/simple/config", headers=self.h).json()
         self.assertIn("id2zh", [s["id"] for s in cfg["scenarios"]])
@@ -213,8 +214,8 @@ class AdminPage(SimpleFlow):
     def test_save_switches_to_server(self):
         self.post("/api/simple/admin/password", {"new": "itpass1"})
         tok = "itpass1"
-        r = self.post("/api/simple/admin/save", {"backend": "server", "gpu_host": "", "llm_host": "10.0.0.5"}, tok)
-        self.assertEqual(r.json()["code"], "need_servers")
+        r = self.post("/api/simple/admin/save", {"backend": "server", "gpu_host": "10.0.0.5", "llm_host": ""}, tok)
+        self.assertEqual(r.json()["code"], "need_llm")          # 伺服器模式一定要有大模型伺服器；GPU 選填
         r = self.post("/api/simple/admin/save", {"backend": "server", "gpu_host": "10.0.0.5; rm -rf /",
                                                   "llm_host": "10.0.0.5"}, tok)
         self.assertEqual(r.json()["code"], "bad_host")
@@ -279,6 +280,81 @@ class AdminPage(SimpleFlow):
         self.assertEqual(self.c.get("/api/simple/share/qr.svg", params={"u": "http://evil.example/"}).status_code, 400)
         self.local = False
         self.assertEqual(self.c.get("/api/simple/share").status_code, 403)
+
+    def test_openwebui_without_gpu(self):
+        """集團 Open WebUI：填完整網址＋API 金鑰；沒有 GPU 伺服器＝辨識在本機（小模型），翻譯與會議紀錄交給大模型"""
+        self.post("/api/simple/admin/password", {"new": "itpass1"})
+        tok = "itpass1"
+        self.cfg.write_text(json.dumps({**json.loads(self.cfg.read_text(encoding="utf-8")),
+                                        "remote_whisper": {"host": "10.9.9.9", "whisper_port": 8978}}), encoding="utf-8")
+        r = self.post("/api/simple/admin/save", {
+            "backend": "server", "gpu_host": "", "llm_url": "https://ai.example.com/", "llm_api_style": "openwebui",
+            "llm_api_key": "sk-abc123", "llm_model": "luna", "summary_model": "deepseek-pro"}, tok).json()
+        self.assertTrue(r["ok"], r)
+        cfg = json.loads(self.cfg.read_text(encoding="utf-8"))
+        self.assertEqual((cfg["llm_url"], cfg["llm_host"], cfg["llm_port"]), ("https://ai.example.com", "ai.example.com", 443))
+        self.assertEqual((cfg["llm_api_style"], cfg["llm_api_key"]), ("openwebui", "sk-abc123"))
+        self.assertNotIn("remote_whisper", cfg)                 # 畫面上沒填 GPU＝不用舊的 GPU 設定
+        st = r["state"]
+        self.assertTrue(st["llm_api_key_set"])
+        self.assertNotIn("sk-abc123", json.dumps(st))           # 金鑰不回給畫面
+        self.assertEqual((st["llm_url"], st["llm_api_style"]), ("https://ai.example.com", "openwebui"))
+        jid = self.submit().json()["id"]
+        self.wait(jid)
+        args = (self.base / "args.txt").read_text(encoding="utf-8")
+        for want in ("--summarize", "--local-asr", "-m small", "-e llm --llm-model luna", "--summary-model deepseek-pro"):
+            self.assertIn(want, args)
+        self.c.post("/api/simple/live", json={"scenario": "id"})
+        self.assertEqual((self.started[-1]["engine"], self.started[-1]["local_asr"], self.started[-1]["model"]),
+                         ("llm", True, "small"))
+        # 存別的設定不會清掉金鑰；勾「刪除」才清
+        self.post("/api/simple/admin/save", {"backend": "server", "llm_url": "https://ai.example.com"}, tok)
+        self.assertEqual(json.loads(self.cfg.read_text(encoding="utf-8"))["llm_api_key"], "sk-abc123")
+        self.post("/api/simple/admin/save", {"backend": "server", "llm_url": "10.0.0.6:11434", "llm_api_style": "auto",
+                                              "clear_llm_api_key": True}, tok)
+        cfg = json.loads(self.cfg.read_text(encoding="utf-8"))
+        for k in ("llm_api_key", "llm_api_style", "llm_url"):
+            self.assertNotIn(k, cfg)
+        self.assertEqual((cfg["llm_host"], cfg["llm_port"]), ("10.0.0.6", 11434))
+        for bad in ("ftp://x", "https://a b", "http://x:99999"):
+            self.assertEqual(self.post("/api/simple/admin/save", {"backend": "server", "llm_url": bad}, tok).json()["code"],
+                             "bad_host", bad)
+
+    def test_openwebui_connection_test(self):
+        """測試連線：帶 Bearer 金鑰查 /api/models，列出 luna、deepseek；金鑰錯時講清楚"""
+        import threading
+        from http.server import BaseHTTPRequestHandler, HTTPServer
+
+        class H(BaseHTTPRequestHandler):
+            def do_GET(self):
+                if self.path != "/api/models":
+                    body, code = b"<html>Open WebUI</html>", 200     # 前端頁面（SPA）
+                elif self.headers.get("Authorization") != "Bearer sk-good":
+                    body, code = b'{"detail":"Not authenticated"}', 401
+                else:
+                    body, code = json.dumps({"data": [{"id": "luna"}, {"id": "deepseek-pro"}]}).encode(), 200
+                self.send_response(code)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, *a):
+                pass
+        srv = HTTPServer(("127.0.0.1", 0), H)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        try:
+            url = f"http://127.0.0.1:{srv.server_port}"
+            self.post("/api/simple/admin/password", {"new": "itpass1"})
+            r = self.post("/api/simple/admin/test", {"llm_url": url, "llm_api_key": "sk-good"}, "itpass1").json()
+            self.assertTrue(r["llm"]["ok"], r)
+            self.assertEqual((r["llm"]["type"], r["llm"]["style"], r["llm"]["models"]),
+                             ("Open WebUI", "openwebui", ["luna", "deepseek-pro"]))
+            r = self.post("/api/simple/admin/test", {"llm_url": url, "llm_api_style": "openwebui",
+                                                      "llm_api_key": "sk-bad"}, "itpass1").json()
+            self.assertFalse(r["llm"]["ok"])
+            self.assertIn("API 金鑰", r["llm"]["detail"])
+        finally:
+            srv.shutdown()
 
     def test_connection_test_reports_failures(self):
         self.post("/api/simple/admin/password", {"new": "itpass1"})
