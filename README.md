@@ -8,14 +8,22 @@
 **IT**：[架構與設定](group/INSTALL.md) ·
 **姊妹工具**：[PCG 文件工具](https://github.com/fairy715/PCG-doc-tools)（PDF／Office 文件處理）
 
-## 介紹影片（1 分鐘，有配樂）
+## 宣傳影片
+
+**廣告版（48 秒）**：從「聽不懂，會就白開了」的情境開始，跟著林老師和印尼同事 Budi 走一遍：線上課雙向字幕 → 手機掃 QR Code → 訓練教室一支麥克風 → 會後自動整理紀錄。適合在週會、Teams 群組開場播放。
+
+| 中文版 | Bahasa Indonesia |
+|---|---|
+| [![PCG AI 會議翻譯廣告](group/docs/promo/poster-ad-zh.png)](group/docs/promo/PCG-AI-ad-zh.mp4) | [![Iklan Penerjemah Rapat AI PCG](group/docs/promo/poster-ad-id.png)](group/docs/promo/PCG-AI-ad-id.mp4) |
+
+**功能介紹版（1 分鐘）**：逐項介紹功能，適合教育訓練時播放。
 
 | 中文版 | Bahasa Indonesia |
 |---|---|
 | [![PCG AI 會議翻譯介紹影片](group/docs/promo/poster-zh.png)](group/docs/promo/PCG-AI-meeting-translator-zh.mp4) | [![Video Penerjemah Rapat AI PCG](group/docs/promo/poster-id.png)](group/docs/promo/PCG-AI-meeting-translator-id.mp4) |
 
-點圖片下載影片（MP4，約 10 MB），可以直接放到 Teams、LINE 或簡報裡。內容：線上教學雙向字幕與 QR Code 分享 → 訓練教室模式 → 開會的電腦就能處理。
-配樂是程式合成的原創音樂（`group/docs/promo/music.py`），沒有版權問題；影片由 `promo3d.html` 逐格產生（`render3d.js`）。
+點圖片下載影片（MP4），可以直接放到 Teams、LINE 或簡報裡。
+配樂是程式合成的原創音樂（`group/docs/promo/music_ad.py`、`music.py`），沒有版權問題；影片由 `promo-ad.html`、`promo3d.html` 逐格產生（`render3d.js`）。
 
 ## 功能
 
