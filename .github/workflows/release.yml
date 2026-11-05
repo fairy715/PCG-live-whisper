@@ -1,13 +1,13 @@
-# PCG 集團版：發布安裝包（手動執行）
-# 產生 Setup.exe ＋ 離線資源包（兩個 zip），放到 GitHub Releases（不會過期、沒有 Actions 容量限制）。
-# 下載後放到 Google Drive 或公司共用資料夾發給同仁。
+# PCG 集團版：發布「單一安裝檔」（手動執行）
+# 離線資源包整個包進 Setup.exe：同仁只要一個檔案，點兩下就裝好（不用解壓縮、不用管資料夾）。
+# 發布前先在乾淨的 Windows 上實際安裝、自我檢查一次；通過才放到 GitHub Releases（不會過期）。
 name: 發布安裝包
 
 on:
   workflow_dispatch:
     inputs:
       models:
-        description: "語音辨識模型（逗號分隔；small 必要，可加 medium 提升錄音檔準確度）"
+        description: "語音辨識模型（逗號分隔；small 必要。加 medium 錄音檔較準，但安裝檔會超過 GitHub 2 GB 上限）"
         default: "small"
         required: true
 
@@ -15,74 +15,83 @@ permissions:
   contents: write
 
 jobs:
-  setup:
+  release:
     runs-on: windows-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - name: 安裝 Inno Setup
-        shell: pwsh
-        run: |
-          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
-          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress }
-      - name: 下載安裝畫面的語言檔
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force group/windows/lang | Out-Null
-          foreach ($n in 'ChineseTraditional','Indonesian','Vietnamese','Hindi') {
-            try { Invoke-WebRequest "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/$n.isl" -OutFile "group/windows/lang/$n.isl" } catch { Write-Host "略過 $n" }
-          }
-      - name: 編譯 Setup.exe
-        shell: pwsh
-        run: |
-          $v = (Get-Date -Format 'yyyy.M.d') + '.r' + $env:GITHUB_RUN_NUMBER
-          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$v" group\windows\PCG-Setup.iss
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-setup
-          path: dist/*.exe
-          retention-days: 1
-
-  publish:
-    needs: setup
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     env:
       PYTHONUTF8: "1"
+      PYTHONIOENCODING: utf-8
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - uses: actions/download-artifact@v4
-        with:
-          name: release-setup
-          path: dist/release
-      - name: 製作離線資源包
-        run: python group/windows/build_bundle.py --out dist/PCG-offline --models "${{ inputs.models }}"
-      - name: 壓縮成兩個 zip
-        run: python group/windows/pack_release.py dist/PCG-offline dist/release
+
+      - name: 安裝 Inno Setup 與安裝畫面的語言檔
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress }
+          New-Item -ItemType Directory -Force group/windows/lang | Out-Null
+          foreach ($n in 'ChineseTraditional','Indonesian','Vietnamese','Hindi') {
+            try { Invoke-WebRequest "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/$n.isl" -OutFile "group/windows/lang/$n.isl" } catch { Write-Host "略過 $n" }
+          }
+
+      - name: 製作離線資源包（翻譯模型轉成 int8，約 0.5 GB）
+        run: python group/windows/build_bundle.py --out dist/PCG-offline --models "${{ inputs.models }}" --m2m-convert
+
+      - name: 編譯單一安裝檔
+        shell: pwsh
+        run: |
+          $v = (Get-Date -Format 'yyyy.M.d') + '.r' + $env:GITHUB_RUN_NUMBER
+          "VER=$v" | Out-File -Append $env:GITHUB_ENV
+          $bundle = (Resolve-Path dist/PCG-offline).Path
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$v" "/DEmbedBundle=$bundle" group\windows\PCG-Setup.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $exe = Get-ChildItem dist -Filter "PCG-Meeting-Translator-Setup-*.exe" | Select-Object -First 1
+          $mb = [math]::Round($exe.Length / 1MB)
+          Write-Host "$($exe.Name)：$mb MB"
+          if ($exe.Length -ge 2GB) { throw "安裝檔 $mb MB 超過 GitHub Releases 的 2 GB 上限" }
+
+      - name: 實際安裝一次（只用這一個檔案，旁邊沒有資源包）
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem dist -Filter "PCG-Meeting-Translator-Setup-*.exe" | Select-Object -First 1
+          $t = New-Item -ItemType Directory -Force "$env:RUNNER_TEMP\only-setup"
+          Copy-Item $exe.FullName $t
+          $log = "C:\PCGtest\group_data\install.log"
+          Start-Process (Join-Path $t $exe.Name) -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/DIR=C:\PCGtest' -Wait
+          for ($i = 0; $i -lt 300; $i++) {
+            if ((Test-Path $log) -and (Select-String -Path $log -Pattern '安裝完成|\[錯誤\]' -Encoding utf8 -Quiet)) { break }
+            Start-Sleep -Seconds 5
+          }
+          Get-Content $log -Encoding utf8 | Select-Object -Last 15
+          if (-not (Select-String -Path $log -Pattern '安裝完成' -Encoding utf8 -Quiet)) { exit 1 }
+          $env:HF_HUB_CACHE = "C:\PCGtest\hf_cache"; $env:HF_HUB_OFFLINE = "1"
+          $env:PATH = "C:\PCGtest\tools\ffmpeg\bin;" + $env:PATH
+          & C:\PCGtest\python\python.exe C:\PCGtest\group\windows\selftest.py
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: 發布到 GitHub Releases
+        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          setup=$(ls dist/release/PCG-Setup-*.exe | head -1)
-          ver=$(basename "$setup" .exe | sed 's/^PCG-Setup-//')
-          cat > notes.md <<NOTES
-          ## PCG 會議翻譯 ${ver}
+          $exe = Get-ChildItem dist -Filter "PCG-Meeting-Translator-Setup-*.exe" | Select-Object -First 1
+          $mb = [math]::Round($exe.Length / 1MB)
+          $notes = @"
+          ## PCG 會議翻譯 $env:VER
 
-          **下載這三個檔案**，放在同一個資料夾（共用資料夾、Google Drive 或 USB）：
+          **只要下載這一個檔案**：``$($exe.Name)``（約 $mb MB）
 
-          1. \`$(basename "$setup")\`：安裝程式
-          2. \`PCG-offline-1-runtime.zip\`：執行環境（Python、套件、語音辨識模型、ffmpeg）
-          3. \`PCG-offline-2-m2m100.zip\`：翻譯模型
+          放到 Google Drive 或公司共用資料夾，同仁下載後點兩下安裝。
+          - 不需要網路、不需要系統管理員；預設裝到 D:\PCG-live-whisper（沒有 D 槽就裝 C 槽）
+          - 第一次執行會出現「Windows 已保護您的電腦」：按「其他資訊」→「仍要執行」（沒有程式碼簽章）
+          - 裝好後桌面會有「PCG 會議翻譯」
 
-          **安裝步驟**
-          1. 兩個 zip 都按右鍵 →「解壓縮全部」到**同一個資料夾**，會合成一個 \`PCG-offline\` 資料夾
-          2. 確認 \`PCG-offline\` 跟 Setup.exe 放在同一層
-          3. 執行 Setup.exe（第一次會出現「Windows 已保護您的電腦」：按「其他資訊」→「仍要執行」）
-
-          語音辨識模型：${{ inputs.models }}；commit ${GITHUB_SHA::7}
-          NOTES
-          gh release create "v${ver}" dist/release/* --title "PCG 會議翻譯 ${ver}" --notes-file notes.md --target "$GITHUB_SHA"
+          已在乾淨的 Windows 上實際安裝並通過自我檢查（套件、模型、5 個翻譯方向）。
+          語音辨識模型：${{ inputs.models }}；commit $($env:GITHUB_SHA.Substring(0,7))
+          "@
+          $notes | Out-File -Encoding utf8 notes.md
+          gh release create "v$env:VER" $exe.FullName --title "PCG 會議翻譯 $env:VER" --notes-file notes.md --target $env:GITHUB_SHA
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

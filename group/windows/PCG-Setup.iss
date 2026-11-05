@@ -18,7 +18,14 @@ PrivilegesRequired=lowest
 UsedUserAreasWarning=no
 DirExistsWarning=no
 OutputDir=..\..\dist
+#ifdef EmbedBundle
+; 單一安裝檔：離線資源包包在裡面（/DEmbedBundle=資源包路徑），同仁只要這一個檔案
+OutputBaseFilename=PCG-Meeting-Translator-Setup-{#AppVersion}
+LZMAUseSeparateProcess=yes
+LZMANumBlockThreads=4
+#else
 OutputBaseFilename=PCG-Setup-{#AppVersion}
+#endif
 SetupIconFile=..\..\icons\jt-live-whisper.ico
 UninstallDisplayIcon={app}\icons\jt-live-whisper.ico
 UninstallDisplayName=PCG Meeting Translator
@@ -82,6 +89,10 @@ hi.LaunchNow=PCG मीटिंग अनुवादक अभी खोले
 [Files]
 Source: "..\..\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion; Excludes: "\.git\*,\.github\*,\dist\*,\group\tests\*,\group\windows\lang\*,\docs\*,\images\*,\logs\*,\recordings\*,\venv\*,\python\*,\hf_cache\*,\models\*,\tools\*,\group_data\*,\PCG-offline\*,\config.json,*.pyc,__pycache__"
 
+#ifdef EmbedBundle
+Source: "{#EmbedBundle}\*"; DestDir: "{tmp}\PCG-offline"; Flags: recursesubdirs createallsubdirs ignoreversion deleteafterinstall
+#endif
+
 [Icons]
 Name: "{autodesktop}\{cm:ShortcutName}"; Filename: "{sys}\wscript.exe"; Parameters: """{app}\group\windows\launch.vbs"""; WorkingDir: "{app}"; IconFilename: "{app}\icons\jt-live-whisper.ico"
 Name: "{autoprograms}\{cm:ShortcutName}"; Filename: "{sys}\wscript.exe"; Parameters: """{app}\group\windows\launch.vbs"""; WorkingDir: "{app}"; IconFilename: "{app}\icons\jt-live-whisper.ico"
@@ -120,6 +131,11 @@ end;
 function InitializeSetup(): Boolean;
 begin
   BundleDir := ExpandConstant('{param:BUNDLE|}');
+#ifdef EmbedBundle
+  { 單一安裝檔：資源包在安裝檔裡面，安裝時解到暫存資料夾（CurStepChanged 再決定路徑） }
+  Result := True;
+  exit;
+#endif
   if BundleDir = '' then
     BundleDir := ExpandConstant('{src}\PCG-offline');
   Result := FileExists(AddBackslash(BundleDir) + 'manifest.json');
@@ -144,6 +160,8 @@ var
 begin
   if CurStep = ssPostInstall then
   begin
+    if BundleDir = '' then
+      BundleDir := ExpandConstant('{tmp}\PCG-offline');
     WizardForm.StatusLabel.Caption := CustomMessage('Installing');
     WizardForm.ProgressGauge.Style := npbstMarquee;
     Params := '-NoProfile -ExecutionPolicy Bypass -File "' + ExpandConstant('{app}\group\windows\pcg-install.ps1') +

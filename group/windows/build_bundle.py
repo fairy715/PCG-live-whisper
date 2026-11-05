@@ -136,20 +136,27 @@ def build_whisper(out, models):
         snapshot_download(repo, cache_dir=str(out / "hf_cache"))
 
 
-def build_m2m(out):
+def build_m2m(out, convert=False):
+    """convert=True：從原始模型自己轉成 int8（約 0.5 GB；網路上轉好的版本是 float32，約 1.8 GB）。
+    本機翻譯本來就以 int8 執行，品質相同；要做成單一安裝檔（GitHub 單檔上限 2 GB）時用"""
     ensure_hf()
     from huggingface_hub import hf_hub_download, snapshot_download
     step("翻譯模型 M2M100 418M（CTranslate2，MIT 授權）")
     dest = out / "models" / "m2m100_418m"
     dest.mkdir(parents=True, exist_ok=True)
-    try:
-        snapshot_download(M2M_CT2_REPO, local_dir=str(dest),
-                          allow_patterns=["model.bin", "*.json", "*.txt", "*.model"])
-    except Exception as e:
-        print(f"   [提示] 下載轉好的版本失敗（{type(e).__name__}: {e}），改為自行轉檔", flush=True)
-    hf_hub_download(M2M_SRC_REPO, "sentencepiece.bpe.model", local_dir=str(dest))
-    if not (dest / "model.bin").is_file():
+    if convert:
         convert_m2m(dest)
+    else:
+        try:
+            snapshot_download(M2M_CT2_REPO, local_dir=str(dest),
+                              allow_patterns=["model.bin", "*.json", "*.txt", "*.model"])
+        except Exception as e:
+            print(f"   [提示] 下載轉好的版本失敗（{type(e).__name__}: {e}），改為自行轉檔", flush=True)
+        if not (dest / "model.bin").is_file():
+            convert_m2m(dest)
+    # 轉檔工具的 --force 會清空輸出資料夾：分詞檔一定要在轉檔之後才放
+    hf_hub_download(M2M_SRC_REPO, "sentencepiece.bpe.model", local_dir=str(dest))
+    print(f"   model.bin：{(dest / 'model.bin').stat().st_size / 1048576:.0f} MB", flush=True)
     for need in ("model.bin", "sentencepiece.bpe.model"):
         if not (dest / need).is_file():
             raise SystemExit(f"[錯誤] M2M100 模型缺 {need}")
@@ -161,7 +168,7 @@ def convert_m2m(dest):
     venv = Path(tempfile.mkdtemp(prefix="m2m-convert-"))
     run([sys.executable, "-m", "venv", venv])
     py = venv / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
-    run([py, "-m", "pip", "install", "--quiet", "ctranslate2", "transformers[torch]", "sentencepiece"])
+    run([py, "-m", "pip", "install", "--quiet", "ctranslate2", "transformers", "torch", "sentencepiece", "protobuf"])
     conv = venv / ("Scripts/ct2-transformers-converter.exe" if os.name == "nt" else "bin/ct2-transformers-converter")
     run([conv, "--model", M2M_SRC_REPO, "--output_dir", dest, "--quantization", "int8", "--force"])
     shutil.rmtree(venv, ignore_errors=True)
@@ -211,6 +218,8 @@ def main():
     ap.add_argument("--models", default="small",
                     help="語音辨識模型，逗號分隔（預設 small；可加 base、medium、large-v3-turbo）")
     ap.add_argument("--skip", default="", help="略過的項目（測試用）：python,wheels,whisper,m2m,ffmpeg")
+    ap.add_argument("--m2m-convert", action="store_true",
+                    help="翻譯模型自己轉成 int8（小很多，約 0.5 GB；需要多下載約 1 GB 的轉檔工具，製作單一安裝檔時用）")
     a = ap.parse_args()
     out = Path(a.out).resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -224,7 +233,7 @@ def main():
     if "whisper" not in skip:
         build_whisper(out, models)
     if "m2m" not in skip:
-        build_m2m(out)
+        build_m2m(out, convert=a.m2m_convert)
     if "ffmpeg" not in skip:
         build_ffmpeg(out)
     write_manifest(out, models)
