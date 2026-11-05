@@ -8,11 +8,14 @@
 **IT**：[架構與設定](group/INSTALL.md) ·
 **姊妹工具**：[PCG 文件工具](https://github.com/fairy715/PCG-doc-tools)（PDF／Office 文件處理）
 
-## 介紹影片（1 分鐘）
+## 介紹影片（1 分鐘，有配樂）
 
-[![PCG AI 會議翻譯介紹影片](group/docs/promo/poster.png)](group/docs/promo/PCG-AI-meeting-translator.mp4)
+| 中文版 | Bahasa Indonesia |
+|---|---|
+| [![PCG AI 會議翻譯介紹影片](group/docs/promo/poster-zh.png)](group/docs/promo/PCG-AI-meeting-translator-zh.mp4) | [![Video Penerjemah Rapat AI PCG](group/docs/promo/poster-id.png)](group/docs/promo/PCG-AI-meeting-translator-id.mp4) |
 
-點圖片下載影片（MP4，約 2.4 MB），可以直接放到 Teams、LINE 或簡報裡。內容：線上教學雙向字幕與 QR Code 分享 → 訓練教室模式 → 開會的電腦就能處理。
+點圖片下載影片（MP4，約 10 MB），可以直接放到 Teams、LINE 或簡報裡。內容：線上教學雙向字幕與 QR Code 分享 → 訓練教室模式 → 開會的電腦就能處理。
+配樂是程式合成的原創音樂（`group/docs/promo/music.py`），沒有版權問題；影片由 `promo3d.html` 逐格產生（`render3d.js`）。
 
 ## 功能
 
