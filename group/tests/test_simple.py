@@ -166,6 +166,19 @@ class SimpleFlow(unittest.TestCase):
         self.assertNotIn("--summarize", args)
         self.assertFalse(self.c.get("/api/simple/config", headers=self.h).json()["minutes"])
 
+    def test_data_scope(self):
+        """簡易頁面「資料送到哪裡」照設定顯示，不能寫死「不會送到外部」"""
+        scope = lambda: self.c.get("/api/simple/config", headers=self.h).json()["data_scope"]
+        self.assertEqual(scope(), "local")
+        for style, want in ((None, "internal"), ("openwebui", "group"), ("openai", "external")):
+            cfg = {"pcg_simple": {"backend": "server"}, "llm_host": "10.0.0.6"}
+            if style:
+                cfg["llm_api_style"] = style
+            self.cfg.write_text(json.dumps(cfg), encoding="utf-8")
+            self.assertEqual(scope(), want, style)
+        page = self.c.get("/simple").text
+        self.assertNotIn("不會送到外部", page)
+
     def test_version(self):
         """畫面上的版本：安裝檔寫的 group/version.json；原作者版本從 translate_meeting.py 讀"""
         simple_routes._VERSION.clear()

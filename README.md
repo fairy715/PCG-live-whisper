@@ -1,6 +1,10 @@
 # jt-live-whisper v2.34.0
 
 > **PCG 集團版**：同仁請看 **[安裝與更新說明](group/安裝說明.md)**（[English](group/INSTALL-GUIDE-en.md) · [Bahasa Indonesia](group/INSTALL-GUIDE-id.md) · [Tiếng Việt](group/INSTALL-GUIDE-vi.md)）（下載：[最新版](https://github.com/fairy715/PCG-live-whisper/releases/latest)）；IT 請看 [group/INSTALL.md](group/INSTALL.md)。
+>
+> **集團版與下方原作者說明的差別**：下方寫的「100% 全地端」「所有模型皆為自由開源」「不需要雲端 API」只適用於**本機模式**與**接內部伺服器**的情況。
+> 集團版的伺服器模式可以接**集團 Open WebUI**（luna、deepseek：不一定是開源模型，資料送到集團的 AI 平台）或**外部 AI 服務**（OpenAI、DeepSeek、Gemini 等：資料會送出公司並依用量計費）。
+> 實際用哪一種由 IT 在設定頁決定，同仁的操作頁面上方會顯示目前的資料去向。
 
 **100% 全地端 AI 語音工具箱**：即時轉錄、即時翻譯、錄音檔批次處理、講者辨識、會議摘要、台灣華語朗讀，所有 AI 模型皆在自有設備上執行，資料不經過任何雲端服務。
 

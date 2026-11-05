@@ -28,6 +28,7 @@ body{margin:0;background:var(--bg);color:var(--text);
 header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px}
 header h1{font-size:22px;margin:0;font-weight:700}
 header .sub{color:var(--dim);font-size:14px}
+header .scope{margin-top:4px}header .scope.ext{color:var(--warn,#9a6700);font-weight:600}
 .lang{flex:none;display:flex;align-items:center;gap:6px;color:var(--dim);font-size:14px}
 .lang select{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 8px}
 .tabs{display:flex;flex-wrap:wrap;gap:0 16px;margin-bottom:20px;border-bottom:1px solid var(--line)}
@@ -107,6 +108,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
     <div>
       <h1 data-t="title"></h1>
       <div class="sub" data-t="tagline"></div>
+      <div class="sub scope" id="scope" hidden></div>
     </div>
     <div class="hdr-right">
       <button class="btn ghost small" id="tourBtn" type="button" data-t="tour_btn"></button>
@@ -207,7 +209,7 @@ zh:{
   tr_file_lang:'選錄音裡主要說的語言。',
   tr_file_submit:'按送出就可以去忙別的，處理好會出現在下面。',
   tr_jobs:'送出的錄音都在這裡：看進度、下載逐字稿和字幕檔。導覽想再看一次，按右上角「導覽」。',
-  title:'PCG 會議翻譯',tagline:'即時字幕、錄音轉會議紀錄。所有語音與文字都在公司自己的伺服器處理，不會送到外部。',
+  title:'PCG 會議翻譯',tagline:'即時字幕、錄音轉會議紀錄。',scope_local:'目前是本機模式：語音與文字只在這台電腦處理，不會送出。',scope_internal:'語音與文字在這台電腦與公司內部的伺服器處理。',scope_group:'翻譯與會議紀錄由集團的 AI 平台（Open WebUI）處理。',scope_external:'注意：翻譯與會議紀錄會送到公司外部的 AI 服務處理。機密會議請先詢問 IT。',
   tab_live:'即時字幕',tab_file:'錄音 → 會議紀錄',
   live_remote:'即時字幕要在<strong>自己的電腦</strong>上開：它翻譯的是這台電腦播出來的聲音（Teams、Zoom、YouTube…）。<br>請 IT 幫你的電腦安裝 PCG-live-whisper，再打開 <code>http://localhost:19781/simple</code>。<br>在這台電腦上，你可以先用「錄音 → 會議紀錄」。',
   live_running:'字幕正在進行中。',open_live:'打開字幕畫面',
@@ -251,7 +253,7 @@ en:{
   tr_file_lang:'Choose the language mostly spoken in the recording.',
   tr_file_submit:'Click Submit and get on with your work; the result will appear below.',
   tr_jobs:'Your recordings are listed here: see progress and download the transcript and subtitles. To see this tour again, click “Tour” at the top right.',
-  title:'PCG Meeting Translator',tagline:'Live subtitles and recording-to-minutes. All audio and text are processed on company servers and never leave the company.',
+  title:'PCG Meeting Translator',tagline:'Live subtitles and recording-to-minutes.',scope_local:'Local mode: audio and text are processed on this computer only.',scope_internal:'Audio and text are processed on this computer and the company\'s internal servers.',scope_group:'Translation and minutes are processed by the group AI platform (Open WebUI).',scope_external:'Note: translation and minutes are sent to an AI service outside the company. Ask IT before using it for confidential meetings.',
   tab_live:'Live subtitles',tab_file:'Recording → Minutes',
   live_remote:'Live subtitles must run on <strong>your own computer</strong>: they translate the sound this computer plays (Teams, Zoom, YouTube…).<br>Ask IT to install PCG-live-whisper on your computer, then open <code>http://localhost:19781/simple</code>.<br>On this computer you can use “Recording → Minutes” for now.',
   live_running:'Subtitles are running.',open_live:'Open subtitle screen',
@@ -295,7 +297,7 @@ id:{
   tr_file_lang:'Pilih bahasa yang paling banyak dipakai dalam rekaman.',
   tr_file_submit:'Klik Kirim lalu lanjutkan pekerjaan Anda; hasilnya akan muncul di bawah.',
   tr_jobs:'Rekaman Anda ada di sini: lihat progres dan unduh transkrip serta subtitle. Untuk melihat panduan lagi, klik “Panduan” di kanan atas.',
-  title:'Penerjemah Rapat PCG',tagline:'Subtitle langsung dan rekaman menjadi notulen. Semua suara dan teks diproses di server perusahaan dan tidak dikirim ke luar.',
+  title:'Penerjemah Rapat PCG',tagline:'Subtitle langsung dan rekaman menjadi notulen.',scope_local:'Mode lokal: suara dan teks hanya diproses di komputer ini.',scope_internal:'Suara dan teks diproses di komputer ini dan server internal perusahaan.',scope_group:'Terjemahan dan notulen diproses oleh platform AI grup (Open WebUI).',scope_external:'Perhatian: terjemahan dan notulen dikirim ke layanan AI di luar perusahaan. Tanyakan IT sebelum digunakan untuk rapat rahasia.',
   tab_live:'Subtitle langsung',tab_file:'Rekaman → Notulen',
   live_remote:'Subtitle langsung harus dijalankan di <strong>komputer Anda sendiri</strong>: yang diterjemahkan adalah suara yang diputar komputer ini (Teams, Zoom, YouTube…).<br>Minta IT memasang PCG-live-whisper di komputer Anda, lalu buka <code>http://localhost:19781/simple</code>.<br>Di komputer ini, Anda bisa memakai “Rekaman → Notulen” terlebih dahulu.',
   live_running:'Subtitle sedang berjalan.',open_live:'Buka layar subtitle',
@@ -339,7 +341,7 @@ vi:{
   tr_file_lang:'Chọn ngôn ngữ được nói nhiều nhất trong bản ghi.',
   tr_file_submit:'Bấm Gửi rồi làm việc khác; kết quả sẽ hiện ở bên dưới.',
   tr_jobs:'Các bản ghi của bạn ở đây: xem tiến độ và tải bản ghi lời nói, phụ đề. Muốn xem lại hướng dẫn, bấm “Hướng dẫn” ở góc trên bên phải.',
-  title:'Phiên dịch cuộc họp PCG',tagline:'Phụ đề trực tiếp và chuyển bản ghi âm thành biên bản. Mọi âm thanh và văn bản đều được xử lý trên máy chủ của công ty, không gửi ra ngoài.',
+  title:'Phiên dịch cuộc họp PCG',tagline:'Phụ đề trực tiếp và chuyển bản ghi âm thành biên bản.',scope_local:'Chế độ máy cục bộ: âm thanh và văn bản chỉ được xử lý trên máy này.',scope_internal:'Âm thanh và văn bản được xử lý trên máy này và máy chủ nội bộ của công ty.',scope_group:'Bản dịch và biên bản được xử lý bởi nền tảng AI của tập đoàn (Open WebUI).',scope_external:'Lưu ý: bản dịch và biên bản được gửi đến dịch vụ AI bên ngoài công ty. Hãy hỏi IT trước khi dùng cho cuộc họp bảo mật.',
   tab_live:'Phụ đề trực tiếp',tab_file:'Ghi âm → Biên bản',
   live_remote:'Phụ đề trực tiếp phải chạy trên <strong>máy tính của bạn</strong>: nó dịch âm thanh mà máy tính này phát ra (Teams, Zoom, YouTube…).<br>Hãy nhờ IT cài PCG-live-whisper cho máy của bạn, rồi mở <code>http://localhost:19781/simple</code>.<br>Trên máy này, bạn có thể dùng “Ghi âm → Biên bản” trước.',
   live_running:'Phụ đề đang chạy.',open_live:'Mở màn hình phụ đề',
@@ -383,7 +385,7 @@ hi:{
   tr_file_lang:'रिकॉर्डिंग में सबसे ज़्यादा बोली गई भाषा चुनें।',
   tr_file_submit:'भेजें दबाएँ और अपना काम करें; नतीजा नीचे दिखेगा।',
   tr_jobs:'आपकी रिकॉर्डिंग यहाँ हैं: प्रगति देखें और ट्रांसक्रिप्ट व सबटाइटल डाउनलोड करें। गाइड दोबारा देखने के लिए ऊपर दाईं ओर “गाइड” दबाएँ।',
-  title:'PCG मीटिंग अनुवादक',tagline:'लाइव सबटाइटल और रिकॉर्डिंग से मीटिंग मिनट्स। सारी आवाज़ और टेक्स्ट कंपनी के अपने सर्वर पर प्रोसेस होते हैं, बाहर नहीं भेजे जाते।',
+  title:'PCG मीटिंग अनुवादक',tagline:'लाइव सबटाइटल और रिकॉर्डिंग से मीटिंग मिनट्स।',scope_local:'लोकल मोड: आवाज़ और टेक्स्ट केवल इसी कंप्यूटर पर प्रोसेस होते हैं।',scope_internal:'आवाज़ और टेक्स्ट इस कंप्यूटर और कंपनी के आंतरिक सर्वर पर प्रोसेस होते हैं।',scope_group:'अनुवाद और मिनट्स ग्रुप के AI प्लेटफ़ॉर्म (Open WebUI) द्वारा प्रोसेस होते हैं।',scope_external:'ध्यान दें: अनुवाद और मिनट्स कंपनी के बाहर की AI सेवा को भेजे जाते हैं। गोपनीय मीटिंग के लिए पहले IT से पूछें।',
   tab_live:'लाइव सबटाइटल',tab_file:'रिकॉर्डिंग → मिनट्स',
   live_remote:'लाइव सबटाइटल <strong>आपके अपने कंप्यूटर</strong> पर चलाने होंगे: यह इसी कंप्यूटर पर चल रही आवाज़ (Teams, Zoom, YouTube…) का अनुवाद करता है।<br>IT से अपने कंप्यूटर पर PCG-live-whisper इंस्टॉल करवाएँ, फिर <code>http://localhost:19781/simple</code> खोलें।<br>इस कंप्यूटर पर अभी आप “रिकॉर्डिंग → मिनट्स” का उपयोग कर सकते हैं।',
   live_running:'सबटाइटल चल रहे हैं।',open_live:'सबटाइटल स्क्रीन खोलें',
@@ -642,6 +644,8 @@ function showVer(v){const e=document.getElementById('ver');if(!e||!v)return;
   const cfg=await api('/api/simple/config');
   if(!cfg.ok){$('jobList').innerHTML=`<div class="banner err">${esc(errText(cfg))}</div>`;return}
   fileScen=cfg.scenarios||[];showVer(cfg.version);
+  // 資料送到哪裡：照 IT 的設定顯示（本機／內部伺服器／集團 AI 平台／外部 AI 服務），不寫死成一定不外送
+  if(cfg.data_scope){const e=$('scope');e.dataset.t='scope_'+cfg.data_scope;e.hidden=false;e.classList.toggle('ext',cfg.data_scope==='external');applyLang()}
   if(cfg.minutes===false){$('langNote').dataset.tHtml='lang_note_local';$('fileNote').dataset.t='file_note_local';applyLang()}
   const live=await initLive();isLocal=!!live.local;
   showTab(store.get('pcg_tab')||(live.local?'pLive':'pFile'));

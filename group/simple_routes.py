@@ -518,7 +518,15 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         return {"ok": True, "scenarios": [{k: s.get(k, "") for k in ("id", "title", "subtitle", "flag")}
                                           for s in scenarios()],
                 "max_upload_mb": _MAX_UPLOAD_MB, "backend": pf["backend"], "minutes": pf["summarize"],
-                "version": app_version(base_dir)}
+                "version": app_version(base_dir), "data_scope": data_scope(pf)}
+
+    def data_scope(pf):
+        """畫面上「資料送到哪裡」：local＝只在這台電腦；internal＝這台＋公司內部伺服器；
+        group＝集團 Open WebUI；external＝公司外部的 AI 服務（IT 設定頁選的伺服器類型）"""
+        if pf["backend"] != "server":
+            return "local"
+        style = read_cfg().get("llm_api_style")
+        return {"openwebui": "group", "openai": "external"}.get(style, "internal")
 
     @app.get("/api/simple/jobs")
     async def simple_jobs(request: Request):
