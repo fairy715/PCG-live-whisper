@@ -57,3 +57,16 @@ Releases 不會過期。
 - 沒有程式碼簽章：第一次執行會出現 Windows SmartScreen 警告
 - 防毒軟體可能攔下 Setup.exe 或 python.exe：請 IT 加入允許清單
 - 即時字幕在 i5-1235U 上的延遲約 3～6 秒（推估，待實機確認）
+
+## 小更新包（PCG-Update-<版本>.exe，約 10 MB）
+
+發布流程每次會同時產出完整安裝檔與小更新包。小更新包**只換程式檔**，執行環境（python）、模型、ffmpeg 沿用電腦上已經裝好的：
+
+- 安裝前比對已安裝的 `group/windows/requirements-cpu.txt` 與 `build_bundle.py`：跟這一版不同（有新套件、新模型）就拒絕，提示改用完整安裝檔，不會裝到一半壞掉
+- 沒有裝過的電腦也會拒絕
+- 裝好後執行 `pcg-update.ps1`：清舊的編譯快取、跑自我檢查，紀錄在 `group_data\update.log`
+- 設定、錄音、逐字稿都保留；靜默安裝一樣加 `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART`
+- 發布流程會實測兩件事：套用到剛裝好的電腦能更新成功；套件不同時會拒絕且不動到程式
+- 跟上一版比較套件清單沒變，才會把小更新包放上發布頁；有變的那一版只放完整安裝檔
+
+本機製作：`ISCC.exe /DAppVersion=<版本> /DPatchOnly /DReqSha=<requirements-cpu.txt 的 SHA-256> /DBundleSha=<build_bundle.py 的 SHA-256> group\windows\PCG-Setup.iss`

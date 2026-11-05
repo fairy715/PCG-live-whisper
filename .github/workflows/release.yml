@@ -23,6 +23,8 @@ jobs:
       PYTHONIOENCODING: utf-8
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # 要比對上一版的套件清單，決定能不能用小更新包
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -77,26 +79,71 @@ jobs:
           & C:\PCGtest\python\python.exe C:\PCGtest\group\windows\selftest.py
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+      - name: 製作小更新包，套用在剛裝好的電腦上測試
+        shell: pwsh
+        run: |
+          # 小更新包只換程式；裝之前比對已安裝的套件清單與資源包腳本，跟這一版不同就拒絕（要用完整安裝檔）
+          $req = (Get-FileHash group\windows\requirements-cpu.txt -Algorithm SHA256).Hash
+          $bb = (Get-FileHash group\windows\build_bundle.py -Algorithm SHA256).Hash
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$env:VER" "/DPatchOnly" "/DReqSha=$req" "/DBundleSha=$bb" group\windows\PCG-Setup.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $patch = Get-ChildItem dist -Filter "PCG-Update-*.exe" | Select-Object -First 1
+          Write-Host "$($patch.Name)：$([math]::Round($patch.Length / 1MB, 1)) MB"
+
+          # 1. 假裝裝的是舊版，套用小更新包 → 版本要變成這一版、自我檢查要過
+          [System.IO.File]::WriteAllText("C:\PCGtest\group\version.json", '{"version":"old"}')
+          $p = Start-Process $patch.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -Wait -PassThru
+          if (Test-Path C:\PCGtest\group_data\update.log) { Get-Content C:\PCGtest\group_data\update.log -Encoding utf8 | Select-Object -Last 12 }
+          if ($p.ExitCode -ne 0) { throw "小更新包結束代碼 $($p.ExitCode)" }
+          if (-not (Select-String -Path C:\PCGtest\group_data\update.log -Pattern '更新完成' -Encoding utf8 -Quiet)) { throw "小更新包的自我檢查沒有通過" }
+          $ver = Get-Content C:\PCGtest\group\version.json -Raw | ConvertFrom-Json
+          if ($ver.version -ne $env:VER) { throw "更新後版本是 $($ver.version)，應該是 $env:VER" }
+
+          # 2. 套件清單不同（模擬「這次有新套件」）→ 要拒絕、不能動到已安裝的程式
+          Add-Content C:\PCGtest\group\windows\requirements-cpu.txt "newpkg==1.0"
+          [System.IO.File]::WriteAllText("C:\PCGtest\group\version.json", '{"version":"old"}')
+          $p = Start-Process $patch.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -Wait -PassThru
+          if ($p.ExitCode -eq 0) { throw "套件不同時小更新包應該拒絕安裝" }
+          $ver = Get-Content C:\PCGtest\group\version.json -Raw | ConvertFrom-Json
+          if ($ver.version -ne "old") { throw "被拒絕的小更新包不應該改動程式" }
+          Write-Host "小更新包：正常更新、套件不同時拒絕，兩項都通過"
+
+          # 3. 跟上一版比：套件清單與資源包腳本都沒變，已裝上一版的電腦才能用小更新包
+          $prev = git describe --tags --abbrev=0 --match "v*" 2>$null
+          $ok = $false
+          if ($prev) {
+            git diff --quiet $prev HEAD -- group/windows/requirements-cpu.txt group/windows/build_bundle.py
+            $ok = ($LASTEXITCODE -eq 0)
+          }
+          $global:LASTEXITCODE = 0
+          Write-Host "上一版：$prev；可以用小更新包：$ok"
+          "PREV=$prev" | Out-File -Append $env:GITHUB_ENV
+          "PATCH_OK=$ok" | Out-File -Append $env:GITHUB_ENV
+
       - name: 發布到 GitHub Releases
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           $exe = Get-ChildItem dist -Filter "PCG-Meeting-Translator-Setup-*.exe" | Select-Object -First 1
+          $patch = Get-ChildItem dist -Filter "PCG-Update-*.exe" | Select-Object -First 1
           $mb = [math]::Round($exe.Length / 1MB)
-          $notes = @"
-          ## PCG 會議翻譯 $env:VER
-
-          **只要下載這一個檔案**：``$($exe.Name)``（約 $mb MB）
-
-          放到 Google Drive 或公司共用資料夾，同仁下載後點兩下安裝。
-          - 不需要網路、不需要系統管理員；預設裝到 D:\PCG-live-whisper（沒有 D 槽就裝 C 槽）
-          - 第一次執行會出現「Windows 已保護您的電腦」：按「其他資訊」→「仍要執行」（沒有程式碼簽章）
-          - 裝好後桌面會有「PCG 會議翻譯」
-
-          已在乾淨的 Windows 上實際安裝並通過自我檢查（套件、模型、5 個翻譯方向）。
-          語音辨識模型：${{ inputs.models }}；commit $($env:GITHUB_SHA.Substring(0,7))
-          "@
-          $notes | Out-File -Encoding utf8 notes.md
-          gh release create "v$env:VER" $exe.FullName --title "PCG 會議翻譯 $env:VER" --notes-file notes.md --target $env:GITHUB_SHA
+          $files = @($exe.FullName)
+          if ($env:PATCH_OK -eq "True") {
+            $files += $patch.FullName
+            $line = "``$($patch.Name)``（約 $([math]::Round($patch.Length / 1MB)) MB；已裝 $env:PREV 的電腦可以用）；如果出現「這次更新包含新的套件或模型」，改用完整安裝檔"
+            $tested = "、套用小更新包"
+          } else {
+            $line = "這一版有新的套件或模型，請用完整安裝檔（直接裝在舊版上面，設定與錄音會保留）"
+            $tested = ""
+          }
+          $notes = Get-Content group/windows/release-notes.md -Raw -Encoding utf8
+          $vals = [ordered]@{
+            '{PATCH_LINE}' = $line; '{PATCH_TESTED}' = $tested; '{VER}' = $env:VER; '{FULL_MB}' = "$mb"
+            '{FULL_GB}' = "$([math]::Round($exe.Length / 1GB, 2))"; '{FULL}' = $exe.Name
+            '{MODELS}' = "${{ inputs.models }}"; '{COMMIT}' = $env:GITHUB_SHA.Substring(0, 7)
+          }
+          foreach ($k in $vals.Keys) { $notes = $notes.Replace($k, $vals[$k]) }
+          [System.IO.File]::WriteAllText("notes.md", $notes, (New-Object System.Text.UTF8Encoding($false)))
+          gh release create "v$env:VER" @files --title "PCG 會議翻譯 $env:VER" --notes-file notes.md --target $env:GITHUB_SHA
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
