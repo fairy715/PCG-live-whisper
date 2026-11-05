@@ -136,8 +136,6 @@ Name: "{autoprograms}\{cm:ShortcutName}"; Filename: "{sys}\wscript.exe"; Paramet
 
 [Run]
 Filename: "{sys}\wscript.exe"; Parameters: """{app}\group\windows\launch.vbs"""; Description: "{cm:LaunchNow}"; Flags: postinstall nowait skipifsilent
-; 一鍵更新（/RELAUNCH=1）：裝完在背景重新開啟程式，不開新的瀏覽器分頁（原本那一頁會自己重新整理）
-Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File ""{app}\group\windows\launch.ps1"" -NoBrowser"; Flags: runhidden nowait; Check: WantRelaunch
 
 [UninstallRun]
 Filename: "powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -Command ""Get-Process python -ErrorAction SilentlyContinue | Where-Object {{ $_.Path -like '{app}\python\*' } | Stop-Process -Force"""; Flags: runhidden; RunOnceId: "StopPCG"
@@ -258,6 +256,11 @@ begin
       SuppressibleMsgBox(FmtMessage(CustomMessage('UpdateFailed'), [ExpandConstant('{app}\group_data\update.log')]),
                          mbCriticalError, MB_OK, IDOK);
     WizardForm.ProgressGauge.Style := npbstNormal;
+    { 一鍵更新（/RELAUNCH=1）：自我檢查做完才在背景重新開啟程式，不開新的瀏覽器分頁（原本那一頁會自己重新整理）。
+      不放在 [Run]：[Run] 會在這一步之前執行，程式會在自我檢查還沒做完時就開起來 }
+    if WantRelaunch() then
+      Exec('powershell.exe', '-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "' +
+           ExpandConstant('{app}\group\windows\launch.ps1') + '" -NoBrowser', '', SW_HIDE, ewNoWait, RC);
     exit;
 #endif
     if BundleDir = '' then
