@@ -1,10 +1,57 @@
-# jt-live-whisper v2.34.0
+# PCG 會議翻譯（PCG Meeting Translator）
 
-> **PCG 集團版**：同仁請看 **[安裝與更新說明](group/安裝說明.md)**（[English](group/INSTALL-GUIDE-en.md) · [Bahasa Indonesia](group/INSTALL-GUIDE-id.md) · [Tiếng Việt](group/INSTALL-GUIDE-vi.md)）（下載：[最新版](https://github.com/fairy715/PCG-live-whisper/releases/latest)）；IT 請看 [group/INSTALL.md](group/INSTALL.md)。
->
-> **集團版與下方原作者說明的差別**：下方寫的「100% 全地端」「所有模型皆為自由開源」「不需要雲端 API」只適用於**本機模式**與**接內部伺服器**的情況。
-> 集團版的伺服器模式可以接**集團 Open WebUI**（luna、deepseek：不一定是開源模型，資料送到集團的 AI 平台）或**外部 AI 服務**（OpenAI、DeepSeek、Gemini 等：資料會送出公司並依用量計費）。
-> 實際用哪一種由 IT 在設定頁決定，同仁的操作頁面上方會顯示目前的資料去向。
+集團版的即時字幕與會議紀錄工具，以 [jt-live-whisper](https://github.com/jasoncheng7115/jt-live-whisper)（原作者 Jason Cheng，Apache-2.0）為基礎，加上**印尼文、越南文、印地語**，以及給同仁用的簡易畫面、離線安裝檔與 IT 設定頁。
+
+**下載**：[最新版](https://github.com/fairy715/PCG-live-whisper/releases/latest) ·
+**安裝說明**：[中文](group/安裝說明.md) · [English](group/INSTALL-GUIDE-en.md) · [Bahasa Indonesia](group/INSTALL-GUIDE-id.md) · [Tiếng Việt](group/INSTALL-GUIDE-vi.md) ·
+**IT**：[架構與設定](group/INSTALL.md) ·
+**姊妹工具**：[PCG 文件工具](https://github.com/fairy715/PCG-doc-tools)（PDF／Office 文件處理）
+
+## 功能
+
+### 給同仁
+
+| 功能 | 說明 |
+|---|---|
+| **即時字幕** | 開會時抓這台電腦播出的聲音（Teams、Zoom、現場收音），即時顯示原文與翻譯字幕。對方說印尼文、越南文、印地語、英文、日文、韓文都可以，翻成中文；勾「我也要說話」就雙向翻譯 |
+| **三種字幕顯示** | 原文＋翻譯、只看翻譯、只看原文；可以選「我要看的語言」，字幕也能浮在所有視窗最上面 |
+| **分享給手機看** | 一台電腦收音，其他人掃 QR Code 用手機看字幕（只能看、要輸入同仁密碼） |
+| **錄音 → 會議紀錄** | 上傳錄音或會議錄影（mp3、m4a、wav、mp4），產出逐字稿、翻譯，以及中文會議紀錄（決議、待辦、風險） |
+| **五種語言介面** | 中文、English、Bahasa Indonesia、Tiếng Việt、हिन्दी，第一次使用有導覽 |
+| **資料去向一看就知道** | 頁面上方顯示語音與文字在哪裡處理：只在這台電腦、公司內部伺服器、集團 AI 平台，或公司外部的 AI 服務（橘色提醒） |
+| **一鍵更新** | 有新版時頁面上方出現「立即更新」，約 1 分鐘自動完成 |
+
+| 即時字幕 | 錄音 → 會議紀錄 |
+|---|---|
+| ![即時字幕](group/docs/images/simple-live.png) | ![錄音轉會議紀錄](group/docs/images/simple-file.png) |
+
+![印尼文介面](group/docs/images/simple-live-id.png)
+
+### 給 IT
+
+| 功能 | 說明 |
+|---|---|
+| **離線單一安裝檔** | 一個 exe 包含程式、Python、語音辨識與翻譯模型，同仁電腦**不用網路、不用系統管理員**；預設裝到 `D:\PCG-live-whisper` |
+| **兩種運作模式** | **本機模式**：全部在同仁電腦的 CPU 上跑（翻譯用 M2M100），不需要任何伺服器。**伺服器模式**：翻譯與 AI 會議紀錄交給大模型，語音辨識可交給 GPU 伺服器（選填；連不上時自動改回本機辨識） |
+| **大模型三種接法** | 集團 Open WebUI（luna、deepseek）、內部伺服器（RTX Spark、Ollama、vLLM）、外部 AI 服務（OpenAI、DeepSeek、Gemini、OpenRouter），按「測試連線」列出模型 |
+| **IT 設定頁** | 網頁上改設定、存檔就生效，不用改設定檔、不用重裝；IT 密碼保護 |
+| **更新** | 小更新包（約 11 MB，只換程式）；一鍵更新可從 GitHub 或**公司共用資料夾**取得（不能上網的電腦也能更新），安裝前比對檔案指紋 |
+| **版本號** | 每個畫面都顯示版本，回報問題時好對照 |
+| **自動測試** | 每次發布前在乾淨的 Windows 上實際安裝、自我檢查、套用小更新包、一鍵更新，全部通過才發布 |
+
+![IT 設定頁](group/docs/images/admin.png)
+
+### 資料去向
+
+- **本機模式、內部伺服器**：語音與文字都不離開公司內網
+- **集團 Open WebUI**：翻譯與會議紀錄送到集團的 AI 平台（luna、deepseek 不一定是開源模型）
+- **外部 AI 服務**：資料會送出公司並依用量計費，IT 設定頁與同仁頁面都會提醒
+
+下方是原作者 jt-live-whisper 的說明。其中「100% 全地端」「所有模型皆為自由開源」「不需要雲端 API」只適用於本機模式與內部伺服器。
+
+---
+
+# 原作者說明：jt-live-whisper v2.34.0
 
 **100% 全地端 AI 語音工具箱**：即時轉錄、即時翻譯、錄音檔批次處理、講者辨識、會議摘要、台灣華語朗讀，所有 AI 模型皆在自有設備上執行，資料不經過任何雲端服務。
 
