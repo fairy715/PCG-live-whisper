@@ -55,6 +55,7 @@ class SimpleFlow(unittest.TestCase):
         self.local = True
         self.started = []
         self.view_pw = []
+        self.gpu_up = True
         app = FastAPI()
 
         async def start_live(body):
@@ -65,7 +66,7 @@ class SimpleFlow(unittest.TestCase):
             lambda c: self.cfg.write_text(json.dumps(c, ensure_ascii=False), encoding="utf-8"),
             start_live=start_live, live_running=lambda: False,
             live_args=lambda: ["python", "translate_meeting.py", "--webui", "--mode", "id_zh"],
-            set_view_password=self.view_pw.append)
+            set_view_password=self.view_pw.append, gpu_alive=lambda h, p: self.gpu_up)
         self.c = TestClient(app)
         self.h = {"X-Client-Id": "browserA1234"}
 
@@ -320,6 +321,41 @@ class AdminPage(SimpleFlow):
             self.assertEqual(self.post("/api/simple/admin/save", {"backend": "server", "llm_url": bad}, tok).json()["code"],
                              "bad_host", bad)
 
+    def test_gpu_down_falls_back_to_local(self):
+        """GPU 伺服器有設但連不上：辨識改在本機用小模型（不要在 CPU 上硬跑 large-v3-turbo）"""
+        self.gpu_up = False
+        self.cfg.write_text(json.dumps({"pcg_simple": {"backend": "server"}, "llm_host": "10.0.0.6",
+                                        "remote_whisper": {"host": "10.0.0.5", "whisper_port": 8978}}), encoding="utf-8")
+        jid = self.submit().json()["id"]
+        self.wait(jid)
+        args = (self.base / "args.txt").read_text(encoding="utf-8")
+        for want in ("--local-asr", "-m small", "--summarize", "-e llm"):
+            self.assertIn(want, args)
+
+    def test_external_ai(self):
+        """外部 AI 服務（OpenAI 相容）：base URL 原樣保留（含 /v1）、一定要金鑰"""
+        self.post("/api/simple/admin/password", {"new": "itpass1"})
+        tok = "itpass1"
+        body = {"backend": "server", "llm_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+                "llm_api_style": "openai", "llm_model": "gemini-2.5-flash"}
+        self.assertEqual(self.post("/api/simple/admin/save", body, tok).json()["code"], "need_key")
+        r = self.post("/api/simple/admin/save", {**body, "llm_api_key": "AIza-test"}, tok).json()
+        self.assertTrue(r["ok"], r)
+        cfg = json.loads(self.cfg.read_text(encoding="utf-8"))
+        self.assertEqual((cfg["llm_url"], cfg["llm_api_style"]),
+                         ("https://generativelanguage.googleapis.com/v1beta/openai", "openai"))
+        self.post("/api/simple/admin/save", {**body, "llm_url": "https://api.openai.com/v1"}, tok)
+        self.assertEqual(json.loads(self.cfg.read_text(encoding="utf-8"))["llm_url"], "https://api.openai.com/v1")
+        self.assertEqual(self.post("/api/simple/admin/save", {}, tok).json().get("code"), None)
+        # 內部伺服器（RTX Spark 上的 Ollama）不用金鑰
+        r = self.post("/api/simple/admin/save", {"backend": "server", "llm_url": "192.168.1.60:11434",
+                                                  "llm_api_style": "auto", "clear_llm_api_key": True}, tok).json()
+        self.assertTrue(r["ok"], r)
+        self.assertEqual(r["state"]["llm_api_style"], "auto")
+        # Open WebUI 沒金鑰也不行
+        self.assertEqual(self.post("/api/simple/admin/save", {"backend": "server", "llm_url": "https://ai.example.com",
+                                                               "llm_api_style": "openwebui"}, tok).json()["code"], "need_key")
+
     def test_openwebui_connection_test(self):
         """測試連線：帶 Bearer 金鑰查 /api/models，列出 luna、deepseek；金鑰錯時講清楚"""
         import threading
@@ -353,6 +389,10 @@ class AdminPage(SimpleFlow):
                                                       "llm_api_key": "sk-bad"}, "itpass1").json()
             self.assertFalse(r["llm"]["ok"])
             self.assertIn("API 金鑰", r["llm"]["detail"])
+            # 外部 AI 服務：base URL 後面直接接 /models
+            r = self.post("/api/simple/admin/test", {"llm_url": url + "/api", "llm_api_style": "openai",
+                                                      "llm_api_key": "sk-good"}, "itpass1").json()
+            self.assertEqual((r["llm"]["ok"], r["llm"]["style"], r["llm"]["models"]), (True, "openai", ["luna", "deepseek-pro"]))
         finally:
             srv.shutdown()
 

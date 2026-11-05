@@ -30,7 +30,7 @@
 | ② GPU 主機 | 語音辨識、翻譯、摘要（最吃算力的部分） | NVIDIA DGX Spark，或 RTX 4090／5090（24 GB 以上顯示記憶體）＋ 64 GB 記憶體；同時跑辨識和大模型 |
 | ③ 同仁電腦 | 只有要「即時字幕」的人需要安裝 | Windows 10／11 或 Mac；辨識與翻譯交給 ②，所以一般文書機即可 |
 
-- **所有語音與文字都不離開公司內網**：不需要任何雲端 API（接集團 Open WebUI 時，文字會送到 Open WebUI 背後的模型，請先確認 luna／deepseek 是集團內部主機，見下方「接集團 Open WebUI」）
+- **本機模式與內部伺服器：語音與文字都不離開公司內網**。接集團 Open WebUI 時，文字會送到它背後的模型（請確認 luna／deepseek 在集團內部）；選「外部 AI 服務」時會送出公司（見下方「伺服器模式：大模型有三種接法」）
 - ① 和 ② 可以是同一台，但原作者建議分開：GPU 主機同時跑大模型時，網頁與檔案處理放另一台比較穩
 - 即時字幕一定要在 ③ 本機跑：它擷取的是**那台電腦播出來的聲音**（Teams、Zoom），伺服器拿不到
 
@@ -83,21 +83,50 @@ bash install.sh --server
 
 設定存在同一個 `config.json`（密碼都是雜湊），格式與原作者的程式相同。
 
-### 接集團 Open WebUI（luna、deepseek）
+### 伺服器模式：大模型有三種接法
 
-集團的 AI 一律經 Open WebUI 使用，不用自己架大模型：
+IT 設定頁的「伺服器類型」：
+
+| 類型 | 什麼時候用 | 網址 | API 金鑰 |
+|---|---|---|---|
+| 集團 Open WebUI | 現在（luna、deepseek） | 瀏覽器打開 Open WebUI 的網址 | 必填 |
+| 內部伺服器 | 買到 RTX Spark／DGX Spark，或自己架 Ollama、vLLM | `主機:11434` | 通常不用 |
+| 外部 AI 服務 | OpenAI、DeepSeek、Google Gemini、OpenRouter 等 | 點按鈕自動帶入 base URL | 必填 |
+
+GPU 伺服器（語音辨識）跟大模型是分開的，可以任意搭配：例如大模型用集團 Open WebUI、辨識用自己的 RTX Spark。
+GPU 伺服器有填但當下連不上時，會自動改在同仁電腦上用小模型辨識，不會卡住。
+
+#### 集團 Open WebUI（luna、deepseek）
 
 1. 到 Open WebUI 建一把 API 金鑰：登入 → 右上角頭像 → 設定 → 帳號 → API 金鑰 → 建立
    （看不到這個選項：請集團 AI 管理者在「管理員設定 → 使用者權限」開放 API Keys）
-2. IT 設定頁：模式選「伺服器模式」，大模型伺服器網址填瀏覽器打開 Open WebUI 的網址（例如 `https://ai.公司網域`），
-   伺服器類型選「Open WebUI」，貼上 API 金鑰
+2. IT 設定頁：模式選「伺服器模式」，類型選「集團 Open WebUI」，填網址（例如 `https://ai.公司網域`），貼上金鑰
 3. 按「測試連線」，從清單選模型：**翻譯選 luna**（快，即時字幕不延遲），**會議紀錄選 deepseek**（推理型，慢但完整）
-4. 沒有 GPU 伺服器就把 GPU 欄位留空：辨識在同仁電腦的 CPU 上跑（small 模型），翻譯與會議紀錄交給 luna／deepseek
+4. 沒有 GPU 伺服器就把 GPU 欄位留空：辨識在同仁電腦的 CPU 上跑（small 模型）
 
-注意：
-- 金鑰是**個人**的：用誰的金鑰，Open WebUI 的用量就記在誰身上。建議向 AI 管理者申請一個專用帳號
-- 同仁電腦要連得到 Open WebUI（離線、不能上網的電腦也要能連到集團內網的這個網址）
-- 程式呼叫的是 Open WebUI 的 `/api/chat/completions` 與 `/api/models`（設定檔 `llm_api_style: "openwebui"`、`llm_url`、`llm_api_key`）
+注意：金鑰是**個人**的，用量記在申請人名下，建議申請專用帳號；同仁電腦要連得到 Open WebUI 的網址。
+
+#### 內部伺服器（RTX Spark、DGX Spark）
+
+買到之後，同一台可以同時當「大模型」和「GPU 語音辨識」：
+
+- **大模型**：在 Spark 上裝 Ollama 並下載模型，讓區網連得到（`OLLAMA_HOST=0.0.0.0`）。IT 設定頁類型選「內部伺服器」，填 `Spark的IP:11434`
+- **GPU 語音辨識**：Spark 上要跑原作者的 GPU 辨識服務（`remote_whisper_server.py`，支援 aarch64 的 DGX Spark）。
+  在 IT 設定頁「GPU 伺服器」填 `Spark的IP`、Port `8978`
+  - DGX Spark（DGX OS／Ubuntu）：從一台 Linux 或 Mac 執行 `bash install.sh`，問到 GPU 伺服器時填 Spark 的位址，會透過 SSH 自動安裝並設成開機自動啟動
+  - RTX Spark 筆電（Windows on Arm）：辨識服務只有 Linux 版，要在 WSL2 裡安裝；**到貨後需要實測**
+- 同仁電腦**只用網址**連 GPU 服務，不需要也不會用 SSH（服務由 Spark 上的 systemd 常駐）
+- 只有大模型、沒有 GPU 辨識也可以：照樣能翻譯、出會議紀錄
+
+#### 外部 AI 服務（OpenAI、DeepSeek、Gemini…）
+
+- **會議內容會送出公司**，並依用量計費：先確認符合公司資料規範，機密會議請用 Open WebUI 或內部伺服器
+- 用公司帳號申請金鑰，並在服務的網站設定每月用量上限
+- 類型選「外部 AI 服務」→ 點 OpenAI／DeepSeek／Google Gemini／OpenRouter 帶入網址 → 貼金鑰 → 測試連線 → 選模型
+- 其他 OpenAI 相容的服務也可以，填它文件上的 base URL（通常以 `/v1` 結尾）。Azure OpenAI 不支援（認證方式不同），可改用 OpenRouter 或架 LiteLLM 代理
+
+設定檔欄位（給除錯用）：`llm_url`、`llm_api_key`、`llm_api_style`（`openwebui`／`openai`／沒有＝內部自動偵測）、`remote_whisper.host`。
+
 建議另外到完整 WebUI 的「安全設定」限制來源 IP（只允許公司網段）。
 
 **同仁的網址：`http://應用伺服器:19781/simple`**（完整版 WebUI 在 `/`，給 IT 用）

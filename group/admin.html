@@ -40,6 +40,10 @@ label.f>input,label.f>select{margin-top:4px}
 .res{font-size:14px;margin-top:10px;padding:10px 12px;border-radius:10px}
 .res.ok{background:var(--ok-soft);color:var(--ok)}.res.err{background:var(--err-soft);color:var(--err)}.res.warn{background:var(--warn-soft);color:var(--warn)}
 .note{font-size:13px;color:var(--dim);margin:6px 0 0}
+h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:first-of-type{margin-top:4px}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
+.chip{border:1px solid var(--accent);background:none;color:var(--accent);border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer}
+.chip:hover{background:var(--accent-soft)}
 [hidden]{display:none!important}
 @media (max-width:560px){.modes{grid-template-columns:1fr}.row{grid-template-columns:1fr 90px}}
 </style>
@@ -73,15 +77,22 @@ label.f>input,label.f>select{margin-top:4px}
 
     <div class="card" id="cServer">
       <h2 data-t="servers_title"></h2>
-      <label class="f"><span data-t="llm_url"></span><input type="text" id="llmUrl" placeholder="https://ai.example.com"></label>
-      <p class="note" data-t="llm_url_note"></p>
-      <div class="row" style="grid-template-columns:1fr 1fr">
-        <label class="f"><span data-t="llm_style"></span>
-          <select id="llmStyle"><option value="openwebui" data-t="style_owui"></option><option value="auto" data-t="style_auto"></option></select></label>
-        <label class="f"><span id="llmKeyLabel"></span><input type="password" id="llmKey" autocomplete="off" data-t-ph="llm_key_ph"></label>
+      <h3 class="sub" data-t="llm_section"></h3>
+      <label class="f"><span data-t="llm_style"></span>
+        <select id="llmStyle"><option value="openwebui" data-t="style_owui"></option><option value="auto" data-t="style_auto"></option><option value="openai" data-t="style_ext"></option></select></label>
+      <div id="extWarn" class="res warn" hidden data-t="ext_warn"></div>
+      <div class="presets" id="presets" hidden>
+        <button type="button" class="chip" data-u="https://api.openai.com/v1">OpenAI</button>
+        <button type="button" class="chip" data-u="https://api.deepseek.com/v1">DeepSeek</button>
+        <button type="button" class="chip" data-u="https://generativelanguage.googleapis.com/v1beta/openai">Google Gemini</button>
+        <button type="button" class="chip" data-u="https://openrouter.ai/api/v1">OpenRouter</button>
       </div>
+      <label class="f"><span data-t="llm_url"></span><input type="text" id="llmUrl" placeholder="https://ai.example.com"></label>
+      <p class="note" id="llmUrlNote"></p>
+      <label class="f"><span id="llmKeyLabel"></span><input type="password" id="llmKey" autocomplete="off" data-t-ph="llm_key_ph"></label>
       <label class="check" id="clearKeyWrap" hidden><input type="checkbox" id="clearKey"><span data-t="clear_llm_key"></span></label>
-      <p class="note" data-t="llm_key_note"></p>
+      <p class="note" id="llmKeyNote"></p>
+      <h3 class="sub" data-t="gpu_section"></h3>
       <div class="row">
         <label class="f"><span data-t="gpu_host"></span><input type="text" id="gpuHost" placeholder="192.168.1.50" data-t-ph="gpu_ph"></label>
         <label class="f"><span data-t="port"></span><input type="number" id="gpuPort" min="1" max="65535"></label>
@@ -134,15 +145,22 @@ zh:{title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式
   login_title:'IT 登入',login_note:'這一頁只給 IT 使用。',set_pw_btn:'設定密碼',pw_mismatch:'兩次輸入的密碼不一樣',
   local_only:'第一次設定 IT 密碼只能在這台電腦上操作',pw_wrong:'IT 密碼不正確',too_short:'密碼至少 6 個字',
   mode_title:'運作模式',mode_local:'本機模式',mode_local_s:'全部在這台電腦的 CPU 上跑，不需要伺服器、不連網。翻譯用 M2M100；不產出 AI 會議紀錄。',
-  mode_server:'伺服器模式',mode_server_s:'翻譯與會議紀錄交給大模型伺服器（集團 Open WebUI 或自建 Ollama），會產出 AI 會議紀錄。有 GPU 伺服器時語音辨識也交給它；沒有就在這台電腦辨識。',
+  mode_server:'伺服器模式',mode_server_s:'翻譯與會議紀錄交給大模型（集團 Open WebUI、內部伺服器或外部 AI 服務），會產出 AI 會議紀錄。有 GPU 伺服器時語音辨識也交給它；沒有就在這台電腦辨識。',
   m2m_missing:'這台電腦沒有安裝本機翻譯模型（M2M100）：本機模式的翻譯不能用。請用集團版離線安裝包重新安裝。',
-  servers_title:'伺服器',gpu_host:'GPU 伺服器（語音辨識）位址（選填）',gpu_ph:'沒有就留空',port:'Port',test:'測試連線',testing:'測試中…',
-  gpu_note:'留空＝語音辨識在這台電腦上跑（用下方「本機辨識模型」），翻譯與會議紀錄仍交給大模型伺服器。',
-  llm_url:'大模型伺服器網址',llm_url_note:'集團 Open WebUI：填瀏覽器打開它的網址（例如 https://ai.公司網域）。自建 Ollama：填 主機:11434。',
-  llm_style:'伺服器類型',style_owui:'Open WebUI（集團 AI）',style_auto:'Ollama／其他（自動偵測）',
+  servers_title:'伺服器',gpu_host:'位址（選填）',gpu_ph:'沒有就留空',port:'Port',test:'測試連線',testing:'測試中…',
+  gpu_note:'留空＝語音辨識在這台電腦上跑（用下方「本機辨識模型」）。有填但當下連不上時，也會自動改在這台電腦辨識。',
+  llm_section:'大模型（翻譯、會議紀錄）',gpu_section:'GPU 伺服器（語音辨識）',
+  llm_url:'網址',llm_style:'伺服器類型',style_owui:'集團 Open WebUI（luna、deepseek）',style_auto:'內部伺服器（RTX Spark、Ollama 等）',style_ext:'外部 AI 服務（OpenAI、DeepSeek、Gemini…）',
+  url_owui:'填瀏覽器打開 Open WebUI 的網址，例如 https://ai.公司網域',
+  url_auto:'填 主機:連接埠，例如 192.168.1.60:11434（Ollama）。vLLM、LM Studio 等 OpenAI 相容的也可以，程式會自動判斷。',
+  url_ext:'點上面的服務自動帶入，或填該服務文件寫的 base URL（OpenAI 相容，通常以 /v1 結尾）。Azure OpenAI 不支援，請改用 OpenRouter 或請 IT 架 LiteLLM。',
+  ext_warn:'注意：會議的逐字稿、字幕內容會送到公司外部的 AI 服務，並依用量計費。請先確認符合公司資料規範，機密會議請改用集團 Open WebUI 或內部伺服器。',
+  key_auto:'內部伺服器通常不用金鑰，留空即可。',
+  key_ext:'到該服務的網站建立 API 金鑰（請用公司帳號，並設定用量上限）。金鑰只存在這台電腦，不會顯示出來。',
+  need_key:'這種伺服器要填 API 金鑰',
   llm_key:'API 金鑰',llm_key_set:'API 金鑰：已設定（要換才填）',llm_key_ph:'sk-…',clear_llm_key:'刪除已存的 API 金鑰',
-  llm_key_note:'Open WebUI 要金鑰：登入 Open WebUI → 右上角頭像 → 設定 → 帳號 → API 金鑰 → 建立。沒有這個選項請集團 AI 管理者開放「API Keys」權限。金鑰只存在這台電腦，不會顯示出來。',
-  model_note:'按「測試連線」後可以從清單選。建議：翻譯選 luna（快，即時字幕不延遲）；會議紀錄選 deepseek（推理型，慢但較完整）。',
+  key_owui:'Open WebUI 要金鑰：登入 Open WebUI → 右上角頭像 → 設定 → 帳號 → API 金鑰 → 建立。沒有這個選項請集團 AI 管理者開放「API Keys」權限。金鑰只存在這台電腦，不會顯示出來。',
+  model_note:'按「測試連線」後可以從清單選。翻譯選速度快的模型，即時字幕才不會延遲（集團：luna）；會議紀錄選能力強的模型，慢一點沒關係（集團：deepseek）。',
   gpu_ok:'GPU 伺服器連線正常',gpu_fail:'GPU 伺服器連不上',llm_ok:'大模型伺服器連線正常（{type}，{n} 個模型）',llm_fail:'大模型伺服器連不上',
   llm_model:'翻譯模型',summary_model:'會議紀錄（摘要）模型',default_ph:'留空＝主程式預設',asr_model:'辨識模型（GPU 伺服器）',
   local_title:'本機辨識模型',live_model:'即時字幕',file_model:'錄音檔',
@@ -152,21 +170,28 @@ zh:{title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式
   staff_pw:'同仁密碼（從別台電腦用簡易頁面、看分享的字幕時要輸入；這台電腦不用）',staff_pw_set:'同仁密碼：已設定（要改才填）',staff_pw_ph:'留空＝不變更',clear_staff_pw:'取消同仁密碼（不需要密碼）',
   save:'儲存',saved:'已儲存，下一次開始字幕或處理錄音就會使用新設定',back:'回到簡易頁面',change_it_pw:'變更 IT 密碼',
   new_it_pw:'請輸入新的 IT 密碼（至少 6 個字）',pw_changed:'IT 密碼已變更',
-  need_llm:'伺服器模式要填大模型伺服器網址',bad_host:'位址格式不正確',bad_key:'API 金鑰格式不正確',error:'發生錯誤'},
+  need_llm:'伺服器模式要填大模型的網址',bad_host:'位址格式不正確',bad_key:'API 金鑰格式不正確',error:'發生錯誤'},
 en:{title:'PCG Meeting Translator: IT settings',tagline:'Switch between local and server mode and set server addresses. Changes take effect immediately; no reinstall needed.',
   it_password:'IT password',it_password_again:'Enter it again',login:'Sign in',set_pw_title:'Set the IT password',set_pw_note:'First use: set an IT password (at least 6 characters). It will be required to open this page. Staff do not need it.',
   login_title:'IT sign-in',login_note:'This page is for IT only.',set_pw_btn:'Set password',pw_mismatch:'The two passwords do not match',
   local_only:'The first IT password can only be set on this computer',pw_wrong:'Incorrect IT password',too_short:'At least 6 characters',
   mode_title:'Mode',mode_local:'Local mode',mode_local_s:'Everything runs on this computer’s CPU: no server, no internet. Translation uses M2M100; no AI meeting minutes.',
-  mode_server:'Server mode',mode_server_s:'Translation and minutes on the LLM server (group Open WebUI or your own Ollama), with AI meeting minutes. Speech recognition runs on the GPU server if you have one, otherwise on this computer.',
+  mode_server:'Server mode',mode_server_s:'Translation and minutes on an LLM (group Open WebUI, an internal server or an external AI service), with AI meeting minutes. Speech recognition runs on the GPU server if you have one, otherwise on this computer.',
   m2m_missing:'The local translation model (M2M100) is not installed on this computer, so translation will not work in local mode. Reinstall with the offline package.',
-  servers_title:'Servers',gpu_host:'GPU server (speech recognition) address (optional)',gpu_ph:'Leave blank if none',port:'Port',test:'Test connection',testing:'Testing…',
-  gpu_note:'Blank = speech recognition runs on this computer (see “Local recognition models” below); translation and minutes still go to the LLM server.',
-  llm_url:'LLM server URL',llm_url_note:'Group Open WebUI: the address you open in the browser (e.g. https://ai.company-domain). Your own Ollama: host:11434.',
-  llm_style:'Server type',style_owui:'Open WebUI (group AI)',style_auto:'Ollama / other (auto-detect)',
+  servers_title:'Servers',gpu_host:'Address (optional)',gpu_ph:'Leave blank if none',port:'Port',test:'Test connection',testing:'Testing…',
+  gpu_note:'Blank = speech recognition runs on this computer (see “Local recognition models” below). If it is set but unreachable at the time, recognition also falls back to this computer.',
+  llm_section:'LLM (translation, minutes)',gpu_section:'GPU server (speech recognition)',
+  llm_url:'URL',llm_style:'Server type',style_owui:'Group Open WebUI (luna, deepseek)',style_auto:'Internal server (RTX Spark, Ollama, etc.)',style_ext:'External AI service (OpenAI, DeepSeek, Gemini…)',
+  url_owui:'The address you open Open WebUI with in the browser, e.g. https://ai.company-domain',
+  url_auto:'host:port, e.g. 192.168.1.60:11434 (Ollama). OpenAI-compatible servers such as vLLM or LM Studio also work; the type is detected automatically.',
+  url_ext:'Click a service above to fill it in, or enter the base URL from the service’s docs (OpenAI-compatible, usually ending in /v1). Azure OpenAI is not supported; use OpenRouter or a LiteLLM proxy.',
+  ext_warn:'Note: meeting transcripts and subtitles are sent to an AI service outside the company and billed by usage. Check this meets company data rules; use the group Open WebUI or an internal server for confidential meetings.',
+  key_auto:'Internal servers usually need no key; leave blank.',
+  key_ext:'Create an API key on the service’s website (use a company account and set a spending limit). The key stays on this computer and is never shown.',
+  need_key:'This server type needs an API key',
   llm_key:'API key',llm_key_set:'API key: set (fill in only to replace)',llm_key_ph:'sk-…',clear_llm_key:'Delete the saved API key',
-  llm_key_note:'Open WebUI needs a key: sign in → avatar (top right) → Settings → Account → API keys → Create. If the option is missing, ask the group AI admin to grant the “API Keys” permission. The key stays on this computer and is never shown.',
-  model_note:'After “Test connection” you can pick from the list. Suggested: luna for translation (fast, no lag in live subtitles); deepseek for minutes (reasoning model, slower but more thorough).',
+  key_owui:'Open WebUI needs a key: sign in → avatar (top right) → Settings → Account → API keys → Create. If the option is missing, ask the group AI admin to grant the “API Keys” permission. The key stays on this computer and is never shown.',
+  model_note:'After “Test connection” you can pick from the list. Use a fast model for translation so live subtitles keep up (group: luna) and a stronger model for minutes, where speed matters less (group: deepseek).',
   gpu_ok:'GPU server is reachable',gpu_fail:'Cannot reach the GPU server',llm_ok:'LLM server is reachable ({type}, {n} models)',llm_fail:'Cannot reach the LLM server',
   llm_model:'Translation model',summary_model:'Minutes (summary) model',default_ph:'Blank = program default',asr_model:'Recognition model (GPU server)',
   local_title:'Local recognition models',live_model:'Live subtitles',file_model:'Recordings',
@@ -176,7 +201,7 @@ en:{title:'PCG Meeting Translator: IT settings',tagline:'Switch between local an
   staff_pw:'Staff password (needed from other computers for the simple page and shared subtitles; not on this computer)',staff_pw_set:'Staff password: set (fill in only to change)',staff_pw_ph:'Blank = unchanged',clear_staff_pw:'Remove the staff password',
   save:'Save',saved:'Saved. New settings apply the next time subtitles start or a recording is processed',back:'Back to the simple page',change_it_pw:'Change IT password',
   new_it_pw:'Enter a new IT password (at least 6 characters)',pw_changed:'IT password changed',
-  need_llm:'Server mode needs the LLM server URL',bad_host:'Invalid address',bad_key:'Invalid API key',error:'Something went wrong'}};
+  need_llm:'Server mode needs the LLM URL',bad_host:'Invalid address',bad_key:'Invalid API key',error:'Something went wrong'}};
 const $=id=>document.getElementById(id);
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 let lang=store.get('pcg_lang')==='zh'||!store.get('pcg_lang')?'zh':'en';
@@ -189,7 +214,7 @@ function applyLang(){
   $('loginTitle').textContent=t(firstTime?'set_pw_title':'login_title');$('loginNote').textContent=t(firstTime?'set_pw_note':'login_note');
   $('loginBtn').textContent=t(firstTime?'set_pw_btn':'login');
   $('staffPwLabel').textContent=t(state&&state.staff_password_set?'staff_pw_set':'staff_pw');
-  $('llmKeyLabel').textContent=t(state&&state.llm_api_key_set?'llm_key_set':'llm_key');
+  styleVis();
 }
 $('langSel').value=lang;$('langSel').onchange=()=>{lang=$('langSel').value;applyLang()};
 async function api(path,body){
@@ -224,7 +249,7 @@ function showMain(){
   $('pLogin').hidden=true;$('pMain').hidden=false;
   document.querySelector(`input[name=backend][value=${state.backend}]`).checked=true;
   $('gpuHost').value=state.gpu_host||'';$('gpuPort').value=state.gpu_port||8978;
-  $('llmUrl').value=state.llm_url||'';$('llmStyle').value=state.llm_api_style==='openwebui'||!state.llm_url?'openwebui':'auto';
+  $('llmUrl').value=state.llm_url||'';$('llmStyle').value=state.llm_url?(state.llm_api_style||'auto'):'openwebui';
   $('llmKey').value='';$('clearKey').checked=false;$('clearKeyWrap').hidden=!state.llm_api_key_set;
   $('llmModel').value=state.llm_model||'';$('sumModel').value=state.summary_model||'';
   $('asrModel').value=state.asr_model||'large-v3-turbo';
@@ -232,6 +257,16 @@ function showMain(){
   $('diarize').checked=!!state.diarize;$('remoteView').checked=!!state.allow_remote_view;$('clearStaffWrap').hidden=!state.staff_password_set;
   modeVis();applyLang();
 }
+function styleVis(){
+  const st=$('llmStyle').value,k={openwebui:'owui',auto:'auto',openai:'ext'}[st]||'auto';
+  $('llmUrlNote').textContent=t('url_'+k);$('llmKeyNote').textContent=t('key_'+k);
+  $('extWarn').hidden=$('presets').hidden=st!=='openai';
+  $('llmUrl').placeholder={openwebui:'https://ai.example.com',auto:'192.168.1.60:11434',openai:'https://api.openai.com/v1'}[st];
+  $('llmModel').placeholder={openwebui:'luna',auto:'gemma4:26b',openai:''}[st];
+  $('llmKeyLabel').textContent=t(state&&state.llm_api_key_set?'llm_key_set':'llm_key')+(st==='auto'?(lang==='zh'?'（選填）':' (optional)'):'');
+}
+$('llmStyle').onchange=()=>{styleVis();$('modelList').innerHTML=''};
+document.querySelectorAll('#presets .chip').forEach(b=>b.onclick=()=>{$('llmUrl').value=b.dataset.u;$('llmModel').value='';$('sumModel').value=''});
 function modeVis(){
   const server=document.querySelector('input[name=backend]:checked')?.value==='server';
   const gpu=!!$('gpuHost').value.trim();
@@ -250,7 +285,7 @@ $('testBtn').onclick=async()=>{
   if(j.gpu)out.push([j.gpu.ok,j.gpu.ok?t('gpu_ok')+(j.gpu.detail?`（${j.gpu.detail}）`:''):`${t('gpu_fail')}：${j.gpu.detail}`]);
   if(j.llm){out.push([j.llm.ok,j.llm.ok?t('llm_ok',{type:j.llm.type,n:j.llm.models.length}):`${t('llm_fail')}：${j.llm.detail}`]);
     if(j.llm.ok){$('modelList').innerHTML=j.llm.models.map(m=>`<option value="${m.replace(/"/g,'&quot;')}">`).join('');
-      if(j.llm.style==='openwebui')$('llmStyle').value='openwebui'}}
+      if(j.llm.style==='openwebui'&&$('llmStyle').value!=='openwebui'){$('llmStyle').value='openwebui';styleVis()}}}
   if(!j.ok&&!out.length)out.push([false,errMsg(j)]);
   for(const [ok,msg] of out){const d=document.createElement('div');d.className='res '+(ok?'ok':'err');d.textContent=msg;$('testRes').appendChild(d)}
 };

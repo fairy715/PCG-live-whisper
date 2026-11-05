@@ -5837,7 +5837,7 @@ def _detect_llm_server(host, port):
     的 /api/generate 取不到 response 欄位而失敗。因此必須驗證回傳結構。
     """
     # 集團版：設成 Open WebUI 時直接走 OpenAI 相容（路徑由 _llm_url 換成 /api/models）；它彙整多個後端，回應較慢
-    owui = _llm_api_style() == "openwebui"
+    owui = _llm_api_style() in ("openwebui", "openai")
     # 先嘗試 Ollama：回傳須為 {"models": [...]} 結構
     try:
         if owui:
@@ -6112,7 +6112,7 @@ def _ssh_cmd_parts(rw_cfg):
 
 def _ssh_close_cm(rw_cfg):
     """關閉 SSH ControlMaster 多工連線"""
-    if IS_WINDOWS:
+    if IS_WINDOWS or not rw_cfg.get("ssh_user"):
         return
     ctrl_sock = _ssh_ctrl_sock(rw_cfg)
     if os.path.exists(ctrl_sock):
@@ -6172,6 +6172,10 @@ def _remote_whisper_start(rw_cfg, force_restart=False):
                     return  # 伺服器已在執行，直接沿用
         except Exception:
             pass  # 伺服器未執行或無回應，先清理再啟動
+    if not rw_cfg.get("ssh_user"):
+        # 集團版：IT 設定頁只填位址（服務在 GPU 主機上由 systemd 常駐），同仁電腦沒有 SSH 權限也不該有。
+        # 連不上就交給後面的 health check 降級本機辨識，不要去 SSH（以前這裡會 KeyError 或跳出密碼提示）
+        return
     # 先停掉舊的 server（避免 port 佔用或 event loop 阻塞導致無法回應）
     # **不可以用 pkill -f 'server.py --port N'**：這條指令自己的遠端 shell 命令列
     # 也含有那串字，pkill 會把自己一起殺掉，後面的指令就不會執行了。
@@ -19473,6 +19477,7 @@ def resolve_model(model_name):
 # 以前只認 http、沒寫連接埠就補 11434、路徑整段丟掉、不能帶 API 金鑰。比照 JTDT（LLMClient：完整網址＋Bearer 金鑰）。
 # 位址照舊以 (host, port) 在程式裡傳，https 與路徑記在這裡，組網址一律經 _llm_url、送請求一律經 _llm_request
 _LLM_EP = {}            # (host, port) → (scheme, 路徑前綴；不含結尾的 /v1)
+_LLM_EP_RAW = {}        # 集團版：(host, port) → 使用者填的原始路徑（含 /v1、/v1beta/openai 等），外部 AI 服務用
 
 
 def _parse_llm_host(text, default_port=None):
@@ -19496,6 +19501,7 @@ def _parse_llm_host(text, default_port=None):
     if any(c in path for c in " \t?#@\\"):
         return None, None, f"主機位址「{text.strip()}」格式不正確（路徑不能有空白、?、#）"
     path = "/" + path.strip("/") if path.strip("/") else ""
+    raw_path = path
     if path.lower().endswith("/v1"):            # OpenAI 相容的網址（…/v1）：/v1 由程式自己接
         path = path[:-3]
     host, port_txt = s, None
@@ -19522,13 +19528,18 @@ def _parse_llm_host(text, default_port=None):
         if not 1 <= port <= 65535:
             return None, None, f"連接埠 {port} 超出範圍（要 1～65535；Ollama 預設 11434）"
     _LLM_EP[(host, port)] = (scheme, path)
+    _LLM_EP_RAW[(host, port)] = raw_path
     return host, port, None
 
 
-# 集團版：Open WebUI 的 OpenAI 相容 API 路徑不同（/api/chat/completions、/api/models，沒有 /v1）。
-# config.json 的 llm_api_style 設成 "openwebui"（IT 設定頁）時，所有呼叫在這裡換路徑；
-# 認證沿用 llm_api_key（Bearer，Open WebUI 的個人 API 金鑰）。其他設定照舊
+# 集團版：config.json 的 llm_api_style（IT 設定頁的「伺服器類型」）決定 API 路徑，認證一律是 llm_api_key（Bearer）
+#   "openwebui"：集團 Open WebUI，/api/chat/completions、/api/models（沒有 /v1）
+#   "openai"   ：外部 AI 服務（OpenAI、DeepSeek、Gemini、OpenRouter…），網址填到 base URL 為止
+#                （例如 https://api.openai.com/v1、https://generativelanguage.googleapis.com/v1beta/openai），
+#                後面直接接 /chat/completions、/models
+#   沒設       ：原本的行為（Ollama 或 OpenAI 相容自動偵測；內部 Ollama、RTX Spark 走這個）
 _OPENWEBUI_PATHS = {"/v1/chat/completions": "/api/chat/completions", "/v1/models": "/api/models"}
+_OPENAI_BASE_PATHS = {"/v1/chat/completions": "/chat/completions", "/v1/models": "/models"}
 
 
 def _llm_api_style():
@@ -19544,9 +19555,12 @@ def _llm_api_style():
 
 def _llm_url(host, port, path):
     """LLM 伺服器上某支 API 的完整網址（path 以 / 開頭，例如 /api/tags、/v1/chat/completions）"""
-    if path in _OPENWEBUI_PATHS and _llm_api_style() == "openwebui":
-        path = _OPENWEBUI_PATHS.get(path, path)
+    style = _llm_api_style() if path in _OPENWEBUI_PATHS else ""
     scheme, prefix = _LLM_EP.get((host, port), ("http", ""))
+    if style == "openwebui":
+        path = _OPENWEBUI_PATHS[path]
+    elif style == "openai":
+        prefix, path = _LLM_EP_RAW.get((host, port), prefix + "/v1"), _OPENAI_BASE_PATHS[path]
     hp = host if (scheme, port) in (("http", 80), ("https", 443)) else f"{host}:{port}"
     return f"{scheme}://{hp}{prefix}{path}"
 

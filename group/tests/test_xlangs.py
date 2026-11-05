@@ -213,6 +213,28 @@ class OpenWebUI(unittest.TestCase):
         finally:
             os.environ.pop("JTLW_LLM_API_STYLE")
 
+    def test_external_base_url(self):
+        os.environ["JTLW_LLM_API_STYLE"] = "openai"
+        try:
+            for base, want in (("https://api.openai.com/v1", "https://api.openai.com/v1/chat/completions"),
+                               ("https://generativelanguage.googleapis.com/v1beta/openai",
+                                "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"),
+                               ("https://openrouter.ai/api/v1", "https://openrouter.ai/api/v1/chat/completions")):
+                h, p, err = t._parse_llm_host(base)
+                self.assertIsNone(err)
+                self.assertEqual(t._llm_url(h, p, "/v1/chat/completions"), want)
+                self.assertEqual(t._llm_url(h, p, "/v1/models"), want.replace("chat/completions", "models"))
+        finally:
+            os.environ.pop("JTLW_LLM_API_STYLE")
+
+    def test_gpu_server_without_ssh(self):
+        """IT 設定頁只存位址（沒有 ssh_user）：GPU 服務沒回應時不可以去 SSH（同仁電腦沒有權限，以前會 KeyError）"""
+        import unittest.mock as um
+        with um.patch.object(t.subprocess, "run") as run:
+            t._remote_whisper_start({"host": "127.0.0.1", "whisper_port": 1})
+            run.assert_not_called()
+            t._ssh_close_cm({"host": "127.0.0.1"})
+
 if __name__ == "__main__":
     unittest.main()
 

@@ -343,9 +343,13 @@ def _error_of(tail, rc):
     return "failed", f"處理失敗（錯誤碼 {rc}），請把這件工作的編號告訴 IT"
 
 
-def parse_llm(text):
+LLM_STYLES = ("openwebui", "openai")    # 沒設＝內部 Ollama／OpenAI 相容自動偵測（RTX Spark、自建伺服器）
+
+
+def parse_llm(text, keep_v1=False):
     """大模型伺服器位址 → (base_url, host, port, None)；格式不對 → (None, None, None, 說明)。
-    可填「主機」「主機:連接埠」（Ollama，預設 11434）或完整網址 http(s)://主機[:連接埠][/路徑]（Open WebUI、反向代理）"""
+    可填「主機」「主機:連接埠」（Ollama，預設 11434）或完整網址 http(s)://主機[:連接埠][/路徑]（Open WebUI、反向代理）。
+    keep_v1：外部 AI 服務的 base URL 原樣保留（…/v1、…/v1beta/openai），程式直接在後面接 /chat/completions"""
     s = (text or "").strip().rstrip("/")
     if not s:
         return None, None, None, "沒有填位址"
@@ -358,7 +362,7 @@ def parse_llm(text):
         return None, None, None, "只支援 http:// 或 https://"
     hostport, _, path = s.partition("/")
     path = ("/" + path.strip("/")) if path.strip("/") else ""
-    if path.lower().endswith("/v1"):
+    if path.lower().endswith("/v1") and not keep_v1:
         path = path[:-3]
     if not re.fullmatch(r"[A-Za-z0-9._\-/~%]*", path):
         return None, None, None, "路徑格式不正確"
@@ -374,19 +378,39 @@ def parse_llm(text):
 
 
 def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path, write_config,
-             start_live=None, live_running=None, live_args=None, set_view_password=None):
+             start_live=None, live_running=None, live_args=None, set_view_password=None, gpu_alive=None):
     """把簡易版的路由掛到 WebUI 的 FastAPI app 上（webui.py 呼叫）。
     start_live(body)：用 WebUI 原本的方式啟動即時字幕；live_running()：WebUI 是否正在跑"""
     from fastapi import File, Form, Request, UploadFile
     from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 
+    def _gpu_alive(host, port):
+        import urllib.request
+        try:
+            with urllib.request.urlopen(f"http://{host}:{port}/health", timeout=2) as r:
+                return r.status == 200
+        except Exception:
+            return False
+    alive_fn = gpu_alive or _gpu_alive
+    _alive_cache = {}
+
     def has_gpu():
+        """有設 GPU 伺服器、而且現在連得上。連不上（關機、斷線）就照「沒有 GPU」處理：辨識改在這台電腦用小模型，
+        不要讓主程式在 CPU 上硬跑 large-v3-turbo（i5 筆電會慢到不能用）。結果記 20 秒，避免每次都等逾時"""
         try:
             c = json.loads(config_file.read_text(encoding="utf-8")) if config_file.exists() else {}
         except (OSError, ValueError):
             c = {}
         rw = c.get("remote_whisper")
-        return bool(isinstance(rw, dict) and rw.get("host"))
+        if not (isinstance(rw, dict) and rw.get("host")):
+            return False
+        key = (str(rw["host"]), int(rw.get("whisper_port") or 8978))
+        hit = _alive_cache.get(key)
+        if hit and time.time() - hit[0] < 20:
+            return hit[1]
+        ok = bool(alive_fn(*key))
+        _alive_cache[key] = (time.time(), ok)
+        return ok
 
     def settings():
         try:
@@ -663,7 +687,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "llm_host": cfg.get("llm_host", ""), "llm_port": cfg.get("llm_port", 11434),
                 "llm_url": cfg.get("llm_url") or (f"{cfg['llm_host']}:{cfg.get('llm_port', 11434)}"
                                                   if cfg.get("llm_host") else ""),
-                "llm_api_style": "openwebui" if cfg.get("llm_api_style") == "openwebui" else "auto",
+                "llm_api_style": cfg.get("llm_api_style") if cfg.get("llm_api_style") in LLM_STYLES else "auto",
                 "llm_api_key_set": bool(str(cfg.get("llm_api_key") or "").strip()),
                 "llm_model": s.get("llm_model", ""), "summary_model": s.get("summary_model", ""),
                 "asr_model": s.get("asr_model", "large-v3-turbo"),
@@ -738,11 +762,14 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 return out
             key = str(body.get("llm_api_key") or "").strip() or str(read_cfg().get("llm_api_key") or "").strip()
             hdr = {"Authorization": f"Bearer {key}"} if key else {}
-            style = "openwebui" if body.get("llm_api_style") == "openwebui" else "auto"
+            style = body.get("llm_api_style") if body.get("llm_api_style") in LLM_STYLES else "auto"
+            if style == "openai":
+                base = parse_llm(raw, keep_v1=True)[0]
 
             def ids(d):
                 return [m.get("id") for m in (d.get("data") or []) if isinstance(m, dict) and m.get("id")]
             tries = ([("Open WebUI", "/api/models")] if style == "openwebui" else
+                     [("外部 AI 服務", "/models")] if style == "openai" else
                      [("Ollama", "/api/tags"), ("OpenAI 相容", "/v1/models"), ("Open WebUI", "/api/models")])
             first = None
             for kind, path in tries:
@@ -753,12 +780,13 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                     if path == "/api/tags" and not d.get("models") and "models" not in d:
                         raise ValueError("不是 Ollama")
                     out["llm"] = {"ok": True, "type": kind, "models": models,
-                                  "style": "openwebui" if kind == "Open WebUI" else "auto"}
+                                  "style": {"Open WebUI": "openwebui", "外部 AI 服務": "openai"}.get(kind, "auto")}
                     break
                 except Exception as e:
                     code = getattr(e, "code", None)
                     if code in (401, 403):
-                        first = "API 金鑰不正確或沒有權限（Open WebUI：設定 → 帳號 → API 金鑰）"
+                        first = ("API 金鑰不正確或沒有權限（Open WebUI：設定 → 帳號 → API 金鑰）" if style != "openai"
+                                 else "API 金鑰不正確、沒有權限或額度用完")
                     elif first is None:
                         first = f"{type(e).__name__}: {e}"[:200]
             else:
@@ -782,12 +810,23 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         if gh and not re.fullmatch(r"[A-Za-z0-9.\-:\[\]]{1,253}", gh):
             return JSONResponse({"ok": False, "code": "bad_host", "error": f"位址格式不正確：{gh}"},
                                 status_code=400)
+        style = body.get("llm_api_style") if "llm_api_style" in body else read_cfg().get("llm_api_style")
+        style = style if style in LLM_STYLES else ""
         llm = None
         if raw_llm:
-            base, lh, lp, perr = parse_llm(raw_llm)
+            base, lh, lp, perr = parse_llm(raw_llm, keep_v1=(style == "openai"))
             if perr:
                 return JSONResponse({"ok": False, "code": "bad_host", "error": perr}, status_code=400)
             llm = (base, lh, lp)
+        key = str(body.get("llm_api_key") or "").strip()
+        if key and (len(key) > 512 or any(c.isspace() for c in key)):
+            return JSONResponse({"ok": False, "code": "bad_key", "error": "API 金鑰格式不正確"}, status_code=400)
+        has_key = bool(key) or (bool(str(read_cfg().get("llm_api_key") or "").strip())
+                                and not body.get("clear_llm_api_key"))
+        if backend == "server" and style and not has_key:
+            # Open WebUI 與外部 AI 服務一定要金鑰；內部 Ollama／RTX Spark 不用
+            return JSONResponse({"ok": False, "code": "need_key",
+                                 "error": "這種伺服器要填 API 金鑰"}, status_code=400)
         cfg = read_cfg()
         s = cfg.setdefault("pcg_simple", {})
         s["backend"] = backend
@@ -810,19 +849,15 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         if llm:
             base, lh, lp = llm
             cfg["llm_host"], cfg["llm_port"] = lh, lp
-            if base == f"http://{lh}:{lp}":
+            if base == f"http://{lh}:{lp}" and style != "openai":
                 cfg.pop("llm_url", None)
             else:
                 cfg["llm_url"] = base          # https、路徑：主程式從 llm_url 解析
-        if "llm_api_style" in body:
-            if body.get("llm_api_style") == "openwebui":
-                cfg["llm_api_style"] = "openwebui"
-            else:
-                cfg.pop("llm_api_style", None)
-        key = str(body.get("llm_api_key") or "").strip()
+        if style:
+            cfg["llm_api_style"] = style
+        else:
+            cfg.pop("llm_api_style", None)
         if key:
-            if len(key) > 512 or any(c.isspace() for c in key):
-                return JSONResponse({"ok": False, "code": "bad_key", "error": "API 金鑰格式不正確"}, status_code=400)
             cfg["llm_api_key"] = key
         elif body.get("clear_llm_api_key"):
             cfg.pop("llm_api_key", None)
