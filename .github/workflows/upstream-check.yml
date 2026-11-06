@@ -53,15 +53,16 @@ jobs:
         if: steps.check.outputs.found == 'yes'
         run: |
           sha="${{ steps.check.outputs.sha }}"
+          # 一律指定集團版自己的 repo：這裡加了名為 upstream 的遠端，gh 沒指定時會把它當成要操作的 repo（原作者的專案）
           # 同一個更新只開一次：用標題裡的變更編號找（不靠標籤，標籤建不起來也一樣）
-          if gh issue list --state all --search "$sha in:title" --json number --jq '.[0].number' | grep -q .; then
+          if gh issue list --repo "$GITHUB_REPOSITORY" --state all --search "$sha in:title" --json number --jq '.[0].number' | grep -q .; then
             echo "這個更新（$sha）已經通知過"; exit 0
           fi
           title="$(head -n 1 result.md)"
           tail -n +3 result.md > body.md
-          if gh label create upstream --color 5319e7 --description "原作者有更新" --force; then
-            gh issue create --title "$title" --body-file body.md --label upstream
+          if gh label create upstream --repo "$GITHUB_REPOSITORY" --color 5319e7 --description "原作者有更新" --force; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body-file body.md --label upstream
           else
             echo "建不了標籤，改成不加標籤"
-            gh issue create --title "$title" --body-file body.md
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body-file body.md
           fi
