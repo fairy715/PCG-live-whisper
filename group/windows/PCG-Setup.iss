@@ -242,8 +242,9 @@ begin
     WizardForm.FilenameLabel.Caption := Elapsed;
     exit;
   end;
-  WizardForm.StatusLabel.Caption := FmtMessage(CustomMessage('StepFmt'),
-    [IntToStr(Step), IntToStr(Steps), CustomMessage('Step' + IntToStr(Step))]);
+  { 不能把「[」放在行首：Inno Setup 會當成區段標題（[Files] 之類） }
+  Detail := CustomMessage('Step' + IntToStr(Step));
+  WizardForm.StatusLabel.Caption := FmtMessage(CustomMessage('StepFmt'), [IntToStr(Step), IntToStr(Steps), Detail]);
   Detail := Elapsed;
   if (Step = 2) and (Total > 0) then
     Detail := FmtMessage(CustomMessage('PkgCount'), [IntToStr(Done), IntToStr(Total)]) + '  ·  ' + Elapsed;
