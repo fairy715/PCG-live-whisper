@@ -1,0 +1,143 @@
+# PCG 集團版：發布「NVIDIA GPU 加速包」（手動執行）
+# 只有裝了 NVIDIA 顯示卡的同仁電腦需要。內容是 CTranslate2（faster-whisper）用顯示卡時要的 CUDA 12 函式庫：
+# cuBLAS、cuDNN 9、NVRTC（從 NVIDIA 在 PyPI 發布的 wheel 取出 DLL），裝到 PCG 會議翻譯安裝資料夾的 gpu\cuda12\bin。
+# 雲端的 Windows 沒有顯示卡：這裡測的是「檔案齊全、裝得上去、沒有顯示卡時照常用 CPU」；
+# 真的用顯示卡辨識，要在有 NVIDIA 顯示卡的電腦上實測（裝完會自動檢查並跳視窗說結果）。
+# 發布在獨立的 Release（標籤 gpu-…，不是「最新版」），不影響主程式的一鍵更新與小更新包判斷。
+name: 發布 GPU 加速包
+
+on:
+  workflow_dispatch:
+    inputs:
+      cublas:
+        description: "nvidia-cublas-cu12 版本（CUDA 12）"
+        default: "12.4.5.8"
+        required: true
+      cudnn:
+        description: "nvidia-cudnn-cu12 版本（cuDNN 9）"
+        default: "9.1.0.70"
+        required: true
+      nvrtc:
+        description: "nvidia-cuda-nvrtc-cu12 版本"
+        default: "12.4.127"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  gpu-pack:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: utf-8
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安裝 Inno Setup 與安裝畫面的語言檔
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress }
+          New-Item -ItemType Directory -Force group/windows/lang | Out-Null
+          try { Invoke-WebRequest "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/ChineseTraditional.isl" -OutFile "group/windows/lang/ChineseTraditional.isl" } catch { Write-Host "略過中文語言檔" }
+
+      - name: 下載 NVIDIA 函式庫，取出 DLL
+        shell: pwsh
+        run: |
+          python -m pip download --only-binary=:all: --platform win_amd64 --python-version 3.12 --no-deps -d wheels `
+            "nvidia-cublas-cu12==${{ inputs.cublas }}" "nvidia-cudnn-cu12==${{ inputs.cudnn }}" "nvidia-cuda-nvrtc-cu12==${{ inputs.nvrtc }}"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python group/windows/gpu_pack_stage.py wheels dist/gpu-stage `
+            --versions "cublas=${{ inputs.cublas }},cudnn=${{ inputs.cudnn }},nvrtc=${{ inputs.nvrtc }}"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 確認 CTranslate2 要的檔案都在
+        shell: pwsh
+        run: |
+          python -m pip install --quiet -r group/windows/requirements-cpu.txt
+          python group/windows/gpu_pack_stage.py --verify dist/gpu-stage
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 編譯 GPU 加速包
+        shell: pwsh
+        run: |
+          $stage = (Resolve-Path dist/gpu-stage).Path
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DPackVersion=$env:GITHUB_RUN_NUMBER" "/DStage=$stage" group\windows\PCG-GPU-Pack.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $exe = Get-ChildItem dist -Filter "PCG-GPU-Pack-*.exe" | Select-Object -First 1
+          Write-Host "$($exe.Name)：$([math]::Round($exe.Length / 1MB)) MB"
+          if ($exe.Length -ge 2GB) { throw "超過 GitHub Releases 的 2 GB 上限" }
+
+      - name: 沒裝主程式的電腦：要說「請先安裝」、不能裝
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem dist -Filter "PCG-GPU-Pack-*.exe" | Select-Object -First 1
+          $p = Start-Process $exe.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -Wait -PassThru
+          Write-Host "結束代碼 $($p.ExitCode)"
+          if ($p.ExitCode -eq 0) { throw "沒裝主程式卻裝成功了" }
+
+      - name: 裝好主程式（最新版）＋目前的程式，再裝 GPU 加速包
+        shell: pwsh
+        run: |
+          gh release download --repo $env:GITHUB_REPOSITORY --pattern "PCG-Meeting-Translator-Setup-*.exe" --dir main-setup
+          $main = Get-ChildItem main-setup -Filter "*.exe" | Select-Object -First 1
+          Start-Process $main.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/DIR=C:\PCGtest' -Wait
+          $log = "C:\PCGtest\group_data\install.log"
+          for ($i = 0; $i -lt 300; $i++) {
+            if ((Test-Path $log) -and (Select-String -Path $log -Pattern '安裝完成|\[錯誤\]' -Encoding utf8 -Quiet)) { break }
+            Start-Sleep -Seconds 5
+          }
+          if (-not (Select-String -Path $log -Pattern '安裝完成' -Encoding utf8 -Quiet)) { Get-Content $log -Encoding utf8 | Select-Object -Last 15; exit 1 }
+          # 主程式換成目前的版本（GPU 加速包要 r13 以上的程式），跟小更新包一樣只換程式檔
+          Copy-Item translate_meeting.py C:\PCGtest\ -Force
+          Copy-Item group\windows\gpu_check.py C:\PCGtest\group\windows\ -Force
+          $exe = Get-ChildItem dist -Filter "PCG-GPU-Pack-*.exe" | Select-Object -First 1
+          $p = Start-Process $exe.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "GPU 加速包安裝失敗（$($p.ExitCode)）" }
+          $bin = "C:\PCGtest\gpu\cuda12\bin"
+          $n = (Get-ChildItem $bin -Filter *.dll).Count
+          Write-Host "gpu\cuda12\bin：$n 個 DLL"
+          if ($n -lt 5) { throw "DLL 不齊" }
+          Get-Content C:\PCGtest\group_data\gpu_check.log -Encoding utf8
+          $r = Get-Content C:\PCGtest\group_data\gpu_check.json -Raw -Encoding utf8 | ConvertFrom-Json
+          if ($r.ok -or -not $r.reason) { throw "沒有顯示卡的電腦應該回報不能用、並說明原因" }
+
+      - name: 程式找得到加速包；沒有顯示卡時照常用 CPU（自我檢查）
+        shell: pwsh
+        run: |
+          $env:HF_HUB_CACHE = "C:\PCGtest\hf_cache"; $env:HF_HUB_OFFLINE = "1"
+          $env:PATH = "C:\PCGtest\tools\ffmpeg\bin;" + $env:PATH
+          & C:\PCGtest\python\python.exe -c "import sys; sys.argv=['x']; sys.path.insert(0, r'C:\PCGtest'); import translate_meeting as t; c = t._win_cuda_candidates(); print(c[:2]); assert c and c[0].lower().endswith(r'gpu\cuda12\bin'), c; print(t._fw_device_kwargs())"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & C:\PCGtest\python\python.exe C:\PCGtest\group\windows\selftest.py --quick
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: 解除安裝 GPU 加速包：檔案移除、主程式還在
+        shell: pwsh
+        run: |
+          $u = Get-ChildItem C:\PCGtest\gpu\uninstall -Filter "unins*.exe" | Select-Object -First 1
+          Start-Process $u.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -Wait
+          for ($i = 0; $i -lt 30 -and (Test-Path C:\PCGtest\gpu\cuda12); $i++) { Start-Sleep -Seconds 2 }
+          if (Test-Path C:\PCGtest\gpu\cuda12) { throw "解除安裝後 gpu\cuda12 還在" }
+          if (-not (Test-Path C:\PCGtest\python\python.exe)) { throw "主程式被移除了" }
+
+      - name: 發布（獨立的 Release，不是「最新版」）
+        shell: pwsh
+        run: |
+          $exe = Get-ChildItem dist -Filter "PCG-GPU-Pack-*.exe" | Select-Object -First 1
+          $sha = "$($exe.FullName).sha256"
+          (Get-FileHash $exe.FullName -Algorithm SHA256).Hash.ToLower() + "  " + $exe.Name | Out-File -Encoding ascii $sha
+          $mb = [math]::Round($exe.Length / 1MB)
+          $notes = Get-Content group/windows/gpu-pack-notes.md -Raw -Encoding utf8
+          $vals = @{ '{FILE}' = $exe.Name; '{MB}' = "$mb"; '{CUBLAS}' = "${{ inputs.cublas }}"; '{CUDNN}' = "${{ inputs.cudnn }}"; '{NVRTC}' = "${{ inputs.nvrtc }}"; '{COMMIT}' = $env:GITHUB_SHA.Substring(0, 7) }
+          foreach ($k in $vals.Keys) { $notes = $notes.Replace($k, $vals[$k]) }
+          [System.IO.File]::WriteAllText("notes.md", $notes, (New-Object System.Text.UTF8Encoding($false)))
+          $tag = "gpu-cuda12-v$env:GITHUB_RUN_NUMBER"
+          gh release create $tag $exe.FullName $sha --title "NVIDIA GPU 加速包（CUDA 12，v$env:GITHUB_RUN_NUMBER）" --notes-file notes.md --target $env:GITHUB_SHA --latest=false
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

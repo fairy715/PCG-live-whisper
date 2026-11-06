@@ -168,6 +168,17 @@ GPU 伺服器有填但當下連不上時，會自動改在同仁電腦上用小�
   - `PCG_CPU_THREADS=8`：指定總共用幾個執行緒（例如效能好的桌機要全速跑）
   - `PCG_NORMAL_PRIORITY=1`：改回一般優先順序
 
+### NVIDIA GPU 加速包（有 NVIDIA 顯示卡的同仁電腦）
+
+- 發布頁另外有「NVIDIA GPU 加速包」（標籤 `gpu-cuda12-v…`，約 1 GB）：CUDA 12 的 cuBLAS、cuDNN 9、NVRTC
+- 只有 NVIDIA 顯示卡（GeForce、RTX、MX）用得到；Intel、AMD 顯示卡不適用
+- 需要 PCG 會議翻譯 r13 以上、NVIDIA 驅動支援 CUDA 12（約 2023 年以後的驅動）
+- 裝到 PCG 會議翻譯資料夾的 `gpu\cuda12`，主程式重裝、小更新包都不會刪；只要裝一次
+- 裝好自動檢查並跳視窗說結果（安靜安裝不跳，看 `group_data\gpu_check.log`）；不能用時程式照常用 CPU
+- 手動檢查：在安裝資料夾執行 `python\python.exe gpu\gpu_check.py`
+- 計算格式自動選：GTX 10／MX 系列（計算能力 6.x）用 int8，RTX 20 系列以後用 float16
+- 雲端打包時沒有顯示卡可測：第一次請在有 NVIDIA 顯示卡的電腦實測後再推廣
+
 ## ③ 需要即時字幕的同仁電腦
 
 ### Windows

@@ -4,6 +4,7 @@
 執行（在專案根目錄）：
     python3 -m unittest group/tests/test_xlangs.py -v
 """
+import json
 import os
 import sys
 import types
@@ -360,3 +361,70 @@ class CpuBudget(unittest.TestCase):
 
     def test_lower_priority_is_safe_off_windows(self):
         t._pcg_lower_priority()       # 不是 Windows：什麼都不做、不出錯
+
+
+class GpuPack(unittest.TestCase):
+    """NVIDIA GPU 加速包：程式優先用安裝資料夾的 gpu\\<版本>\\bin；舊顯示卡用 int8"""
+
+    def test_compute_type_by_generation(self):
+        allt = {"float32", "float16", "int8", "int8_float16", "int8_float32"}
+        self.assertEqual(t._cuda_compute_type(allt, (6, 1)), "int8")        # MX330、GTX 1050
+        self.assertEqual(t._cuda_compute_type(allt, (7, 5)), "float16")     # RTX 20、GTX 16
+        self.assertEqual(t._cuda_compute_type(allt, (12, 0)), "float16")    # RTX 50：int8 會出錯
+        self.assertEqual(t._cuda_compute_type(allt, (5, 2)), "float32")
+        self.assertEqual(t._cuda_compute_type(allt, None), "float16")       # 查不到：照以前
+        self.assertEqual(t._cuda_compute_type({"float32", "int8"}, None), "float32")
+        self.assertEqual(t._cuda_compute_type({"float32"}, (6, 1)), "float32")
+
+    def test_pack_folder_is_searched_first(self):
+        import shutil
+        import tempfile
+        from unittest import mock
+        root = tempfile.mkdtemp()
+        try:
+            b = os.path.join(root, "gpu", "cuda12", "bin")
+            os.makedirs(b)
+            fake = os.path.join(root, "translate_meeting.py")
+            with mock.patch.object(t, "__file__", fake):
+                c = t._win_cuda_candidates()
+            self.assertEqual(c[0], b)
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_stage_tool_picks_only_cuda_dlls(self):
+        import shutil
+        import subprocess
+        import tempfile
+        import zipfile
+        root = tempfile.mkdtemp()
+        try:
+            wh = os.path.join(root, "wheels")
+            os.makedirs(wh)
+            with zipfile.ZipFile(os.path.join(wh, "nvidia_cublas_cu12-12.4-py3-none-win_amd64.whl"), "w") as z:
+                for n in ("nvidia/cublas/bin/cublas64_12.dll", "nvidia/cublas/bin/cublasLt64_12.dll",
+                          "nvidia/cublas/bin/nvblas64_12.dll", "nvidia/cublas/lib/cublas.lib", "nvidia/cublas/include/x.h"):
+                    z.writestr(n, b"x")
+            with zipfile.ZipFile(os.path.join(wh, "nvidia_cudnn_cu12-9.1-py3-none-win_amd64.whl"), "w") as z:
+                z.writestr("nvidia/cudnn/bin/cudnn64_9.dll", b"x")
+                z.writestr("nvidia/cudnn/bin/cudnn_ops64_9.dll", b"x")
+            out = os.path.join(root, "stage")
+            tool = os.path.join(os.path.dirname(__file__), "..", "windows", "gpu_pack_stage.py")
+            r = subprocess.run([sys.executable, tool, wh, out, "--versions", "cublas=12.4,cudnn=9.1"],
+                               capture_output=True, text=True)
+            self.assertEqual(r.returncode, 0, r.stderr)
+            self.assertEqual(sorted(os.listdir(os.path.join(out, "bin"))),
+                             ["cublas64_12.dll", "cublasLt64_12.dll", "cudnn64_9.dll", "cudnn_ops64_9.dll"])
+            info = json.load(open(os.path.join(out, "VERSION.json"), encoding="utf-8"))
+            self.assertEqual(info["packages"], {"cublas": "12.4", "cudnn": "9.1"})
+        finally:
+            shutil.rmtree(root, ignore_errors=True)
+
+    def test_gpu_check_without_nvidia(self):
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "windows"))
+        try:
+            import gpu_check
+        finally:
+            sys.path.pop(0)
+        r = gpu_check.check()
+        self.assertFalse(r["ok"])
+        self.assertTrue(r["reason"] and r["reason_en"])

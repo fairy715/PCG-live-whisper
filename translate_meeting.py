@@ -244,7 +244,10 @@ def _win_cuda_candidates():
             list(getattr(site, "getsitepackages", lambda: [])()):
         if p and os.path.isdir(p) and p not in sps:
             sps.append(p)
-    out = [os.path.join(sp, "torch", "lib") for sp in sps]
+    # 集團版的「NVIDIA GPU 加速包」放在安裝資料夾的 gpu\<版本>\bin（主程式重裝、更新都不會刪到），優先用它
+    here = os.path.dirname(os.path.abspath(__file__))
+    out = sorted(glob.glob(os.path.join(here, "gpu", "*", "bin")), reverse=True)
+    out += [os.path.join(sp, "torch", "lib") for sp in sps]
     for sp in sps:
         out += sorted(glob.glob(os.path.join(sp, "nvidia", "*", "bin")))
     for k, v in sorted(os.environ.items()):
@@ -2661,6 +2664,7 @@ def _fw_local_cuda_ok():
     if not ok:
         _FW_CUDA_OFF["reason"] = "missing"
         _fw_cuda_notice("找不到 " + "、".join(missing[:4]) + ("…" if len(missing) > 4 else ""),
+                        "要用顯示卡加速：安裝「NVIDIA GPU 加速包」（PCG-GPU-Pack-….exe，請找 IT）" if LOCAL_MT_IS_M2M else
                         "要用顯示卡加速：在安裝資料夾重新執行 .\\install.ps1（會補裝 CUDA 版 PyTorch 與 "
                         "nvidia-cublas-cu12、nvidia-cudnn-cu12，裡面有這些函式庫）")
         return False
@@ -2682,6 +2686,37 @@ def _local_asr_use_mlx(model_name, args=None):
     return _is_apple_silicon() and _has_mlx_whisper()
 
 
+def _cuda_compute_capability(device=0):
+    """顯示卡的計算能力（例如 MX330 是 (6, 1)、RTX 3060 是 (8, 6)）；從驅動的 nvcuda 讀，查不到回 None"""
+    try:
+        import ctypes
+        lib = ctypes.WinDLL("nvcuda.dll") if IS_WINDOWS else ctypes.CDLL("libcuda.so.1")
+        if lib.cuInit(0) != 0:
+            return None
+        dev = ctypes.c_int()
+        if lib.cuDeviceGet(ctypes.byref(dev), device) != 0:
+            return None
+        major, minor = ctypes.c_int(), ctypes.c_int()
+        if lib.cuDeviceGetAttribute(ctypes.byref(major), 75, dev) != 0 or \
+                lib.cuDeviceGetAttribute(ctypes.byref(minor), 76, dev) != 0:   # COMPUTE_CAPABILITY_MAJOR／MINOR
+            return None
+        return major.value, minor.value
+    except Exception:
+        return None
+
+
+def _cuda_compute_type(types, cc):
+    """顯示卡用哪一種計算格式。
+    - 7.0 以上（RTX 20 系列起、有 Tensor Core）：float16，最快；RTX 50 的 int8 會出錯，所以不用 int8
+    - 6.x（GTX 10 系列、MX 系列等 Pascal）：float16 在這些卡上非常慢，用 int8
+    - 其他或查不到計算能力：沿用以前的判斷（有 float16 就用，沒有用 float32）"""
+    if cc and cc[0] == 6 and "int8" in types:
+        return "int8"
+    if cc and cc[0] < 6:
+        return "float32"
+    return "float16" if "float16" in types else "float32"
+
+
 def _fw_device_kwargs():
     """faster-whisper WhisperModel 的 device / compute_type 設定。
 
@@ -2698,7 +2733,7 @@ def _fw_device_kwargs():
             types = ctranslate2.get_supported_compute_types("cuda")
         except Exception:
             types = set()
-        return {"device": "cuda", "compute_type": "float16" if "float16" in types else "float32"}
+        return {"device": "cuda", "compute_type": _cuda_compute_type(types, _cuda_compute_capability())}
     if LOCAL_MT_IS_M2M:          # 集團版：限制 CPU 執行緒數（faster-whisper 預設 4，再加翻譯就吃滿 4 核的筆電）
         return {"device": "cpu", "compute_type": "int8", "cpu_threads": _pcg_cpu_threads()[0]}
     return {"device": "cpu", "compute_type": "int8"}
