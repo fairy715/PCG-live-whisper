@@ -63,14 +63,13 @@ def cpu_budget():
     WhisperModel("small", **kw)
     pri = ""
     if sys.platform == "win32":
-        import ctypes
-        k32 = ctypes.windll.kernel32
-        before = k32.GetPriorityClass(k32.GetCurrentProcess())
+        k32, me = t._win_k32_process()
+        before = k32.GetPriorityClass(me)
         t._pcg_lower_priority()
-        after = k32.GetPriorityClass(k32.GetCurrentProcess())
+        after = k32.GetPriorityClass(me)
         if after != 0x00004000:
             raise RuntimeError(f"優先順序沒有改成低於標準（0x{before:x} → 0x{after:x}）")
-        k32.SetPriorityClass(k32.GetCurrentProcess(), before)
+        k32.SetPriorityClass(me, before)
         pri = "，低於標準優先順序 OK"
     return f"邏輯 {logical}、實體 {phys}：辨識 {asr}、翻譯 {mt} 執行緒{pri}"
 

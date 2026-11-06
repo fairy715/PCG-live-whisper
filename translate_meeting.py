@@ -695,11 +695,25 @@ def _pcg_lower_priority():
     if sys.platform != "win32" or os.environ.get("PCG_NORMAL_PRIORITY") == "1":
         return
     try:
-        import ctypes
-        k32 = ctypes.windll.kernel32
-        k32.SetPriorityClass(k32.GetCurrentProcess(), 0x00004000)    # BELOW_NORMAL_PRIORITY_CLASS
+        k32, me = _win_k32_process()
+        k32.SetPriorityClass(me, 0x00004000)    # BELOW_NORMAL_PRIORITY_CLASS
     except Exception:
         pass
+
+
+def _win_k32_process():
+    """(kernel32, 這個程序的 handle)：函式的參數與回傳型別要宣告成 HANDLE，
+    不然 64 位元 Python 會把 handle 當成 32 位元整數傳，Windows 不認得、什麼都沒改（2026-11-06 自我檢查抓到）"""
+    import ctypes
+    from ctypes import wintypes
+    k32 = ctypes.WinDLL("kernel32", use_last_error=True)
+    k32.GetCurrentProcess.restype = wintypes.HANDLE
+    k32.GetCurrentProcess.argtypes = []
+    k32.SetPriorityClass.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+    k32.SetPriorityClass.restype = wintypes.BOOL
+    k32.GetPriorityClass.argtypes = [wintypes.HANDLE]
+    k32.GetPriorityClass.restype = wintypes.DWORD
+    return k32, k32.GetCurrentProcess()
 LOCAL_MT_DESC = ("支援中英日韓、印尼文、越南文、印地語，免 LLM 伺服器；MIT 授權可商用" if LOCAL_MT_IS_M2M
                  else "支援中日韓英，品質一般；模型非商業授權（CC-BY-NC 4.0）")
 
