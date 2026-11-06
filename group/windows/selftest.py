@@ -48,6 +48,33 @@ def whisper_model():
     return "small（離線快取）"
 
 
+def cpu_budget():
+    """CPU 用量限制：實體核心數讀得到、執行緒數合理、語音辨識模型吃得下 cpu_threads、低優先順序有生效"""
+    sys.argv = [sys.argv[0]]
+    import translate_meeting as t
+    logical, phys = os.cpu_count() or 0, t._pcg_physical_cores()
+    if phys is not None and not 1 <= phys <= max(logical, 1):
+        raise RuntimeError(f"實體核心數不合理：{phys}（邏輯 {logical}）")
+    asr, mt = t._pcg_cpu_threads()
+    if asr < 1 or mt < 1 or asr + mt > max(logical, 2):
+        raise RuntimeError(f"執行緒數不合理：辨識 {asr}、翻譯 {mt}（邏輯 {logical}）")
+    from faster_whisper import WhisperModel
+    kw = {"device": "cpu", "compute_type": "int8", "cpu_threads": asr}
+    WhisperModel("small", **kw)
+    pri = ""
+    if sys.platform == "win32":
+        import ctypes
+        k32 = ctypes.windll.kernel32
+        before = k32.GetPriorityClass(k32.GetCurrentProcess())
+        t._pcg_lower_priority()
+        after = k32.GetPriorityClass(k32.GetCurrentProcess())
+        if after != 0x00004000:
+            raise RuntimeError(f"優先順序沒有改成低於標準（0x{before:x} → 0x{after:x}）")
+        k32.SetPriorityClass(k32.GetCurrentProcess(), before)
+        pri = "，低於標準優先順序 OK"
+    return f"邏輯 {logical}、實體 {phys}：辨識 {asr}、翻譯 {mt} 執行緒{pri}"
+
+
 def translations(quick):
     sys.argv = [sys.argv[0]]
     import translate_meeting as t
@@ -88,6 +115,8 @@ def main():
     check("ffmpeg", ffmpeg)
     check("語音辨識模型", whisper_model)
     check("本機翻譯 M2M100", lambda: translations(a.quick))
+    if not a.quick:                       # 安裝時不檢查：查不到也只是用預設值，不該讓安裝失敗
+        check("CPU 用量限制", cpu_budget)
     print("結果：" + ("全部通過" if ok else "有項目沒通過"))
     sys.exit(0 if ok else 1)
 

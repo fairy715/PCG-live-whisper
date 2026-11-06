@@ -642,9 +642,35 @@ LOCAL_MT_NAME = "M2M100 本機離線" if LOCAL_MT_IS_M2M else "NLLB 本機離線
 
 # 集團版（有 M2M100 模型就是集團版）：同仁電腦多半是筆電，語音辨識＋翻譯在 CPU 上跑時不要把核心全部吃滿，
 # 不然 Teams 會卡、滑鼠會頓（2026-11-06 同仁回報 CPU 100%）
+def _pcg_physical_cores():
+    """實體核心數（Windows）；查不到回 None。筆電常見 4 核 8 執行緒（超執行緒），
+    語音辨識的矩陣運算用超執行緒幾乎不會更快，只會把 CPU 吃滿"""
+    if sys.platform != "win32":
+        return None
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        class _SLPI(ctypes.Structure):          # SYSTEM_LOGICAL_PROCESSOR_INFORMATION（64 位元 32 bytes）
+            _fields_ = [("mask", ctypes.c_size_t), ("rel", ctypes.c_int), ("_u", ctypes.c_byte * 16)]
+        k32 = ctypes.windll.kernel32
+        size = wintypes.DWORD(0)
+        k32.GetLogicalProcessorInformation(None, ctypes.byref(size))
+        cnt = size.value // ctypes.sizeof(_SLPI)
+        if cnt <= 0:
+            return None
+        buf = (_SLPI * cnt)()
+        if not k32.GetLogicalProcessorInformation(buf, ctypes.byref(size)):
+            return None
+        cores = sum(1 for x in buf if x.rel == 0)    # RelationProcessorCore
+        return cores or None
+    except Exception:
+        return None
+
+
 def _pcg_cpu_threads():
-    """(語音辨識, 本機翻譯) 的執行緒數。總共用約 3/4 的核心，留給 Teams 和其他程式；
-    環境變數 PCG_CPU_THREADS 可以指定總數（例如 IT 要讓某台電腦全速跑）"""
+    """(語音辨識, 本機翻譯) 的執行緒數。總共用約 3/4 的邏輯核心、而且不超過實體核心數，留給 Teams 和其他程式
+    （i5-10 代 4 核 8 執行緒：辨識 3、翻譯 1）；環境變數 PCG_CPU_THREADS 可以指定總數（例如 IT 要讓某台電腦全速跑）"""
     n = os.cpu_count() or 4
     try:
         budget = int(os.environ.get("PCG_CPU_THREADS") or 0)
@@ -652,6 +678,9 @@ def _pcg_cpu_threads():
         budget = 0
     if budget <= 0:
         budget = max(2, n * 3 // 4)
+        phys = _pcg_physical_cores()
+        if phys and 2 <= phys < budget:
+            budget = phys
     budget = min(budget, max(n, 2))
     mt = max(1, budget // 4)
     return max(1, min(8, budget - mt)), mt

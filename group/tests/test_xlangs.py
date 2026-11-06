@@ -319,9 +319,10 @@ class LocalM2M(unittest.TestCase):
 class CpuBudget(unittest.TestCase):
     """集團版：語音辨識＋本機翻譯不要把 CPU 吃滿（同仁回報 CPU 100%）"""
 
-    def threads(self, cores, env=None):
+    def threads(self, cores, env=None, phys=None):
         from unittest import mock
         with mock.patch.object(t.os, "cpu_count", lambda: cores), \
+                mock.patch.object(t, "_pcg_physical_cores", lambda: phys), \
                 mock.patch.dict(t.os.environ, env or {}, clear=False):
             if not env:
                 t.os.environ.pop("PCG_CPU_THREADS", None)
@@ -337,6 +338,12 @@ class CpuBudget(unittest.TestCase):
             a, m = self.threads(n)
             self.assertGreaterEqual(min(a, m), 1)
             self.assertLessEqual(a + m, max(n, 2))
+
+    def test_hyperthreading_uses_physical_cores(self):
+        self.assertEqual(self.threads(8, phys=4), (3, 1))      # i5-10 代筆電：4 核 8 執行緒
+        self.assertEqual(self.threads(4, phys=2), (1, 1))      # 2 核 4 執行緒
+        self.assertEqual(self.threads(8, phys=8), (5, 1))      # 沒有超執行緒：照 3/4
+        self.assertEqual(self.threads(8, {"PCG_CPU_THREADS": "8"}, phys=4), (6, 2))   # IT 指定就照 IT
 
     def test_it_can_override(self):
         self.assertEqual(self.threads(8, {"PCG_CPU_THREADS": "8"}), (6, 2))
