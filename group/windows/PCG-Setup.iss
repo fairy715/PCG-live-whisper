@@ -197,14 +197,15 @@ var
   BundleDir: String;
   PrevDir: String;
   ProgFile: String;
-  ProgStart: DWORD;
+  ProgStart: Longword;
 
 { 安裝執行環境時的進度：pcg-install.ps1 寫 group_data\install-progress.txt（「第幾步 共幾步 已裝套件 套件總數」），
   這裡每秒讀一次，顯示目前在做哪一步、進度條、已經過多久（原本只有一句「正在安裝…」，同仁以為當掉了） }
-{ 型別照 Inno Setup 官方範例（Examples\CodeDll.iss）：64 位元安裝程式的指標是 8 bytes }
-function SetTimer(hWnd: HWND; nIDEvent: UINT_PTR; uElapse: UINT; lpTimerFunc: NativeInt): UINT_PTR; external 'SetTimer@user32.dll stdcall';
-function KillTimer(hWnd: HWND; nIDEvent: UINT_PTR): BOOL; external 'KillTimer@user32.dll stdcall';
-function GetTickCount: DWORD; external 'GetTickCount@kernel32.dll stdcall';
+{ 寫法照 Inno Setup 6.7.1 的官方範例（Examples\CodeDll.iss，32 位元安裝程式）。
+  之後換 Inno Setup 7（64 位元安裝程式）要改成 7 的範例：HWND／UINT_PTR／NativeInt }
+function SetTimer(hWnd, nIDEvent, uElapse, lpTimerFunc: Longword): Longword; external 'SetTimer@user32.dll stdcall';
+function KillTimer(hWnd, nIDEvent: Longword): Bool; external 'KillTimer@user32.dll stdcall';
+function GetTickCount: Longword; external 'GetTickCount@kernel32.dll stdcall';
 
 function NextNum(var S: String): Integer;
 var
@@ -222,7 +223,7 @@ begin
   end;
 end;
 
-procedure ShowInstallProgress(Arg1: HWND; Arg2: UINT; Arg3: UINT_PTR; Arg4: DWORD);
+procedure ShowInstallProgress(Arg1, Arg2, Arg3, Arg4: Longword);
 var
   Raw: AnsiString;
   S, Detail, Elapsed: String;
@@ -352,7 +353,7 @@ procedure CurStepChanged(CurStep: TSetupStep);
 var
   RC: Integer;
   Params: String;
-  Timer: UINT_PTR;
+  Timer: Longword;
 begin
   if CurStep = ssPostInstall then
   begin
