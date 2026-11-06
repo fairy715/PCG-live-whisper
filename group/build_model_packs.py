@@ -30,9 +30,11 @@ PACKS = [
     {"id": "phowhisper-medium", "repo": "vinai/PhoWhisper-medium", "base": "openai/whisper-medium",
      "name": "PhoWhisper medium（越南文）", "languages": ["vi"],
      "note": "比 small 準、慢約 2～3 倍：建議錄音檔用；有 NVIDIA 顯示卡時即時字幕也可以用"},
-    {"id": "whisper-id-small", "repo": "cahya/whisper-small-id", "base": "openai/whisper-small",
-     "name": "Whisper small 印尼文（cahya）", "languages": ["id"],
-     "note": "用印尼語資料加強訓練（Common Voice、FLEURS 等）。CPU 上即時字幕也跑得動"},
+    # 印尼文 small：cahya 的授權只寫「cc」不能用；依序試授權清楚的（作者公布 Common Voice 17 印尼文錯字率：
+    # maleo-ai 8.9%、anak10thn 10.3%，原版 whisper-small 21.1%）
+    {"id": "whisper-id-small", "repos": ["maleo-ai/whisper-small-id", "anak10thn/whisper-small-id", "cahya/whisper-small-id"],
+     "base": "openai/whisper-small", "name": "Whisper small 印尼文", "languages": ["id"],
+     "note": "用印尼語資料加強訓練的 Whisper small。CPU 上即時字幕也跑得動"},
     {"id": "whisper-id-medium", "repo": "cahya/whisper-medium-id", "base": "openai/whisper-medium",
      "name": "Whisper medium 印尼文（cahya）", "languages": ["id"],
      "note": "比 small 準、慢約 2～3 倍：建議錄音檔用；有 NVIDIA 顯示卡時即時字幕也可以用"},
@@ -142,7 +144,8 @@ def build_mt(spec, work, out):
 
 
 def package(spec, dest, out, lic, version):
-    meta = {"id": spec["id"], "name": spec["name"], "type": spec.get("type", "asr"),
+    name = spec["name"] + (f"（{spec['repo'].split('/')[0]}）" if spec.get("repos") else "")
+    meta = {"id": spec["id"], "name": name, "type": spec.get("type", "asr"),
             "engine": spec.get("engine", "faster-whisper"), "languages": spec["languages"],
             "purpose": ["live", "file"], "version": version, "license": lic, "source": f"https://huggingface.co/{spec['repo']}",
             "note": spec["note"]}
@@ -202,15 +205,23 @@ def main():
     for spec in PACKS:
         if spec["id"] not in want:
             continue
-        log(f"▶ {spec['id']}（{spec['repo']}）")
-        lic = hf_license(spec["repo"]) or spec.get("license_fallback", "")
+        # 有好幾個候選時，用第一個授權清楚（可商用）的
+        lic = ""
+        for repo in spec.get("repos") or [spec["repo"]]:
+            try:
+                lic = hf_license(repo) or spec.get("license_fallback", "")
+            except Exception as e:
+                lic = f"讀不到（{type(e).__name__}）"
+            spec["repo"] = repo
+            log(f"▶ {spec['id']}（{repo}）授權：{lic or '沒寫'}")
+            if lic in OK_LICENSES:
+                break
         if lic not in OK_LICENSES:
             # 授權不明確的不打包，但不影響其他模型包（最後列出來，GitHub 上顯示警告）
-            why = f"{spec['repo']} 的授權是「{lic or '沒寫'}」，不確定能商用"
+            why = f"{'、'.join(spec.get('repos') or [spec['repo']])} 的授權都不確定能商用（最後一個：{lic or '沒寫'}）"
             log(f"   [略過] {why}")
             skipped.append(f"{spec['id']}：{why}")
             continue
-        log(f"   授權：{lic}")
         work = Path(tempfile.mkdtemp(dir=out))
         try:
             dest = build_mt(spec, work, out) if spec.get("type") == "mt" else build_asr(spec, work, out)
