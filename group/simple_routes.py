@@ -29,8 +29,14 @@ import secrets
 import subprocess
 import sys
 import threading
+import shutil
 import time
 from pathlib import Path
+
+try:
+    from group import model_packs
+except ImportError:                     # 測試時直接 import simple_routes
+    import model_packs
 
 # 情境：同仁看到的是「錄音裡主要說什麼語言 → 拿到什麼」，背後對應主程式的模式代號
 DEFAULT_SCENARIOS = [
@@ -256,6 +262,11 @@ class SimpleQueue:
                 args += ["--summary-model", s["summary_model"]]
         if pf["local_asr"]:
             args.append("--local-asr")
+            # IT 指定的語言模型包（例如越南文用 PhoWhisper）：只用在「對方的語言」錄音（id2zh、vi2zh、hi2zh 與轉錄）
+            lang = job["mode"][:2] if job["mode"] in ("id", "vi", "hi", "id2zh", "vi2zh", "hi2zh") else ""
+            pack = lang and model_packs.asr_model_for(self.base, s, lang, "file")
+            if pack:
+                args[args.index("-m") + 1] = pack
         if job["mode"] not in ("zh", "en", "ja", "ko", "id", "vi", "hi"):
             args += ["-e", pf["engine"]]
             if pf["engine"] == "llm" and s.get("llm_model"):
@@ -739,6 +750,11 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             "denoise": True,
             "subtitle_overlay": bool(body.get("overlay")),
         }
+        if mode in ("id2zh", "vi2zh", "hi2zh") and pf["local_asr"]:
+            # 單向「對方說印尼文／越南文／印地語」：IT 指定的語言模型包（雙向、教室模式的麥克風那邊是中文，照舊用多語 Whisper）
+            pack = model_packs.asr_model_for(base_dir, s, mode[:2], "live")
+            if pack:
+                start["model"] = pack
         if mode == "en2zh" and not room and pf["local_asr"] and use_moonshine(s):
             # 對方說英文、在這台電腦辨識：用 Moonshine（英文專用，延遲低、CPU 輕很多）；雙向、教室模式照舊用 Whisper
             start.update(asr="moonshine", moonshine_model="medium")
@@ -964,6 +980,122 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             else:
                 out["llm"] = {"ok": False, "detail": first or "連不上"}
         return out
+
+    # ─── 模型管理（模型包）───
+    def models_state(force_catalog=False):
+        s = settings()
+        inst = model_packs.installed(base_dir)
+        now = time.time()
+        if force_catalog or not _cat_cache.get("at") or now - _cat_cache["at"] > 600:
+            cat, errs = model_packs.catalog(share=str(s.get("update_share") or ""),
+                                            fetch=(update_hooks or {}).get("models_fetch"))
+            _cat_cache.update(at=now, cat=cat, errs=errs)
+        cat = _cat_cache.get("cat") or {}
+        have = {m["id"]: m for m in inst}
+        avail = []
+        for pid, p in sorted(cat.items()):
+            cur = have.get(pid)
+            avail.append({k: p.get(k) for k in ("id", "name", "type", "languages", "purpose", "version", "size_mb",
+                                                 "license", "note", "source_kind")}
+                         | {"installed_version": cur.get("version") if cur else None,
+                            "update": bool(cur and str(cur.get("version")) != str(p.get("version")))})
+        try:
+            free = shutil.disk_usage(base_dir).free
+        except OSError:
+            free = 0
+        return {"ok": True, "installed": [{k: m.get(k) for k in ("id", "name", "type", "languages", "purpose", "version",
+                                                                  "size_mb", "license", "note")} for m in inst],
+                "available": avail, "catalog_errors": _cat_cache.get("errs") or [],
+                "jobs": {k: dict(v) for k, v in model_packs.JOBS.items()},
+                "asr_packs": s.get("asr_packs") or {}, "mt_pack": s.get("mt_pack") or "",
+                "disk_free_gb": round(free / 1073741824, 1)}
+
+    _cat_cache = {}
+
+    @app.get("/api/simple/admin/models")
+    async def admin_models(request: Request):
+        err = admin_auth(request)
+        if err:
+            return err
+        import asyncio
+        return await asyncio.to_thread(models_state, request.query_params.get("refresh") == "1")
+
+    @app.post("/api/simple/admin/models/install")
+    async def admin_models_install(request: Request, body: dict = {}):
+        err = admin_auth(request)
+        if err:
+            return err
+        if not is_local(request):
+            return JSONResponse({"ok": False, "code": "models_remote", "error": "只能在這台電腦上安裝模型"}, status_code=403)
+        pid = str(body.get("id") or "")
+        p = (_cat_cache.get("cat") or {}).get(pid)
+        if not p:
+            return JSONResponse({"ok": False, "code": "no_pack", "error": "清單裡沒有這個模型包，請重新整理"}, status_code=404)
+        if not model_packs.install_async(base_dir, p, opener=(update_hooks or {}).get("models_opener")):
+            return JSONResponse({"ok": False, "code": "busy", "error": "這個模型包正在安裝"}, status_code=409)
+        return {"ok": True}
+
+    @app.post("/api/simple/admin/models/remove")
+    async def admin_models_remove(request: Request, body: dict = {}):
+        err = admin_auth(request)
+        if err:
+            return err
+        pid = str(body.get("id") or "")
+        if live_running and live_running():
+            return JSONResponse({"ok": False, "code": "busy", "error": "即時字幕進行中，結束後再移除"}, status_code=409)
+        try:
+            model_packs.remove(base_dir, pid)
+        except RuntimeError as e:
+            return JSONResponse({"ok": False, "code": "remove_failed", "error": str(e)}, status_code=400)
+        cfg = read_cfg()
+        s = cfg.setdefault("pcg_simple", {})
+        ap = s.get("asr_packs") or {}
+        for lang, d in list(ap.items()):        # 用到它的設定一起拿掉
+            for k in [k for k, v in d.items() if v == pid]:
+                d.pop(k)
+            if not d:
+                ap.pop(lang)
+        if not ap:
+            s.pop("asr_packs", None)
+        if s.get("mt_pack") == pid:
+            s.pop("mt_pack")
+        write_config(cfg)
+        return {"ok": True}
+
+    @app.post("/api/simple/admin/models/use")
+    async def admin_models_use(request: Request, body: dict = {}):
+        """每種語言用哪個模型包：{"asr_packs": {"vi": {"live": id, "file": id}}, "mt_pack": id 或 ""}"""
+        err = admin_auth(request)
+        if err:
+            return err
+        asr_in = body.get("asr_packs") if isinstance(body.get("asr_packs"), dict) else {}
+        asr = {}
+        for lang, d in asr_in.items():
+            if lang not in model_packs.LANGS or not isinstance(d, dict):
+                continue
+            for purpose in ("live", "file"):
+                pid = str(d.get(purpose) or "")
+                if not pid:
+                    continue
+                if not model_packs.find(base_dir, pid, "asr", lang, purpose):
+                    return JSONResponse({"ok": False, "code": "bad_pack",
+                                         "error": f"{pid} 沒有裝，或不能用在這個語言"}, status_code=400)
+                asr.setdefault(lang, {})[purpose] = pid
+        mt = str(body.get("mt_pack") or "")
+        if mt and not model_packs.find(base_dir, mt, "mt"):
+            return JSONResponse({"ok": False, "code": "bad_pack", "error": f"{mt} 沒有裝"}, status_code=400)
+        cfg = read_cfg()
+        s = cfg.setdefault("pcg_simple", {})
+        if asr:
+            s["asr_packs"] = asr
+        else:
+            s.pop("asr_packs", None)
+        if mt:
+            s["mt_pack"] = mt
+        else:
+            s.pop("mt_pack", None)
+        write_config(cfg)
+        return {"ok": True}
 
     @app.post("/api/simple/admin/save")
     async def admin_save(request: Request, body: dict = {}):

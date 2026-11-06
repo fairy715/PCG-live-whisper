@@ -45,6 +45,12 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
 .presets{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 4px}
 .chip{border:1px solid var(--accent);background:none;color:var(--accent);border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer}
 .chip:hover{background:var(--accent-soft)}
+.mrow{display:flex;gap:10px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding:10px 0;font-size:14px}
+.mrow:first-child{border-top:0}.mrow b{font-weight:600}.mrow small{display:block;color:var(--dim);font-size:12.5px}
+.mrow .btn.ghost{padding:6px 12px;font-size:13px;white-space:nowrap}
+.muse{display:grid;grid-template-columns:7em 1fr 1fr;gap:8px 10px;align-items:center;font-size:14px}
+.muse .h{color:var(--dim);font-size:13px}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--accent)}
 [hidden]{display:none!important}
 @media (max-width:560px){.modes{grid-template-columns:1fr}.row{grid-template-columns:1fr 90px}}
 </style>
@@ -139,6 +145,22 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <p class="note" data-t="upd_note"></p>
     </div>
 
+    <div class="card" id="cModels">
+      <h2 data-t="models_title"></h2>
+      <p class="note" data-t="models_note"></p>
+      <h3 class="sub" data-t="models_use"></h3>
+      <div class="muse" id="mUse"></div>
+      <div style="margin-top:12px"><button class="btn ghost" type="button" id="mApply" data-t="models_apply"></button></div>
+      <div id="mUseRes" hidden></div>
+      <h3 class="sub" data-t="models_installed"></h3>
+      <div id="mInst"></div>
+      <h3 class="sub" data-t="models_available"></h3>
+      <div id="mAvail"></div>
+      <p class="note" id="mErr" hidden></p>
+      <div style="margin-top:8px"><button class="chip" type="button" id="mRefresh" data-t="models_refresh"></button></div>
+      <p class="note" data-t="models_offline"></p>
+    </div>
+
     <div class="actions">
       <button class="btn" type="submit" data-t="save"></button>
       <a href="/simple" data-t="back"></a>
@@ -180,6 +202,16 @@ zh:{title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式
   staff_pw:'同仁密碼（從別台電腦用簡易頁面、看分享的字幕時要輸入；這台電腦不用）',staff_pw_set:'同仁密碼：已設定（要改才填）',staff_pw_ph:'留空＝不變更',clear_staff_pw:'取消同仁密碼（不需要密碼）',
   save:'儲存',saved:'已儲存，下一次開始字幕或處理錄音就會使用新設定',back:'回到簡易頁面',change_it_pw:'變更 IT 密碼',
   new_it_pw:'請輸入新的 IT 密碼（至少 6 個字）',pw_changed:'IT 密碼已變更',
+  models_title:'模型管理（模型包）',models_note:'額外的語音辨識與翻譯模型，裝在這台電腦。只影響「在這台電腦辨識／翻譯」的情況（本機模式，或伺服器模式但沒有 GPU 伺服器）。',
+  models_use:'每種語言用哪個模型',models_apply:'套用模型設定',models_applied:'已套用，下次開始字幕或處理錄音時生效',
+  models_installed:'這台電腦已安裝',models_available:'可以安裝',models_refresh:'重新整理清單',
+  models_offline:'不能上網的電腦：把發布頁「model-packs」的 catalog.json 與模型包檔案放到上方「更新」的公司共用資料夾（或它的 models 子資料夾）。',
+  m_lang:'語言',m_live:'即時字幕',m_file:'錄音檔',m_mt:'本機翻譯',m_builtin:'內建（照上方的本機模型）',m_m2m:'M2M100（內建，快）',
+  m_none_inst:'還沒有安裝模型包',m_none_avail:'清單是空的（按「重新整理清單」）',m_install:'安裝',m_update:'更新',m_remove:'移除',
+  m_confirm_remove:'確定要移除「{n}」？用到它的語言會改回內建模型。',m_dl:'下載中 {a}／{b} MB',m_inst_ing:'安裝中…',m_failed:'安裝失敗：{e}',
+  m_done:'已安裝',m_size:'{n} MB',m_ver:'版本 {v}',m_from_share:'公司共用資料夾',m_from_gh:'GitHub',
+  m_lang_zh:'中文',m_lang_en:'英文',m_lang_ja:'日文',m_lang_ko:'韓文',m_lang_id:'印尼文',m_lang_vi:'越南文',m_lang_hi:'印地語',m_use_note:'只用在「對方說這種語言」的單向即時字幕與錄音檔；雙向、教室模式照舊用內建的多語模型。',
+  models_remote:'只能在這台電腦上安裝模型',no_pack:'清單裡沒有這個模型包，請重新整理',busy:'正在進行中，請稍候',bad_pack:'模型包沒有裝，或不能用在這個語言',
   upd_title:'更新',upd_check:'自動檢查新版本（同仁頁面上方會出現「立即更新」）',upd_who:'誰可以按更新',
   upd_who_staff:'同仁自己按（建議）',upd_who_it:'只有 IT（要輸入 IT 密碼）',upd_share:'公司共用資料夾（選填）',upd_share_ph:'例如 \\\\檔案伺服器\\PCG\\更新',
   upd_note:'能上網的電腦會從 GitHub 發布頁取得小更新包。不能上網的電腦：把發布頁上的 PCG-Update-<版本>.exe（和同名的 .sha256 檔）放進這個資料夾，同仁電腦就能一鍵更新。只會安裝比目前新的小更新包，安裝前會比對檔案指紋；需要完整安裝檔的版本只會提示找 IT。',
@@ -215,6 +247,16 @@ en:{title:'PCG Meeting Translator: IT settings',tagline:'Switch between local an
   staff_pw:'Staff password (needed from other computers for the simple page and shared subtitles; not on this computer)',staff_pw_set:'Staff password: set (fill in only to change)',staff_pw_ph:'Blank = unchanged',clear_staff_pw:'Remove the staff password',
   save:'Save',saved:'Saved. New settings apply the next time subtitles start or a recording is processed',back:'Back to the simple page',change_it_pw:'Change IT password',
   new_it_pw:'Enter a new IT password (at least 6 characters)',pw_changed:'IT password changed',
+  models_title:'Models (model packs)',models_note:'Extra speech recognition and translation models installed on this computer. Used only when recognition/translation runs on this computer (local mode, or server mode without a GPU server).',
+  models_use:'Model for each language',models_apply:'Apply model settings',models_applied:'Applied; takes effect the next time subtitles or a recording start',
+  models_installed:'Installed on this computer',models_available:'Available',models_refresh:'Refresh list',
+  models_offline:'Computers without internet: put catalog.json and the pack files from the "model-packs" release page in the shared folder set under Updates (or its models subfolder).',
+  m_lang:'Language',m_live:'Live subtitles',m_file:'Recordings',m_mt:'Local translation',m_builtin:'Built-in (local models above)',m_m2m:'M2M100 (built-in, fast)',
+  m_none_inst:'No model packs installed yet',m_none_avail:'The list is empty (click “Refresh list”)',m_install:'Install',m_update:'Update',m_remove:'Remove',
+  m_confirm_remove:'Remove “{n}”? Languages that use it go back to the built-in model.',m_dl:'Downloading {a} / {b} MB',m_inst_ing:'Installing…',m_failed:'Install failed: {e}',
+  m_done:'Installed',m_size:'{n} MB',m_ver:'version {v}',m_from_share:'company shared folder',m_from_gh:'GitHub',
+  m_lang_zh:'Chinese',m_lang_en:'English',m_lang_ja:'Japanese',m_lang_ko:'Korean',m_lang_id:'Indonesian',m_lang_vi:'Vietnamese',m_lang_hi:'Hindi',m_use_note:'Used only for one-way live subtitles and recordings in that language; two-way and classroom mode keep the built-in multilingual model.',
+  models_remote:'Models can only be installed on this computer',no_pack:'This pack is not in the list; refresh it',busy:'Already in progress, please wait',bad_pack:'The pack is not installed or does not support this language',
   upd_title:'Updates',upd_check:'Check for new versions (staff see “Update now” at the top of their page)',upd_who:'Who can update',
   upd_who_staff:'Staff themselves (recommended)',upd_who_it:'IT only (IT password required)',upd_share:'Company shared folder (optional)',upd_share_ph:'e.g. \\\\fileserver\\PCG\\updates',
   upd_note:'Computers with internet get the small update from the GitHub release page. For computers without internet, put PCG-Update-<version>.exe (and its .sha256 file) from the release page in this folder and staff can update with one click. Only newer small updates are installed, and the file fingerprint is checked first; versions that need the full installer only show “ask IT”.',
@@ -234,7 +276,7 @@ function applyLang(){
   $('staffPwLabel').textContent=t(state&&state.staff_password_set?'staff_pw_set':'staff_pw');
   styleVis();
 }
-$('langSel').value=lang;$('langSel').onchange=()=>{lang=$('langSel').value;applyLang()};
+$('langSel').value=lang;$('langSel').onchange=()=>{lang=$('langSel').value;applyLang();if(typeof renderModels==='function')renderModels()};
 async function api(path,body){
   const r=await fetch(path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json','X-IT-Token':token},body:body?JSON.stringify(body):undefined});
   return r.json().catch(()=>({ok:false}));
@@ -278,7 +320,7 @@ function showMain(){
   $('liveModel').value=state.local_live_model||'small';$('fileModel').value=state.local_file_model||'small';
   $('updCheck').checked=state.update_check!==false;$('updWho').value=state.update_who||'staff';$('updShare').value=state.update_share||'';
   $('diarize').checked=!!state.diarize;$('remoteView').checked=!!state.allow_remote_view;$('clearStaffWrap').hidden=!state.staff_password_set;
-  modeVis();applyLang();
+  modeVis();applyLang();loadModels();
 }
 function styleVis(){
   const st=$('llmStyle').value,k={openwebui:'owui',auto:'auto',openai:'ext'}[st]||'auto';
@@ -331,6 +373,58 @@ $('chgPwBtn').onclick=async()=>{
   const p=prompt(t('new_it_pw'));if(!p)return;
   const j=await api('/api/simple/admin/password',{new:p});
   if(j.ok){token=p;sessionStorage.setItem('pcg_it',token);alert(t('pw_changed'))}else alert(errMsg(j));
+};
+
+/* ── 模型管理（模型包）── */
+let models=null,mTimer=null;
+const LANGS3=['id','vi','hi'];
+const escH=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function loadModels(refresh){
+  const j=await api('/api/simple/admin/models'+(refresh?'?refresh=1':''));
+  if(!j.ok){$('mErr').hidden=false;$('mErr').textContent=errMsg(j);return}
+  models=j;renderModels();
+  const busy=Object.values(j.jobs||{}).some(x=>x.state==='downloading'||x.state==='installing');
+  clearTimeout(mTimer);if(busy)mTimer=setTimeout(()=>loadModels(),2000);
+}
+function packOpts(lang,purpose,cur){
+  const ps=(models.installed||[]).filter(p=>p.type==='asr'&&(p.languages||[]).includes(lang)&&(p.purpose||['live','file']).includes(purpose));
+  return `<option value="">${escH(t('m_builtin'))}</option>`+ps.map(p=>`<option value="${escH(p.id)}"${p.id===cur?' selected':''}>${escH(p.name||p.id)}</option>`).join('');
+}
+function renderModels(){
+  if(!models)return;
+  const use=models.asr_packs||{};
+  let h=`<span class="h">${escH(t('m_lang'))}</span><span class="h">${escH(t('m_live'))}</span><span class="h">${escH(t('m_file'))}</span>`;
+  for(const l of LANGS3)h+=`<span>${escH(t('m_lang_'+l))}</span><select data-l="${l}" data-p="live">${packOpts(l,'live',(use[l]||{}).live)}</select><select data-l="${l}" data-p="file">${packOpts(l,'file',(use[l]||{}).file)}</select>`;
+  const mts=(models.installed||[]).filter(p=>p.type==='mt');
+  h+=`<span>${escH(t('m_mt'))}</span><select id="mMt" style="grid-column:span 2"><option value="">${escH(t('m_m2m'))}</option>`+
+     mts.map(p=>`<option value="${escH(p.id)}"${p.id===models.mt_pack?' selected':''}>${escH(p.name||p.id)}</option>`).join('')+`</select>`;
+  h+=`<span></span><p class="note" style="grid-column:span 2;margin:0">${escH(t('m_use_note'))}</p>`;
+  $('mUse').innerHTML=h;
+  const info=p=>[(p.languages||[]).map(l=>t('m_lang_'+l)!=='m_lang_'+l?t('m_lang_'+l):l).join('、'),p.size_mb?t('m_size',{n:p.size_mb}):'',p.version?t('m_ver',{v:p.version}):'',p.license||''].filter(Boolean).join(' · ');
+  const inst=models.installed||[];
+  $('mInst').innerHTML=inst.length?inst.map(p=>`<div class="mrow"><div><b>${escH(p.name||p.id)}</b><small>${escH(info(p))}</small>${p.note?`<small>${escH(p.note)}</small>`:''}</div>
+    <button class="btn ghost" type="button" data-rm="${escH(p.id)}" data-n="${escH(p.name||p.id)}">${escH(t('m_remove'))}</button></div>`).join(''):`<p class="note">${escH(t('m_none_inst'))}</p>`;
+  const av=(models.available||[]).filter(p=>!p.installed_version||p.update);
+  $('mAvail').innerHTML=av.length?av.map(p=>{const jb=(models.jobs||{})[p.id]||{};let st='';
+    if(jb.state==='downloading')st=`<small>${escH(t('m_dl',{a:jb.done_mb||0,b:jb.total_mb||p.size_mb||'?'}))}</small><div class="bar"><i style="width:${jb.total_mb?Math.min(100,100*(jb.done_mb||0)/jb.total_mb):0}%"></i></div>`;
+    else if(jb.state==='installing')st=`<small>${escH(t('m_inst_ing'))}</small>`;
+    else if(jb.state==='failed')st=`<small style="color:var(--err)">${escH(t('m_failed',{e:jb.error||''}))}</small>`;
+    const busy=jb.state==='downloading'||jb.state==='installing';
+    return `<div class="mrow"><div><b>${escH(p.name||p.id)}</b><small>${escH(info(p))} · ${escH(t(p.source_kind==='share'?'m_from_share':'m_from_gh'))}</small>${p.note?`<small>${escH(p.note)}</small>`:''}${st}</div>
+    <button class="btn ghost" type="button" data-in="${escH(p.id)}"${busy?' disabled':''}>${escH(t(p.update?'m_update':'m_install'))}</button></div>`}).join(''):`<p class="note">${escH(t('m_none_avail'))}</p>`;
+  const errs=models.catalog_errors||[];$('mErr').hidden=!errs.length;$('mErr').textContent=errs.join('；');
+}
+$('mInst').onclick=async e=>{const id=e.target.dataset?.rm;if(!id)return;
+  if(!confirm(t('m_confirm_remove',{n:e.target.dataset.n})))return;
+  const j=await api('/api/simple/admin/models/remove',{id});if(!j.ok)alert(errMsg(j));loadModels()};
+$('mAvail').onclick=async e=>{const id=e.target.dataset?.in;if(!id)return;
+  e.target.disabled=true;const j=await api('/api/simple/admin/models/install',{id});if(!j.ok)alert(errMsg(j));loadModels()};
+$('mRefresh').onclick=()=>loadModels(true);
+$('mApply').onclick=async()=>{
+  const asr={};document.querySelectorAll('#mUse select[data-l]').forEach(s=>{if(s.value)(asr[s.dataset.l]=asr[s.dataset.l]||{})[s.dataset.p]=s.value});
+  const j=await api('/api/simple/admin/models/use',{asr_packs:asr,mt_pack:$('mMt').value});
+  const r=$('mUseRes');r.hidden=false;r.className='res '+(j.ok?'ok':'err');r.textContent=j.ok?t('models_applied'):errMsg(j);
+  if(j.ok)loadModels();
 };
 applyLang();load();
 </script>

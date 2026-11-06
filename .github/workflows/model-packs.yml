@@ -1,0 +1,93 @@
+# PCG 集團版：製作並發布「模型包」（手動執行）
+# 語音辨識：PhoWhisper（越南文）、印尼文 Whisper、印地語 Whisper（各 small、medium），轉成 CTranslate2 int8
+# 翻譯：MADLAD-400 3B（CTranslate2 int8）
+# 發布在固定的「model-packs」發布頁（不是最新版，不影響一鍵更新），附 catalog.json 給 IT 設定頁的「模型管理」讀。
+# 只做某幾個：在 packs 填代號（逗號分隔）；其他模型包沿用發布頁上原本的。
+name: 發布模型包
+
+on:
+  workflow_dispatch:
+    inputs:
+      packs:
+        description: "要做的模型包代號（逗號分隔，空白＝全部）：phowhisper-small,phowhisper-medium,whisper-id-small,whisper-id-medium,whisper-hi-small,whisper-hi-medium,madlad400-3b"
+        default: ""
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PYTHONUTF8: "1"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 空出磁碟空間（模型很大）
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          df -h /
+
+      - name: 安裝轉檔工具
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq espeak-ng
+          python -m pip install --quiet torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install --quiet ctranslate2 faster-whisper "transformers<5" sentencepiece huggingface_hub
+
+      - name: 下載發布頁上原本的清單（只做部分模型包時沿用其他的）
+        run: |
+          gh release download model-packs --repo "$GITHUB_REPOSITORY" --pattern catalog.json --dir old || echo "還沒有發布過"
+
+      - name: 製作模型包
+        run: |
+          python group/build_model_packs.py --out dist/packs --packs "${{ inputs.packs }}" \
+            --version "$GITHUB_RUN_NUMBER" --old-catalog old/catalog.json
+          ls -la dist/packs
+
+      - name: 用集團版的程式實際安裝一次（共用資料夾的方式）
+        run: |
+          python -m pip install --quiet fastapi
+          python - <<'EOF'
+          import json, sys, tempfile
+          from pathlib import Path
+          sys.path.insert(0, "group")
+          import model_packs as mp
+          out = Path("dist/packs")
+          cat = json.loads((out / "catalog.json").read_text(encoding="utf-8"))
+          built = {p.name.split(".zip")[0] for p in out.glob("*.zip*")}
+          share = tempfile.mkdtemp()
+          for p in out.iterdir():
+              (Path(share) / p.name).symlink_to(p.resolve())
+          c, errs = mp.catalog(share, use_github=False)
+          base = Path(tempfile.mkdtemp())
+          for pid in sorted(built):
+              mp.install(base, c[pid])
+              print("裝好", pid, [m["size_mb"] for m in mp.installed(base) if m["id"] == pid])
+              mp.remove(base, pid)
+          EOF
+
+      - name: 發布（固定的 model-packs 發布頁，不是最新版）
+        run: |
+          cd dist/packs
+          notes="$GITHUB_WORKSPACE/group/model-packs-notes.md"
+          if ! gh release view model-packs --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create model-packs --repo "$GITHUB_REPOSITORY" --title "模型包（語音辨識與翻譯）" \
+              --notes-file "$notes" --latest=false --target "$GITHUB_SHA"
+          else
+            gh release edit model-packs --repo "$GITHUB_REPOSITORY" --notes-file "$notes"
+          fi
+          # 這次重做的模型包：先刪掉發布頁上舊的檔案（分割數量可能不同）
+          for z in *.zip *.zip.*; do
+            [ -e "$z" ] || continue
+            id="${z%%.zip*}"
+            gh release view model-packs --repo "$GITHUB_REPOSITORY" --json assets --jq ".assets[].name" \
+              | { grep -E "^${id}\.zip" || true; } | while read old; do gh release delete-asset model-packs "$old" --repo "$GITHUB_REPOSITORY" -y; done
+          done
+          gh release upload model-packs --repo "$GITHUB_REPOSITORY" --clobber catalog.json *.zip*

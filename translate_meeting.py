@@ -2563,10 +2563,41 @@ def _mode_whisper_lang(mode):
     return "zh"
 
 
+def _pcg_packs(kind=None):
+    """集團版：裝好的模型包（models/packs/<id>/pack.json），[(id, pack.json, 資料夾)]"""
+    root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "packs")
+    out = []
+    try:
+        names = sorted(os.listdir(root))
+    except OSError:
+        return out
+    for n in names:
+        d = os.path.join(root, n)
+        try:
+            with open(os.path.join(d, "pack.json"), encoding="utf-8") as f:
+                m = json.load(f)
+        except (OSError, ValueError):
+            continue
+        if isinstance(m, dict) and m.get("id") == n and (kind is None or m.get("type") == kind):
+            out.append((n, m, d))
+    return out
+
+
+def _pcg_pack_model_names():
+    """-m 可以用的模型包名稱：pack:<id>（語音辨識模型包）"""
+    return [f"pack:{n}" for n, _, _ in _pcg_packs("asr")]
+
+
 def _resolve_fw_model(model_name, remote=False):
     """把模型代號轉成 faster-whisper 可載入的名稱或 HF repo。
     一般模型原樣回傳；台語模型依執行位置選 float16 / int8 版本
-    （GPU 伺服器一律 float16，本機看有沒有 CUDA）。"""
+    （GPU 伺服器一律 float16，本機看有沒有 CUDA）。
+    集團版：pack:<id> 是 IT 裝的模型包，回傳它的資料夾（CTranslate2 格式，faster-whisper 直接載入）"""
+    if isinstance(model_name, str) and model_name.startswith("pack:"):
+        for n, _, d in _pcg_packs("asr"):
+            if n == model_name[5:]:
+                return d
+        raise FileNotFoundError(f"找不到模型包 {model_name[5:]}（IT 設定頁「模型管理」安裝）")
     if model_name == BREEZE_MODEL:
         if remote or _fw_local_cuda_ok():
             return _BREEZE_REPOS["fw_fp16"]
@@ -5747,7 +5778,9 @@ class NllbTranslator:
 
     def __new__(cls, *args, **kwargs):
         # 集團版：有 M2M100 模型時一律改用它（可商用），呼叫端照舊寫 NllbTranslator(...)
-        if cls is NllbTranslator and LOCAL_MT_IS_M2M:
+        if cls is NllbTranslator and _pcg_mt_pack():
+            cls = MadladTranslator            # IT 在「模型管理」選了 MADLAD-400 翻譯模型包
+        elif cls is NllbTranslator and LOCAL_MT_IS_M2M:
             cls = M2M100Translator
         return super().__new__(cls)
 
@@ -5902,6 +5935,55 @@ class M2M100Translator(NllbTranslator):
             max_decoding_length=256,
         )
         return self.sp.Decode(results[0].hypotheses[0][1:])     # 去掉開頭的語言代碼
+
+
+def _pcg_mt_pack():
+    """IT 在設定頁選的本機翻譯模型包（config.json 的 pcg_simple.mt_pack）：回傳資料夾；沒選、沒裝回 None"""
+    try:
+        with open(CONFIG_PATH, encoding="utf-8") as f:
+            pid = (json.load(f).get("pcg_simple") or {}).get("mt_pack")
+    except (OSError, ValueError, AttributeError):
+        return None
+    for n, m, d in _pcg_packs("mt"):
+        if n == pid and m.get("engine") == "madlad" and os.path.isfile(os.path.join(d, "model.bin")):
+            return d
+    return None
+
+
+class MadladTranslator(NllbTranslator):
+    """集團版：MADLAD-400 3B（Google，Apache-2.0；CTranslate2 int8）離線翻譯，模型包另外裝。
+    比 M2M100 準（尤其印尼文、越南文、印地語），但大很多、CPU 上慢：適合錄音檔、效能好的電腦。
+    用法：原文前面加 <2目標語言>，模型直接輸出譯文；斷句、重複偵測、簡轉繁沿用 NllbTranslator"""
+
+    LABEL = "MADLAD-400"
+    _LANG_MAP = {"en": "en", "zh": "zh", "ja": "ja", "ko": "ko", "id": "id", "vi": "vi", "hi": "hi"}
+    BEAM_SIZE = 1
+
+    def __init__(self, direction="en2zh"):
+        src_key, tgt_key = self._DIRECTION_MAP.get(direction, ("en", "zh"))
+        self.src_lang = self._LANG_MAP[src_key]
+        self.tgt_lang = self._LANG_MAP[tgt_key]
+        self.direction = direction
+        self.model = "MADLAD-400"
+        d = _pcg_mt_pack()
+        print(f"{C_DIM}正在載入 MADLAD-400 離線翻譯模型...{RESET}", end=" ", flush=True)
+        _webui_send({"type": "progress", "stage": "載入中", "detail": "MADLAD-400 離線翻譯模型"})
+        spm = next((os.path.join(d, n) for n in ("sentencepiece.model", "spiece.model")
+                    if d and os.path.isfile(os.path.join(d, n))), None)
+        if not spm:
+            raise FileNotFoundError(f"MADLAD-400 模型包不完整（缺 sentencepiece.model）：{d}")
+        self.sp = sentencepiece.SentencePieceProcessor()
+        self.sp.Load(spm)
+        # 大模型：翻譯是主要的等待時間，執行緒跟語音辨識一樣多（總數仍不超過 _pcg_cpu_threads 的上限）
+        self.ct2 = ctranslate2.Translator(d, device="cpu", compute_type="int8",
+                                          intra_threads=_pcg_cpu_threads()[0])
+        print(f"{C_OK}{BOLD}完成！{RESET}")
+
+    def _translate_short(self, text):
+        tokens = self.sp.Encode(f"<2{self.tgt_lang}> {text}", out_type=str)
+        results = self.ct2.translate_batch([tokens], beam_size=self.BEAM_SIZE, no_repeat_ngram_size=4,
+                                           repetition_penalty=1.2, max_decoding_length=256)
+        return self.sp.Decode(results[0].hypotheses[0])
 
 
 def _is_private_host(host):
@@ -19433,7 +19515,7 @@ def parse_args():
         epilog=epilog,
     )
     mode_names = list(MODE_MAP.keys())
-    model_names = [name for name, _, _ in WHISPER_MODELS] + [BREEZE_MODEL, QWEN_MODEL]
+    model_names = [name for name, _, _ in WHISPER_MODELS] + [BREEZE_MODEL, QWEN_MODEL] + _pcg_pack_model_names()
     scene_names = list(SCENE_MAP.keys())
     moonshine_model_names = [name for name, _, _ in MOONSHINE_MODELS]
     parser.add_argument(

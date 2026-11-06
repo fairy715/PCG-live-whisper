@@ -168,6 +168,25 @@ GPU 伺服器有填但當下連不上時，會自動改在同仁電腦上用小�
   - `PCG_CPU_THREADS=8`：指定總共用幾個執行緒（例如效能好的桌機要全速跑）
   - `PCG_NORMAL_PRIORITY=1`：改回一般優先順序
 
+### 模型管理（模型包，r15 起）
+
+主安裝檔只放基本款（Whisper small、M2M100、Moonshine 英文）；其他模型做成**模型包**，在 IT 設定頁的「模型管理」安裝：
+
+| 模型包 | 用途 | 大小 | 授權 |
+|---|---|---|---|
+| PhoWhisper small／medium | 越南文語音辨識 | 約 250／780 MB | BSD-3-Clause |
+| Whisper small／medium 印尼文（cahya） | 印尼文語音辨識 | 約 250／780 MB | Apache-2.0 |
+| Whisper small／medium 印地語（vasista22） | 印地語語音辨識 | 約 250／780 MB | Apache-2.0 |
+| MADLAD-400 3B | 本機翻譯（印尼文、越南文、印地語較準、較慢） | 約 3 GB | Apache-2.0 |
+
+- **來源**：GitHub 的 [model-packs 發布頁](https://github.com/fairy715/PCG-live-whisper/releases/tag/model-packs)；不能上網的電腦：IT 把那一頁的 `catalog.json` 與模型包檔案放到「更新」的公司共用資料夾（或它的 `models` 子資料夾）
+- **安裝**：只能在那台電腦上按（要 IT 密碼）；每個檔案比對 SHA-256，不符就不裝；裝到 `models\packs\<代號>`
+- **指定用途**：「每種語言用哪個模型」選即時字幕、錄音檔各用哪個，按「套用模型設定」，下次開始字幕或處理錄音時生效
+  - 只用在「對方說這種語言」的**單向**即時字幕與錄音檔；雙向（麥克風那邊是中文）、教室模式照舊用內建的多語模型
+  - 本機翻譯選 MADLAD-400 時，本機模式的所有翻譯都改用它（大約每句幾秒，舊電腦的即時字幕會跟不上，建議先用在錄音檔）
+- **移除**：用到它的語言自動改回內建模型
+- 製作方式：`.github/workflows/model-packs.yml`（從 Hugging Face 下載、轉成 CTranslate2 int8、只收可商用授權、試辨識／試翻、實際安裝一次才發布）
+
 ### 英文即時字幕（Moonshine）
 
 - 「對方說英文」在同仁電腦上辨識時，改用 **Moonshine medium**（英文專用，MIT 授權，約 250 MB，離線資源包附）：延遲約 0.3 秒、CPU 比 Whisper 輕很多
