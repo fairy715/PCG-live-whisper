@@ -5,7 +5,7 @@
 **下載**：[最新版](https://github.com/fairy715/PCG-live-whisper/releases/latest) ·
 **安裝說明**：[中文](group/安裝說明.md) · [English](group/INSTALL-GUIDE-en.md) · [Bahasa Indonesia](group/INSTALL-GUIDE-id.md) · [Tiếng Việt](group/INSTALL-GUIDE-vi.md) ·
 **怎麼用**：[使用情境](group/使用情境.md)（[English](group/USE-CASES-en.md) · [Bahasa Indonesia](group/USE-CASES-id.md) · [Tiếng Việt](group/USE-CASES-vi.md)）：線上課雙向翻譯、同一間會議室、手機看字幕、會後會議紀錄 ·
-**IT 必讀**：[架構與設定、模型包、GPU 加速包](group/INSTALL.md) ·
+**IT 必讀**：架構與設定、模型包、GPU 加速包（[中文](group/INSTALL.md) · [English](group/IT-GUIDE-en.md) · [Bahasa Indonesia](group/IT-GUIDE-id.md)） ·
 **姊妹工具**：[PCG 文件工具](https://github.com/fairy715/PCG-doc-tools)（PDF／Office 文件處理）
 
 ## 宣傳影片（48 秒，有配樂）

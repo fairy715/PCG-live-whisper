@@ -1,5 +1,9 @@
 # PCG 集團版：系統架構與安裝（給 IT）
 
+[中文](INSTALL.md) · [English](IT-GUIDE-en.md) · [Bahasa Indonesia](IT-GUIDE-id.md)
+
+<!-- 修改這份說明時，中文、英文、印尼文三份要一起更新（INSTALL.md、IT-GUIDE-en.md、IT-GUIDE-id.md）。 -->
+
 ## 系統架構
 
 ```
@@ -161,7 +165,7 @@ GPU 伺服器有填但當下連不上時，會自動改在同仁電腦上用小�
 
 即時字幕、錄音檔處理在同仁電腦的 CPU 上跑時（本機模式，或只接大模型伺服器的伺服器模式）：
 
-- 語音辨識＋本機翻譯合計只用約 **3/4 的核心**（4 核筆電：辨識 2、翻譯 1），留給 Teams 和其他程式
+- 語音辨識＋本機翻譯合計只用約 **3/4 的核心**、而且不超過實體核心數（4 核筆電：辨識 2～3、翻譯 1），留給 Teams 和其他程式
 - Windows 上用「**低於標準**」的優先順序：CPU 忙的時候先讓給前景的程式，Teams、滑鼠不會頓
 - 舊電腦還是很吃力、字幕跟不上：在 IT 設定頁把「本機即時字幕模型」換成 base（較快但錯字多；離線安裝檔只附 small，換 base 時這台電腦要能上網下載一次）
 - 要調整（Windows 系統環境變數，設定後重開程式）：
@@ -229,7 +233,7 @@ GPU 伺服器有填但當下連不上時，會自動改在同仁電腦上用小�
 
 ### NVIDIA GPU 加速包（有 NVIDIA 顯示卡的同仁電腦）
 
-- 發布頁另外有「NVIDIA GPU 加速包」（標籤 `gpu-cuda12-v…`，約 1 GB）：CUDA 12 的 cuBLAS、cuDNN 9、NVRTC
+- 發布頁另外有「NVIDIA GPU 加速包」（標籤 `gpu-cuda12-v…`，約 670 MB）：CUDA 12 的 cuBLAS、cuDNN 9、NVRTC
 - 只有 NVIDIA 顯示卡（GeForce、RTX、MX）用得到；Intel、AMD 顯示卡不適用
 - 需要 PCG 會議翻譯 r13 以上、NVIDIA 驅動支援 CUDA 12（約 2023 年以後的驅動）
 - 裝到 PCG 會議翻譯資料夾的 `gpu\cuda12`，主程式重裝、小更新包都不會刪；只要裝一次
@@ -274,7 +278,7 @@ git pull
 sudo systemctl restart jt-live-whisper-webui    # 只有 ① 需要
 ```
 
-原作者出新版時（啟動時會提示「有新版本」），請把新版合併進集團版再更新，不要直接用 `--upgrade`。
+原作者出新版時（啟動時會提示「有新版本」），請把新版合併進集團版再更新，不要直接用 `--upgrade`。GitHub 每週一會自動檢查原作者的更新，有新東西就開 Issue 通知。
 
 ## 維運
 
