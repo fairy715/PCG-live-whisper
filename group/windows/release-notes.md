@@ -33,7 +33,7 @@
 
 1. 點桌面的「PCG 會議翻譯」，瀏覽器會自動打開操作頁面（`http://localhost:19781/simple`）。
 2. 第一次會有導覽，照著看一遍。
-3. 即時字幕：選對方說的語言 → 按「開始」；錄音檔：上傳 → 處理完下載會議紀錄。
+3. 即時字幕：選你說的語言 → 哪一種場合 → 對方說的語言 → 按「開始」（外語同仁選自己的語言就會自動選好）；錄音檔：上傳 → 處理完下載會議紀錄。
 4. 頁面最下方會顯示版本（例如 v{VER}），回報問題時請附上（點一下就會複製）。
 
 ## 四、更新
@@ -91,7 +91,7 @@
 1. Double-click the desktop shortcut. The browser opens the app page (`http://localhost:19781/simple`).
 2. A short guided tour runs the first time. Follow it once.
 3. You can switch the page language at the top right (中文 / English / Bahasa Indonesia / Tiếng Việt / हिन्दी).
-4. Live subtitles: choose the language the other person speaks → "Start". Recordings: upload → when processing is done, download the minutes.
+4. Live subtitles: choose the language you speak → the kind of meeting → the language the others speak → "Start" (if you speak Indonesian, Vietnamese, Hindi or English, it is chosen for you). Recordings: upload → when processing is done, download the minutes.
 5. The version is shown at the bottom of the page (e.g. v{VER}). Include it when you report a problem (click it to copy).
 
 ## 4. Update

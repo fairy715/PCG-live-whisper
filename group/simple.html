@@ -566,7 +566,10 @@ function renderScenarios(){
   $('stepLangN').textContent=zh&&!showAll?'3':'2';
   const list=visibleScen();
   $('liveScenarios').innerHTML=cardsHtml(list,'live',liveTitle);
-  if(list.length===1&&!picked('live'))document.querySelector('input[name=live]').checked=true;
+  if(!picked('live')){      // 這個「我說的語言」上次選的；只有一個選項就直接選好
+    const last=store.get('pcg_live_'+me),el=last&&document.querySelector(`input[name=live][value="${CSS.escape(last)}"]`);
+    if(el)el.checked=true;else if(list.length===1)document.querySelector('input[name=live]').checked=true;
+  }
   $('meNote').hidden=zh||showAll;
   $('speakBox').hidden=$('roomBox').hidden=!showAll;
   $('showAll').textContent=t(showAll?'show_less':'show_all');
@@ -581,7 +584,7 @@ function onLivePick(){
   if(!showAll){$('liveSpeak').checked=me==='zh'&&scene==='speak';$('liveRoom').checked=me==='zh'&&scene==='room'}
   $('liveSpeak').disabled=!s?.can_bidi;if(!s?.can_bidi)$('liveSpeak').checked=false;
   $('liveRoom').disabled=!s?.can_room;if(!s?.can_room)$('liveRoom').checked=false;
-  $('liveStart').disabled=!s;if(s)store.set('pcg_live',s.id);
+  $('liveStart').disabled=!s;if(s){store.set('pcg_live',s.id);store.set('pcg_live_'+me,s.id)}
 }
 $('liveScenarios').addEventListener('change',onLivePick);
 $('liveMe').addEventListener('change',e=>{me=e.target.value;store.set('pcg_me',me);renderScenarios()});

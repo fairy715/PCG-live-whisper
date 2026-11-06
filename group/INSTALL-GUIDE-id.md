@@ -32,7 +32,7 @@ Cara memakai untuk rapat online, kelas, dan notulen: lihat [contoh penggunaan](U
 1. Klik dua kali pintasan di desktop. Browser membuka halaman aplikasi (`http://localhost:19781/simple`).
 2. Pertama kali akan ada tur panduan singkat. Ikuti sekali.
 3. Bahasa halaman bisa diganti di kanan atas (中文 / English / Bahasa Indonesia / Tiếng Việt / हिन्दी).
-4. Subtitle langsung: pilih bahasa yang diucapkan lawan bicara → "Mulai". Rekaman: unggah file → setelah selesai diproses, unduh notulen rapat.
+4. Subtitle langsung: pilih bahasa Anda (Bahasa Indonesia) → "Mandarin → Indonesia" langsung terpilih → "Mulai". Rekaman: unggah file → setelah selesai diproses, unduh notulen rapat.
 5. Versi ditampilkan di bagian bawah halaman (misalnya v2026.11.5.r5). Sertakan saat melaporkan masalah (klik untuk menyalin).
 
 ## 4. Pembaruan
