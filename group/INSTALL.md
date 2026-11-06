@@ -182,6 +182,35 @@ GPU 伺服器有填但當下連不上時，會自動改在同仁電腦上用小�
 
 印尼文 small 用 maleo-ai/whisper-small-id（Apache-2.0）；cahya/whisper-small-id 的授權只寫「cc」、無法確認能商用，打包時自動略過。
 
+#### 要裝哪些（建議）
+
+**只在需要的電腦裝**：例如常跟印尼同事開會的台灣同仁電腦，裝印尼文的模型包。外語同仁自己的電腦（選「對方說中文 → 翻成我的語言」）聽的是中文，**不用裝**語言模型包。
+
+| 語言 | 即時字幕（一般筆電，CPU） | 即時字幕（有 NVIDIA 顯示卡＋GPU 加速包） | 錄音檔 |
+|---|---|---|---|
+| 越南文 | PhoWhisper small | PhoWhisper medium | PhoWhisper medium |
+| 印尼文 | Whisper small 印尼文（maleo-ai） | Whisper medium 印尼文（cahya） | Whisper medium 印尼文（cahya） |
+| 印地語 | Whisper small 印地語 | Whisper medium 印地語 | Whisper medium 印地語 |
+| 本機翻譯 | 維持內建 M2M100 | 維持內建 M2M100 | 先維持 M2M100；MADLAD-400 實測比較後再決定 |
+
+- small 約 240 MB、medium 約 740 MB；一種語言兩個都裝約 1 GB
+- medium 在 CPU 上比 small 慢 2～3 倍：一般筆電即時字幕用 small，medium 留給錄音檔
+- 打包時的試辨識（電腦合成語音）：PhoWhisper medium、印尼文 small 全對；PhoWhisper small、印尼文 medium 各錯 1 個字。真人錄音的效果請實測
+- 伺服器模式而且有 GPU 伺服器時，辨識在伺服器上做，同仁電腦的模型包用不到
+
+#### 安裝步驟（每台要用的電腦做一次）
+
+1. 那台電腦先更新到 **r15 以上**（頁面最下方看版本；舊的按「檢查更新」）
+2. 在那台電腦打開 `http://localhost:19781/simple/admin`，輸入 IT 密碼（只能在那台電腦上安裝）
+3. 往下到「**模型管理（模型包）**」→「可以安裝」，按要的模型包的「安裝」，等進度條跑完（一個 small 約 1～3 分鐘，看網路）
+4. 在「**每種語言用哪個模型**」照上表選好「即時字幕」「錄音檔」，按「**套用模型設定**」
+5. 開一次「對方說○○文」的即時字幕確認：字幕畫面能正常出字就好了
+6. 不要了：「這台電腦已安裝」按「移除」，用到它的語言自動改回內建模型
+
+很多台電腦要裝：IT 先把[發布頁](https://github.com/fairy715/PCG-live-whisper/releases/tag/model-packs)的 `catalog.json` 與要用的 `*.zip` 放到公司共用資料夾（「更新」那欄填的資料夾），各電腦從內網複製，比每台都從 GitHub 下載快。
+
+#### 細節
+
 - **來源**：GitHub 的 [model-packs 發布頁](https://github.com/fairy715/PCG-live-whisper/releases/tag/model-packs)；不能上網的電腦：IT 把那一頁的 `catalog.json` 與模型包檔案放到「更新」的公司共用資料夾（或它的 `models` 子資料夾）
 - **安裝**：只能在那台電腦上按（要 IT 密碼）；每個檔案比對 SHA-256，不符就不裝；裝到 `models\packs\<代號>`
 - **指定用途**：「每種語言用哪個模型」選即時字幕、錄音檔各用哪個，按「套用模型設定」，下次開始字幕或處理錄音時生效
