@@ -135,6 +135,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
     <div id="liveRemote" class="banner warn" hidden data-t-html="live_remote"></div>
     <div id="liveRunning" class="banner info" hidden>
       <span data-t="live_running"></span> <button class="btn ghost" id="openLive" type="button" data-t="open_live"></button>
+      <button class="btn ghost" id="stopLive" type="button" data-t="stop_live"></button>
     </div>
     <div id="liveForm">
       <div class="card">
@@ -223,7 +224,7 @@ zh:{
   title:'PCG 會議翻譯',tagline:'即時字幕、錄音轉會議紀錄。',scope_local:'目前是本機模式：語音與文字只在這台電腦處理，不會送出。',scope_internal:'語音與文字在這台電腦與公司內部的伺服器處理。',scope_group:'翻譯與會議紀錄由集團的 AI 平台（Open WebUI）處理。',scope_external:'注意：翻譯與會議紀錄會送到公司外部的 AI 服務處理。機密會議請先詢問 IT。',
   tab_live:'即時字幕',tab_file:'錄音 → 會議紀錄',
   live_remote:'即時字幕要在<strong>自己的電腦</strong>上開：它翻譯的是這台電腦播出來的聲音（Teams、Zoom、YouTube…）。<br>請 IT 幫你的電腦安裝 PCG-live-whisper，再打開 <code>http://localhost:19781/simple</code>。<br>在這台電腦上，你可以先用「錄音 → 會議紀錄」。',
-  live_running:'字幕正在進行中。',open_live:'打開字幕畫面',
+  live_running:'字幕正在進行中。',open_live:'打開字幕畫面',stop_live:'停止',confirm_stop_live:'確定要停止正在進行的字幕？',
   step_live_lang:'對方說什麼語言？',
   room_t:'教室模式（同一間教室，一支麥克風）',room_s:'老師說中文、學生說對方的語言都可以：每一句自動判斷是哪一種語言，再翻成另一種。一次一個人講效果最好；很短的話（例如「好」）可能判斷錯。',
   speak_t:'我也要說話（雙向）',speak_s:'用麥克風：我說中文，會翻成對方的語言顯示出來。請戴耳機，避免把對方的聲音錄進麥克風。',
@@ -269,7 +270,7 @@ en:{
   title:'PCG Meeting Translator',tagline:'Live subtitles and recording-to-minutes.',scope_local:'Local mode: audio and text are processed on this computer only.',scope_internal:'Audio and text are processed on this computer and the company\'s internal servers.',scope_group:'Translation and minutes are processed by the group AI platform (Open WebUI).',scope_external:'Note: translation and minutes are sent to an AI service outside the company. Ask IT before using it for confidential meetings.',
   tab_live:'Live subtitles',tab_file:'Recording → Minutes',
   live_remote:'Live subtitles must run on <strong>your own computer</strong>: they translate the sound this computer plays (Teams, Zoom, YouTube…).<br>Ask IT to install PCG-live-whisper on your computer, then open <code>http://localhost:19781/simple</code>.<br>On this computer you can use “Recording → Minutes” for now.',
-  live_running:'Subtitles are running.',open_live:'Open subtitle screen',
+  live_running:'Subtitles are running.',open_live:'Open subtitle screen',stop_live:'Stop',confirm_stop_live:'Stop the running subtitles?',
   step_live_lang:'What language do the others speak?',
   room_t:'Classroom mode (same room, one microphone)',room_s:'Chinese and the other language can both be spoken: each sentence is detected automatically and translated into the other language. Works best one speaker at a time; very short replies may be detected wrongly.',
   speak_t:'I will speak too (two-way)',speak_s:'Uses your microphone: when you speak Chinese, it is translated into their language. Please wear headphones so the microphone does not pick up the other side.',
@@ -315,7 +316,7 @@ id:{
   title:'Penerjemah Rapat PCG',tagline:'Subtitle langsung dan rekaman menjadi notulen.',scope_local:'Mode lokal: suara dan teks hanya diproses di komputer ini.',scope_internal:'Suara dan teks diproses di komputer ini dan server internal perusahaan.',scope_group:'Terjemahan dan notulen diproses oleh platform AI grup (Open WebUI).',scope_external:'Perhatian: terjemahan dan notulen dikirim ke layanan AI di luar perusahaan. Tanyakan IT sebelum digunakan untuk rapat rahasia.',
   tab_live:'Subtitle langsung',tab_file:'Rekaman → Notulen',
   live_remote:'Subtitle langsung harus dijalankan di <strong>komputer Anda sendiri</strong>: yang diterjemahkan adalah suara yang diputar komputer ini (Teams, Zoom, YouTube…).<br>Minta IT memasang PCG-live-whisper di komputer Anda, lalu buka <code>http://localhost:19781/simple</code>.<br>Di komputer ini, Anda bisa memakai “Rekaman → Notulen” terlebih dahulu.',
-  live_running:'Subtitle sedang berjalan.',open_live:'Buka layar subtitle',
+  live_running:'Subtitle sedang berjalan.',open_live:'Buka layar subtitle',stop_live:'Berhenti',confirm_stop_live:'Hentikan subtitle yang sedang berjalan?',
   step_live_lang:'Lawan bicara memakai bahasa apa?',
   room_t:'Mode kelas (satu ruangan, satu mikrofon)',room_s:'Bahasa Mandarin dan bahasa lain boleh dipakai bergantian: setiap kalimat dikenali otomatis lalu diterjemahkan ke bahasa lainnya. Paling baik satu orang berbicara bergantian; jawaban sangat pendek bisa salah dikenali.',
   speak_t:'Saya juga akan berbicara (dua arah)',speak_s:'Memakai mikrofon: saat saya berbicara bahasa Mandarin, akan diterjemahkan ke bahasa lawan bicara. Gunakan headphone agar suara lawan bicara tidak masuk ke mikrofon.',
@@ -361,7 +362,7 @@ vi:{
   title:'Phiên dịch cuộc họp PCG',tagline:'Phụ đề trực tiếp và chuyển bản ghi âm thành biên bản.',scope_local:'Chế độ máy cục bộ: âm thanh và văn bản chỉ được xử lý trên máy này.',scope_internal:'Âm thanh và văn bản được xử lý trên máy này và máy chủ nội bộ của công ty.',scope_group:'Bản dịch và biên bản được xử lý bởi nền tảng AI của tập đoàn (Open WebUI).',scope_external:'Lưu ý: bản dịch và biên bản được gửi đến dịch vụ AI bên ngoài công ty. Hãy hỏi IT trước khi dùng cho cuộc họp bảo mật.',
   tab_live:'Phụ đề trực tiếp',tab_file:'Ghi âm → Biên bản',
   live_remote:'Phụ đề trực tiếp phải chạy trên <strong>máy tính của bạn</strong>: nó dịch âm thanh mà máy tính này phát ra (Teams, Zoom, YouTube…).<br>Hãy nhờ IT cài PCG-live-whisper cho máy của bạn, rồi mở <code>http://localhost:19781/simple</code>.<br>Trên máy này, bạn có thể dùng “Ghi âm → Biên bản” trước.',
-  live_running:'Phụ đề đang chạy.',open_live:'Mở màn hình phụ đề',
+  live_running:'Phụ đề đang chạy.',open_live:'Mở màn hình phụ đề',stop_live:'Dừng',confirm_stop_live:'Dừng phụ đề đang chạy?',
   step_live_lang:'Người kia nói tiếng gì?',
   room_t:'Chế độ lớp học (cùng phòng, một micro)',room_s:'Có thể nói tiếng Trung và ngôn ngữ kia: mỗi câu được tự nhận biết rồi dịch sang ngôn ngữ còn lại. Tốt nhất là từng người nói một; câu quá ngắn có thể bị nhận sai.',
   speak_t:'Tôi cũng sẽ nói (hai chiều)',speak_s:'Dùng micro: khi tôi nói tiếng Trung, sẽ được dịch sang tiếng của người kia. Hãy đeo tai nghe để micro không thu tiếng của bên kia.',
@@ -407,7 +408,7 @@ hi:{
   title:'PCG मीटिंग अनुवादक',tagline:'लाइव सबटाइटल और रिकॉर्डिंग से मीटिंग मिनट्स।',scope_local:'लोकल मोड: आवाज़ और टेक्स्ट केवल इसी कंप्यूटर पर प्रोसेस होते हैं।',scope_internal:'आवाज़ और टेक्स्ट इस कंप्यूटर और कंपनी के आंतरिक सर्वर पर प्रोसेस होते हैं।',scope_group:'अनुवाद और मिनट्स ग्रुप के AI प्लेटफ़ॉर्म (Open WebUI) द्वारा प्रोसेस होते हैं।',scope_external:'ध्यान दें: अनुवाद और मिनट्स कंपनी के बाहर की AI सेवा को भेजे जाते हैं। गोपनीय मीटिंग के लिए पहले IT से पूछें।',
   tab_live:'लाइव सबटाइटल',tab_file:'रिकॉर्डिंग → मिनट्स',
   live_remote:'लाइव सबटाइटल <strong>आपके अपने कंप्यूटर</strong> पर चलाने होंगे: यह इसी कंप्यूटर पर चल रही आवाज़ (Teams, Zoom, YouTube…) का अनुवाद करता है।<br>IT से अपने कंप्यूटर पर PCG-live-whisper इंस्टॉल करवाएँ, फिर <code>http://localhost:19781/simple</code> खोलें।<br>इस कंप्यूटर पर अभी आप “रिकॉर्डिंग → मिनट्स” का उपयोग कर सकते हैं।',
-  live_running:'सबटाइटल चल रहे हैं।',open_live:'सबटाइटल स्क्रीन खोलें',
+  live_running:'सबटाइटल चल रहे हैं।',open_live:'सबटाइटल स्क्रीन खोलें',stop_live:'रोकें',confirm_stop_live:'चल रहे सबटाइटल रोकें?',
   step_live_lang:'सामने वाले कौन-सी भाषा बोलते हैं?',
   room_t:'कक्षा मोड (एक ही कमरा, एक माइक्रोफ़ोन)',room_s:'चीनी और दूसरी भाषा दोनों बोली जा सकती हैं: हर वाक्य की भाषा अपने आप पहचानी जाती है और दूसरी भाषा में अनुवाद होता है। एक समय में एक व्यक्ति बोले तो सबसे अच्छा; बहुत छोटे जवाब गलत पहचाने जा सकते हैं।',
   speak_t:'मैं भी बोलूँगा (दो-तरफ़ा)',speak_s:'माइक्रोफ़ोन से: जब मैं चीनी बोलूँ, तो सामने वाले की भाषा में अनुवाद दिखेगा। कृपया हेडफ़ोन लगाएँ, ताकि सामने वाले की आवाज़ माइक्रोफ़ोन में न जाए।',
@@ -558,6 +559,14 @@ async function initLive(){
   return j;
 }
 $('openLive').onclick=()=>{location.href='/simple/live'};
+$('stopLive').onclick=async()=>{
+  if(!confirm(t('confirm_stop_live')))return;
+  const b=$('stopLive');b.disabled=true;
+  const j=await api('/api/simple/live/stop',{method:'POST'});
+  b.disabled=false;
+  if(!j.ok){alert(errText(j));return}
+  $('liveRunning').hidden=true;
+};
 $('liveStart').onclick=async()=>{
   const b=$('liveStart');b.disabled=true;b.textContent=t('preparing');
   const j=await api('/api/simple/live',{method:'POST',headers:{'Content-Type':'application/json'},

@@ -64,13 +64,19 @@ class SimpleFlow(unittest.TestCase):
         async def start_live(body):
             self.started.append(body)
 
+        self.stopped = 0
+
+        async def stop_live():
+            self.stopped += 1
+            self.running = False
+
         self.q = simple_routes.register(
             app, self.base, lambda r: self.local, _pw_hash, _pw_match, self.cfg,
             lambda c: self.cfg.write_text(json.dumps(c, ensure_ascii=False), encoding="utf-8"),
             start_live=start_live, live_running=lambda: self.running,
             live_args=lambda: self.args,
             set_view_password=self.view_pw.append, gpu_alive=lambda h, p: self.gpu_up,
-            update_hooks={"github_fetch": self._no_github, "launch": self.launched.append})
+            update_hooks={"github_fetch": self._no_github, "launch": self.launched.append}, stop_live=stop_live)
         self.c = TestClient(app)
         self.h = {"X-Client-Id": "browserA1234"}
 
@@ -252,6 +258,20 @@ class SimpleFlow(unittest.TestCase):
         r = self.c.post("/api/simple/live", json={"scenario": "en"})
         self.assertEqual((r.status_code, r.json()["code"]), (409, "live_busy_file"))
         self.assertEqual(len(self.started), 2)
+
+    def test_live_stop_from_home(self):
+        """首頁「字幕進行中」旁的停止：只在這台電腦、沒在跑就不用停、處理錄音檔時不停"""
+        self.assertFalse(self.c.post("/api/simple/live/stop").json()["stopped"])
+        self.running = True
+        self.args = ["python", "translate_meeting.py", "--webui", "--mode", "id2zh", "--input", "a.mp3"]
+        self.assertEqual(self.c.post("/api/simple/live/stop").status_code, 409)
+        self.args = ["python", "translate_meeting.py", "--webui", "--mode", "zh2id"]
+        self.local = False
+        self.assertEqual(self.c.post("/api/simple/live/stop").status_code, 403)
+        self.local = True
+        self.assertTrue(self.c.post("/api/simple/live/stop").json()["stopped"])
+        self.assertEqual(self.stopped, 1)
+        self.assertFalse(self.c.get("/api/simple/live").json()["running"])
 
 
 class AdminPage(SimpleFlow):

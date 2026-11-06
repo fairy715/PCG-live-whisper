@@ -421,9 +421,10 @@ def parse_llm(text, keep_v1=False):
 
 def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path, write_config,
              start_live=None, live_running=None, live_args=None, set_view_password=None, gpu_alive=None,
-             update_hooks=None):
+             update_hooks=None, stop_live=None):
     """把簡易版的路由掛到 WebUI 的 FastAPI app 上（webui.py 呼叫）。
-    start_live(body)：用 WebUI 原本的方式啟動即時字幕；live_running()：WebUI 是否正在跑"""
+    start_live(body)：用 WebUI 原本的方式啟動即時字幕；live_running()：WebUI 是否正在跑；
+    stop_live()：停止即時字幕（首頁「字幕進行中」旁的停止按鈕）"""
     from fastapi import File, Form, Request, UploadFile
     from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 
@@ -675,6 +676,21 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "scenarios": [{k: s[k] for k in ("id", "title", "flag")}
                               | {"can_bidi": bool(s["bidi"]), "can_room": s["id"] in ROOM_SCENARIOS}
                               for s in LIVE_SCENARIOS]}
+
+    @app.post("/api/simple/live/stop")
+    async def simple_live_stop(request: Request):
+        """首頁的「停止」：只能在這台電腦上按；正在處理錄音檔時不停"""
+        if not is_local(request):
+            return JSONResponse({"ok": False, "code": "live_remote", "error": "只能在這台電腦上停止"}, status_code=403)
+        if stop_live is None:
+            return JSONResponse({"ok": False, "code": "live_unavailable", "error": "這個版本不支援"}, status_code=503)
+        if not (live_running and live_running()):
+            return {"ok": True, "stopped": False}
+        if "--input" in ((live_args() if live_args else None) or []):
+            return JSONResponse({"ok": False, "code": "live_busy_file",
+                                 "error": "這台電腦正在處理錄音檔，處理完再開即時字幕"}, status_code=409)
+        await stop_live()
+        return {"ok": True, "stopped": True}
 
     @app.post("/api/simple/live")
     async def simple_live_start(request: Request, body: dict = {}):
