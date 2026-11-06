@@ -314,3 +314,42 @@ class LocalM2M(unittest.TestCase):
     def test_upstream_nllb_untouched_without_m2m(self):
         t.LOCAL_MT_IS_M2M = False
         self.assertIs(type(t.NllbTranslator.__new__(t.NllbTranslator)), t.NllbTranslator)
+
+
+class CpuBudget(unittest.TestCase):
+    """集團版：語音辨識＋本機翻譯不要把 CPU 吃滿（同仁回報 CPU 100%）"""
+
+    def threads(self, cores, env=None):
+        from unittest import mock
+        with mock.patch.object(t.os, "cpu_count", lambda: cores), \
+                mock.patch.dict(t.os.environ, env or {}, clear=False):
+            if not env:
+                t.os.environ.pop("PCG_CPU_THREADS", None)
+            return t._pcg_cpu_threads()
+
+    def test_leaves_cores_free(self):
+        self.assertEqual(self.threads(4), (2, 1))          # 4 核筆電：辨識 2、翻譯 1，留 1 核給 Teams
+        self.assertEqual(self.threads(8), (5, 1))
+        self.assertEqual(self.threads(2), (1, 1))
+        a, m = self.threads(32)
+        self.assertLessEqual(a, 8)
+        for n in (1, 2, 4, 6, 8, 12, 16):
+            a, m = self.threads(n)
+            self.assertGreaterEqual(min(a, m), 1)
+            self.assertLessEqual(a + m, max(n, 2))
+
+    def test_it_can_override(self):
+        self.assertEqual(self.threads(8, {"PCG_CPU_THREADS": "8"}), (6, 2))
+        self.assertEqual(self.threads(8, {"PCG_CPU_THREADS": "abc"}), (5, 1))
+
+    def test_whisper_gets_thread_limit_on_cpu(self):
+        from unittest import mock
+        with mock.patch.object(t, "_fw_local_cuda_ok", lambda: False), mock.patch.object(t, "LOCAL_MT_IS_M2M", True):
+            kw = t._fw_device_kwargs()
+        self.assertEqual((kw["device"], kw["compute_type"]), ("cpu", "int8"))
+        self.assertGreaterEqual(kw["cpu_threads"], 1)
+        with mock.patch.object(t, "_fw_local_cuda_ok", lambda: False), mock.patch.object(t, "LOCAL_MT_IS_M2M", False):
+            self.assertNotIn("cpu_threads", t._fw_device_kwargs())     # 上游版不變
+
+    def test_lower_priority_is_safe_off_windows(self):
+        t._pcg_lower_priority()       # 不是 Windows：什麼都不做、不出錯

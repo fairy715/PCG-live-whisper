@@ -638,6 +638,36 @@ LOCAL_MT_IS_M2M = os.path.isfile(os.path.join(M2M_MODEL_DIR, "model.bin"))
 if LOCAL_MT_IS_M2M:
     NLLB_MODEL_DIR = M2M_MODEL_DIR
 LOCAL_MT_NAME = "M2M100 本機離線" if LOCAL_MT_IS_M2M else "NLLB 本機離線"
+
+
+# 集團版（有 M2M100 模型就是集團版）：同仁電腦多半是筆電，語音辨識＋翻譯在 CPU 上跑時不要把核心全部吃滿，
+# 不然 Teams 會卡、滑鼠會頓（2026-11-06 同仁回報 CPU 100%）
+def _pcg_cpu_threads():
+    """(語音辨識, 本機翻譯) 的執行緒數。總共用約 3/4 的核心，留給 Teams 和其他程式；
+    環境變數 PCG_CPU_THREADS 可以指定總數（例如 IT 要讓某台電腦全速跑）"""
+    n = os.cpu_count() or 4
+    try:
+        budget = int(os.environ.get("PCG_CPU_THREADS") or 0)
+    except ValueError:
+        budget = 0
+    if budget <= 0:
+        budget = max(2, n * 3 // 4)
+    budget = min(budget, max(n, 2))
+    mt = max(1, budget // 4)
+    return max(1, min(8, budget - mt)), mt
+
+
+def _pcg_lower_priority():
+    """Windows：這個程序（即時字幕、錄音檔處理）用「低於標準」的優先順序，CPU 忙的時候先讓給前景的程式。
+    PCG_NORMAL_PRIORITY=1 可以關掉"""
+    if sys.platform != "win32" or os.environ.get("PCG_NORMAL_PRIORITY") == "1":
+        return
+    try:
+        import ctypes
+        k32 = ctypes.windll.kernel32
+        k32.SetPriorityClass(k32.GetCurrentProcess(), 0x00004000)    # BELOW_NORMAL_PRIORITY_CLASS
+    except Exception:
+        pass
 LOCAL_MT_DESC = ("支援中英日韓、印尼文、越南文、印地語，免 LLM 伺服器；MIT 授權可商用" if LOCAL_MT_IS_M2M
                  else "支援中日韓英，品質一般；模型非商業授權（CC-BY-NC 4.0）")
 
@@ -2640,6 +2670,8 @@ def _fw_device_kwargs():
         except Exception:
             types = set()
         return {"device": "cuda", "compute_type": "float16" if "float16" in types else "float32"}
+    if LOCAL_MT_IS_M2M:          # 集團版：限制 CPU 執行緒數（faster-whisper 預設 4，再加翻譯就吃滿 4 核的筆電）
+        return {"device": "cpu", "compute_type": "int8", "cpu_threads": _pcg_cpu_threads()[0]}
     return {"device": "cpu", "compute_type": "int8"}
 
 
@@ -5772,8 +5804,8 @@ class M2M100Translator(NllbTranslator):
             raise FileNotFoundError(f"M2M100 模型缺少 sentencepiece.bpe.model：{M2M_MODEL_DIR}")
         self.sp = sentencepiece.SentencePieceProcessor()
         self.sp.Load(spm)
-        # 執行緒：保留一半核心給語音辨識（即時字幕兩者同時在跑）
-        _threads = max(1, (os.cpu_count() or 4) // 2)
+        # 執行緒：大部分留給語音辨識（即時字幕兩者同時在跑），總數不吃滿整台電腦（見 _pcg_cpu_threads）
+        _threads = _pcg_cpu_threads()[1]
         self.ct2 = ctranslate2.Translator(M2M_MODEL_DIR, device="cpu", compute_type="int8",
                                           intra_threads=_threads)
         print(f"{C_OK}{BOLD}完成！{RESET}")
@@ -19814,6 +19846,8 @@ def _confirm_start(cli_cmd):
 def main():
     global _diarize_engine
     args = parse_args()
+    if LOCAL_MT_IS_M2M:
+        _pcg_lower_priority()
     # 集團版：-e m2m 就是「本機離線翻譯」，走原本 nllb 的路徑（NllbTranslator 會改用 M2M100）
     if getattr(args, "engine", None) == "m2m":
         if not LOCAL_MT_IS_M2M:
