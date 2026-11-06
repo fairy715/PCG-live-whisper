@@ -51,6 +51,7 @@
 ## 五、遇到問題
 
 * 安裝失敗：把 `D:\PCG-live-whisper\group_data\install.log`（更新失敗是 `update.log`）交給 IT。
+* 程式用到一半出問題：按頁面最下方的「回報問題」→「產生診斷檔」，把下載的 zip 寄給 IT。
 * 防毒軟體攔截：請 IT 把安裝資料夾加入例外。
 * 解除安裝：Windows「設定」→「應用程式」→「PCG Meeting Translator」→「解除安裝」。錄音、逐字稿、設定會留在資料夾裡，確定不要了再手動刪除。
 
@@ -109,6 +110,7 @@ You do **not** need to uninstall first. Settings, recordings and transcripts are
 ## 5. Problems
 
 * Installation failed: send `D:\PCG-live-whisper\group_data\install.log` (for a failed update: `update.log`) to IT.
+* A problem while using the app: click “Report a problem” at the bottom of the page → “Create report”, and send the downloaded zip to IT.
 * Blocked by antivirus: ask IT to add the install folder as an exception.
 * Uninstall: Windows "Settings" → "Apps" → "PCG Meeting Translator" → "Uninstall". Recordings, transcripts and settings stay in the folder; delete it manually if you no longer need them.
 

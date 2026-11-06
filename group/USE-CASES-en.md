@@ -97,4 +97,4 @@ Choose "**Everyone speaks Chinese**": a Chinese transcript only, no translation.
 
 - Speak clearly, one person at a time, microphone close to the speaker. Fill in the meeting topic for meetings with many technical terms.
 - The top of the page shows where audio and text are processed. Check it before confidential meetings.
-- The version is at the bottom of the page; click to copy it when reporting a problem.
+- **Problems**: click “Report a problem” at the bottom of the page, describe what happened and press “Create report”. A zip file is downloaded; send it to IT (if IT has set it up, the page shows where to send it and an “Email IT” button). It has the version, computer specs and program logs, not recordings, transcripts or minutes.

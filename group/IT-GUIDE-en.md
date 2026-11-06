@@ -305,3 +305,12 @@ When the original author releases a new version (the app shows "new version" at 
 | Health check | `./install.sh --doctor` |
 
 **Recordings and outputs are never deleted automatically**: meeting recordings are sensitive data; clean them up regularly according to the company's data retention rules (e.g. keep 90 days).
+
+### Problem reports (from r16)
+
+* **Staff**: “Report a problem” at the bottom of the page → describe what happened → “Create report”. The browser downloads `PCG-report-<computer>-<date-time>.zip`, which staff send to IT. It can only be created on that computer (the logs are that computer's).
+* **IT**: on the settings page, “Problem reports” lets you enter where staff send reports (email or Teams group); it is shown to staff. An email address also adds an “Email IT” button (subject and description filled in; staff attach the zip themselves). “Create a diagnostic file for this computer” on the same card creates one for IT; with “Allow other computers and phones to view subtitles” on, IT can also fetch it from their own computer with the IT password.
+* **In the zip**: `summary.txt` (version, computer specs, memory, disk, GPU pack, model packs, browser, the staff description), `report.json` (the same plus the status and errors of the last 20 recording jobs and the live subtitle parameters), `config.json` (settings, **keys, passwords and hashes replaced with `***`**), `logs/` (last 400 lines of `webui.log`, `webui-error.log`, `update.log`, `install.log`, `gpu_check.log`, and the logs of the last 3 jobs, failed ones first).
+* **Not in the zip**: recordings, transcripts, minutes, recording file names and meeting topics. Program logs may contain some subtitle text; staff can untick “Include recent program logs”.
+* Each computer keeps only the last 10 diagnostic files (`group_data\reports\`).
+* Diagnostic files may contain parts of meetings: **do not post them in a public GitHub issue**. The GitHub “Problem report” template only asks for the version, what happened and the steps.

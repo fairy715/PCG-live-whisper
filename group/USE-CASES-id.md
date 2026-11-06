@@ -91,4 +91,4 @@ Setiap kalimat dikenali otomatis sebagai Mandarin atau Indonesia: Mandarin → M
 
 - Bicara jelas, satu per satu, mikrofon dekat pembicara. Isi topik rapat jika banyak istilah teknis.
 - Bagian atas halaman menunjukkan di mana suara dan teks diproses. Periksa sebelum rapat rahasia.
-- Versi ada di bagian bawah halaman; klik untuk menyalin saat melaporkan masalah.
+- **Ada masalah**: klik “Laporkan masalah” di bagian bawah halaman, tulis apa yang terjadi, lalu tekan “Buat laporan”. File zip akan diunduh; kirim ke IT (jika IT sudah mengaturnya, halaman menampilkan tujuan dan tombol “Email IT”). Isinya versi, spesifikasi komputer, dan log program, tanpa rekaman, transkrip, atau notulen.

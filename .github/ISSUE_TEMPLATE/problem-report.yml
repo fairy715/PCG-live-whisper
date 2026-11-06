@@ -1,0 +1,64 @@
+name: 問題回報 / Problem report
+description: PCG 會議翻譯用起來有問題（IT 整理同仁的回報後填寫）/ Something does not work in PCG Meeting Translator
+title: "[問題] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **這裡是公開的頁面。** 不要貼診斷檔（`PCG-report-….zip`）、逐字稿、會議內容、伺服器位址、金鑰或密碼；診斷檔留在公司內部。
+        **This page is public.** Do not attach the diagnostic file (`PCG-report-….zip`), transcripts, meeting content, server addresses, keys or passwords. Keep diagnostic files inside the company.
+
+        資安問題請不要開 issue，私下通知 IT。/ For security problems, do not open an issue; tell IT privately.
+  - type: input
+    id: version
+    attributes:
+      label: 版本 / Version
+      description: 頁面最下方的版本，或診斷檔 summary.txt 的「版本」/ Bottom of the page, or "Version" in summary.txt
+      placeholder: 2026.11.6.r16
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: 哪一個功能 / Which feature
+      options:
+        - 即時字幕 / Live subtitles
+        - 錄音 → 會議紀錄 / Recording → minutes
+        - 安裝或更新 / Install or update
+        - IT 設定頁、模型包 / IT settings, model packs
+        - GPU 加速包 / GPU pack
+        - 其他 / Other
+    validations:
+      required: true
+  - type: input
+    id: scenario
+    attributes:
+      label: 選了什麼 / What was chosen
+      description: 例如「我說中文 · 線上會議只看字幕 · 對方說印尼文」/ e.g. "I speak Chinese · online meeting, subtitles only · Indonesian"
+  - type: textarea
+    id: what
+    attributes:
+      label: 發生了什麼事 / What happened
+      description: 看到什麼、預期應該怎樣 / What you saw and what you expected
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 怎麼重現 / Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+  - type: textarea
+    id: computer
+    attributes:
+      label: 電腦 / Computer
+      description: 從診斷檔 summary.txt 複製「系統、處理器、記憶體、GPU 加速包、模型包」幾行即可（不要貼電腦名稱以外的內部資訊）/ Copy the OS, CPU, RAM, GPU pack and model pack lines from summary.txt
+      render: text
+  - type: textarea
+    id: error
+    attributes:
+      label: 錯誤訊息 / Error message
+      description: 畫面上的錯誤，或 webui-error.log 裡相關的幾行（先確認沒有會議內容）/ The error on screen, or the relevant lines of webui-error.log (check there is no meeting content)
+      render: text

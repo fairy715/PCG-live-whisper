@@ -52,6 +52,7 @@ Cách dùng cho họp trực tuyến, lớp học và biên bản: xem [các tì
 ## 5. Khi gặp sự cố
 
 * Cài đặt thất bại: gửi tệp `D:\PCG-live-whisper\group_data\install.log` (nếu cập nhật thất bại: `update.log`) cho IT.
+* Gặp sự cố khi dùng: bấm “Báo lỗi” ở cuối trang → “Tạo báo cáo”, rồi gửi tệp zip đã tải về cho IT.
 * Bị phần mềm diệt virus chặn: nhờ IT thêm thư mục cài đặt vào danh sách ngoại lệ.
 * Gỡ cài đặt: Windows "Cài đặt" → "Ứng dụng" → "PCG Meeting Translator" → "Gỡ cài đặt". Bản ghi âm, bản chép lời và cài đặt vẫn nằm trong thư mục; xóa thủ công nếu không cần nữa.
 

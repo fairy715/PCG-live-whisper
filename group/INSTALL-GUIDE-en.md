@@ -52,6 +52,7 @@ You do **not** need to uninstall first. Settings, recordings and transcripts are
 ## 5. Problems
 
 * Installation failed: send `D:\PCG-live-whisper\group_data\install.log` (for a failed update: `update.log`) to IT.
+* A problem while using the app: click “Report a problem” at the bottom of the page → “Create report”, and send the downloaded zip to IT.
 * Blocked by antivirus: ask IT to add the install folder as an exception.
 * Uninstall: Windows "Settings" → "Apps" → "PCG Meeting Translator" → "Uninstall". Recordings, transcripts and settings stay in the folder; delete it manually if you no longer need them.
 

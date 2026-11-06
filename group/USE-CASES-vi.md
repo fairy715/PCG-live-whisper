@@ -91,4 +91,4 @@ Mỗi câu được tự nhận biết là tiếng Trung hay tiếng Việt: ti�
 
 - Nói rõ ràng, từng người một, micro gần người nói. Điền chủ đề cuộc họp nếu có nhiều thuật ngữ.
 - Phía trên trang cho biết âm thanh và văn bản được xử lý ở đâu. Hãy kiểm tra trước cuộc họp bảo mật.
-- Phiên bản ở cuối trang; bấm để sao chép khi báo lỗi.
+- **Gặp sự cố**: bấm “Báo lỗi” ở cuối trang, mô tả chuyện gì đã xảy ra rồi bấm “Tạo báo cáo”. Một tệp zip sẽ được tải về; gửi tệp đó cho IT (nếu IT đã cài đặt, trang sẽ hiện nơi gửi và nút “Gửi email cho IT”). Trong đó có phiên bản, cấu hình máy và nhật ký chương trình, không có bản ghi âm, bản ghi lời hay biên bản họp.

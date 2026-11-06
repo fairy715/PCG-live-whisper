@@ -35,8 +35,10 @@ from pathlib import Path
 
 try:
     from group import model_packs
+    from group import diagnostics
 except ImportError:                     # 測試時直接 import simple_routes
     import model_packs
+    import diagnostics
 
 # 情境：同仁看到的是「錄音裡主要說什麼語言 → 拿到什麼」，背後對應主程式的模式代號
 DEFAULT_SCENARIOS = [
@@ -547,7 +549,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         return {"ok": True, "scenarios": [{k: s.get(k, "") for k in ("id", "title", "subtitle", "flag")}
                                           for s in scenarios()],
                 "max_upload_mb": _MAX_UPLOAD_MB, "backend": pf["backend"], "minutes": pf["summarize"],
-                "version": app_version(base_dir), "data_scope": data_scope(pf)}
+                "version": app_version(base_dir), "data_scope": data_scope(pf),
+                "support": str(settings().get("support_contact") or "")}
 
     def data_scope(pf):
         """畫面上「資料送到哪裡」：local＝只在這台電腦；internal＝這台＋公司內部伺服器；
@@ -851,6 +854,48 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         finally:
             _upd_lock.release()
 
+    # ─── 回報問題：把版本、電腦規格、設定（遮掉金鑰與密碼）、模型、工作狀態、程式記錄打包成 zip 給瀏覽器下載 ───
+    def make_report(body):
+        body = body if isinstance(body, dict) else {}
+        q = _state.get("q")
+        with (q.lock if q else threading.Lock()):
+            jobs = {k: dict(v) for k, v in (q.jobs if q else {}).items()}
+        running = bool(live_running and live_running())
+        return diagnostics.build(
+            base_dir, description=str(body.get("desc") or ""), client=body.get("client") or {},
+            with_logs=body.get("logs", True) is not False, config=read_cfg(), version=app_version(base_dir),
+            packs=model_packs.installed(base_dir), jobs=jobs,
+            live={"running": running, "args": (live_args() if running and live_args else None)})
+
+    def report_response(path):
+        return FileResponse(path, media_type="application/zip", filename=path.name)
+
+    @app.post("/api/simple/report")
+    async def report(request: Request, body: dict = {}):
+        """同仁按「回報問題」：只能在這台電腦上（記錄是這台電腦的）"""
+        if not is_local(request):
+            return JSONResponse({"ok": False, "code": "report_remote", "error": "只能在這台電腦上產生診斷檔"},
+                                status_code=403)
+        import asyncio
+        try:
+            path = await asyncio.to_thread(make_report, body)
+        except Exception as e:  # noqa: BLE001
+            return JSONResponse({"ok": False, "code": "report_failed", "error": str(e)[:300]}, status_code=500)
+        return report_response(path)
+
+    @app.post("/api/simple/admin/report")
+    async def admin_report(request: Request, body: dict = {}):
+        """IT 設定頁的「產生診斷檔」：要 IT 密碼；IT 打開「允許其他電腦觀看字幕」時也能從自己的電腦拿"""
+        err = admin_auth(request)
+        if err:
+            return err
+        import asyncio
+        try:
+            path = await asyncio.to_thread(make_report, body)
+        except Exception as e:  # noqa: BLE001
+            return JSONResponse({"ok": False, "code": "report_failed", "error": str(e)[:300]}, status_code=500)
+        return report_response(path)
+
     # ─── IT 設定頁（/simple/admin）：切換本機／伺服器、填伺服器位址、測試連線、設定密碼 ───
     # 一律要 IT 密碼（同仁就坐在這台電腦前，「本機」不能當成 IT）。還沒設定時，只能在本機設定第一組密碼
     admin_html = Path(__file__).with_name("admin.html")
@@ -892,6 +937,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "update_check": bool(s.get("update_check", True)),
                 "update_who": "it" if s.get("update_who") == "it" else "staff",
                 "update_share": str(s.get("update_share") or ""),
+                "support_contact": str(s.get("support_contact") or ""),
                 "version": app_version(base_dir)}
 
     @app.get("/simple/admin", response_class=HTMLResponse)
@@ -1165,6 +1211,14 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 s["update_share"] = share
             else:
                 s.pop("update_share", None)
+        if "support_contact" in body:
+            sc = str(body.get("support_contact") or "").strip()
+            if len(sc) > 200 or any(c in sc for c in "\r\n\t<>"):
+                return JSONResponse({"ok": False, "code": "bad_contact", "error": "聯絡方式格式不正確"}, status_code=400)
+            if sc:
+                s["support_contact"] = sc
+            else:
+                s.pop("support_contact", None)
         s["allow_remote_view"] = bool(body.get("allow_remote_view"))
         if gh:
             rw = cfg.get("remote_whisper") if isinstance(cfg.get("remote_whisper"), dict) else {}

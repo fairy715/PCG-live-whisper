@@ -307,3 +307,12 @@ Khi tác giả gốc phát hành phiên bản mới (ứng dụng hiện "có ph
 | Kiểm tra tình trạng | `./install.sh --doctor` |
 
 **Bản ghi âm và kết quả không bao giờ tự xóa**: bản ghi âm cuộc họp là dữ liệu nhạy cảm; hãy dọn định kỳ theo quy định lưu trữ dữ liệu của công ty (ví dụ giữ 90 ngày).
+
+### Báo lỗi (từ r16)
+
+* **Nhân viên**: “Báo lỗi” ở cuối trang → mô tả chuyện gì đã xảy ra → “Tạo báo cáo”. Trình duyệt tải về `PCG-report-<tên máy>-<ngày giờ>.zip`, nhân viên gửi tệp đó cho IT. Chỉ tạo được trên chính máy đó (nhật ký là của máy đó).
+* **IT**: trên trang cài đặt, mục "**Problem reports**" (trang cài đặt IT hiển thị bằng tiếng Anh) cho phép điền nơi nhân viên gửi báo cáo (email hoặc nhóm Teams); thông tin này hiện cho nhân viên. Nếu là email, sẽ có thêm nút “Gửi email cho IT” (đã điền sẵn tiêu đề và mô tả; nhân viên tự đính kèm tệp zip). Nút "**Create a diagnostic file for this computer**" trên cùng thẻ tạo tệp cho IT; khi bật "Allow other computers and phones to view subtitles", IT cũng có thể lấy từ máy của mình bằng mật khẩu IT.
+* **Trong tệp zip**: `summary.txt` (phiên bản, cấu hình máy, bộ nhớ, ổ đĩa, gói GPU, gói mô hình, trình duyệt, mô tả của nhân viên), `report.json` (cùng dữ liệu, thêm trạng thái và lỗi của 20 tác vụ ghi âm gần nhất và tham số phụ đề trực tiếp), `config.json` (cài đặt, **khóa, mật khẩu và mã băm được thay bằng `***`**), `logs/` (400 dòng cuối của `webui.log`, `webui-error.log`, `update.log`, `install.log`, `gpu_check.log`, và nhật ký của 3 tác vụ gần nhất, ưu tiên tác vụ lỗi).
+* **Không có trong tệp zip**: bản ghi âm, bản ghi lời, biên bản, tên tệp ghi âm và chủ đề cuộc họp. Nhật ký chương trình có thể có một phần nội dung phụ đề; nhân viên có thể bỏ chọn “Kèm nhật ký chương trình gần đây”.
+* Mỗi máy chỉ giữ 10 tệp chẩn đoán gần nhất (`group_data\reports\`).
+* Tệp chẩn đoán có thể chứa một phần cuộc họp: **không đăng lên issue GitHub công khai**. Mẫu “Báo lỗi” trên GitHub chỉ hỏi phiên bản, hiện tượng và các bước.

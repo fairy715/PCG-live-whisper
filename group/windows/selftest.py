@@ -98,6 +98,30 @@ def cpu_budget():
     return f"邏輯 {logical}、實體 {phys}：辨識 {asr}、翻譯 {mt} 執行緒{pri}"
 
 
+def report():
+    """「回報問題」的診斷檔：讀得到電腦規格（記憶體、處理器）、金鑰會遮掉；做完就刪掉，不留在電腦上"""
+    import json
+    import zipfile
+    from pathlib import Path
+    from group import diagnostics
+    secret = "sk-selftest-0123456789"
+    p = diagnostics.build(Path(ROOT), description="selftest", config={"llm_api_key": secret, "pcg_simple": {}},
+                          live={"running": True, "args": ["--llm-api-key", secret]}, with_logs=True)
+    try:
+        with zipfile.ZipFile(p) as z:
+            names = z.namelist()
+            text = "".join(z.read(n).decode("utf-8", "replace") for n in names)
+            info = json.loads(z.read("report.json"))
+    finally:
+        p.unlink()
+    if secret in text:
+        raise RuntimeError("診斷檔裡有沒遮掉的金鑰")
+    sysinfo = info["system"]
+    if not sysinfo.get("ram_gb") or not sysinfo.get("cpu"):
+        raise RuntimeError(f"讀不到電腦規格：{sysinfo}")
+    return f"{sysinfo['cpu']}，記憶體 {sysinfo['ram_gb']} GB，{len(names)} 個檔案"
+
+
 def translations(quick):
     sys.argv = [sys.argv[0]]
     import translate_meeting as t
@@ -141,6 +165,7 @@ def main():
     if not a.quick:                       # 安裝時不檢查：查不到也只是用預設值，不該讓安裝失敗
         check("英文即時字幕 Moonshine", moonshine)
         check("CPU 用量限制", cpu_budget)
+        check("回報問題的診斷檔", report)
     print("結果：" + ("全部通過" if ok else "有項目沒通過"))
     sys.exit(0 if ok else 1)
 

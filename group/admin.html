@@ -145,6 +145,14 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <p class="note" data-t="upd_note"></p>
     </div>
 
+    <div class="card" id="cReport">
+      <h2 data-t="sup_title"></h2>
+      <label class="f"><span data-t="sup_contact"></span><input type="text" id="supContact" maxlength="200" data-t-ph="sup_contact_ph"></label>
+      <p class="note" data-t="sup_note"></p>
+      <div style="margin-top:12px"><button class="btn ghost" type="button" id="supMake" data-t="sup_make"></button></div>
+      <div id="supRes" hidden></div>
+    </div>
+
     <div class="card" id="cModels">
       <h2 data-t="models_title"></h2>
       <p class="note" data-t="models_note"></p>
@@ -172,7 +180,8 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
 
 <script>
 const I18N={
-zh:{title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式、設定伺服器位址。存檔後立即生效，同仁電腦不用重裝。',
+zh:{sup_title:"問題回報",sup_contact:"同仁回報問題時寄給誰（信箱或 Teams 群組，選填）",sup_contact_ph:"例如 it-helpdesk@pcg.com.tw",sup_note:"同仁頁面下方有「回報問題」：寫下發生什麼事、按一下就下載診斷檔（版本、電腦規格、遮掉金鑰與密碼的設定、最近的程式記錄；不含錄音、逐字稿和會議紀錄）。這裡填的聯絡方式會顯示給同仁；填信箱時會多一個「寫信給 IT」按鈕。",sup_make:"產生這台電腦的診斷檔",sup_making:"正在產生…",sup_done:"已下載 {n}",sup_failed:"沒有產生診斷檔：{e}",bad_contact:"聯絡方式格式不正確",
+  title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式、設定伺服器位址。存檔後立即生效，同仁電腦不用重裝。',
   it_password:'IT 密碼',it_password_again:'再輸入一次',login:'登入',set_pw_title:'設定 IT 密碼',set_pw_note:'第一次使用，請設定 IT 密碼（至少 6 個字）。之後進入這一頁都要輸入。同仁不需要知道這組密碼。',
   login_title:'IT 登入',login_note:'這一頁只給 IT 使用。',set_pw_btn:'設定密碼',pw_mismatch:'兩次輸入的密碼不一樣',
   local_only:'第一次設定 IT 密碼只能在這台電腦上操作',pw_wrong:'IT 密碼不正確',too_short:'密碼至少 6 個字',
@@ -217,7 +226,8 @@ zh:{title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式
   upd_note:'能上網的電腦會從 GitHub 發布頁取得小更新包。不能上網的電腦：把發布頁上的 PCG-Update-<版本>.exe（和同名的 .sha256 檔）放進這個資料夾，同仁電腦就能一鍵更新。只會安裝比目前新的小更新包，安裝前會比對檔案指紋；需要完整安裝檔的版本只會提示找 IT。',
   bad_share:'共用資料夾路徑格式不正確',
   need_llm:'伺服器模式要填大模型的網址',bad_host:'位址格式不正確',bad_key:'API 金鑰格式不正確',error:'發生錯誤'},
-en:{title:'PCG Meeting Translator: IT settings',tagline:'Switch between local and server mode and set server addresses. Changes take effect immediately; no reinstall needed.',
+en:{sup_title:"Problem reports",sup_contact:"Where staff send problem reports (email or Teams group, optional)",sup_contact_ph:"e.g. it-helpdesk@example.com",sup_note:"The staff page has “Report a problem” at the bottom: staff describe what happened and download a diagnostic file with one click (version, computer specs, settings with keys and passwords removed, recent program logs; no recordings, transcripts or minutes). The contact entered here is shown to staff; an email address also adds an “Email IT” button.",sup_make:"Create a diagnostic file for this computer",sup_making:"Creating…",sup_done:"Downloaded {n}",sup_failed:"The diagnostic file was not created: {e}",bad_contact:"The contact is not valid",
+  title:'PCG Meeting Translator: IT settings',tagline:'Switch between local and server mode and set server addresses. Changes take effect immediately; no reinstall needed.',
   it_password:'IT password',it_password_again:'Enter it again',login:'Sign in',set_pw_title:'Set the IT password',set_pw_note:'First use: set an IT password (at least 6 characters). It will be required to open this page. Staff do not need it.',
   login_title:'IT sign-in',login_note:'This page is for IT only.',set_pw_btn:'Set password',pw_mismatch:'The two passwords do not match',
   local_only:'The first IT password can only be set on this computer',pw_wrong:'Incorrect IT password',too_short:'At least 6 characters',
@@ -262,7 +272,8 @@ en:{title:'PCG Meeting Translator: IT settings',tagline:'Switch between local an
   upd_note:'Computers with internet get the small update from the GitHub release page. For computers without internet, put PCG-Update-<version>.exe (and its .sha256 file) from the release page in this folder and staff can update with one click. Only newer small updates are installed, and the file fingerprint is checked first; versions that need the full installer only show “ask IT”.',
   bad_share:'Invalid shared folder path',
   need_llm:'Server mode needs the LLM URL',bad_host:'Invalid address',bad_key:'Invalid API key',error:'Something went wrong'},
-id:{title:'Penerjemah Rapat PCG: Pengaturan IT',tagline:'Beralih antara mode lokal dan mode server serta atur alamat server. Perubahan langsung berlaku; tidak perlu memasang ulang.',
+id:{sup_title:"Laporan masalah",sup_contact:"Ke mana karyawan mengirim laporan masalah (email atau grup Teams, opsional)",sup_contact_ph:"mis. it-helpdesk@contoh.com",sup_note:"Halaman karyawan punya “Laporkan masalah” di bagian bawah: karyawan menulis apa yang terjadi dan mengunduh file diagnostik dengan satu klik (versi, spesifikasi komputer, pengaturan tanpa kunci dan kata sandi, log program terbaru; tanpa rekaman, transkrip, atau notulen). Kontak yang diisi di sini ditampilkan ke karyawan; alamat email juga menambahkan tombol “Email IT”.",sup_make:"Buat file diagnostik komputer ini",sup_making:"Sedang membuat…",sup_done:"{n} sudah diunduh",sup_failed:"File diagnostik tidak dibuat: {e}",bad_contact:"Kontak tidak valid",
+  title:'Penerjemah Rapat PCG: Pengaturan IT',tagline:'Beralih antara mode lokal dan mode server serta atur alamat server. Perubahan langsung berlaku; tidak perlu memasang ulang.',
   it_password:'Kata sandi IT',it_password_again:'Masukkan sekali lagi',login:'Masuk',set_pw_title:'Buat kata sandi IT',set_pw_note:'Pertama kali: buat kata sandi IT (minimal 6 karakter). Kata sandi ini diperlukan untuk membuka halaman ini. Karyawan tidak memerlukannya.',
   login_title:'Masuk IT',login_note:'Halaman ini hanya untuk IT.',set_pw_btn:'Buat kata sandi',pw_mismatch:'Kedua kata sandi tidak sama',
   local_only:'Kata sandi IT pertama hanya bisa dibuat di komputer ini',pw_wrong:'Kata sandi IT salah',too_short:'Minimal 6 karakter',
@@ -363,7 +374,7 @@ function showMain(){
   $('llmModel').value=state.llm_model||'';$('sumModel').value=state.summary_model||'';
   $('asrModel').value=state.asr_model||'large-v3-turbo';
   fillLocalModels();
-  $('updCheck').checked=state.update_check!==false;$('updWho').value=state.update_who||'staff';$('updShare').value=state.update_share||'';
+  $('updCheck').checked=state.update_check!==false;$('updWho').value=state.update_who||'staff';$('updShare').value=state.update_share||'';$('supContact').value=state.support_contact||'';
   $('diarize').checked=!!state.diarize;$('remoteView').checked=!!state.allow_remote_view;$('clearStaffWrap').hidden=!state.staff_password_set;
   modeVis();applyLang();loadModels();
 }
@@ -418,10 +429,24 @@ $('pMain').onsubmit=async e=>{
     llm_model:$('llmModel').value,summary_model:$('sumModel').value,asr_model:$('asrModel').value,
     local_live_model:$('liveModel').value,local_file_model:$('fileModel').value,diarize:$('diarize').checked,allow_remote_view:$('remoteView').checked,
     staff_password:$('staffPw').value,clear_staff_password:$('clearStaff').checked,
-    update_check:$('updCheck').checked,update_who:$('updWho').value,update_share:$('updShare').value});
+    update_check:$('updCheck').checked,update_who:$('updWho').value,update_share:$('updShare').value,support_contact:$('supContact').value});
   const r=$('saveRes');r.hidden=false;r.className='res '+(j.ok?'ok':'err');r.textContent=j.ok?t('saved'):errMsg(j);
   if(j.ok){state=j.state;$('staffPw').value='';$('clearStaff').checked=false;$('clearStaffWrap').hidden=!state.staff_password_set;
     $('llmKey').value='';$('clearKey').checked=false;$('clearKeyWrap').hidden=!state.llm_api_key_set;applyLang()}
+};
+
+$('supMake').onclick=async()=>{
+  const b=$('supMake'),x=$('supRes');b.disabled=true;b.textContent=t('sup_making');x.hidden=true;
+  try{
+    const r=await fetch('/api/simple/admin/report',{method:'POST',headers:{'Content-Type':'application/json','X-IT-Token':token},
+      body:JSON.stringify({desc:'(IT)',logs:true,client:{ua:navigator.userAgent,lang,page:'admin',screen:innerWidth+'x'+innerHeight}})});
+    if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.code==='it_password_wrong'?t('pw_wrong'):(j.error||j.code||r.status))}
+    const m=/filename\*?=(?:UTF-8'')?"?([^";]+)/i.exec(r.headers.get('Content-Disposition')||''),name=m?decodeURIComponent(m[1]):'PCG-report.zip';
+    const url=URL.createObjectURL(await r.blob()),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+    x.className='res ok';x.textContent=t('sup_done',{n:name});
+  }catch(e){x.className='res err';x.textContent=t('sup_failed',{e:e.message||e})}
+  x.hidden=false;b.disabled=false;b.textContent=t('sup_make');
 };
 $('chgPwBtn').onclick=async()=>{
   const p=prompt(t('new_it_pw'));if(!p)return;

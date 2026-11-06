@@ -307,3 +307,12 @@ Saat penulis asli merilis versi baru (aplikasi menampilkan "versi baru" saat dim
 | Pemeriksaan kesehatan | `./install.sh --doctor` |
 
 **Rekaman dan hasil tidak pernah dihapus otomatis**: rekaman rapat adalah data sensitif; bersihkan secara berkala sesuai aturan penyimpanan data perusahaan (misalnya simpan 90 hari).
+
+### Laporan masalah (mulai r16)
+
+* **Karyawan**: “Laporkan masalah” di bagian bawah halaman → tulis apa yang terjadi → “Buat laporan”. Browser mengunduh `PCG-report-<komputer>-<tanggal-jam>.zip`, lalu karyawan mengirimnya ke IT. Hanya bisa dibuat di komputer itu sendiri (log-nya milik komputer itu).
+* **IT**: di halaman pengaturan, “Laporan masalah” untuk mengisi ke mana karyawan mengirim laporan (email atau grup Teams); ditampilkan ke karyawan. Alamat email juga menambahkan tombol “Email IT” (subjek dan deskripsi sudah terisi; karyawan melampirkan zip sendiri). “Buat file diagnostik komputer ini” di kartu yang sama membuatnya untuk IT; jika “Izinkan komputer dan ponsel lain menonton subtitle” aktif, IT juga bisa mengambilnya dari komputernya sendiri dengan kata sandi IT.
+* **Isi zip**: `summary.txt` (versi, spesifikasi komputer, memori, disk, paket GPU, paket model, browser, deskripsi karyawan), `report.json` (data yang sama ditambah status dan error 20 pekerjaan rekaman terakhir serta parameter subtitle langsung), `config.json` (pengaturan, **kunci, kata sandi, dan hash diganti `***`**), `logs/` (400 baris terakhir `webui.log`, `webui-error.log`, `update.log`, `install.log`, `gpu_check.log`, dan log 3 pekerjaan terakhir, yang gagal lebih dulu).
+* **Tidak ada di zip**: rekaman, transkrip, notulen, nama file rekaman, dan topik rapat. Log program mungkin berisi sebagian teks subtitle; karyawan bisa menghapus centang “Sertakan log program terbaru”.
+* Setiap komputer hanya menyimpan 10 file diagnostik terakhir (`group_data\reports\`).
+* File diagnostik mungkin berisi potongan rapat: **jangan ditempel di issue GitHub publik**. Templat “Laporan masalah” di GitHub hanya meminta versi, gejala, dan langkah.

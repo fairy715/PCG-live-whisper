@@ -52,6 +52,7 @@ Cara memakai untuk rapat online, kelas, dan notulen: lihat [contoh penggunaan](U
 ## 5. Jika ada masalah
 
 * Instalasi gagal: kirim file `D:\PCG-live-whisper\group_data\install.log` (jika pembaruan gagal: `update.log`) ke IT.
+* Masalah saat memakai aplikasi: klik “Laporkan masalah” di bagian bawah halaman → “Buat laporan”, lalu kirim file zip yang terunduh ke IT.
 * Diblokir antivirus: minta IT menambahkan folder instalasi sebagai pengecualian.
 * Hapus instalasi: Windows "Pengaturan" → "Aplikasi" → "PCG Meeting Translator" → "Copot pemasangan". Rekaman, transkrip, dan pengaturan tetap ada di folder; hapus manual jika sudah tidak diperlukan.
 
