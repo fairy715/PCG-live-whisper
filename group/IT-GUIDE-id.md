@@ -1,8 +1,8 @@
 # Edisi grup PCG: arsitektur dan instalasi (untuk IT)
 
-[中文](INSTALL.md) · [English](IT-GUIDE-en.md) · [Bahasa Indonesia](IT-GUIDE-id.md)
+[中文](INSTALL.md) · [English](IT-GUIDE-en.md) · [Bahasa Indonesia](IT-GUIDE-id.md) · [Tiếng Việt](IT-GUIDE-vi.md)
 
-<!-- Jika panduan ini diubah, perbarui ketiga bahasa (INSTALL.md, IT-GUIDE-en.md, IT-GUIDE-id.md). -->
+<!-- Jika panduan ini diubah, perbarui keempat bahasa (INSTALL.md, IT-GUIDE-en.md, IT-GUIDE-id.md, IT-GUIDE-vi.md). -->
 
 ## Arsitektur
 
@@ -212,7 +212,7 @@ Bahasa Indonesia small memakai maleo-ai/whisper-small-id (Apache-2.0); cahya/whi
 
 Banyak komputer: IT terlebih dulu menaruh `catalog.json` dan file `*.zip` yang diperlukan dari [halaman rilis](https://github.com/fairy715/PCG-live-whisper/releases/tag/model-packs) di folder bersama perusahaan (folder yang diisi di "Pembaruan"); setiap komputer menyalin dari jaringan perusahaan, lebih cepat daripada mengunduh dari GitHub setiap kali.
 
-Catatan: halaman pengaturan IT saat ini tersedia dalam bahasa Mandarin dan Inggris; nama tombol di atas mengikuti versi bahasa Inggris (Models, Install, Apply model settings, Remove).
+Catatan: halaman pengaturan IT tersedia dalam bahasa Indonesia: pilih **Bahasa Indonesia** di kanan atas. Nama tombol di panduan ini mengikuti versi bahasa Indonesia.
 
 #### Rincian
 

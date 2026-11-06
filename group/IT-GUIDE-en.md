@@ -1,8 +1,8 @@
 # PCG group edition: architecture and installation (for IT)
 
-[中文](INSTALL.md) · [English](IT-GUIDE-en.md) · [Bahasa Indonesia](IT-GUIDE-id.md)
+[中文](INSTALL.md) · [English](IT-GUIDE-en.md) · [Bahasa Indonesia](IT-GUIDE-id.md) · [Tiếng Việt](IT-GUIDE-vi.md)
 
-<!-- When you change this guide, update all three languages (INSTALL.md, IT-GUIDE-en.md, IT-GUIDE-id.md). -->
+<!-- When you change this guide, update all four languages (INSTALL.md, IT-GUIDE-en.md, IT-GUIDE-id.md, IT-GUIDE-vi.md). -->
 
 ## Architecture
 
@@ -76,7 +76,7 @@ During installation:
 
 ### IT settings page (no config file editing)
 
-Open the IT settings page **on the computer you want to configure** ("IT settings" at the bottom of the simple page):
+Open the IT settings page **on the computer you want to configure** ("IT settings" at the bottom of the simple page; switch between 繁體中文, English and Bahasa Indonesia at the top right):
 
 - Staff computers (installed with the offline installer): `http://localhost:19781/simple/admin`
 - Application server: `http://app-server:19781/simple/admin`

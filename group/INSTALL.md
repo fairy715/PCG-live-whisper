@@ -1,8 +1,8 @@
 # PCG 集團版：系統架構與安裝（給 IT）
 
-[中文](INSTALL.md) · [English](IT-GUIDE-en.md) · [Bahasa Indonesia](IT-GUIDE-id.md)
+[中文](INSTALL.md) · [English](IT-GUIDE-en.md) · [Bahasa Indonesia](IT-GUIDE-id.md) · [Tiếng Việt](IT-GUIDE-vi.md)
 
-<!-- 修改這份說明時，中文、英文、印尼文三份要一起更新（INSTALL.md、IT-GUIDE-en.md、IT-GUIDE-id.md）。 -->
+<!-- 修改這份說明時，中文、英文、印尼文、越南文四份要一起更新（INSTALL.md、IT-GUIDE-en.md、IT-GUIDE-id.md、IT-GUIDE-vi.md）。 -->
 
 ## 系統架構
 
@@ -76,7 +76,7 @@ bash install.sh --server
 
 ### IT 設定頁（不用改設定檔）
 
-在**要設定的那台電腦上**打開 IT 設定頁（簡易頁面最下方的「IT 設定」）：
+在**要設定的那台電腦上**打開 IT 設定頁（簡易頁面最下方的「IT 設定」；右上角可切換繁體中文、English、Bahasa Indonesia）：
 
 - 同仁電腦（離線安裝檔裝的）：`http://localhost:19781/simple/admin`
 - 應用伺服器：`http://應用伺服器:19781/simple/admin`

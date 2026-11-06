@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- PCG 集團版：IT 設定頁（/simple/admin）。後端見 group/simple_routes.py 的 admin_*。
-     介面語言：繁體中文、English（給 IT；同仁用的簡易頁面另有五種語言） -->
+     介面語言：繁體中文、English、Bahasa Indonesia（給 IT；同仁用的簡易頁面另有五種語言） -->
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
@@ -59,7 +59,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
 <div class="wrap">
   <header>
     <div><h1 data-t="title"></h1><div class="sub" data-t="tagline"></div><span id="ver" class="ver"></span></div>
-    <select id="langSel" aria-label="Language"><option value="zh">繁體中文</option><option value="en">English</option></select>
+    <select id="langSel" aria-label="Language"><option value="zh">繁體中文</option><option value="en">English</option><option value="id">Bahasa Indonesia</option></select>
   </header>
 
   <!-- 登入／第一次設定密碼 -->
@@ -261,14 +261,59 @@ en:{title:'PCG Meeting Translator: IT settings',tagline:'Switch between local an
   upd_who_staff:'Staff themselves (recommended)',upd_who_it:'IT only (IT password required)',upd_share:'Company shared folder (optional)',upd_share_ph:'e.g. \\\\fileserver\\PCG\\updates',
   upd_note:'Computers with internet get the small update from the GitHub release page. For computers without internet, put PCG-Update-<version>.exe (and its .sha256 file) from the release page in this folder and staff can update with one click. Only newer small updates are installed, and the file fingerprint is checked first; versions that need the full installer only show “ask IT”.',
   bad_share:'Invalid shared folder path',
-  need_llm:'Server mode needs the LLM URL',bad_host:'Invalid address',bad_key:'Invalid API key',error:'Something went wrong'}};
+  need_llm:'Server mode needs the LLM URL',bad_host:'Invalid address',bad_key:'Invalid API key',error:'Something went wrong'},
+id:{title:'Penerjemah Rapat PCG: Pengaturan IT',tagline:'Beralih antara mode lokal dan mode server serta atur alamat server. Perubahan langsung berlaku; tidak perlu memasang ulang.',
+  it_password:'Kata sandi IT',it_password_again:'Masukkan sekali lagi',login:'Masuk',set_pw_title:'Buat kata sandi IT',set_pw_note:'Pertama kali: buat kata sandi IT (minimal 6 karakter). Kata sandi ini diperlukan untuk membuka halaman ini. Karyawan tidak memerlukannya.',
+  login_title:'Masuk IT',login_note:'Halaman ini hanya untuk IT.',set_pw_btn:'Buat kata sandi',pw_mismatch:'Kedua kata sandi tidak sama',
+  local_only:'Kata sandi IT pertama hanya bisa dibuat di komputer ini',pw_wrong:'Kata sandi IT salah',too_short:'Minimal 6 karakter',
+  mode_title:'Mode',mode_local:'Mode lokal',mode_local_s:'Semua berjalan di CPU komputer ini: tanpa server, tanpa internet. Terjemahan memakai M2M100; tanpa notulen rapat AI.',
+  mode_server:'Mode server',mode_server_s:'Terjemahan dan notulen memakai LLM (Open WebUI grup, server internal, atau layanan AI eksternal), dengan notulen rapat AI. Pengenalan suara berjalan di server GPU jika ada, jika tidak di komputer ini.',
+  m2m_missing:'Model terjemahan lokal (M2M100) tidak terpasang di komputer ini, sehingga terjemahan tidak berjalan di mode lokal. Pasang ulang dengan paket offline.',
+  servers_title:'Server',gpu_host:'Alamat (opsional)',gpu_ph:'Kosongkan jika tidak ada',port:'Port',test:'Tes koneksi',testing:'Sedang menguji…',
+  gpu_note:'Kosong = pengenalan suara berjalan di komputer ini (lihat “Model pengenalan lokal” di bawah). Jika diisi tetapi sedang tidak bisa dijangkau, pengenalan suara juga beralih ke komputer ini.',
+  llm_section:'LLM (terjemahan, notulen)',gpu_section:'Server GPU (pengenalan suara)',
+  llm_url:'URL',llm_style:'Jenis server',style_owui:'Open WebUI grup (luna, deepseek)',style_auto:'Server internal (RTX Spark, Ollama, dll.)',style_ext:'Layanan AI eksternal (OpenAI, DeepSeek, Gemini…)',
+  url_owui:'Alamat yang dipakai untuk membuka Open WebUI di browser, misalnya https://ai.domain-perusahaan',
+  url_auto:'host:port, misalnya 192.168.1.60:11434 (Ollama). Server yang kompatibel dengan OpenAI seperti vLLM atau LM Studio juga bisa; jenisnya dideteksi otomatis.',
+  url_ext:'Klik salah satu layanan di atas untuk mengisinya, atau isi base URL dari dokumentasi layanan (kompatibel OpenAI, biasanya diakhiri /v1). Azure OpenAI tidak didukung; gunakan OpenRouter atau proxy LiteLLM.',
+  ext_warn:'Perhatian: transkrip dan subtitle rapat dikirim ke layanan AI di luar perusahaan dan ditagih sesuai pemakaian. Pastikan sesuai aturan data perusahaan; gunakan Open WebUI grup atau server internal untuk rapat rahasia.',
+  key_auto:'Server internal biasanya tidak memerlukan kunci; kosongkan.',
+  key_ext:'Buat kunci API di situs layanan (pakai akun perusahaan dan atur batas biaya). Kunci disimpan di komputer ini dan tidak pernah ditampilkan.',
+  need_key:'Jenis server ini memerlukan kunci API',
+  llm_key:'Kunci API',llm_key_set:'Kunci API: sudah diatur (isi hanya untuk mengganti)',llm_key_ph:'sk-…',clear_llm_key:'Hapus kunci API yang tersimpan',
+  key_owui:'Open WebUI memerlukan kunci: masuk → avatar (kanan atas) → Settings → Account → API keys → Create. Jika opsi tidak ada, minta admin AI grup memberikan izin “API Keys”. Kunci disimpan di komputer ini dan tidak pernah ditampilkan.',
+  model_note:'Setelah “Tes koneksi” Anda bisa memilih dari daftar. Pakai model cepat untuk terjemahan agar subtitle langsung tidak tertinggal (grup: luna) dan model yang lebih kuat untuk notulen, di mana kecepatan kurang penting (grup: deepseek).',
+  gpu_ok:'Server GPU bisa dijangkau',gpu_fail:'Server GPU tidak bisa dijangkau',llm_ok:'Server LLM bisa dijangkau ({type}, {n} model)',llm_fail:'Server LLM tidak bisa dijangkau',
+  llm_model:'Model terjemahan',summary_model:'Model notulen (ringkasan)',default_ph:'Kosong = bawaan program',asr_model:'Model pengenalan (server GPU)',
+  local_title:'Model pengenalan lokal',live_model:'Subtitle langsung',file_model:'Rekaman',
+  local_models_note:'Komputer tanpa GPU terpisah: pakai small untuk subtitle langsung (base lebih cepat tetapi kurang akurat); medium lebih akurat untuk rekaman tetapi jauh lebih lambat.',
+  remote_view:'Izinkan komputer dan ponsel lain menonton subtitle',remote_view_note:'Satu komputer menangkap suara rapat; yang lain memindai kode QR dari “Bagikan” di layar subtitle untuk menonton di ponsel (hanya menonton, perlu kata sandi karyawan). Jika mati, hanya komputer ini yang bisa memakainya. Berlaku setelah program dibuka ulang.',
+  other_title:'Lainnya',diarize:'Kenali pembicara (diarisasi)',diarize_note:'Menampilkan siapa yang berbicara. Menambah waktu pemrosesan di mode lokal.',
+  staff_pw:'Kata sandi karyawan (diperlukan dari komputer lain untuk halaman sederhana dan subtitle yang dibagikan; tidak di komputer ini)',staff_pw_set:'Kata sandi karyawan: sudah diatur (isi hanya untuk mengganti)',staff_pw_ph:'Kosong = tidak berubah',clear_staff_pw:'Hapus kata sandi karyawan',
+  save:'Simpan',saved:'Tersimpan. Pengaturan baru berlaku saat subtitle berikutnya dimulai atau rekaman berikutnya diproses',back:'Kembali ke halaman sederhana',change_it_pw:'Ganti kata sandi IT',
+  new_it_pw:'Masukkan kata sandi IT baru (minimal 6 karakter)',pw_changed:'Kata sandi IT sudah diganti',
+  models_title:'Model (paket model)',models_note:'Model pengenalan suara dan terjemahan tambahan yang dipasang di komputer ini. Hanya dipakai saat pengenalan/terjemahan berjalan di komputer ini (mode lokal, atau mode server tanpa server GPU).',
+  models_use:'Model untuk setiap bahasa',models_apply:'Terapkan pengaturan model',models_applied:'Diterapkan; berlaku saat subtitle atau rekaman berikutnya dimulai',
+  models_installed:'Terpasang di komputer ini',models_available:'Tersedia',models_refresh:'Muat ulang daftar',
+  models_offline:'Komputer tanpa internet: taruh catalog.json dan file paket dari halaman rilis "model-packs" di folder bersama yang diatur di Pembaruan (atau subfolder models-nya).',
+  m_lang:'Bahasa',m_live:'Subtitle langsung',m_file:'Rekaman',m_mt:'Terjemahan lokal',m_builtin:'Bawaan (model lokal di atas)',m_m2m:'M2M100 (bawaan, cepat)',
+  m_none_inst:'Belum ada paket model yang terpasang',m_none_avail:'Daftar kosong (klik “Muat ulang daftar”)',m_install:'Pasang',m_update:'Perbarui',m_remove:'Hapus',
+  m_confirm_remove:'Hapus “{n}”? Bahasa yang memakainya kembali ke model bawaan.',m_dl:'Mengunduh {a} / {b} MB',m_inst_ing:'Memasang…',m_failed:'Pemasangan gagal: {e}',
+  m_done:'Terpasang',m_size:'{n} MB',m_ver:'versi {v}',m_from_share:'folder bersama perusahaan',m_from_gh:'GitHub',
+  m_lang_zh:'Mandarin',m_lang_en:'Inggris',m_lang_ja:'Jepang',m_lang_ko:'Korea',m_lang_id:'Indonesia',m_lang_vi:'Vietnam',m_lang_hi:'Hindi',m_use_note:'Hanya dipakai untuk subtitle langsung dan rekaman satu arah dalam bahasa itu; dua arah dan mode kelas tetap memakai model multibahasa bawaan.',
+  models_remote:'Model hanya bisa dipasang di komputer ini',no_pack:'Paket ini tidak ada di daftar; muat ulang daftarnya',busy:'Sedang berjalan, harap tunggu',bad_pack:'Paket belum terpasang atau tidak mendukung bahasa ini',
+  upd_title:'Pembaruan',upd_check:'Periksa versi baru (karyawan melihat “Perbarui sekarang” di atas halamannya)',upd_who:'Siapa yang boleh memperbarui',
+  upd_who_staff:'Karyawan sendiri (disarankan)',upd_who_it:'Hanya IT (perlu kata sandi IT)',upd_share:'Folder bersama perusahaan (opsional)',upd_share_ph:'mis. \\\\fileserver\\PCG\\update',
+  upd_note:'Komputer dengan internet mengambil pembaruan kecil dari halaman rilis GitHub. Untuk komputer tanpa internet, taruh PCG-Update-<versi>.exe (dan file .sha256-nya) dari halaman rilis di folder ini, lalu karyawan bisa memperbarui sekali klik. Hanya pembaruan kecil yang lebih baru yang dipasang, dan sidik jari file diperiksa dulu; versi yang memerlukan penginstal lengkap hanya menampilkan “hubungi IT”.',
+  bad_share:'Jalur folder bersama tidak valid',
+  need_llm:'Mode server memerlukan URL LLM',bad_host:'Alamat tidak valid',bad_key:'Kunci API tidak valid',error:'Terjadi kesalahan'}};
 const $=id=>document.getElementById(id);
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
-let lang=store.get('pcg_lang')==='zh'||!store.get('pcg_lang')?'zh':'en';
+let lang=({zh:'zh',id:'id'})[store.get('pcg_lang')||'zh']||'en';   // 跟同仁頁面共用語言設定；越南文、印地語的 IT 用英文
 const t=(k,v={})=>String(I18N[lang][k]??I18N.zh[k]??k).replace(/\{(\w+)\}/g,(_,x)=>v[x]??'');
 let token=sessionStorage.getItem('pcg_it')||'',state=null,firstTime=false;
 function applyLang(){
-  document.documentElement.lang=lang==='zh'?'zh-Hant':'en';document.title=t('title');
+  document.documentElement.lang=lang==='zh'?'zh-Hant':lang;document.title=t('title');
   document.querySelectorAll('[data-t]').forEach(e=>{e.textContent=t(e.dataset.t)});
   document.querySelectorAll('[data-t-ph]').forEach(e=>{e.placeholder=t(e.dataset.tPh)});
   $('loginTitle').textContent=t(firstTime?'set_pw_title':'login_title');$('loginNote').textContent=t(firstTime?'set_pw_note':'login_note');
@@ -328,7 +373,7 @@ function styleVis(){
   $('extWarn').hidden=$('presets').hidden=st!=='openai';
   $('llmUrl').placeholder={openwebui:'https://ai.example.com',auto:'192.168.1.60:11434',openai:'https://api.openai.com/v1'}[st];
   $('llmModel').placeholder={openwebui:'luna',auto:'gemma4:26b',openai:''}[st];
-  $('llmKeyLabel').textContent=t(state&&state.llm_api_key_set?'llm_key_set':'llm_key')+(st==='auto'?(lang==='zh'?'（選填）':' (optional)'):'');
+  $('llmKeyLabel').textContent=t(state&&state.llm_api_key_set?'llm_key_set':'llm_key')+(st==='auto'?({zh:'（選填）',id:' (opsional)'}[lang]||' (optional)'):'');
 }
 $('llmStyle').onchange=()=>{styleVis();$('modelList').innerHTML=''};
 document.querySelectorAll('#presets .chip').forEach(b=>b.onclick=()=>{$('llmUrl').value=b.dataset.u;$('llmModel').value='';$('sumModel').value=''});
