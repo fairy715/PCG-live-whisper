@@ -183,7 +183,7 @@ Bộ cài chính chỉ có phần cơ bản (Whisper small, M2M100, Moonshine ch
 | Whisper small tiếng Indonesia (maleo-ai) | Nhận dạng giọng nói tiếng Indonesia | khoảng 240 MB | Apache-2.0 |
 | Whisper medium tiếng Indonesia (cahya) | Nhận dạng giọng nói tiếng Indonesia | khoảng 740 MB | Apache-2.0 |
 | Whisper small / medium tiếng Hindi (vasista22) | Nhận dạng giọng nói tiếng Hindi | khoảng 240 / 740 MB | Apache-2.0 |
-| Whisper base / medium / large-v3-turbo (đa ngôn ngữ, OpenAI) | "Mô hình nhận dạng cục bộ" cho mọi ngôn ngữ (kể cả tiếng Trung), cũng dùng cho hai chiều và chế độ lớp học | khoảng 80 / 740 / 800 MB | MIT |
+| Whisper base / medium / large-v3-turbo (đa ngôn ngữ, OpenAI) | "Mô hình nhận dạng cục bộ" cho mọi ngôn ngữ (kể cả tiếng Trung), cũng dùng cho hai chiều và chế độ lớp học | khoảng 80 / 740 / 800 MB | Apache-2.0 (base, medium) / MIT (large-v3-turbo) |
 | MADLAD-400 3B | Dịch cục bộ (chậm hơn; khi dịch thử có thêm nội dung không có trong câu gốc, hãy so sánh trước khi đổi) | khoảng 2,8 GB | Apache-2.0 |
 
 Tiếng Indonesia small dùng maleo-ai/whisper-small-id (Apache-2.0); cahya/whisper-small-id chỉ ghi "cc" nên không xác nhận được việc dùng thương mại, khi đóng gói tự động bỏ qua.

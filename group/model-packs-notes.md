@@ -8,7 +8,7 @@ PCG 會議翻譯的**額外模型**，由 IT 在設定頁的「**模型管理**�
 | Whisper small 印尼文（maleo-ai） | 印尼文語音辨識 | 約 240 MB | Apache-2.0 |
 | Whisper medium 印尼文（cahya） | 印尼文語音辨識 | 約 740 MB | Apache-2.0 |
 | Whisper small／medium 印地語（vasista22） | 印地語語音辨識 | 約 240／740 MB | Apache-2.0 |
-| Whisper base／medium／large-v3-turbo（多語，OpenAI） | 所有語言（含中文）的本機辨識，也用在雙向、教室模式；離線安裝檔只附 small | 約 80／740／800 MB | MIT |
+| Whisper base／medium／large-v3-turbo（多語，OpenAI） | 所有語言（含中文）的本機辨識，也用在雙向、教室模式；離線安裝檔只附 small | 約 80／740／800 MB | Apache-2.0（base、medium）／MIT（large-v3-turbo） |
 | MADLAD-400 3B（Google） | 本機翻譯（400 多種語言；較慢，要先實測） | 約 2.8 GB（分成兩個檔案） | Apache-2.0 |
 
 * 印尼文 small 用 maleo-ai/whisper-small-id（Apache-2.0）；cahya/whisper-small-id 的授權只寫「cc」，無法確認能商用，沒有採用。

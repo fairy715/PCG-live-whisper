@@ -181,7 +181,7 @@ Penginstal utama hanya berisi yang dasar (Whisper small, M2M100, Moonshine untuk
 | Whisper small bahasa Indonesia (maleo-ai) | Pengenalan suara bahasa Indonesia | sekitar 240 MB | Apache-2.0 |
 | Whisper medium bahasa Indonesia (cahya) | Pengenalan suara bahasa Indonesia | sekitar 740 MB | Apache-2.0 |
 | Whisper small / medium bahasa Hindi (vasista22) | Pengenalan suara bahasa Hindi | sekitar 240 / 740 MB | Apache-2.0 |
-| Whisper base / medium / large-v3-turbo (multibahasa, OpenAI) | "Model pengenalan lokal" untuk semua bahasa (termasuk Mandarin), juga dipakai untuk dua arah dan mode kelas | sekitar 80 / 740 / 800 MB | MIT |
+| Whisper base / medium / large-v3-turbo (multibahasa, OpenAI) | "Model pengenalan lokal" untuk semua bahasa (termasuk Mandarin), juga dipakai untuk dua arah dan mode kelas | sekitar 80 / 740 / 800 MB | Apache-2.0 (base, medium) / MIT (large-v3-turbo) |
 | MADLAD-400 3B | Terjemahan lokal (lebih lambat; dalam uji terjemahan ada tambahan isi, bandingkan dulu sebelum mengganti) | sekitar 2,8 GB | Apache-2.0 |
 
 Bahasa Indonesia small memakai maleo-ai/whisper-small-id (Apache-2.0); cahya/whisper-small-id hanya bertanda "cc", sehingga pemakaian komersial tidak bisa dipastikan dan otomatis dilewati saat pembuatan paket.

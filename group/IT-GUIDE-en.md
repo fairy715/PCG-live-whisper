@@ -181,7 +181,7 @@ The main installer only contains the basics (Whisper small, M2M100, Moonshine fo
 | Whisper small Indonesian (maleo-ai) | Indonesian speech recognition | about 240 MB | Apache-2.0 |
 | Whisper medium Indonesian (cahya) | Indonesian speech recognition | about 740 MB | Apache-2.0 |
 | Whisper small / medium Hindi (vasista22) | Hindi speech recognition | about 240 / 740 MB | Apache-2.0 |
-| Whisper base / medium / large-v3-turbo (multilingual, OpenAI) | The "local recognition model" for all languages (including Chinese), also used for two-way and classroom mode | about 80 / 740 / 800 MB | MIT |
+| Whisper base / medium / large-v3-turbo (multilingual, OpenAI) | The "local recognition model" for all languages (including Chinese), also used for two-way and classroom mode | about 80 / 740 / 800 MB | Apache-2.0 (base, medium) / MIT (large-v3-turbo) |
 | MADLAD-400 3B | Local translation (slower; added content in test translations, compare before switching) | about 2.8 GB | Apache-2.0 |
 
 Indonesian small uses maleo-ai/whisper-small-id (Apache-2.0); cahya/whisper-small-id is tagged only "cc", so commercial use cannot be confirmed and the build skips it automatically.

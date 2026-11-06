@@ -182,7 +182,7 @@ GPU 伺服器有填但當下連不上時，會自動改在同仁電腦上用小�
 | Whisper small 印尼文（maleo-ai） | 印尼文語音辨識 | 約 240 MB | Apache-2.0 |
 | Whisper medium 印尼文（cahya） | 印尼文語音辨識 | 約 740 MB | Apache-2.0 |
 | Whisper small／medium 印地語（vasista22） | 印地語語音辨識 | 約 240／740 MB | Apache-2.0 |
-| Whisper base／medium／large-v3-turbo（多語，OpenAI） | 所有語言（含中文）的「本機辨識模型」，也用在雙向、教室模式 | 約 80／740 MB／800 MB | MIT |
+| Whisper base／medium／large-v3-turbo（多語，OpenAI） | 所有語言（含中文）的「本機辨識模型」，也用在雙向、教室模式 | 約 80／740 MB／800 MB | Apache-2.0（base、medium）／MIT（large-v3-turbo） |
 | MADLAD-400 3B | 本機翻譯（較慢；試翻有加料的情況，先實測再換） | 約 2.8 GB | Apache-2.0 |
 
 印尼文 small 用 maleo-ai/whisper-small-id（Apache-2.0）；cahya/whisper-small-id 的授權只寫「cc」、無法確認能商用，打包時自動略過。
