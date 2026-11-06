@@ -1,0 +1,62 @@
+# PCG 集團版：每週一早上（台灣時間約 8 點）檢查原作者 jt-live-whisper 有沒有新的更新。
+# 有的話試合併、跑集團版的測試，開一張 Issue 通知（GitHub 會寄 email）；不會自動合併或發布。
+# 同一個更新只開一次；也可以在 Actions 頁手動執行。
+name: 檢查原作者更新
+
+on:
+  schedule:
+    - cron: "13 0 * * 1"     # UTC 週一 00:13＝台灣週一 08:13
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 抓原作者的最新版本
+        run: |
+          git config user.name "upstream-check"
+          git config user.email "upstream-check@users.noreply.github.com"
+          git remote add upstream https://github.com/jasoncheng7115/jt-live-whisper.git
+          git fetch --quiet upstream main
+
+      - name: 測試要用的套件
+        run: python -m pip install --quiet numpy ctranslate2 sentencepiece fastapi httpx python-multipart uvicorn opencc-python-reimplemented requests qrcode
+
+      - name: 比對、試合併、跑測試
+        id: check
+        run: |
+          set +e
+          python group/upstream_check.py --out result.md
+          code=$?
+          set -e
+          if [ $code -eq 3 ]; then echo "found=no" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ $code -ne 0 ]; then exit $code; fi
+          echo "found=yes" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse --short=7 upstream/main)" >> "$GITHUB_OUTPUT"
+
+      - name: 開 Issue 通知（同一個更新只開一次）
+        if: steps.check.outputs.found == 'yes'
+        run: |
+          sha="${{ steps.check.outputs.sha }}"
+          gh label create upstream --color 5319e7 --description "原作者有更新" --force >/dev/null 2>&1 || true
+          if gh issue list --label upstream --state all --search "$sha in:title" --json number --jq '.[0].number' | grep -q .; then
+            echo "這個更新（$sha）已經通知過"; exit 0
+          fi
+          title="$(head -n 1 result.md)"
+          tail -n +3 result.md > body.md
+          gh issue create --title "$title" --body-file body.md --label upstream
