@@ -67,6 +67,21 @@ def hf_license(repo):
     return (lic or "").lower()
 
 
+def read_wav16k(path):
+    """讀 WAV 成 16 kHz 單聲道 float32（自己讀，不經過 PyAV：新版 PyAV 與 faster-whisper 的 decode_audio 不相容）"""
+    import wave
+    import numpy as np
+    with wave.open(str(path), "rb") as w:
+        sr, ch, n = w.getframerate(), w.getnchannels(), w.getnframes()
+        a = np.frombuffer(w.readframes(n), dtype=np.int16).astype(np.float32) / 32768.0
+    if ch > 1:
+        a = a.reshape(-1, ch).mean(axis=1)
+    if sr != 16000:
+        x = np.arange(0, len(a), sr / 16000.0)
+        a = np.interp(x, np.arange(len(a)), a).astype(np.float32)
+    return a
+
+
 def build_asr(spec, work, out):
     from huggingface_hub import snapshot_download
     import ctranslate2
@@ -94,7 +109,7 @@ def build_asr(spec, work, out):
     try:
         subprocess.run(["espeak-ng", "-v", lang, "-w", str(wav), SAY[lang]], check=True, capture_output=True)
         m = WhisperModel(str(dest), device="cpu", compute_type="int8")
-        segs, _ = m.transcribe(str(wav), language=lang, beam_size=1)
+        segs, _ = m.transcribe(read_wav16k(wav), language=lang, beam_size=1)
         text = " ".join(s.text.strip() for s in segs)
         log(f"   試辨識（{lang}）：{text or '（沒有文字）'}")
     except FileNotFoundError:
