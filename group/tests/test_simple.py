@@ -57,6 +57,8 @@ class SimpleFlow(unittest.TestCase):
         self.view_pw = []
         self.gpu_up = True
         self.launched = []
+        self.running = False
+        self.args = ["python", "translate_meeting.py", "--webui", "--mode", "id_zh"]
         app = FastAPI()
 
         async def start_live(body):
@@ -65,8 +67,8 @@ class SimpleFlow(unittest.TestCase):
         self.q = simple_routes.register(
             app, self.base, lambda r: self.local, _pw_hash, _pw_match, self.cfg,
             lambda c: self.cfg.write_text(json.dumps(c, ensure_ascii=False), encoding="utf-8"),
-            start_live=start_live, live_running=lambda: False,
-            live_args=lambda: ["python", "translate_meeting.py", "--webui", "--mode", "id_zh"],
+            start_live=start_live, live_running=lambda: self.running,
+            live_args=lambda: self.args,
             set_view_password=self.view_pw.append, gpu_alive=lambda h, p: self.gpu_up,
             update_hooks={"github_fetch": self._no_github, "launch": self.launched.append})
         self.c = TestClient(app)
@@ -230,6 +232,26 @@ class SimpleFlow(unittest.TestCase):
         self.assertIsNone(self.started[-1]["engine"])
         self.local = False
         self.assertEqual(self.c.post("/api/simple/live", json={"scenario": "id"}).status_code, 403)
+
+    def test_live_switch_language_while_running(self):
+        """上一場沒按停止：同一種語言回到那一場；換語言要換掉，不能回到舊的那一場"""
+        self.running = True
+        self.args = ["python", "translate_meeting.py", "--webui", "--mode", "zh2id"]
+        r = self.c.post("/api/simple/live", json={"scenario": "zh2id"}).json()
+        self.assertTrue(r.get("already"))
+        self.assertEqual(self.started, [])
+        r = self.c.post("/api/simple/live", json={"scenario": "en"}).json()
+        self.assertFalse(r.get("already"))
+        self.assertEqual(self.started[-1]["mode"], "en2zh")
+        # 同一種語言，但這次要開教室模式：也要重開
+        self.args = ["python", "translate_meeting.py", "--webui", "--mode", "en2zh"]
+        self.c.post("/api/simple/live", json={"scenario": "en", "room": True})
+        self.assertEqual((self.started[-1]["mode"], self.started[-1]["room"]), ("en2zh", True))
+        # 正在處理錄音檔：不要把它停掉
+        self.args = ["python", "translate_meeting.py", "--webui", "--mode", "id2zh", "--input", "a.mp3"]
+        r = self.c.post("/api/simple/live", json={"scenario": "en"})
+        self.assertEqual((r.status_code, r.json()["code"]), (409, "live_busy_file"))
+        self.assertEqual(len(self.started), 2)
 
 
 class AdminPage(SimpleFlow):

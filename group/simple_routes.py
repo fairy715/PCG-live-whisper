@@ -683,14 +683,22 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                                                        "用桌面捷徑開啟"}, status_code=403)
         if start_live is None:
             return JSONResponse({"ok": False, "code": "live_unavailable", "error": "這個版本不支援即時字幕"}, status_code=503)
-        if live_running and live_running():
-            return {"ok": True, "already": True}
         sc = next((x for x in LIVE_SCENARIOS if x["id"] == body.get("scenario")), None)
         if not sc:
             return JSONResponse({"ok": False, "code": "pick_language", "error": "請選擇對方說的語言"}, status_code=400)
         s = settings()
         room = bool(body.get("room")) and sc["id"] in ROOM_SCENARIOS
         mode = sc["mode"] if room else (sc["bidi"] if (body.get("speak") and sc["bidi"]) else sc["mode"])
+        if live_running and live_running():
+            # 上一場沒按「停止」還在跑：同一種語言就回到那一場；換了語言就換掉（start_live 會先停掉舊的），
+            # 不然選「對方說英文」會回到還在跑的「中文 → 印尼文」
+            cur = (live_args() if live_args else None) or []
+            if "--input" in cur:
+                return JSONResponse({"ok": False, "code": "live_busy_file",
+                                     "error": "這台電腦正在處理錄音檔，處理完再開即時字幕"}, status_code=409)
+            cur_mode = cur[cur.index("--mode") + 1] if "--mode" in cur[:-1] else None
+            if cur_mode is None or (cur_mode == mode and ("--room" in cur) == room):
+                return {"ok": True, "already": True}
         pf = profile(s, has_gpu())
         if room:
             # 教室模式：每一句要先判斷語言，只做在這台電腦的辨識（GPU 伺服器不支援），用本機的即時字幕模型
