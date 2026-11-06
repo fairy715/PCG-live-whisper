@@ -60,7 +60,7 @@
 | **CPU 用量** | 辨識＋翻譯不超過實體核心數、約 3/4 的核心，Windows 上用「低於標準」優先順序；IT 可用環境變數調整 |
 | **版本號** | 每個畫面都顯示版本，回報問題時好對照 |
 | **自動測試** | 每次發布前在乾淨的 Windows 上實際安裝、自我檢查（套件、模型、翻譯、英文字幕、CPU 限制）、套用小更新包、一鍵更新，全部通過才發布 |
-| **模型管理（模型包）** | IT 設定頁安裝、更新、移除額外模型，並指定每種語言用哪個：越南文 PhoWhisper、印尼文（medium）與印地語加強版 Whisper、MADLAD-400 翻譯（[model-packs 發布頁](https://github.com/fairy715/PCG-live-whisper/releases/tag/model-packs)；不能上網的電腦用公司共用資料夾） |
+| **模型管理（模型包）** | IT 設定頁安裝、更新、移除額外模型，並指定每種語言用哪個：越南文 PhoWhisper、印尼文與印地語加強版 Whisper、MADLAD-400 翻譯（[model-packs 發布頁](https://github.com/fairy715/PCG-live-whisper/releases/tag/model-packs)；不能上網的電腦用公司共用資料夾） |
 | **跟上原作者** | 每週一自動比對原作者 jt-live-whisper 的更新，試合併並跑測試，有新東西就開 Issue 通知；不會自動合併或發布 |
 
 ![IT 設定頁](group/docs/images/admin.png)
