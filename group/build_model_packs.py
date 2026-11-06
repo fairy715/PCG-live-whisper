@@ -198,14 +198,18 @@ def main():
     old = {}
     if a.old_catalog and os.path.isfile(a.old_catalog):
         old = {p["id"]: p for p in json.load(open(a.old_catalog, encoding="utf-8")).get("packs", [])}
-    built = {}
+    built, skipped = {}, []
     for spec in PACKS:
         if spec["id"] not in want:
             continue
         log(f"▶ {spec['id']}（{spec['repo']}）")
         lic = hf_license(spec["repo"]) or spec.get("license_fallback", "")
         if lic not in OK_LICENSES:
-            sys.exit(f"[錯誤] {spec['repo']} 的授權是「{lic or '沒寫'}」，不確定能商用，不打包")
+            # 授權不明確的不打包，但不影響其他模型包（最後列出來，GitHub 上顯示警告）
+            why = f"{spec['repo']} 的授權是「{lic or '沒寫'}」，不確定能商用"
+            log(f"   [略過] {why}")
+            skipped.append(f"{spec['id']}：{why}")
+            continue
         log(f"   授權：{lic}")
         work = Path(tempfile.mkdtemp(dir=out))
         try:
@@ -217,6 +221,11 @@ def main():
                                       if built.get(p["id"]) or old.get(p["id"])]}
     (out / "catalog.json").write_text(json.dumps(catalog, ensure_ascii=False, indent=1), encoding="utf-8")
     log(f"完成：{', '.join(built)}；清單共 {len(catalog['packs'])} 個模型包")
+    for x in skipped:
+        log(f"::warning::略過 {x}")
+    (out / "skipped.txt").write_text("\n".join(skipped), encoding="utf-8")
+    if not built and want:
+        sys.exit("[錯誤] 沒有任何模型包做成")
 
 
 if __name__ == "__main__":

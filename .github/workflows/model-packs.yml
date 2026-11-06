@@ -90,4 +90,5 @@ jobs:
             gh release view model-packs --repo "$GITHUB_REPOSITORY" --json assets --jq ".assets[].name" \
               | { grep -E "^${id}\.zip" || true; } | while read old; do gh release delete-asset model-packs "$old" --repo "$GITHUB_REPOSITORY" -y; done
           done
+          rm -f skipped.txt
           gh release upload model-packs --repo "$GITHUB_REPOSITORY" --clobber catalog.json *.zip*
