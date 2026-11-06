@@ -442,6 +442,10 @@ def _to_traditional(text):
     return text
 
 # Moonshine ASR（選用，未安裝時自動降級為 Whisper only）
+# 集團版：英文模型放在安裝資料夾的 models/moonshine（離線資源包附），檔案都在時不會連網路
+_PCG_MOONSHINE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "models", "moonshine")
+if os.path.isdir(_PCG_MOONSHINE_DIR):
+    os.environ.setdefault("MOONSHINE_VOICE_CACHE", _PCG_MOONSHINE_DIR)
 _MOONSHINE_AVAILABLE = False
 try:
     from moonshine_voice import get_model_for_language, ModelArch
@@ -20992,6 +20996,9 @@ def main():
             asr_engine = "whisper"
         # 中文/日文模式強制 whisper（Moonshine 僅支援英文）
         if mode not in ("en2zh", "en"):
+            asr_engine = "whisper"
+        if asr_engine == "moonshine" and not _MOONSHINE_AVAILABLE:     # 集團版：簡易頁面指定了、但這台沒裝
+            print(f"  {C_WARN}[提示] 這台電腦沒有 Moonshine，英文改用 Whisper 辨識{RESET}")
             asr_engine = "whisper"
         # --mic 不支援 moonshine（互動選單選到 moonshine 的情況）
         if args.mic and asr_engine == "moonshine":

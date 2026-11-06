@@ -168,6 +168,14 @@ GPU 伺服器有填但當下連不上時，會自動改在同仁電腦上用小�
   - `PCG_CPU_THREADS=8`：指定總共用幾個執行緒（例如效能好的桌機要全速跑）
   - `PCG_NORMAL_PRIORITY=1`：改回一般優先順序
 
+### 英文即時字幕（Moonshine）
+
+- 「對方說英文」在同仁電腦上辨識時，改用 **Moonshine medium**（英文專用，MIT 授權，約 250 MB，離線資源包附）：延遲約 0.3 秒、CPU 比 Whisper 輕很多
+- 雙向（我也要說話）、教室模式、其他語言照舊用 Whisper（Moonshine 只聽得懂英文）
+- 接了 GPU 伺服器（辨識在伺服器）時照舊用伺服器的 Whisper
+- 要改回 Whisper：在 `config.json` 的 `pcg_simple` 加 `"english_asr": "whisper"`
+- Moonshine 的非英文模型是非商業授權，集團版不使用
+
 ### NVIDIA GPU 加速包（有 NVIDIA 顯示卡的同仁電腦）
 
 - 發布頁另外有「NVIDIA GPU 加速包」（標籤 `gpu-cuda12-v…`，約 1 GB）：CUDA 12 的 cuBLAS、cuDNN 9、NVRTC

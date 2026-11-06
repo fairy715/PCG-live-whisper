@@ -48,6 +48,30 @@ def whisper_model():
     return "small（離線快取）"
 
 
+def moonshine():
+    """英文即時字幕（Moonshine medium）：離線載得起來、辨識一段聲音不出錯（不連網路：模型在 models/moonshine）"""
+    sys.argv = [sys.argv[0]]
+    import translate_meeting as t
+    if not os.path.isdir(t._PCG_MOONSHINE_DIR):
+        raise RuntimeError(f"找不到模型資料夾 {t._PCG_MOONSHINE_DIR}")
+    if not t._MOONSHINE_AVAILABLE:
+        raise RuntimeError("moonshine_voice 沒有裝好")
+    os.environ["HTTPS_PROXY"] = os.environ["HTTP_PROXY"] = "http://127.0.0.1:9"     # 確認真的不需要網路
+    try:
+        from moonshine_voice import get_model_for_language, ModelArch
+        from moonshine_voice.transcriber import Transcriber
+        path, arch = get_model_for_language("en", ModelArch.MEDIUM_STREAMING)
+        tr = Transcriber(model_path=path, model_arch=arch)
+        import math
+        audio = [0.05 * math.sin(i * 2 * math.pi * 220 / 16000) for i in range(16000 * 2)]
+        tr.transcribe_without_streaming(audio, sample_rate=16000)
+        tr.close()
+    finally:
+        os.environ.pop("HTTPS_PROXY", None)
+        os.environ.pop("HTTP_PROXY", None)
+    return "medium（離線）"
+
+
 def cpu_budget():
     """CPU 用量限制：實體核心數讀得到、執行緒數合理、語音辨識模型吃得下 cpu_threads、低優先順序有生效"""
     sys.argv = [sys.argv[0]]
@@ -115,6 +139,7 @@ def main():
     check("語音辨識模型", whisper_model)
     check("本機翻譯 M2M100", lambda: translations(a.quick))
     if not a.quick:                       # 安裝時不檢查：查不到也只是用預設值，不該讓安裝失敗
+        check("英文即時字幕 Moonshine", moonshine)
         check("CPU 用量限制", cpu_budget)
     print("結果：" + ("全部通過" if ok else "有項目沒通過"))
     sys.exit(0 if ok else 1)

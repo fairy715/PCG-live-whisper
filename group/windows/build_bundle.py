@@ -152,6 +152,28 @@ def materialize_hf_cache(cache):
         shutil.rmtree(blobs, ignore_errors=True)
 
 
+def build_moonshine(out, arch="MEDIUM_STREAMING"):
+    """英文即時字幕用的 Moonshine 模型（medium 串流版，約 250 MB，MIT）：放在 models/moonshine，
+    程式用 MOONSHINE_VOICE_CACHE 指到這裡；檔案都在時不會連網路"""
+    step("英文即時字幕模型 Moonshine medium（MIT）")
+    import importlib.util
+    if importlib.util.find_spec("moonshine_voice") is None:
+        run([sys.executable, "-m", "pip", "install", "--quiet", "moonshine-voice"])
+    dest = out / "models" / "moonshine"
+    dest.mkdir(parents=True, exist_ok=True)
+    env = dict(os.environ, MOONSHINE_VOICE_CACHE=str(dest))
+    code = ("from moonshine_voice import get_model_for_language, ModelArch\n"
+            f"p, a = get_model_for_language('en', ModelArch.{arch})\nprint(p)")
+    subprocess.run([sys.executable, "-c", code], check=True, env=env)
+    for f in dest.rglob("*"):
+        if f.suffix in (".lock", ".partial"):
+            f.unlink()
+    size = sum(f.stat().st_size for f in dest.rglob("*") if f.is_file())
+    if size < 50 * 1048576:
+        raise SystemExit(f"[錯誤] Moonshine 模型太小（{size / 1048576:.0f} MB），下載不完整")
+    print(f"   {size / 1048576:.0f} MB", flush=True)
+
+
 def build_m2m(out, convert=False):
     """convert=True：從原始模型自己轉成 int8（約 0.5 GB；網路上轉好的版本是 float32，約 1.8 GB）。
     本機翻譯本來就以 int8 執行，品質相同；要做成單一安裝檔（GitHub 單檔上限 2 GB）時用"""
@@ -240,7 +262,7 @@ def main():
     ap.add_argument("--out", default="PCG-offline", help="輸出資料夾（預設 PCG-offline）")
     ap.add_argument("--models", default="small",
                     help="語音辨識模型，逗號分隔（預設 small；可加 base、medium、large-v3-turbo）")
-    ap.add_argument("--skip", default="", help="略過的項目（測試用）：python,wheels,whisper,m2m,ffmpeg")
+    ap.add_argument("--skip", default="", help="略過的項目（測試用）：python,wheels,whisper,m2m,moonshine,ffmpeg")
     ap.add_argument("--m2m-convert", action="store_true",
                     help="翻譯模型自己轉成 int8（小很多，約 0.5 GB；需要多下載約 1 GB 的轉檔工具，製作單一安裝檔時用）")
     a = ap.parse_args()
@@ -257,6 +279,8 @@ def main():
         build_whisper(out, models)
     if "m2m" not in skip:
         build_m2m(out, convert=a.m2m_convert)
+    if "moonshine" not in skip:
+        build_moonshine(out)
     if "ffmpeg" not in skip:
         build_ffmpeg(out)
     write_manifest(out, models)

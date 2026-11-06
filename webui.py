@@ -1790,6 +1790,8 @@ def _build_args(body: dict) -> list:
     args.extend(["--mode", mode])
     model = body.get("model", "large-v3-turbo")
     args.extend(["-m", model])
+    if body.get("asr") == "moonshine":          # 集團版：英文即時字幕用 Moonshine（低延遲、CPU 輕）
+        args.extend(["--asr", "moonshine", "--moonshine-model", body.get("moonshine_model") or "medium"])
     scene = body.get("scene", "training")
     args.extend(["-s", scene])
     engine = body.get("engine")

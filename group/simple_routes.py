@@ -677,6 +677,10 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                               | {"can_bidi": bool(s["bidi"]), "can_room": s["id"] in ROOM_SCENARIOS}
                               for s in LIVE_SCENARIOS]}
 
+    def use_moonshine(s):
+        """英文即時字幕要不要用 Moonshine：模型在（離線資源包附）、IT 沒有關掉（english_asr = "whisper"）"""
+        return s.get("english_asr") != "whisper" and (Path(base_dir) / "models" / "moonshine").is_dir()
+
     @app.post("/api/simple/live/stop")
     async def simple_live_stop(request: Request):
         """首頁的「停止」：只能在這台電腦上按；正在處理錄音檔時不停"""
@@ -735,6 +739,9 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             "denoise": True,
             "subtitle_overlay": bool(body.get("overlay")),
         }
+        if mode == "en2zh" and not room and pf["local_asr"] and use_moonshine(s):
+            # 對方說英文、在這台電腦辨識：用 Moonshine（英文專用，延遲低、CPU 輕很多）；雙向、教室模式照舊用 Whisper
+            start.update(asr="moonshine", moonshine_model="medium")
         try:
             await start_live(start)
         except Exception as e:

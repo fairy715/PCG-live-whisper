@@ -239,6 +239,23 @@ class SimpleFlow(unittest.TestCase):
         self.local = False
         self.assertEqual(self.c.post("/api/simple/live", json={"scenario": "id"}).status_code, 403)
 
+    def test_english_live_uses_moonshine(self):
+        """對方說英文、本機辨識：有 Moonshine 模型就用它；雙向、教室模式、沒有模型、IT 關掉時用 Whisper"""
+        self.c.post("/api/simple/live", json={"scenario": "en"})
+        self.assertNotIn("asr", self.started[-1])                      # 還沒有模型
+        (self.base / "models" / "moonshine").mkdir(parents=True)
+        self.c.post("/api/simple/live", json={"scenario": "en"})
+        self.assertEqual((self.started[-1]["asr"], self.started[-1]["moonshine_model"]), ("moonshine", "medium"))
+        self.c.post("/api/simple/live", json={"scenario": "en", "speak": True})
+        self.assertNotIn("asr", self.started[-1])                      # 雙向：麥克風是中文
+        self.c.post("/api/simple/live", json={"scenario": "en", "room": True})
+        self.assertNotIn("asr", self.started[-1])                      # 教室模式要判斷語言
+        self.c.post("/api/simple/live", json={"scenario": "id"})
+        self.assertNotIn("asr", self.started[-1])
+        self.cfg.write_text(json.dumps({"pcg_simple": {"english_asr": "whisper"}}), encoding="utf-8")
+        self.c.post("/api/simple/live", json={"scenario": "en"})
+        self.assertNotIn("asr", self.started[-1])                      # IT 指定用 Whisper
+
     def test_live_switch_language_while_running(self):
         """上一場沒按停止：同一種語言回到那一場；換語言要換掉，不能回到舊的那一場"""
         self.running = True
