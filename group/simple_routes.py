@@ -757,7 +757,9 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         us = upd_settings()
         cur = app_version(base_dir)["version"]
         key = (cur, us["share"])
-        if not force and _upd_cache["key"] == key and time.time() - _upd_cache["at"] < 3600:
+        # 有新版記 1 小時；沒有新版只記 10 分鐘：程式一直開著時，新版發布後不用等太久就會看到
+        ttl = 3600 if (_upd_cache["result"] or {}).get("available") else 600
+        if not force and _upd_cache["key"] == key and time.time() - _upd_cache["at"] < ttl:
             return _upd_cache["result"]
         res = _upd.check(cur, share=us["share"], github_fetch=hooks.get("github_fetch"))
         _upd_cache.update(at=time.time(), key=key, result=res)

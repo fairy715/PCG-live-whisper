@@ -517,6 +517,48 @@ class AdminPage(SimpleFlow):
                          .json()["code"], "bad_share")
         simple_routes._VERSION.clear()
 
+    def test_update_no_new_version_rechecks_after_10_minutes(self):
+        """程式一直開著：之前查過「沒有新版」，新版發布後 10 分鐘內要看得到（以前要等 1 小時）"""
+        import hashlib
+        from unittest import mock
+        simple_routes._VERSION.clear()
+        (self.base / "group").mkdir(exist_ok=True)
+        (self.base / "group" / "version.json").write_text('{"version": "2026.11.5.r9"}', encoding="utf-8")
+        share = self.base / "share"
+        share.mkdir()
+        self.post("/api/simple/admin/password", {"new": "itpass1"})
+        self.post("/api/simple/admin/save", {"backend": "local", "update_share": str(share)}, "itpass1")
+        now = [1_000_000.0]
+        with mock.patch.object(simple_routes.time, "time", lambda: now[0]):
+            self.assertFalse(self.c.get("/api/simple/update").json()["available"])
+            data = b"MZ patch"
+            (share / "PCG-Update-2026.11.6.r10.exe").write_bytes(data)
+            (share / "PCG-Update-2026.11.6.r10.exe.sha256").write_text(hashlib.sha256(data).hexdigest())
+            now[0] += 300
+            self.assertFalse(self.c.get("/api/simple/update").json()["available"])      # 5 分鐘：還是上次的結果
+            self.assertTrue(self.c.get("/api/simple/update?force=1").json()["available"])  # 「檢查更新」馬上查
+        simple_routes._VERSION.clear()
+
+    def test_update_cache_expires(self):
+        from unittest import mock
+        import hashlib
+        simple_routes._VERSION.clear()
+        (self.base / "group").mkdir(exist_ok=True)
+        (self.base / "group" / "version.json").write_text('{"version": "2026.11.5.r9"}', encoding="utf-8")
+        share = self.base / "share"
+        share.mkdir()
+        self.post("/api/simple/admin/password", {"new": "itpass1"})
+        self.post("/api/simple/admin/save", {"backend": "local", "update_share": str(share)}, "itpass1")
+        now = [2_000_000.0]
+        with mock.patch.object(simple_routes.time, "time", lambda: now[0]):
+            self.assertFalse(self.c.get("/api/simple/update").json()["available"])
+            data = b"MZ patch"
+            (share / "PCG-Update-2026.11.6.r10.exe").write_bytes(data)
+            (share / "PCG-Update-2026.11.6.r10.exe.sha256").write_text(hashlib.sha256(data).hexdigest())
+            now[0] += 601
+            self.assertTrue(self.c.get("/api/simple/update").json()["available"])
+        simple_routes._VERSION.clear()
+
     def test_connection_test_reports_failures(self):
         self.post("/api/simple/admin/password", {"new": "itpass1"})
         r = self.post("/api/simple/admin/test", {"gpu_host": "127.0.0.1", "gpu_port": 1,
