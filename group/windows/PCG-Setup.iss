@@ -78,6 +78,14 @@ en.NotInstalled=PCG Meeting Translator is not installed on this computer.%n%nThi
 en.NeedFull=This update needs new components that are only in the full installer.%n%nPlease use PCG-Meeting-Translator-Setup-{#AppVersion}.exe instead. Your settings and recordings are kept.
 en.Updating=Updating and checking the program. Please wait...
 en.UpdateFailed=The update was installed but the self-check failed. Please send this file to IT:%n%1
+en.StepFmt=Step %1 of %2: %3
+en.Step1=Preparing Python
+en.Step2=Installing packages (the longest step)
+en.Step3=Copying speech and translation models (about 1 GB)
+en.Step4=Checking that everything works
+en.PkgCount=%1 of %2 packages
+en.Elapsed=%1 elapsed
+en.SlowHint=Antivirus scanning can make this step slow. Please do not close this window.
 #ifexist LangDir + "\ChineseTraditional.isl"
 zh.ShortcutName=PCG 會議翻譯
 zh.Installing=正在安裝執行環境與模型（約 3～10 分鐘），請稍候…
@@ -88,6 +96,14 @@ zh.NotInstalled=這台電腦還沒有安裝 PCG 會議翻譯。%n%n小更新包�
 zh.NeedFull=這次更新包含新的套件或模型，只有完整安裝檔才有。%n%n請改用 PCG-Meeting-Translator-Setup-{#AppVersion}.exe，設定與錄音都會保留。
 zh.Updating=正在更新並檢查程式，請稍候…
 zh.UpdateFailed=已更新，但自我檢查沒有通過。請把這個檔案交給 IT：%n%1
+zh.StepFmt=第 %1 步，共 %2 步：%3
+zh.Step1=準備 Python
+zh.Step2=安裝套件（最久的一步）
+zh.Step3=複製語音辨識與翻譯模型（約 1 GB）
+zh.Step4=檢查能不能正常使用
+zh.PkgCount=已裝好 %1 / %2 個套件
+zh.Elapsed=已經過 %1
+zh.SlowHint=防毒軟體掃描會讓這一步變慢，請不要關閉視窗。
 #endif
 #ifexist LangDir + "\Indonesian.isl"
 id.ShortcutName=Penerjemah Rapat PCG
@@ -99,6 +115,14 @@ id.NotInstalled=Penerjemah Rapat PCG belum terpasang di komputer ini.%n%nPembaru
 id.NeedFull=Pembaruan ini memerlukan komponen baru yang hanya ada di penginstal lengkap.%n%nGunakan PCG-Meeting-Translator-Setup-{#AppVersion}.exe. Pengaturan dan rekaman tetap disimpan.
 id.Updating=Memperbarui dan memeriksa program. Mohon tunggu...
 id.UpdateFailed=Pembaruan terpasang, tetapi pemeriksaan mandiri gagal. Kirim file ini ke IT:%n%1
+id.StepFmt=Langkah %1 dari %2: %3
+id.Step1=Menyiapkan Python
+id.Step2=Memasang paket (langkah terlama)
+id.Step3=Menyalin model suara dan terjemahan (sekitar 1 GB)
+id.Step4=Memeriksa apakah semuanya berfungsi
+id.PkgCount=%1 dari %2 paket terpasang
+id.Elapsed=Sudah berjalan %1
+id.SlowHint=Pemindaian antivirus bisa membuat langkah ini lambat. Jangan tutup jendela ini.
 #endif
 #ifexist LangDir + "\Vietnamese.isl"
 vi.ShortcutName=Phiên dịch cuộc họp PCG
@@ -110,6 +134,14 @@ vi.NotInstalled=Máy tính này chưa cài Phiên dịch cuộc họp PCG.%n%nG�
 vi.NeedFull=Bản cập nhật này cần thành phần mới, chỉ có trong bộ cài đầy đủ.%n%nHãy dùng PCG-Meeting-Translator-Setup-{#AppVersion}.exe. Cài đặt và bản ghi âm vẫn được giữ.
 vi.Updating=Đang cập nhật và kiểm tra chương trình. Vui lòng chờ...
 vi.UpdateFailed=Đã cập nhật nhưng tự kiểm tra không đạt. Hãy gửi tệp này cho IT:%n%1
+vi.StepFmt=Bước %1/%2: %3
+vi.Step1=Chuẩn bị Python
+vi.Step2=Cài đặt các gói (bước lâu nhất)
+vi.Step3=Sao chép mô hình nhận dạng giọng nói và dịch (khoảng 1 GB)
+vi.Step4=Kiểm tra mọi thứ hoạt động
+vi.PkgCount=Đã cài %1/%2 gói
+vi.Elapsed=Đã chạy %1
+vi.SlowHint=Phần mềm diệt virus quét có thể làm bước này chậm. Vui lòng không đóng cửa sổ.
 #endif
 #ifexist LangDir + "\Hindi.isl"
 hi.ShortcutName=PCG मीटिंग अनुवादक
@@ -121,6 +153,14 @@ hi.NotInstalled=इस कंप्यूटर पर PCG मीटिंग �
 hi.NeedFull=इस अपडेट के लिए नए घटक चाहिए जो केवल पूरे इंस्टॉलर में हैं।%n%nकृपया PCG-Meeting-Translator-Setup-{#AppVersion}.exe उपयोग करें। सेटिंग्स और रिकॉर्डिंग सुरक्षित रहेंगी।
 hi.Updating=प्रोग्राम अपडेट और जाँच हो रही है। कृपया प्रतीक्षा करें...
 hi.UpdateFailed=अपडेट इंस्टॉल हो गया, लेकिन स्व-जाँच विफल रही। यह फ़ाइल IT को भेजें:%n%1
+hi.StepFmt=चरण %1 / %2: %3
+hi.Step1=Python तैयार हो रहा है
+hi.Step2=पैकेज इंस्टॉल हो रहे हैं (सबसे लंबा चरण)
+hi.Step3=भाषण पहचान और अनुवाद मॉडल कॉपी हो रहे हैं (लगभग 1 GB)
+hi.Step4=जाँच हो रही है कि सब ठीक चल रहा है
+hi.PkgCount=%2 में से %1 पैकेज इंस्टॉल हुए
+hi.Elapsed=बीता समय %1
+hi.SlowHint=एंटीवायरस स्कैन से यह चरण धीमा हो सकता है। कृपया यह विंडो बंद न करें।
 #endif
 
 [Files]
@@ -156,6 +196,73 @@ Type: filesandordirs; Name: "{app}\jtlw_tts\__pycache__"
 var
   BundleDir: String;
   PrevDir: String;
+  ProgFile: String;
+  ProgStart: DWORD;
+
+{ 安裝執行環境時的進度：pcg-install.ps1 寫 group_data\install-progress.txt（「第幾步 共幾步 已裝套件 套件總數」），
+  這裡每秒讀一次，顯示目前在做哪一步、進度條、已經過多久（原本只有一句「正在安裝…」，同仁以為當掉了） }
+{ 型別照 Inno Setup 官方範例（Examples\CodeDll.iss）：64 位元安裝程式的指標是 8 bytes }
+function SetTimer(hWnd: HWND; nIDEvent: UINT_PTR; uElapse: UINT; lpTimerFunc: NativeInt): UINT_PTR; external 'SetTimer@user32.dll stdcall';
+function KillTimer(hWnd: HWND; nIDEvent: UINT_PTR): BOOL; external 'KillTimer@user32.dll stdcall';
+function GetTickCount: DWORD; external 'GetTickCount@kernel32.dll stdcall';
+
+function NextNum(var S: String): Integer;
+var
+  P: Integer;
+begin
+  S := Trim(S);
+  P := Pos(' ', S);
+  if P = 0 then
+  begin
+    Result := StrToIntDef(S, 0);
+    S := '';
+  end else begin
+    Result := StrToIntDef(Copy(S, 1, P - 1), 0);
+    S := Copy(S, P + 1, Length(S));
+  end;
+end;
+
+procedure ShowInstallProgress(Arg1: HWND; Arg2: UINT; Arg3: UINT_PTR; Arg4: DWORD);
+var
+  Raw: AnsiString;
+  S, Detail, Elapsed: String;
+  Step, Steps, Done, Total, Secs, Pct: Integer;
+begin
+  Secs := (GetTickCount - ProgStart) div 1000;
+  Elapsed := FmtMessage(CustomMessage('Elapsed'), [Format('%d:%.2d', [Secs div 60, Secs mod 60])]);
+  Step := 0; Steps := 4; Done := 0; Total := 0;
+  if LoadStringFromFile(ProgFile, Raw) then
+  begin
+    S := String(Raw);
+    Step := NextNum(S); Steps := NextNum(S); Done := NextNum(S); Total := NextNum(S);
+  end;
+  if (Step < 1) or (Step > 4) or (Steps < 1) then
+  begin
+    WizardForm.StatusLabel.Caption := CustomMessage('Installing');
+    WizardForm.FilenameLabel.Caption := Elapsed;
+    exit;
+  end;
+  WizardForm.StatusLabel.Caption := FmtMessage(CustomMessage('StepFmt'),
+    [IntToStr(Step), IntToStr(Steps), CustomMessage('Step' + IntToStr(Step))]);
+  Detail := Elapsed;
+  if (Step = 2) and (Total > 0) then
+    Detail := FmtMessage(CustomMessage('PkgCount'), [IntToStr(Done), IntToStr(Total)]) + '  ·  ' + Elapsed;
+  if (Step = 2) and (Secs > 480) then
+    Detail := Detail + '  ·  ' + CustomMessage('SlowHint');
+  WizardForm.FilenameLabel.Caption := Detail;
+  { 進度條：準備 0-5%、套件 5-80%（照已裝的套件數）、模型 80-95%、檢查 95-100% }
+  case Step of
+    1: Pct := 2;
+    2: if Total > 0 then Pct := 5 + (75 * Done) div Total else Pct := 5;
+    3: Pct := 85;
+  else
+    Pct := 96;
+  end;
+  WizardForm.ProgressGauge.Style := npbstNormal;
+  WizardForm.ProgressGauge.Min := 0;
+  WizardForm.ProgressGauge.Max := 100;
+  WizardForm.ProgressGauge.Position := Pct;
+end;
 
 function WantRelaunch(): Boolean;
 begin
@@ -244,6 +351,7 @@ procedure CurStepChanged(CurStep: TSetupStep);
 var
   RC: Integer;
   Params: String;
+  Timer: UINT_PTR;
 begin
   if CurStep = ssPostInstall then
   begin
@@ -269,9 +377,20 @@ begin
     WizardForm.ProgressGauge.Style := npbstMarquee;
     Params := '-NoProfile -ExecutionPolicy Bypass -File "' + ExpandConstant('{app}\group\windows\pcg-install.ps1') +
               '" -AppDir "' + ExpandConstant('{app}') + '" -Bundle "' + BundleDir + '"';
+    ProgFile := ExpandConstant('{app}\group_data\install-progress.txt');
+    DeleteFile(ProgFile);
+    ProgStart := GetTickCount;
+    { Exec 等待時照樣處理視窗訊息，計時器每秒更新畫面 }
+    Timer := SetTimer(0, 0, 1000, CreateCallback(@ShowInstallProgress));
     if (not Exec('powershell.exe', Params, '', SW_HIDE, ewWaitUntilTerminated, RC)) or (RC <> 0) then
+    begin
+      KillTimer(0, Timer);
       SuppressibleMsgBox(FmtMessage(CustomMessage('InstallFailed'), [ExpandConstant('{app}\group_data\install.log')]),
                          mbCriticalError, MB_OK, IDOK);
+    end else
+      KillTimer(0, Timer);
+    DeleteFile(ProgFile);
+    WizardForm.FilenameLabel.Caption := '';
     WizardForm.ProgressGauge.Style := npbstNormal;
   end;
 end;

@@ -24,7 +24,8 @@ How to use it for online meetings, classes and minutes: see [use cases](USE-CASE
 3. If a language window appears, choose your language and click "OK" (usually it is chosen automatically from the Windows language).
 4. Install location: `D:\PCG-live-whisper` by default (`C:\PCG-live-whisper` if there is no D drive). Keep it and click "Next" → "Install".
    * No administrator rights and no internet connection are needed.
-5. The window shows "Installing the runtime and models". This takes about 3–10 minutes. Do not close it.
+5. The runtime and models are installed. This takes about 3–10 minutes (20–30 minutes on computers with antivirus). Do not close the window.
+   * The window shows the current step (of 4) and the time elapsed. The longest is step 2, "Installing packages", which shows how many packages are done.
 6. Done: tick "Open PCG Meeting Translator now" and click "Finish". A desktop shortcut is created (its name follows the installer language, e.g. "PCG Meeting Translator" or "Penerjemah Rapat PCG").
 
 ## 3. First use

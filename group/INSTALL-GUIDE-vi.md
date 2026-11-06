@@ -24,7 +24,8 @@ Cách dùng cho họp trực tuyến, lớp học và biên bản: xem [các tì
 3. Nếu xuất hiện cửa sổ chọn ngôn ngữ, chọn ngôn ngữ rồi bấm "OK" (thường đã được chọn tự động theo ngôn ngữ Windows).
 4. Vị trí cài đặt: mặc định `D:\PCG-live-whisper` (nếu không có ổ D thì là `C:\PCG-live-whisper`). Giữ nguyên, bấm nút tiếp theo rồi bấm cài đặt.
    * Không cần quyền quản trị viên và không cần mạng internet.
-5. Cửa sổ hiển thị "Đang cài đặt môi trường chạy và mô hình", mất khoảng 3–10 phút. Đừng đóng cửa sổ.
+5. Môi trường chạy và mô hình được cài đặt, mất khoảng 3–10 phút (20–30 phút trên máy có phần mềm diệt virus). Đừng đóng cửa sổ.
+   * Cửa sổ hiển thị bước hiện tại (trên 4 bước) và thời gian đã chạy. Lâu nhất là bước 2 "Cài đặt các gói", có hiển thị số gói đã cài.
 6. Hoàn tất: đánh dấu "Mở Phiên dịch cuộc họp PCG ngay" rồi bấm nút hoàn tất. Màn hình desktop sẽ có lối tắt "Phiên dịch cuộc họp PCG".
 
 ## 3. Sử dụng lần đầu

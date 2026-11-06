@@ -83,7 +83,14 @@ jobs:
         run: |
           $exe = Get-ChildItem dist -Filter "PCG-Setup-*.exe" | Select-Object -First 1
           $log = "$env:APP\group_data\install.log"
-          Start-Process $exe.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/DIR=$env:APP",'/LOG=dist\setup.log' -Wait
+          # 安裝畫面的進度（r18）：安裝時每秒讀一次 install-progress.txt，記下看到的內容
+          $prog = "$env:APP\group_data\install-progress.txt"
+          $seen = [System.Collections.Generic.List[string]]::new()
+          $proc = Start-Process $exe.FullName -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',"/DIR=$env:APP",'/LOG=dist\setup.log' -PassThru
+          while (-not $proc.HasExited) {
+            try { $v = (Get-Content $prog -Raw -ErrorAction Stop).Trim(); if ($v -and ($seen.Count -eq 0 -or $seen[$seen.Count - 1] -ne $v)) { $seen.Add($v) } } catch { }
+            Start-Sleep -Milliseconds 1000
+          }
           # 安裝程式有可能比裡面的 pcg-install.ps1 早結束：等紀錄出現「完成」或「錯誤」（最多 25 分鐘）
           for ($i = 0; $i -lt 300; $i++) {
             if ((Test-Path $log) -and (Select-String -Path $log -Pattern '安裝完成|\[錯誤\]' -Encoding utf8 -Quiet)) { break }
@@ -93,6 +100,15 @@ jobs:
           if (-not (Select-String -Path $log -Pattern '安裝完成' -Encoding utf8 -Quiet)) {
             Write-Host "===== setup.log（最後 60 行）====="; Get-Content dist\setup.log -Tail 60
             exit 1
+          }
+          # 進度：要看到「第 2 步」（裝套件）而且數得到已裝的套件；結束後進度檔要刪掉；安裝畫面的程式不能出錯
+          Write-Host "安裝畫面看到的進度（$($seen.Count) 種）：$($seen -join ' | ')"
+          $pkg = @($seen | Where-Object { $_ -match '^2 4 (\d+) (\d+)$' -and [int]$Matches[2] -gt 0 -and [int]$Matches[1] -gt 0 })
+          if (-not $pkg) { throw "安裝時沒有看到套件安裝的進度" }
+          if (-not ($seen | Where-Object { $_ -match '^[34] 4 ' })) { throw "安裝時沒有看到模型或自我檢查的步驟" }
+          if (Test-Path $prog) { throw "安裝完成後進度檔沒有刪掉" }
+          if (Select-String -Path dist\setup.log -Pattern 'Runtime error|Exception' -Quiet) {
+            Get-Content dist\setup.log -Tail 60; throw "安裝畫面的程式（Pascal Script）出錯"
           }
 
       - name: 自我檢查（套件、模型、7 個翻譯方向）

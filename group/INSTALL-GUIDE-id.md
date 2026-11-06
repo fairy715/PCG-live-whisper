@@ -24,7 +24,8 @@ Cara memakai untuk rapat online, kelas, dan notulen: lihat [contoh penggunaan](U
 3. Jika muncul jendela pilihan bahasa, pilih bahasa lalu klik "OK" (biasanya sudah dipilih otomatis sesuai bahasa Windows).
 4. Lokasi instalasi: bawaan `D:\PCG-live-whisper` (`C:\PCG-live-whisper` jika tidak ada drive D). Biarkan saja, klik tombol lanjut lalu "Instal".
    * Tidak perlu hak administrator dan tidak perlu internet.
-5. Jendela menampilkan "Memasang runtime dan model". Proses ini sekitar 3–10 menit. Jangan ditutup.
+5. Runtime dan model dipasang. Proses ini sekitar 3–10 menit (20–30 menit di komputer dengan antivirus). Jangan tutup jendela.
+   * Jendela menampilkan langkah saat ini (dari 4) dan waktu yang sudah berjalan. Yang terlama adalah langkah 2, "Memasang paket", yang menampilkan jumlah paket yang sudah terpasang.
 6. Selesai: centang "Buka Penerjemah Rapat PCG sekarang", lalu klik "Selesai". Pintasan "Penerjemah Rapat PCG" dibuat di desktop.
 
 ## 3. Penggunaan pertama

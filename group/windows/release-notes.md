@@ -26,7 +26,8 @@
 3. 如果出現選語言的視窗，選好按「確定」（通常會依 Windows 語言自動選好，不會出現）。
 4. 安裝位置：預設 `D:\PCG-live-whisper`（沒有 D 槽就是 `C:\PCG-live-whisper`），不用改，按「下一步」→「安裝」。
    * 不需要系統管理員權限，也不需要網路。
-5. 畫面顯示「正在安裝執行環境與模型」，約 3～10 分鐘，請不要關掉。
+5. 安裝執行環境與模型，約 3～10 分鐘（有防毒軟體的電腦可能 20～30 分鐘），請不要關掉。
+   * 畫面會顯示目前在第幾步（共 4 步）、已經過多久；最久的是第 2 步「安裝套件」，會顯示已裝好幾個套件。
 6. 完成：勾「立即開啟 PCG 會議翻譯」再按「完成」。桌面會多一個「PCG 會議翻譯」捷徑。
 
 ## 三、第一次使用
@@ -84,7 +85,8 @@
 3. If a language window appears, choose your language and click "OK" (usually it is chosen automatically from the Windows language).
 4. Install location: `D:\PCG-live-whisper` by default (`C:\PCG-live-whisper` if there is no D drive). Keep it and click "Next" → "Install".
    * No administrator rights and no internet connection are needed.
-5. The window shows "Installing the runtime and models". This takes about 3–10 minutes. Do not close it.
+5. The runtime and models are installed. This takes about 3–10 minutes (20–30 minutes on computers with antivirus). Do not close the window.
+   * The window shows the current step (of 4) and the time elapsed. The longest is step 2, "Installing packages", which shows how many packages are done.
 6. Done: tick "Open PCG Meeting Translator now" and click "Finish". A desktop shortcut is created (its name follows the installer language, e.g. "PCG Meeting Translator" or "Penerjemah Rapat PCG").
 
 ## 3. First use

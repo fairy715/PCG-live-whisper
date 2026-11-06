@@ -39,6 +39,35 @@ function Invoke-Py([string[]]$PyArgs) {
         $ErrorActionPreference = $old
     }
 }
+# 安裝畫面的進度（Setup.exe 每秒讀一次）：「第幾步 共幾步 已裝幾個套件 套件總數」，只用 ASCII
+$progress = Join-Path $logDir "install-progress.txt"
+function Set-Progress([int]$Step, [int]$Done = 0, [int]$Total = 0) {
+    try { [System.IO.File]::WriteAllText($progress, "$Step 4 $Done $Total") } catch { }
+}
+# 裝套件最久（防毒軟體逐一掃描上萬個小檔案時更久）：pip 在背景跑，每 2 秒數一次裝好幾個套件
+# （site-packages 裡的 *.dist-info 資料夾，每個套件裝完才會出現），讓安裝畫面看得到進度
+function Invoke-PyProgress([string[]]$PyArgs, [string]$Site, [int]$Total) {
+    $quoted = ($PyArgs | ForEach-Object { if ($_ -match '\s') { '"' + $_ + '"' } else { $_ } }) -join ' '
+    $out = Join-Path $logDir "pip-out.tmp"
+    $err = Join-Path $logDir "pip-err.tmp"
+    $count = { @(Get-ChildItem $Site -Directory -Filter "*.dist-info" -ErrorAction SilentlyContinue).Count }
+    $base = & $count
+    $p = Start-Process -FilePath $script:py -ArgumentList $quoted -NoNewWindow -PassThru `
+        -RedirectStandardOutput $out -RedirectStandardError $err
+    $null = $p.Handle                 # 先取 Handle，結束後才讀得到 ExitCode（PowerShell 5.1 的已知問題）
+    while (-not $p.HasExited) {
+        Set-Progress 2 ([Math]::Max(0, [Math]::Min((& $count) - $base, $Total))) $Total
+        Start-Sleep -Seconds 2
+    }
+    $p.WaitForExit()
+    foreach ($f in @($out, $err)) {
+        if (Test-Path $f) {
+            Get-Content $f -Encoding UTF8 | Out-File -Append -Encoding UTF8 $log
+            Remove-Item $f -ErrorAction SilentlyContinue
+        }
+    }
+    return $p.ExitCode
+}
 function Copy-Tree($src, $dst) {
     New-Item -ItemType Directory -Force -Path $dst | Out-Null
     & robocopy $src $dst /E /NFL /NDL /NJH /NJS /NP /R:2 /W:2 | Out-Null
@@ -67,6 +96,7 @@ if (Test-Path $reqHere) {
 }
 
 # 2. Python（NuGet 免安裝版：解壓縮即可，不寫登錄檔）
+Set-Progress 1
 $pyDir = Join-Path $AppDir "python"
 $py = Join-Path $pyDir "python.exe"
 $script:py = $py
@@ -96,6 +126,7 @@ if (-not (Test-Path $py)) { Fail "Python 安裝失敗（找不到 $py）" }
 
 # 3. 套件（--no-index：只從資源包裝，不連網）
 Log "安裝套件（約 2～5 分鐘）..."
+Set-Progress 2
 $env:PIP_DISABLE_PIP_VERSION_CHECK = "1"
 $env:PYTHONUTF8 = "1"
 if ((Invoke-Py @("-m", "ensurepip", "--default-pip")) -ne 0) { Fail "pip 安裝失敗（詳見 $log）" }
@@ -103,11 +134,14 @@ $wheels = Join-Path $Bundle "wheels"
 $lock = Join-Path $Bundle "requirements-lock.txt"
 $pipArgs = @("-m", "pip", "install", "--no-index", "--find-links", $wheels, "--no-warn-script-location", "--disable-pip-version-check")
 if ((Invoke-Py ($pipArgs + @("--upgrade", "pip"))) -ne 0) { Log "[注意] pip 更新失敗，沿用 Python 內建的版本" }
-if ((Invoke-Py ($pipArgs + @("-r", $lock))) -ne 0) { Fail "套件安裝失敗（詳見 $log）" }
+$wheelCount = @(Get-ChildItem $wheels -Filter "*.whl" -ErrorAction SilentlyContinue).Count
+$site = Join-Path $pyDir "Lib\site-packages"
+if ((Invoke-PyProgress ($pipArgs + @("-r", $lock)) $site $wheelCount) -ne 0) { Fail "套件安裝失敗（詳見 $log）" }
 if ((Invoke-Py ($pipArgs + @("--no-deps", "resemblyzer"))) -ne 0) { Fail "resemblyzer 安裝失敗（詳見 $log）" }
 
 # 4. 模型與 ffmpeg
 Log "複製模型與工具..."
+Set-Progress 3
 Copy-Tree (Join-Path $Bundle "models") (Join-Path $AppDir "models")
 Copy-Tree (Join-Path $Bundle "hf_cache") (Join-Path $AppDir "hf_cache")
 Copy-Tree (Join-Path $Bundle "tools") (Join-Path $AppDir "tools")
@@ -124,9 +158,11 @@ if (-not (Test-Path $cfgPath)) {
 
 # 6. 自我檢查：套件載得起來、模型在、翻譯跑得動
 Log "自我檢查..."
+Set-Progress 4
 $env:HF_HUB_CACHE = Join-Path $AppDir "hf_cache"
 $env:HF_HUB_OFFLINE = "1"
 $env:PATH = (Join-Path $AppDir "tools\ffmpeg\bin") + ";" + $env:PATH
 if ((Invoke-Py @((Join-Path $AppDir "group\windows\selftest.py"), "--quick")) -ne 0) { Fail "自我檢查沒有通過（詳見 $log）" }
+Remove-Item $progress -ErrorAction SilentlyContinue
 Log "=== 安裝完成 ==="
 exit 0
