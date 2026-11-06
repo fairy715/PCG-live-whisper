@@ -5,7 +5,7 @@
 Phụ đề trực tiếp phân biệt ngôn ngữ **theo nguồn âm thanh**:
 
 - **Âm thanh máy tính phát ra** (người bên kia trên Teams/Zoom, video) = ngôn ngữ của bên kia
-- **Micro** (khi chọn "tôi cũng nói") = tiếng Trung của bạn
+- **Micro** (khi chọn "tôi cũng nói") = ngôn ngữ của bạn
 
 Vì vậy chỉ **máy tính chủ trì cuộc họp hoặc lớp học** cần cài ứng dụng. Bên kia không cần cài gì.
 
@@ -14,11 +14,11 @@ Vì vậy chỉ **máy tính chủ trì cuộc họp hoặc lớp học** cần 
 "Phụ đề trực tiếp" hỏi lần lượt ba điều, và chỉ giữ lại các lựa chọn phù hợp với bạn:
 
 1. **Bạn nói tiếng gì?** Nhân viên Đài Loan chọn "中文"; nhân viên Indonesia, Việt Nam, Ấn Độ chọn ngôn ngữ của mình.
-2. **Loại cuộc họp nào?** (chỉ hỏi khi chọn "中文")
+2. **Loại cuộc họp nào?**
    - Họp hoặc lớp online, tôi chỉ đọc phụ đề
    - Họp hoặc lớp online, tôi cũng nói (đeo tai nghe)
    - Cùng một phòng học, một micro
-3. **Người kia nói tiếng gì?** Nếu bạn chọn tiếng Việt, "Tiếng Trung → Tiếng Việt" được chọn sẵn.
+3. **Người kia nói tiếng gì?** Nếu bạn chọn tiếng Việt, bạn sẽ thấy "Tiếng Trung → Tiếng Việt" và các ngoại ngữ khác (từ r17; ví dụ "Tiếng Indonesia, sang tiếng Việt").
 
 Lựa chọn lần trước sẽ được ghi nhớ. Nếu không thấy lựa chọn cần dùng, bấm "Hiện tất cả lựa chọn".
 
@@ -27,7 +27,8 @@ Lựa chọn lần trước sẽ được ghi nhớ. Nếu không thấy lựa c
 | Lựa chọn | Nghe được | Phụ đề bằng | Máy của ai | Có thể thêm |
 |---|---|---|---|---|
 | Tiếng Việt (người kia nói tiếng Việt) | Tiếng Việt | Tiếng Trung | Nhân viên Đài Loan không hiểu tiếng Việt | Tôi cũng sẽ nói (hai chiều), chế độ lớp học |
-| Tiếng Trung → Tiếng Việt | Tiếng Trung | Tiếng Việt | Nhân viên Việt Nam không hiểu giảng viên hoặc quản lý nói tiếng Trung | Chỉ một chiều |
+| Tiếng Trung → Tiếng Việt | Tiếng Trung | Tiếng Việt | Nhân viên Việt Nam không hiểu giảng viên hoặc quản lý nói tiếng Trung | Chế độ lớp học |
+| Tiếng Indonesia, sang tiếng Việt (r17) | Tiếng Indonesia | Tiếng Việt | Nhân viên Việt Nam họp với nhân viên Indonesia | Tôi cũng sẽ nói (hai chiều), chế độ lớp học |
 
 Ví dụ: giảng viên Lin dạy Minh ở Việt Nam qua Teams.
 - Máy giảng viên Lin: tôi nói "中文" → "tôi cũng nói" → "Tiếng Việt".
@@ -86,6 +87,24 @@ Mỗi câu được tự nhận biết là tiếng Trung hay tiếng Việt: ti�
 2. Chọn ngôn ngữ **được nói nhiều nhất**; có thể điền chủ đề và số người nói.
 3. Có thể đóng trang; quay lại sau để tải biên bản, bản chép lời và tệp phụ đề (khoảng 10–30 phút cho cuộc họp 1 giờ).
 4. Biên bản AI (quyết định, việc cần làm, rủi ro) cần chế độ máy chủ; chế độ máy cục bộ tạo bản chép lời và bản dịch.
+
+## 6. Nhân viên nước ngoài họp với nhau (ví dụ nhân viên Việt Nam và Indonesia, từ r17)
+
+Dịch trực tiếp, không qua tiếng Trung. Hai ngôn ngữ bất kỳ trong tiếng Indonesia, tiếng Việt, tiếng Hindi và tiếng Anh.
+
+**Họp online (mỗi người trên máy của mình)**
+- Nhân viên Việt Nam: tôi nói "Tiếng Việt" → loại cuộc họp → "Bahasa Indonesia" (phụ đề bằng tiếng Việt).
+- Nhân viên Indonesia: tôi nói "Bahasa Indonesia" → loại cuộc họp → "Tiếng Việt" (phụ đề bằng tiếng Indonesia).
+- Chọn "tôi chỉ đọc phụ đề", hoặc "tôi cũng nói (đeo tai nghe)" để hiện cả bản dịch lời bạn nói.
+
+**Cùng phòng họp, một micro**: trên một máy chọn ngôn ngữ của bạn → "Cùng một phòng học, một micro" → ngôn ngữ của bên kia. Mỗi câu được tự nhận biết rồi dịch sang ngôn ngữ còn lại; dùng "Chia sẻ" để người khác xem trên điện thoại bằng ngôn ngữ họ chọn.
+
+**Chất lượng**
+- Mặc định chỉ dùng mô hình cơ bản: Whisper small để nhận dạng và M2M100 trên máy để dịch. Nhận dạng tiếng Indonesia và tiếng Việt có thể sai, bản dịch cũng sai theo.
+- Muốn chính xác hơn, IT có thể cài gói mô hình ngôn ngữ (có ích khi "tôi chỉ đọc phụ đề") hoặc chuyển sang chế độ máy chủ trên trang cài đặt IT để dịch bằng mô hình ngôn ngữ lớn.
+- Biên bản từ bản ghi âm vẫn được viết bằng tiếng Trung.
+
+---
 
 ## Mẹo
 

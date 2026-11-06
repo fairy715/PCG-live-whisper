@@ -70,6 +70,33 @@ LIVE_SCENARIOS = [
 # 教室模式（同一支麥克風，中文與這些語言互相翻譯）可以用的情境
 ROOM_SCENARIOS = ("id", "vi", "hi", "en")
 
+# 外語對外語（r17）：「你說什麼語言」選了這些語言時，對方說另一種外語也能直接翻成你的語言（不經過中文）
+FOREIGN_ME = ("id", "vi", "hi", "en")
+
+
+def live_mode(sc_id, me="zh", speak=False, room=False):
+    """即時字幕的情境 → (主程式的 --mode, 是否教室模式, 畫面上顯示的模式)；不支援回傳 None。
+    me＝同仁自己說的語言。中文（預設）照原本的情境表；外語同仁：
+      - 對方說中文（zh2<me>）：單向翻成自己的語言；教室模式＝中文與自己的語言互翻
+      - 對方說另一種外語 A：單向 A→me；「我也要說話」＝雙向 A_me；教室模式＝A 與 me 互翻"""
+    if me not in FOREIGN_ME:
+        sc = next((x for x in LIVE_SCENARIOS if x["id"] == sc_id), None)
+        if not sc:
+            return None
+        room = bool(room) and sc["id"] in ROOM_SCENARIOS
+        mode = sc["mode"] if room else (sc["bidi"] if (speak and sc["bidi"]) else sc["mode"])
+        return mode, room, (f"{sc['id']}_zh" if room else mode)
+    if sc_id == f"zh2{me}":
+        return (f"{me}2zh", True, f"{me}_zh") if room else (sc_id, False, sc_id)
+    if sc_id in FOREIGN_ME and sc_id != me:
+        one = f"{sc_id}2{me}"
+        if room:
+            return one, True, f"{sc_id}_{me}"
+        if speak:
+            return f"{sc_id}_{me}", False, f"{sc_id}_{me}"
+        return one, False, one
+    return None
+
 _AUDIO_EXTS = {".mp3", ".wav", ".m4a", ".flac", ".ogg", ".mp4", ".mkv", ".webm", ".avi", ".aac", ".wma", ".mov"}
 _MAX_UPLOAD_MB = int(os.environ.get("PCG_SIMPLE_MAX_UPLOAD_MB", "2048"))
 _ANSI = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
@@ -725,12 +752,12 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                                                        "用桌面捷徑開啟"}, status_code=403)
         if start_live is None:
             return JSONResponse({"ok": False, "code": "live_unavailable", "error": "這個版本不支援即時字幕"}, status_code=503)
-        sc = next((x for x in LIVE_SCENARIOS if x["id"] == body.get("scenario")), None)
-        if not sc:
+        me = body.get("me") if body.get("me") in FOREIGN_ME else "zh"
+        picked = live_mode(body.get("scenario"), me, bool(body.get("speak")), bool(body.get("room")))
+        if not picked:
             return JSONResponse({"ok": False, "code": "pick_language", "error": "請選擇對方說的語言"}, status_code=400)
         s = settings()
-        room = bool(body.get("room")) and sc["id"] in ROOM_SCENARIOS
-        mode = sc["mode"] if room else (sc["bidi"] if (body.get("speak") and sc["bidi"]) else sc["mode"])
+        mode, room, shown = picked
         if live_running and live_running():
             # 上一場沒按「停止」還在跑：同一種語言就回到那一場；換了語言就換掉（start_live 會先停掉舊的），
             # 不然選「對方說英文」會回到還在跑的「中文 → 印尼文」
@@ -761,9 +788,11 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             "denoise": True,
             "subtitle_overlay": bool(body.get("overlay")),
         }
-        if mode in ("id2zh", "vi2zh", "hi2zh") and pf["local_asr"]:
-            # 單向「對方說印尼文／越南文／印地語」：IT 指定的語言模型包（雙向、教室模式的麥克風那邊是中文，照舊用多語 Whisper）
-            pack = model_packs.asr_model_for(base_dir, s, mode[:2], "live")
+        src = mode.split("2")[0] if "2" in mode else ""
+        if src in ("id", "vi", "hi") and not room and pf["local_asr"]:
+            # 單向「對方說印尼文／越南文／印地語」（翻成中文或其他語言）：IT 指定的語言模型包
+            # （雙向、教室模式的麥克風那邊是另一種語言，照舊用多語 Whisper）
+            pack = model_packs.asr_model_for(base_dir, s, src, "live")
             if pack:
                 start["model"] = pack
         if mode == "en2zh" and not room and pf["local_asr"] and use_moonshine(s):
@@ -773,7 +802,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             await start_live(start)
         except Exception as e:
             return JSONResponse({"ok": False, "code": "live_failed", "error": f"啟動失敗：{e}"}, status_code=500)
-        return {"ok": True, "mode": f"{sc['id']}_zh" if room else mode, "room": room}
+        return {"ok": True, "mode": shown, "room": room}
 
     # ─── 一鍵更新（小更新包）：來源是 IT 設定的共用資料夾，或 GitHub 發布頁（見 updater.py） ───
     from group import updater as _upd

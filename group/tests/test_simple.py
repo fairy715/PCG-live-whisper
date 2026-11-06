@@ -239,6 +239,59 @@ class SimpleFlow(unittest.TestCase):
         self.local = False
         self.assertEqual(self.c.post("/api/simple/live", json={"scenario": "id"}).status_code, 403)
 
+    def test_live_foreign_pairs(self):
+        """r17 外語對外語：外語同仁（me）跟說另一種外語的人開會，直接翻成自己的語言，不經過中文"""
+        post = lambda **b: self.c.post("/api/simple/live", json=b).json()
+        # 印尼同仁看越南同仁說話：越南文 → 印尼文
+        r = post(scenario="vi", me="id")
+        self.assertEqual((r["mode"], r["room"]), ("vi2id", False))
+        self.assertEqual((self.started[-1]["mode"], self.started[-1]["room"]), ("vi2id", False))
+        self.assertEqual(self.started[-1]["engine"], "nllb")
+        # 我也要說話：系統音訊越南文、麥克風印尼文
+        r = post(scenario="vi", me="id", speak=True)
+        self.assertEqual(r["mode"], "vi_id")
+        self.assertEqual(self.started[-1]["mode"], "vi_id")
+        # 教室模式：越南文與印尼文互翻，本機辨識，畫面顯示「越南文 ↔ 印尼文」
+        r = post(scenario="vi", me="id", room=True, speak=True)
+        self.assertEqual((r["mode"], r["room"]), ("vi_id", True))
+        self.assertEqual((self.started[-1]["mode"], self.started[-1]["room"], self.started[-1]["local_asr"]),
+                         ("vi2id", True, True))
+        # 和英文配對用既有的方向
+        self.assertEqual(post(scenario="en", me="vi")["mode"], "en2vi")
+        self.assertEqual(post(scenario="id", me="en")["mode"], "id2en")
+        self.assertEqual(post(scenario="en", me="hi", speak=True)["mode"], "en_hi")
+        # 外語同仁、對方說中文：單向；教室模式＝中文與自己的語言互翻
+        self.assertEqual(post(scenario="zh2vi", me="vi", speak=True)["mode"], "zh2vi")
+        r = post(scenario="zh2vi", me="vi", room=True)
+        self.assertEqual((r["mode"], r["room"], self.started[-1]["mode"]), ("vi_zh", True, "vi2zh"))
+        # 不支援的組合
+        for bad in ({"scenario": "id", "me": "id"}, {"scenario": "ja", "me": "id"}, {"scenario": "zh2vi", "me": "id"}):
+            self.assertEqual(self.c.post("/api/simple/live", json=bad).json()["code"], "pick_language", bad)
+        # 不認得的 me：照中文同仁（原本的行為）
+        self.assertEqual(post(scenario="vi", me="xx")["mode"], "vi2zh")
+        self.assertEqual(post(scenario="vi")["mode"], "vi2zh")
+
+    def test_live_foreign_pair_uses_language_pack(self):
+        """單向外語對外語：對方語言的模型包照樣用；雙向、教室模式不用（另一路是別的語言）"""
+        pack = self.base / "models" / "packs" / "phowhisper-small"
+        pack.mkdir(parents=True)
+        (pack / "pack.json").write_text(json.dumps({
+            "id": "phowhisper-small", "name": "PhoWhisper small", "type": "asr", "engine": "faster-whisper",
+            "languages": ["vi"], "purpose": ["live", "file"], "version": "1", "license": "BSD-3-Clause"}),
+            encoding="utf-8")
+        self.cfg.write_text(json.dumps({"pcg_simple": {"asr_packs": {"vi": {"live": "phowhisper-small"}}}}),
+                            encoding="utf-8")
+        self.c.post("/api/simple/live", json={"scenario": "vi", "me": "id"})
+        self.assertEqual(self.started[-1]["model"], "pack:phowhisper-small")
+        self.c.post("/api/simple/live", json={"scenario": "vi", "me": "id", "speak": True})
+        self.assertNotEqual(self.started[-1]["model"], "pack:phowhisper-small")
+        self.c.post("/api/simple/live", json={"scenario": "vi", "me": "id", "room": True})
+        self.assertNotEqual(self.started[-1]["model"], "pack:phowhisper-small")
+        self.c.post("/api/simple/live", json={"scenario": "vi", "room": True})        # 中文同仁的教室模式也不用
+        self.assertNotEqual(self.started[-1]["model"], "pack:phowhisper-small")
+        self.c.post("/api/simple/live", json={"scenario": "vi"})
+        self.assertEqual(self.started[-1]["model"], "pack:phowhisper-small")
+
     def test_english_live_uses_moonshine(self):
         """對方說英文、本機辨識：有 Moonshine 模型就用它；雙向、教室模式、沒有模型、IT 關掉時用 Whisper"""
         self.c.post("/api/simple/live", json={"scenario": "en"})

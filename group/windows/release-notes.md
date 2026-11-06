@@ -115,4 +115,4 @@ You do **not** need to uninstall first. Settings, recordings and transcripts are
 * Uninstall: Windows "Settings" → "Apps" → "PCG Meeting Translator" → "Uninstall". Recordings, transcripts and settings stay in the folder; delete it manually if you no longer need them.
 
 ---
-已在乾淨的 Windows 上實際安裝{PATCH_TESTED}並通過自我檢查（套件、模型、5 個翻譯方向）。語音辨識模型：{MODELS}；commit {COMMIT}
+已在乾淨的 Windows 上實際安裝{PATCH_TESTED}並通過自我檢查（套件、模型、7 個翻譯方向，含越南文 ⇄ 印尼文）。語音辨識模型：{MODELS}；commit {COMMIT}

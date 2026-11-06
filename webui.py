@@ -1123,6 +1123,13 @@ def _get_config():
           for v, lb in ((f"{code}2zh", f"{short}翻中字幕"), (f"zh2{code}", f"中翻{short}字幕"),
                         (f"{code}_zh", f"{short}中雙向字幕"), (code, f"{grp}轉錄"),
                         (f"{code}2en", f"{short}翻英字幕"), (f"en2{code}", f"英翻{short}字幕"))],
+        # 集團版 r17：外語對外語（印尼文、越南文、印地語、英文之間，不經過中文）
+        *[{"value": f"{a}2{b}", "label": f"{sa}翻{sb}字幕", "group": "外語互譯"}
+          for a, sa in (("id", "印尼"), ("vi", "越"), ("hi", "印地")) for b, sb in (("id", "印尼"), ("vi", "越"), ("hi", "印地"))
+          if a != b],
+        *[{"value": f"{a}_{b}", "label": f"{sa}{sb}雙向字幕", "group": "外語互譯"}
+          for a, sa in (("id", "印尼"), ("vi", "越"), ("hi", "印地"), ("en", "英"))
+          for b, sb in (("id", "印尼"), ("vi", "越"), ("hi", "印地"), ("en", "英")) if a != b],
         {"value": "nan", "label": "台語轉錄", "group": "轉錄"},
         {"value": "nan2en", "label": "台翻英字幕", "group": "單向翻譯"},
         {"value": "record", "label": "純錄音", "group": "其他"},

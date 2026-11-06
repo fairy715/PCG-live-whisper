@@ -5,7 +5,7 @@
 Live subtitles tell languages apart **by where the sound comes from**:
 
 - **Sound played by the computer** (the other people in Teams/Zoom, a video) = the other language
-- **Microphone** (when you choose "I will speak too") = your own Chinese
+- **Microphone** (when you choose "I will speak too") = your own language
 
 So only **the computer running the meeting or class** needs the app. The other side does not install anything.
 
@@ -14,11 +14,11 @@ So only **the computer running the meeting or class** needs the app. The other s
 "Live subtitles" asks three things in order, and only the options that fit you stay on screen:
 
 1. **What language do you speak?** Taiwanese staff choose "中文"; Indonesian, Vietnamese and Indian staff choose their own language.
-2. **What kind of meeting?** (asked only if you chose "中文")
+2. **What kind of meeting?**
    - Online meeting or class, I only read subtitles
    - Online meeting or class, I will speak too (headset)
    - Same classroom, one microphone
-3. **What language do the others speak?** If you chose another language, "Chinese → your language" is selected for you.
+3. **What language do the others speak?** If you chose another language, you see "Chinese → your language" and the other foreign languages (from r17; e.g. Vietnamese staff see "Indonesian, to Vietnamese").
 
 Your last choice is remembered. If the option you want is not shown, click "Show all options".
 
@@ -27,7 +27,8 @@ Your last choice is remembered. If the option you want is not shown, click "Show
 | Option | You hear | Subtitles in | Whose computer | Can add |
 |---|---|---|---|---|
 | Indonesian (the others speak Indonesian) | Indonesian | Chinese | Taiwanese staff who do not understand Indonesian | I will speak too (two-way), classroom mode |
-| Chinese → Indonesian | Chinese | Indonesian | Indonesian staff who do not understand the Chinese-speaking trainer or manager | One-way only |
+| Chinese → Indonesian | Chinese | Indonesian | Indonesian staff who do not understand the Chinese-speaking trainer or manager | Classroom mode |
+| Indonesian, to Vietnamese (r17) | Indonesian | Vietnamese | Vietnamese staff in a meeting with Indonesian staff | I will speak too (two-way), classroom mode |
 
 Example: trainer Lin teaches Budi in Indonesia over Teams.
 - Lin's computer: I speak "中文" → "I will speak too" → "Indonesian".
@@ -92,6 +93,24 @@ Each sentence is detected as Chinese or Indonesian automatically: Chinese → Ch
 ## 6. Everyone speaks Chinese
 
 Choose "**Everyone speaks Chinese**": a Chinese transcript only, no translation.
+
+## 7. Foreign-language staff with each other (e.g. Vietnamese and Indonesian staff, from r17)
+
+Translated directly, not through Chinese. Any two of Indonesian, Vietnamese, Hindi and English.
+
+**Online meeting (each on their own computer)**
+- Vietnamese staff: I speak "Tiếng Việt" → kind of meeting → "Bahasa Indonesia" (subtitles in Vietnamese).
+- Indonesian staff: I speak "Bahasa Indonesia" → kind of meeting → "Tiếng Việt" (subtitles in Indonesian).
+- Choose "I only read subtitles", or "I will speak too (headset)" to also show the translation of what you say.
+
+**Same meeting room, one microphone**: on one computer choose your language → "Same classroom, one microphone" → the other language. Each sentence is detected and translated into the other language; use "Share" so others can follow on their phones in the language they choose.
+
+**Quality**
+- By default only the basic models are used: Whisper small for recognition and M2M100 on the computer for translation. Indonesian and Vietnamese recognition makes mistakes, and the translation follows them.
+- For better results, IT can install language model packs (they help for "I only read subtitles") or switch to server mode on the IT settings page to translate with a large language model.
+- Minutes from recordings are still written in Chinese.
+
+---
 
 ## Tips
 

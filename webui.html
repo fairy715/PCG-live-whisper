@@ -635,10 +635,14 @@ function _updateModelRec(mode){
 }
 /* 集團版：印尼文、越南文、印地語 */
 const XL_LANGS=[['id','印尼文','印尼'],['vi','越南文','越'],['hi','印地語','印地']];
-const XL_TRANSCRIBE=XL_LANGS.map(x=>x[0]),XL_BIDI=XL_LANGS.map(x=>x[0]+'_zh');
-const XL_TRANSLATE=XL_LANGS.flatMap(([c])=>[c+'2zh','zh2'+c,c+'2en','en2'+c]);
-const XL_NOENG=XL_LANGS.flatMap(([c])=>[c+'2zh','zh2'+c,c+'_zh',c,c+'2en']);
-const _xlLabels=Object.fromEntries(XL_LANGS.flatMap(([c,n,s])=>[[c+'2zh',s+'翻中字幕'],['zh2'+c,'中翻'+s+'字幕'],[c+'_zh',s+'中雙向字幕'],[c,n+'轉錄'],[c+'2en',s+'翻英字幕'],['en2'+c,'英翻'+s+'字幕']]));
+/* r17 外語對外語：印尼文、越南文、印地語、英文之間（A2B 單向、A_B 雙向：對方說 A、我說 B） */
+const XP_LANGS=[...XL_LANGS,['en','英文','英']];
+const XP_ONEWAY=XL_LANGS.flatMap(([a,,sa])=>XL_LANGS.filter(([b])=>b!==a).map(([b,,sb])=>[a+'2'+b,sa+'翻'+sb+'字幕']));
+const XP_BIDI=XP_LANGS.flatMap(([a,,sa])=>XP_LANGS.filter(([b])=>b!==a).map(([b,,sb])=>[a+'_'+b,sa+sb+'雙向字幕']));
+const XL_TRANSCRIBE=XL_LANGS.map(x=>x[0]),XL_BIDI=[...XL_LANGS.map(x=>x[0]+'_zh'),...XP_BIDI.map(x=>x[0])];
+const XL_TRANSLATE=[...XL_LANGS.flatMap(([c])=>[c+'2zh','zh2'+c,c+'2en','en2'+c]),...XP_ONEWAY.map(x=>x[0])];
+const XL_NOENG=[...XL_LANGS.flatMap(([c])=>[c+'2zh','zh2'+c,c+'_zh',c,c+'2en']),...XP_ONEWAY.map(x=>x[0]),...XP_BIDI.map(x=>x[0])];
+const _xlLabels=Object.fromEntries([...XL_LANGS.flatMap(([c,n,s])=>[[c+'2zh',s+'翻中字幕'],['zh2'+c,'中翻'+s+'字幕'],[c+'_zh',s+'中雙向字幕'],[c,n+'轉錄'],[c+'2en',s+'翻英字幕'],['en2'+c,'英翻'+s+'字幕']]),...XP_ONEWAY,...XP_BIDI]);
 const _modeLabels={..._xlLabels,'en2zh':'英翻中字幕','zh2en':'中翻英字幕','ja2zh':'日翻中字幕','zh2ja':'中翻日字幕','ko2zh':'韓翻中字幕','zh2ko':'中翻韓字幕','en_zh':'英中雙向字幕','ja_zh':'日中雙向字幕','ko_zh':'韓中雙向字幕','en':'英文轉錄','zh':'中文轉錄','ja':'日文轉錄','ko':'韓文轉錄','nan':'台語轉錄','nan2en':'台翻英字幕','record':'純錄音','tts':'文字朗讀','tts_file':'文字轉語音檔'};
 const _spkColors=['#ffa550','#64c8ff','#ff96b4','#b4e664','#bea0ff','#fff064','#64f0c8','#ffb4a0'];
 /* Custom Select */

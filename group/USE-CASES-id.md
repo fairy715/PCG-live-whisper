@@ -5,7 +5,7 @@
 Subtitle langsung membedakan bahasa **dari sumber suara**:
 
 - **Suara yang diputar komputer** (lawan bicara di Teams/Zoom, video) = bahasa lawan bicara
-- **Mikrofon** (jika memilih "saya juga berbicara") = bahasa Mandarin Anda sendiri
+- **Mikrofon** (jika memilih "saya juga berbicara") = bahasa Anda sendiri
 
 Jadi hanya **komputer yang menjalankan rapat atau kelas** yang perlu memasang aplikasi. Pihak lain tidak perlu memasang apa pun.
 
@@ -14,11 +14,11 @@ Jadi hanya **komputer yang menjalankan rapat atau kelas** yang perlu memasang ap
 "Subtitle langsung" menanyakan tiga hal secara berurutan, dan hanya opsi yang cocok untuk Anda yang tetap tampil:
 
 1. **Anda berbicara bahasa apa?** Karyawan Taiwan memilih "中文"; karyawan Indonesia, Vietnam, dan India memilih bahasanya sendiri.
-2. **Jenis rapat apa?** (hanya ditanyakan jika memilih "中文")
+2. **Jenis rapat apa?**
    - Rapat atau kelas online, saya hanya membaca subtitle
    - Rapat atau kelas online, saya juga berbicara (pakai headset)
    - Satu ruang kelas, satu mikrofon
-3. **Lawan bicara berbahasa apa?** Jika Anda memilih bahasa Indonesia, "Mandarin → Indonesia" langsung terpilih.
+3. **Lawan bicara berbahasa apa?** Jika Anda memilih bahasa Indonesia, Anda melihat "Mandarin → Indonesia" dan bahasa asing lain (mulai r17; mis. "Bahasa Vietnam, ke Indonesia").
 
 Pilihan terakhir Anda akan diingat. Jika opsi yang dicari tidak muncul, klik "Tampilkan semua pilihan".
 
@@ -27,7 +27,8 @@ Pilihan terakhir Anda akan diingat. Jika opsi yang dicari tidak muncul, klik "Ta
 | Opsi | Yang didengar | Subtitle dalam | Komputer siapa | Bisa ditambah |
 |---|---|---|---|---|
 | Bahasa Indonesia (lawan bicara berbahasa Indonesia) | Bahasa Indonesia | Mandarin | Karyawan Taiwan yang tidak mengerti bahasa Indonesia | Saya juga berbicara (dua arah), mode kelas |
-| Mandarin → Indonesia | Mandarin | Bahasa Indonesia | Karyawan Indonesia yang tidak mengerti pengajar atau atasan berbahasa Mandarin | Hanya satu arah |
+| Mandarin → Indonesia | Mandarin | Bahasa Indonesia | Karyawan Indonesia yang tidak mengerti pengajar atau atasan berbahasa Mandarin | Mode kelas |
+| Bahasa Vietnam, ke Indonesia (r17) | Bahasa Vietnam | Bahasa Indonesia | Karyawan Indonesia yang rapat dengan karyawan Vietnam | Saya juga berbicara (dua arah), mode kelas |
 
 Contoh: Guru Lin mengajar Budi di Indonesia lewat Teams.
 - Komputer Guru Lin: saya berbicara "中文" → "saya juga berbicara" → "Bahasa Indonesia".
@@ -86,6 +87,24 @@ Setiap kalimat dikenali otomatis sebagai Mandarin atau Indonesia: Mandarin → M
 2. Pilih bahasa yang **paling banyak dipakai**; boleh isi topik dan jumlah pembicara.
 3. Halaman boleh ditutup; kembali nanti untuk mengunduh notulen, transkrip, dan file subtitle (sekitar 10–30 menit untuk rapat 1 jam).
 4. Notulen AI (keputusan, tindak lanjut, risiko) memerlukan mode server; mode lokal menghasilkan transkrip dan terjemahan.
+
+## 6. Rapat antar karyawan asing (mis. karyawan Indonesia dan Vietnam, mulai r17)
+
+Diterjemahkan langsung, tidak lewat bahasa Mandarin. Dua bahasa mana pun dari Indonesia, Vietnam, Hindi, dan Inggris.
+
+**Rapat online (masing-masing di komputernya sendiri)**
+- Karyawan Indonesia: saya berbicara "Bahasa Indonesia" → jenis rapat → "Bahasa Vietnam" (subtitle dalam bahasa Indonesia).
+- Karyawan Vietnam: saya berbicara "Tiếng Việt" → jenis rapat → "Bahasa Indonesia" (subtitle dalam bahasa Vietnam).
+- Pilih "saya hanya membaca subtitle", atau "saya juga berbicara (pakai headset)" agar terjemahan ucapan Anda juga tampil.
+
+**Satu ruang rapat, satu mikrofon**: di satu komputer pilih bahasa Anda → "Satu ruang kelas, satu mikrofon" → bahasa lawan bicara. Setiap kalimat dikenali lalu diterjemahkan ke bahasa lainnya; gunakan "Bagikan" agar orang lain bisa mengikuti di ponsel dalam bahasa pilihannya.
+
+**Kualitas**
+- Secara bawaan hanya model dasar yang dipakai: Whisper small untuk pengenalan suara dan M2M100 di komputer untuk terjemahan. Pengenalan bahasa Indonesia dan Vietnam bisa salah, dan terjemahan ikut salah.
+- Agar lebih akurat, IT dapat memasang paket model bahasa (membantu untuk "saya hanya membaca subtitle") atau beralih ke mode server di halaman pengaturan IT agar diterjemahkan oleh model bahasa besar.
+- Notulen dari rekaman masih ditulis dalam bahasa Mandarin.
+
+---
 
 ## Tips
 

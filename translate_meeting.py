@@ -2006,13 +2006,38 @@ _XLANGS = {
     "hi": ("印地語", "印地", "HI", C_HI, C_MY_HI, "Hindi"),
 }
 _XL_CODES = tuple(_XLANGS)
-_XL_MODE_LANG = {}          # 模式 → 這個模式涉及的額外語言
+_XL_MODE_LANG = {}          # 模式 → 這個模式涉及的額外語言（外語對外語：對方說的語言）
 for _L in _XL_CODES:
     for _m in (f"{_L}2zh", f"zh2{_L}", f"{_L}_zh", _L, f"{_L}2en", f"en2{_L}"):
         _XL_MODE_LANG[_m] = _L
+
+# 外語對外語（r17）：印尼文、越南文、印地語、英文之間直接翻譯，不經過中文。
+#   單向 A2B：對方說 A，翻成 B（例 vi2id：越南文 → 印尼文）；A2en、en2B 上面已經有了
+#   雙向 A_B：系統音訊（對方）說 A → 翻成 B；麥克風（我）說 B → 翻成 A（例 vi_id：印尼同仁跟越南同仁開會）
+# 欄位比照 _XLANGS：中文名、模式名用的簡稱、字幕標籤、顏色、我方顏色、英文名
+_XP_LANGS = _XL_CODES + ("en",)
+_XP_PAIRS = {}              # 模式 → (對方語言 A, 我方語言 B)
+for _A in _XP_LANGS:
+    for _B in _XP_LANGS:
+        if _A != _B:
+            if "en" not in (_A, _B):
+                _XP_PAIRS[f"{_A}2{_B}"] = (_A, _B)
+            _XP_PAIRS[f"{_A}_{_B}"] = (_A, _B)
+_XP_ONEWAY = tuple(m for m in _XP_PAIRS if "2" in m)
+_XP_BIDI = tuple(m for m in _XP_PAIRS if "_" in m)
+for _m, (_A, _B) in _XP_PAIRS.items():
+    _XL_MODE_LANG[_m] = _A if _A != "en" else _B
+    _na = _XLANGS[_A][0] if _A in _XLANGS else "英文"
+    _nb = _XLANGS[_B][0] if _B in _XLANGS else "英文"
+    _sa = _XLANGS[_A][1] if _A in _XLANGS else "英"
+    _sb = _XLANGS[_B][1] if _B in _XLANGS else "英"
+    MODE_PRESETS.insert(next(i for i, p in enumerate(MODE_PRESETS) if p[0] == "nan"),
+                        (_m, f"{_sa}{_sb}雙向字幕", f"對方說{_na}翻{_nb} + 自己說{_nb}翻{_na}") if "_" in _m
+                        else (_m, f"{_sa}翻{_sb}字幕", f"{_na}語音 → 翻譯成{_nb}"))
+
 _XL_MODES = tuple(_XL_MODE_LANG)
 # 輸入（說話）是額外語言的模式：Whisper 用該語言辨識、用該語言的幻覺過濾
-_XL_INPUT_MODES = tuple(m for L in _XL_CODES for m in (f"{L}2zh", L, f"{L}2en"))
+_XL_INPUT_MODES = tuple(m for L in _XL_CODES for m in (f"{L}2zh", L, f"{L}2en")) + _XP_ONEWAY
 _XL_TRANSCRIBE_MODES = _XL_CODES
 _XL_BIDI_MODES = tuple(f"{L}_zh" for L in _XL_CODES)
 _XL_TRANSLATE_MODES = tuple(m for m in _XL_MODES if m not in _XL_TRANSCRIBE_MODES)
@@ -2022,7 +2047,7 @@ _ZH_INPUT_MODES = _ZH_INPUT_MODES + tuple(f"zh2{L}" for L in _XL_CODES)
 _TRANSLATE_MODES = _TRANSLATE_MODES + _XL_TRANSLATE_MODES
 # .en 模型只會英文：除了英翻 L 以外都不能用
 _NOENG_MODELS = _NOENG_MODELS + tuple(m for m in _XL_MODES if not m.startswith("en2"))
-_BIDI_MODES = _BIDI_MODES + _XL_BIDI_MODES
+_BIDI_MODES = _BIDI_MODES + _XL_BIDI_MODES + _XP_BIDI
 # 雙向模式中，對方外語不是英文的（麥克風要分辨「外語／英文」）
 _BIDI_NONEN_MODES = ("ja_zh", "ko_zh") + _XL_BIDI_MODES
 # 只轉錄、不翻譯的模式
@@ -2059,8 +2084,30 @@ for _L, (_nm, _short, _tag, _c, _myc, _en) in _XLANGS.items():
                       f"{_L}2en": "en", f"en2{_L}": _L})
 
 
+def _xp_info(L):
+    """外語對外語用：語言 → (中文名, 簡稱, 標籤, 顏色, 我方顏色, 英文名)，英文也查得到"""
+    return _XLANGS[L] if L in _XLANGS else ("英文", "英", "EN", C_EN, C_MY_EN, "English")
+
+
+for _m, (_A, _B) in _XP_PAIRS.items():
+    _a, _b = _xp_info(_A), _xp_info(_B)
+    _MODE_LABELS[_m] = (_a[3], _a[2], _b[3], _b[2])
+    _LB_LANG[_m], _MIC_LANG[_m] = _A, _B
+    if _m in _XP_BIDI:
+        _BIDI_LB_DIR[_m] = f"{_A}2{_B}"
+        _BIDI_MIC_DIR[_m] = f"{_B}2{_A}"
+        _BIDI_FOREIGN[_m] = _A
+        _BIDI_LABELS[_m] = {"loopback": (_a[3], _a[2], _b[3], _b[2]), "mic": (_b[4], _b[2], _a[4], _a[2])}
+    else:
+        _BIDI_LABELS[_m] = {"loopback": (_a[3], _a[2], _b[3], _b[2]), "mic": (_b[4], _b[2], _b[4], _b[2])}
+
+
 def _xl_mode_name(mode):
     """額外語言模式的短名（用於檔名、記錄檔前綴），例如 id2zh → 印尼翻中、id_zh → 印尼中雙向"""
+    if mode in _XP_PAIRS:
+        _A, _B = _XP_PAIRS[mode]
+        sa, sb = _xp_info(_A)[1], _xp_info(_B)[1]
+        return f"{sa}{sb}雙向" if mode in _XP_BIDI else f"{sa}翻{sb}"
     L = _XL_MODE_LANG.get(mode)
     if not L:
         return None
@@ -2085,6 +2132,9 @@ def _xl_listen_hints():
         out.update({f"{L}2zh": f"說{nm}即可看到中文翻譯", f"zh2{L}": f"說中文即可看到{nm}翻譯",
                     L: f"說{nm}即可看到字幕", f"{L}2en": f"說{nm}即可看到英文翻譯",
                     f"en2{L}": f"說英文即可看到{nm}翻譯"})
+    for m, (A, B) in _XP_PAIRS.items():
+        a, b = _xp_info(A)[0], _xp_info(B)[0]
+        out[m] = (f"對方說{a}、你說{b}，互相翻譯" if m in _XP_BIDI else f"說{a}即可看到{b}翻譯")
     return out
 
 
@@ -5343,7 +5393,7 @@ class OllamaTranslator:
     # 翻成外語時，指示用目標語言寫（上游中翻日、中翻韓的經驗：用中文寫指示，模型傾向輸出中文）
     _XL_TARGET_PROMPT = {
         "id": {
-            "src": {"zh": "bahasa Mandarin", "en": "bahasa Inggris"},
+            "src": {"zh": "bahasa Mandarin", "en": "bahasa Inggris", "vi": "bahasa Vietnam", "hi": "bahasa Hindi"},
             "head": "Anda adalah juru bahasa rapat waktu nyata. Terjemahkan {src} ke dalam bahasa Indonesia.\n",
             "rules": (
                 "Aturan:\n"
@@ -5361,7 +5411,7 @@ class OllamaTranslator:
             "ask": "\nTerjemahkan: {text}",
         },
         "vi": {
-            "src": {"zh": "tiếng Trung", "en": "tiếng Anh"},
+            "src": {"zh": "tiếng Trung", "en": "tiếng Anh", "id": "tiếng Indonesia", "hi": "tiếng Hindi"},
             "head": "Bạn là phiên dịch viên cuộc họp theo thời gian thực. Hãy dịch {src} sang tiếng Việt.\n",
             "rules": (
                 "Quy tắc:\n"
@@ -5379,7 +5429,7 @@ class OllamaTranslator:
             "ask": "\nHãy dịch: {text}",
         },
         "hi": {
-            "src": {"zh": "चीनी", "en": "अंग्रेज़ी"},
+            "src": {"zh": "चीनी", "en": "अंग्रेज़ी", "id": "इंडोनेशियाई", "vi": "वियतनामी"},
             "head": "आप एक रीयल-टाइम मीटिंग दुभाषिया हैं। {src} का हिंदी में अनुवाद करें।\n",
             "rules": (
                 "नियम:\n"
@@ -5455,7 +5505,7 @@ class OllamaTranslator:
             prompt += t["topic"].format(topic=self.meeting_topic)
         if context:
             prompt += t["ctx"]
-            _src_tag = "中" if src_lang == "zh" else "EN"
+            _src_tag = {"zh": "中", "en": "EN"}.get(src_lang) or _XLANGS[src_lang][2]
             for src, dst in context:
                 prompt += f"{_src_tag}: {src}\n{_XLANGS[L][2]}: {dst}\n"
         prompt += t["ask"].format(text=text)
@@ -5464,6 +5514,9 @@ class OllamaTranslator:
     def _xl_builder(self):
         """額外語言的翻譯方向 → 對應的 prompt builder（不是額外語言的方向回傳 None）"""
         d = self.direction
+        if d in _XP_ONEWAY:                  # 外語對外語（例 vi2id）：指示用目標語言寫
+            _A, _B = _XP_PAIRS[d]
+            return lambda text, ctx: self._build_prompt_to_xl(_A, _B, text, ctx)
         for L in _XL_CODES:
             if d == f"{L}2zh":
                 return lambda text, ctx: self._build_prompt_xl_to_zh(L, text, ctx)
@@ -5495,6 +5548,14 @@ class OllamaTranslator:
         has_han = any('\u4e00' <= ch <= '\u9fff' for ch in text)
         has_deva = any('\u0900' <= ch <= '\u097f' for ch in text)
         has_vi = bool(_VI_DIACRITIC_RE.search(text))
+        if d in _XP_ONEWAY:
+            # 外語對外語：不能有中文；翻成印地語一定要有天城文；原文是印地語／越南文時不能夾帶原文
+            _A, _B = _XP_PAIRS[d]
+            if has_han:
+                return True
+            if _B == "hi":
+                return len(text) >= 2 and not has_deva
+            return (_A == "hi" and has_deva) or (_A == "vi" and has_vi)
         if d.endswith("2zh"):
             # 譯成中文：夾帶原文（天城文、越南文聲調字母）就是失敗；長一點的譯文一定要有漢字
             if (L == "hi" and has_deva) or (L == "vi" and has_vi):
@@ -5807,6 +5868,7 @@ class NllbTranslator:
         **{f"zh2{L}": ("zh", L) for L in _XL_CODES},
         **{f"{L}2en": (L, "en") for L in _XL_CODES},
         **{f"en2{L}": ("en", L) for L in _XL_CODES},
+        **{m: _XP_PAIRS[m] for m in _XP_ONEWAY},     # 外語對外語（例 vi2id）
     }
 
     def __init__(self, direction="en2zh"):
@@ -9638,12 +9700,23 @@ _ROOM_ALIASES = {"zh": ("zh", "yue"), "id": ("id", "ms", "jw", "su"), "vi": ("vi
 _ROOM_LANGS = ("id", "vi", "hi", "en")
 
 
-def _room_pick_lang(all_probs, other):
-    """Whisper 的語言機率 [(語言, 機率), …] → "zh" 或 other（兩個裡面選一個，不會選到第三種語言）"""
+def _room_pick_lang(all_probs, other, mine="zh"):
+    """Whisper 的語言機率 [(語言, 機率), …] → mine（我方，預設中文）或 other（兩個裡面選一個，不會選到第三種語言）"""
     probs = dict(all_probs or [])
-    zh = sum(probs.get(c, 0.0) for c in _ROOM_ALIASES["zh"])
+    me = sum(probs.get(c, 0.0) for c in _ROOM_ALIASES.get(mine, (mine,)))
     ot = sum(probs.get(c, 0.0) for c in _ROOM_ALIASES.get(other, (other,)))
-    return "zh" if zh >= ot else other
+    return mine if me >= ot else other
+
+
+def _room_parse_mode(mode):
+    """教室模式的 --mode → (對方語言, 我方語言)；不支援回傳 None。
+    id2zh／vi2zh／hi2zh／en2zh：中文 ⇄ 對方語言；外語對外語（例 vi2id、en2id、id2en）：兩種外語互翻"""
+    if mode.endswith("2zh") and mode[:-3] in _ROOM_LANGS:
+        return mode[:-3], "zh"
+    a, _, b = mode.partition("2")
+    if a in _ROOM_LANGS and b in _ROOM_LANGS and a != b:
+        return a, b
+    return None
 
 
 @_keep_awake_during
@@ -9665,8 +9738,10 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
         _fw_av_compat()
 
     whisper_lang = _mode_whisper_lang(mode)
-    # 教室模式：room=(對方語言, 中文→對方語言的翻譯器)；mode 是「對方語言→中文」
-    room_lang, room_translator = (room if room else (None, None))
+    # 教室模式：room=(對方語言, 我方語言→對方語言的翻譯器[, 我方語言])；mode 是「對方語言→我方語言」
+    # 我方語言預設中文；外語對外語（r17）例如 room=("vi", 印尼→越南翻譯器, "id")
+    room_lang, room_translator = (room[0], room[1]) if room else (None, None)
+    room_mine = (room[2] if room and len(room) > 2 else "zh")
     if room_lang and use_mlx:
         use_mlx = False                       # 語言判斷用 faster-whisper
 
@@ -10023,7 +10098,7 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
                 try:
                     _, _det = fw_model.transcribe(wav_path, language=None, vad_filter=True)
                     _lang = _room_pick_lang(getattr(_det, "all_language_probs", None)
-                                            or [(_det.language, _det.language_probability)], room_lang)
+                                            or [(_det.language, _det.language_probability)], room_lang, room_mine)
                 except Exception:              # 整段是靜音等：照「對方的語言」辨識
                     _lang = whisper_lang
                 _room_tls.lang = _lang
@@ -10175,11 +10250,11 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
             segments, full_text, proc_time, seg_lang = result
             if not full_text:
                 continue
-            # 教室模式：這一段是中文 → 用「中文→對方語言」的翻譯器、中文的過濾與標籤
-            room_zh = bool(room_lang) and seg_lang == "zh"
-            line_check = _is_zh_hallucination if room_zh else hallucination_check
+            # 教室模式：這一段是我方語言（預設中文）→ 用「我方→對方語言」的翻譯器、我方語言的過濾與標籤
+            room_zh = bool(room_lang) and seg_lang == room_mine
+            line_check = _HALLU_BY_LANG.get(room_mine, _is_zh_hallucination) if room_zh else hallucination_check
             line_tr = room_translator if room_zh else translator
-            line_mode = f"zh2{room_lang}" if room_zh else mode
+            line_mode = f"{room_mine}2{room_lang}" if room_zh else mode
             lines = []
             if segments:
                 for seg in segments:
@@ -10305,10 +10380,10 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
     }
     _hint = listen_hints.get(mode, '')
     if room_lang:
-        _hint = "教室模式：說中文或對方的語言都可以，會自動判斷、互相翻譯"
+        _hint = "教室模式：兩種語言說哪一種都可以，會自動判斷、互相翻譯"
     print(f"\n{C_OK}{BOLD}開始監聽...{RESET} {C_WHITE}{_hint}{RESET}\n\n", flush=True)
-    # 教室模式在畫面上顯示成雙向（例如「印尼文 ↔ 中文」）
-    _webui_send({"type": "started", "mode": f"{room_lang}_zh" if room_lang else mode})
+    # 教室模式在畫面上顯示成雙向（例如「印尼文 ↔ 中文」「越南文 ↔ 印尼文」）
+    _webui_send({"type": "started", "mode": f"{room_lang}_{room_mine}" if room_lang else mode})
 
     _tr_model = translator.model if isinstance(translator, OllamaTranslator) else (getattr(translator, "LABEL", "NLLB") if isinstance(translator, NllbTranslator) else ("Argos" if isinstance(translator, ArgosTranslator) else ""))
     _tr_loc = "伺服器" if isinstance(translator, OllamaTranslator) else ("本機" if isinstance(translator, (ArgosTranslator, NllbTranslator)) else "")
@@ -21339,22 +21414,24 @@ def main():
             # 集團版教室模式：本機 faster-whisper、預設麥克風、多一個「中文→對方語言」的翻譯器
             _room = None
             if getattr(args, "room", False):
-                _room_l = mode[:-3] if mode.endswith("2zh") else ""
-                if _room_l not in _ROOM_LANGS or not translator:
-                    print(f"[錯誤] 教室模式只支援 id2zh、vi2zh、hi2zh、en2zh 而且要有翻譯", file=sys.stderr)
+                _room_pair = _room_parse_mode(mode)
+                if not _room_pair or not translator:
+                    print(f"[錯誤] 教室模式只支援 id2zh、vi2zh、hi2zh、en2zh，以及印尼文、越南文、印地語、英文之間"
+                          f"（例 vi2id），而且要有翻譯", file=sys.stderr)
                     sys.exit(1)
+                _room_l, _room_me = _room_pair
                 _cli_use_local_fw = True
                 if args.device is None:
                     _room_devs = _detect_bidi_devices()
                     if _room_devs and _room_devs[2] is not None:
                         capture_id = _room_devs[2]
                 if isinstance(translator, OllamaTranslator):
-                    _room_tr = OllamaTranslator(ollama_model, host, port, direction=f"zh2{_room_l}",
+                    _room_tr = OllamaTranslator(ollama_model, host, port, direction=f"{_room_me}2{_room_l}",
                                                 server_type=srv_type, meeting_topic=meeting_topic)
                 else:
-                    _room_tr = NllbTranslator(direction=f"zh2{_room_l}")
-                _room = (_room_l, _room_tr)
-                print(f"{C_DIM}教室模式：麥克風 {capture_id}，中文 ⇄ {_room_l}{RESET}")
+                    _room_tr = NllbTranslator(direction=f"{_room_me}2{_room_l}")
+                _room = (_room_l, _room_tr, _room_me)
+                print(f"{C_DIM}教室模式：麥克風 {capture_id}，{_room_me} ⇄ {_room_l}{RESET}")
 
             _asr_label = f"Whisper ({model_name})" + (" [faster-whisper]" if _cli_use_local_fw else "")
             mode_label = next(name for k, name, _ in MODE_PRESETS if k == mode)

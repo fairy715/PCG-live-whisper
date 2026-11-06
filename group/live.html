@@ -142,7 +142,7 @@ let fs=+store.get('pcg_live_fs')||22,onlyMine=store.get('pcg_live_only')==='1',t
 function modeName(m){
   if(!m)return '';
   let x;
-  if((x=m.match(/^([a-z]+)_zh$/)))return `${t('n_'+x[1])} ↔ ${t('n_zh')}`;
+  if((x=m.match(/^([a-z]+)_([a-z]+)$/)))return `${t('n_'+x[1])} ↔ ${t('n_'+x[2])}`;   // 雙向、教室模式（含外語對外語，例 vi_id）
   if((x=m.match(/^([a-z]+)2([a-z]+)$/)))return `${t('n_'+(x[1]==='nan'?'zh':x[1]))} → ${t('n_'+x[2])}`;
   if(I18N.zh['n_'+m])return t('tr',{a:t('n_'+m)});
   return m;

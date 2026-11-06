@@ -259,6 +259,96 @@ if __name__ == "__main__":
     unittest.main()
 
 
+class ForeignPairs(unittest.TestCase):
+    """r17 外語對外語：印尼文、越南文、印地語、英文之間直接翻譯，不經過中文"""
+    ONE = ("id2vi", "vi2id", "id2hi", "hi2id", "vi2hi", "hi2vi")
+    BIDI = ("vi_id", "id_vi", "hi_id", "id_hi", "hi_vi", "vi_hi", "en_id", "id_en", "en_vi", "vi_en", "en_hi", "hi_en")
+
+    def test_modes_registered(self):
+        keys = [k for k, _, _ in t.MODE_PRESETS]
+        self.assertEqual(set(t._XP_ONEWAY), set(self.ONE))
+        self.assertEqual(set(t._XP_BIDI), set(self.BIDI))
+        for m in self.ONE + self.BIDI:
+            self.assertIn(m, keys)
+            self.assertIn(m, t.MODE_MAP)
+            for table in (t._MODE_LABELS, t._BIDI_LABELS, t._LB_LANG, t._MIC_LANG):
+                self.assertIn(m, table)
+            self.assertIn(m, t._TRANSLATE_MODES)
+            self.assertIn(m, t._NOENG_MODELS)              # 不能用只會英文的 .en 模型
+        self.assertEqual(len(keys), len(set(keys)))
+        self.assertEqual(keys[-1], "record")
+        names = [t._xl_mode_name(m) for m in t._XL_MODES]
+        self.assertEqual(len(names), len(set(names)), "檔名用的模式名稱重複")
+
+    def test_one_way(self):
+        self.assertEqual(t._mode_whisper_lang("vi2id"), "vi")
+        self.assertEqual(t._mode_whisper_lang("hi2vi"), "hi")
+        self.assertEqual(t._xl_mode_name("vi2id"), "越翻印尼")
+        self.assertEqual(t._MODE_LABELS["vi2id"][1::2], ("VI", "ID"))
+        self.assertIn("vi2id", t._XL_INPUT_MODES)           # 越南文的幻覺過濾
+        self.assertIn("vi2id", t._ARGOS_UNSUPPORTED_MODES)
+
+    def test_bidi(self):
+        # vi_id：對方（系統音訊）越南文 → 印尼文；我（麥克風）印尼文 → 越南文
+        self.assertIn("vi_id", t._BIDI_MODES)
+        self.assertNotIn("vi_id", t._BIDI_NONEN_MODES)       # 麥克風固定我的語言，不做中文預偵測
+        self.assertEqual((t._BIDI_LB_DIR["vi_id"], t._BIDI_MIC_DIR["vi_id"]), ("vi2id", "id2vi"))
+        self.assertEqual((t._LB_LANG["vi_id"], t._MIC_LANG["vi_id"]), ("vi", "id"))
+        self.assertEqual(t._BIDI_LABELS["vi_id"]["mic"][1::2], ("ID", "VI"))
+        self.assertEqual(t._xl_mode_name("vi_id"), "越印尼雙向")
+        # 和英文配對：方向都是既有的 en2X／X2en
+        self.assertEqual((t._BIDI_LB_DIR["en_id"], t._BIDI_MIC_DIR["en_id"]), ("en2id", "id2en"))
+        self.assertEqual((t._BIDI_LB_DIR["id_en"], t._BIDI_MIC_DIR["id_en"]), ("id2en", "en2id"))
+        # 各路用各自語言的幻覺過濾
+        self.assertIs(t._xl_hallu_for_mode("vi_id", "lb"), t._is_vi_hallucination)
+        self.assertIs(t._xl_hallu_for_mode("vi_id", "mic"), t._is_id_hallucination)
+        self.assertIs(t._xl_hallu_for_mode("en_id", "lb"), t._is_en_hallucination)
+
+    def test_prompts(self):
+        for d, needles in {"vi2id": ("bahasa Vietnam", "bahasa Indonesia"),
+                           "id2vi": ("tiếng Indonesia", "tiếng Việt"),
+                           "hi2vi": ("tiếng Hindi",), "vi2hi": ("वियतनामी", "हिंदी"),
+                           "id2hi": ("इंडोनेशियाई",), "hi2id": ("bahasa Hindi",)}.items():
+            p = _translator(d, topic="ASICS").\
+                _build_prompt("TEXT", [("a", "b")])
+            for n in needles:
+                self.assertIn(n, p, d)
+            self.assertNotIn("將英文翻譯成台灣繁體中文", p, d)
+            self.assertIn("TEXT", p)
+        # 上下文標籤用來源語言
+        p = _translator("vi2id")._build_prompt("x", [("Xin chào", "Halo")])
+        self.assertIn("VI: Xin chào", p)
+
+    def test_output_checks(self):
+        bad = lambda d, x: _translator(d)._contains_bad_chars(x)
+        self.assertFalse(bad("vi2id", "Kita akan rapat besok pagi"))
+        self.assertTrue(bad("vi2id", "Chúng ta sẽ họp vào sáng mai"))     # 原文丟回來
+        self.assertTrue(bad("vi2id", "我們明天開會"))
+        self.assertFalse(bad("id2vi", "Chúng ta sẽ họp vào sáng mai"))
+        self.assertTrue(bad("id2hi", "Kita rapat besok"))                 # 沒有天城文
+        self.assertFalse(bad("id2hi", "हम कल बैठक करेंगे"))
+        self.assertTrue(bad("hi2id", "Kita कल rapat"))                    # 夾帶天城文
+
+    def test_m2m_directions(self):
+        for d in self.ONE:
+            src, tgt = t.M2M100Translator._DIRECTION_MAP[d]
+            self.assertEqual(f"{src}2{tgt}", d)
+            self.assertIn(src, t.M2M100Translator._LANG_MAP)
+            self.assertIn(tgt, t.M2M100Translator._LANG_MAP)
+
+    def test_classroom(self):
+        self.assertEqual(t._room_parse_mode("id2zh"), ("id", "zh"))
+        self.assertEqual(t._room_parse_mode("vi2id"), ("vi", "id"))
+        self.assertEqual(t._room_parse_mode("en2id"), ("en", "id"))
+        self.assertEqual(t._room_parse_mode("id2en"), ("id", "en"))
+        self.assertIsNone(t._room_parse_mode("ja2zh"))
+        self.assertIsNone(t._room_parse_mode("id_zh"))
+        # 我方是印尼文：只在印尼文與越南文之間選（中文機率再高也不會選中文）
+        self.assertEqual(t._room_pick_lang([("zh", 0.6), ("ms", 0.2), ("vi", 0.1)], "vi", "id"), "id")
+        self.assertEqual(t._room_pick_lang([("vi", 0.7), ("id", 0.2)], "vi", "id"), "vi")
+        self.assertEqual(t._room_pick_lang([], "vi", "id"), "id")
+
+
 class LocalM2M(unittest.TestCase):
     """本機離線翻譯 M2M100：有模型時 NllbTranslator 一律改用它；送進模型的 token 格式要對"""
 

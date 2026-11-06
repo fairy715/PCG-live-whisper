@@ -1,6 +1,6 @@
 """PCG 集團版：安裝後的自我檢查（安裝程式會自動執行；IT 也可以手動執行看結果）。
 
-    python group/windows/selftest.py           # 完整：套件、模型、翻譯 5 種語言方向
+    python group/windows/selftest.py           # 完整：套件、模型、翻譯 7 個方向（含外語對外語）
     python group/windows/selftest.py --quick   # 安裝時用：套件、模型、翻譯一句
 
 需要的環境變數由 launch.ps1／pcg-install.ps1 設定（HF_HUB_CACHE、HF_HUB_OFFLINE、PATH 裡的 ffmpeg）。
@@ -131,7 +131,10 @@ def translations(quick):
              ("vi2zh", "Chúng ta sẽ họp vào sáng mai."),
              ("hi2zh", "हम कल सुबह बैठक करेंगे।"),
              ("zh2id", "我們明天早上開會。"),
-             ("zh2hi", "我們明天早上開會。")]
+             ("zh2hi", "我們明天早上開會。"),
+             # 外語對外語（r17）：不經過中文
+             ("vi2id", "Chúng ta sẽ họp vào sáng mai."),
+             ("id2vi", "Kita akan rapat besok pagi.")]
     if quick:
         cases = cases[:1]
     out = []
@@ -144,6 +147,12 @@ def translations(quick):
             raise RuntimeError(f"{d} 譯文沒有中文：{r}")
         if d == "zh2hi" and not any("\u0900" <= c <= "\u097f" for c in r):
             raise RuntimeError(f"{d} 譯文沒有天城文：{r}")
+        if d in ("vi2id", "id2vi") and any("\u4e00" <= c <= "\u9fff" for c in r):
+            raise RuntimeError(f"{d} 譯文跑出中文：{r}")
+        if d == "vi2id" and t._VI_DIACRITIC_RE.search(r):
+            raise RuntimeError(f"{d} 譯文還是越南文：{r}")
+        if d == "id2vi" and not t._VI_DIACRITIC_RE.search(r):
+            raise RuntimeError(f"{d} 譯文不像越南文：{r}")
         out.append(f"{d}: {r}")
     return "\n       " + "\n       ".join(out)
 

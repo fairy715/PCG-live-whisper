@@ -1,6 +1,6 @@
 # PCG 集團版：產生 Windows 安裝程式（Setup.exe），並在乾淨的 Windows 上實際安裝、測試一次
 # - build：Inno Setup 編譯 Setup.exe，上傳成 Artifact（保留 14 天）
-# - e2e：製作離線資源包 → 靜默安裝 → 自我檢查（5 個翻譯方向）→ 語音端到端（Windows 語音合成 → 辨識 → 翻成印尼文）→ 啟動網頁
+# - e2e：製作離線資源包 → 靜默安裝 → 自我檢查（7 個翻譯方向）→ 語音端到端（Windows 語音合成 → 辨識 → 翻成印尼文）→ 啟動網頁
 name: Windows 安裝程式
 
 on:
@@ -95,7 +95,7 @@ jobs:
             exit 1
           }
 
-      - name: 自我檢查（套件、模型、5 個翻譯方向）
+      - name: 自我檢查（套件、模型、7 個翻譯方向）
         shell: pwsh
         run: |
           $env:HF_HUB_CACHE = "$env:APP\hf_cache"; $env:HF_HUB_OFFLINE = "1"; $env:PYTHONUTF8 = "1"
