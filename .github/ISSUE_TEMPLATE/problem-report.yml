@@ -8,7 +8,7 @@ body:
         **這裡是公開的頁面。** 不要貼診斷檔（`PCG-report-….zip`）、逐字稿、會議內容、伺服器位址、金鑰或密碼；診斷檔留在公司內部。
         **This page is public.** Do not attach the diagnostic file (`PCG-report-….zip`), transcripts, meeting content, server addresses, keys or passwords. Keep diagnostic files inside the company.
 
-        資安問題請不要開 issue，私下通知 IT。/ For security problems, do not open an issue; tell IT privately.
+        資安問題請不要開 issue，寄信給集團 IT：pgt.it@pci.co.id（見 SECURITY.md）。/ For security problems, do not open an issue; email group IT at pgt.it@pci.co.id (see SECURITY.md).
   - type: input
     id: version
     attributes:

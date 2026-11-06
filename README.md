@@ -1121,7 +1121,7 @@ cd C:\jt-live-whisper
 
 ## 資安問題通報
 
-發現資安問題請**不要開公開的 issue**，請依 [SECURITY.md](SECURITY.md) 私下通報（GitHub「Report a vulnerability」或 service@jason.tools）。
+發現資安問題請**不要開公開的 issue**，請依 [SECURITY.md](SECURITY.md) 私下寄信給集團 IT 窗口：**pgt.it@pci.co.id**。原作者程式本身的問題，由 IT 確認後再私下通報原作者。
 
 &nbsp;
 
