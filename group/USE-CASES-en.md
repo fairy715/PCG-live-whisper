@@ -5,9 +5,35 @@
 Live subtitles tell languages apart **by where the sound comes from**:
 
 - **Sound played by the computer** (the other people in Teams/Zoom, a video) = the other language
-- **Microphone** (when "I will speak too" is ticked) = your own Chinese
+- **Microphone** (when you choose "I will speak too") = your own Chinese
 
 So only **the computer running the meeting or class** needs the app. The other side does not install anything.
+
+## Choosing the right option (from version r11)
+
+"Live subtitles" asks three things in order, and only the options that fit you stay on screen:
+
+1. **What language do you speak?** Taiwanese staff choose "中文"; Indonesian, Vietnamese and Indian staff choose their own language.
+2. **What kind of meeting?** (asked only if you chose "中文")
+   - Online meeting or class, I only read subtitles
+   - Online meeting or class, I will speak too (headset)
+   - Same classroom, one microphone
+3. **What language do the others speak?** If you chose another language, "Chinese → your language" is selected for you.
+
+Your last choice is remembered. If the option you want is not shown, click "Show all options".
+
+**"Indonesian" vs "Chinese → Indonesian": what is the difference?**
+
+| Option | You hear | Subtitles in | Whose computer | Can add |
+|---|---|---|---|---|
+| Indonesian (the others speak Indonesian) | Indonesian | Chinese | Taiwanese staff who do not understand Indonesian | I will speak too (two-way), classroom mode |
+| Chinese → Indonesian | Chinese | Indonesian | Indonesian staff who do not understand the Chinese-speaking trainer or manager | One-way only |
+
+Example: trainer Lin teaches Budi in Indonesia over Teams.
+- Lin's computer: I speak "中文" → "I will speak too" → "Indonesian".
+- Budi's computer: I speak "Bahasa Indonesia" → "Chinese → Indonesian" is selected automatically.
+
+Rule of thumb: the option names the language **the others** speak; subtitles come out in **your** language. Vietnamese, Hindi and English work the same way.
 
 ## 1. Online meeting or class: Chinese ⇄ another language
 
@@ -16,7 +42,7 @@ So only **the computer running the meeting or class** needs the app. The other s
 **Who installs it**: only the trainer's computer. Students join Teams/Zoom as usual.
 
 1. On the trainer's computer: "PCG Meeting Translator" → "Live subtitles".
-2. Choose "**The other side speaks Indonesian**", tick "**I will speak too (two-way)**", click Start.
+2. I speak "**中文**" → setting "**Online meeting or class, I will speak too (headset)**" → "**Indonesian**", click Start.
 3. **Wear headphones**, otherwise the students' voices come out of the speakers into the microphone and are treated as Chinese.
 
 Subtitles: the trainer's Chinese → Chinese + Indonesian translation; the students' Indonesian → Indonesian + Chinese translation.
@@ -25,20 +51,20 @@ Subtitles: the trainer's Chinese → Chinese + Indonesian translation; the stude
 - **Share the screen** (works anywhere): tick "Subtitles always on top" and share your screen in Teams.
 - **Phones** (students on the company network): click "Share" under the subtitles; students scan the QR code, enter the staff password and choose their language. IT must first turn on "Allow other computers and phones to view subtitles".
 
-**Students want subtitles on their own computer** (from v2026.11.5.r9): install it on the student's computer too, open "Live subtitles", choose "**Chinese → Indonesian**" (also Vietnamese, Hindi, English) and click Start. Students only listen, so no two-way and no headphones needed. It picks up the trainer's voice from Teams and shows it in Indonesian; the trainer keeps two-way on. No screen sharing needed; everyone reads their own language.
+**Students want subtitles on their own computer** (from v2026.11.5.r9): install it on the student's computer too, open "Live subtitles" and choose I speak "**Bahasa Indonesia**": "**Chinese → Indonesian**" is selected automatically (Vietnamese, Hindi and English work the same way). Click Start. Students only listen, so no headphones needed. It picks up the trainer's voice from Teams and shows it in Indonesian; the trainer keeps two-way on. No screen sharing needed; everyone reads their own language.
 
 ## 2. Only understand what the other side says
 
 > Example: a presentation from the Indonesian factory, a Vietnamese training video.
 
-Choose "**The other side speaks …**", do **not** tick "I will speak too", click Start. No headphones needed.
+I speak "中文" → setting "**Online meeting or class, I only read subtitles**" → the others' language, click Start. No headphones needed.
 
 ## 3. Same meeting room or classroom, one microphone (classroom mode)
 
 > Example: the trainer and Indonesian students talk in the same classroom. (from v2026.11.5.r9)
 
 1. Connect a microphone that picks up the whole room (conference or desk microphone).
-2. "Live subtitles" → choose "**Indonesian**" → tick "**Classroom mode**" → Start. (Vietnamese, Hindi and English also work.)
+2. "Live subtitles" → I speak "中文" → setting "**Same classroom, one microphone**" → "**Indonesian**" → Start. (Vietnamese, Hindi and English also work.)
 3. Project the subtitles, or let students scan the "Share" QR code.
 
 Each sentence is detected as Chinese or Indonesian automatically: Chinese → Chinese + Indonesian; Indonesian → Indonesian + Chinese.

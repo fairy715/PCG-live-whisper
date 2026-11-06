@@ -5,9 +5,35 @@
 Phụ đề trực tiếp phân biệt ngôn ngữ **theo nguồn âm thanh**:
 
 - **Âm thanh máy tính phát ra** (người bên kia trên Teams/Zoom, video) = ngôn ngữ của bên kia
-- **Micro** (khi đánh dấu "Tôi cũng sẽ nói") = tiếng Trung của bạn
+- **Micro** (khi chọn "tôi cũng nói") = tiếng Trung của bạn
 
 Vì vậy chỉ **máy tính chủ trì cuộc họp hoặc lớp học** cần cài ứng dụng. Bên kia không cần cài gì.
+
+## Chọn đúng lựa chọn (từ phiên bản r11)
+
+"Phụ đề trực tiếp" hỏi lần lượt ba điều, và chỉ giữ lại các lựa chọn phù hợp với bạn:
+
+1. **Bạn nói tiếng gì?** Nhân viên Đài Loan chọn "中文"; nhân viên Indonesia, Việt Nam, Ấn Độ chọn ngôn ngữ của mình.
+2. **Loại cuộc họp nào?** (chỉ hỏi khi chọn "中文")
+   - Họp hoặc lớp online, tôi chỉ đọc phụ đề
+   - Họp hoặc lớp online, tôi cũng nói (đeo tai nghe)
+   - Cùng một phòng học, một micro
+3. **Người kia nói tiếng gì?** Nếu bạn chọn tiếng Việt, "Tiếng Trung → Tiếng Việt" được chọn sẵn.
+
+Lựa chọn lần trước sẽ được ghi nhớ. Nếu không thấy lựa chọn cần dùng, bấm "Hiện tất cả lựa chọn".
+
+**"Tiếng Việt" và "Tiếng Trung → Tiếng Việt" khác nhau thế nào?**
+
+| Lựa chọn | Nghe được | Phụ đề bằng | Máy của ai | Có thể thêm |
+|---|---|---|---|---|
+| Tiếng Việt (người kia nói tiếng Việt) | Tiếng Việt | Tiếng Trung | Nhân viên Đài Loan không hiểu tiếng Việt | Tôi cũng sẽ nói (hai chiều), chế độ lớp học |
+| Tiếng Trung → Tiếng Việt | Tiếng Trung | Tiếng Việt | Nhân viên Việt Nam không hiểu giảng viên hoặc quản lý nói tiếng Trung | Chỉ một chiều |
+
+Ví dụ: giảng viên Lin dạy Minh ở Việt Nam qua Teams.
+- Máy giảng viên Lin: tôi nói "中文" → "tôi cũng nói" → "Tiếng Việt".
+- Máy của Minh: tôi nói "Tiếng Việt" → "Tiếng Trung → Tiếng Việt" được chọn sẵn.
+
+Cách nhớ: tên lựa chọn là ngôn ngữ **người kia** nói; phụ đề hiện bằng ngôn ngữ **của bạn**. Indonesia, Hindi và tiếng Anh cũng vậy.
 
 ## 1. Họp hoặc học trực tuyến: tiếng Trung ⇄ ngôn ngữ khác
 
@@ -16,7 +42,7 @@ Vì vậy chỉ **máy tính chủ trì cuộc họp hoặc lớp học** cần 
 **Ai cần cài**: chỉ máy của giảng viên. Học viên vào Teams/Zoom như bình thường.
 
 1. Trên máy giảng viên: "Phiên dịch cuộc họp PCG" → "Phụ đề trực tiếp".
-2. Chọn "**Tiếng Việt**" (ngôn ngữ bên kia), đánh dấu "**Tôi cũng sẽ nói (hai chiều)**", bấm Bắt đầu.
+2. Tôi nói "**中文**" → loại cuộc họp "**Họp hoặc lớp online, tôi cũng nói (đeo tai nghe)**" → "**Tiếng Việt**", bấm Bắt đầu.
 3. **Đeo tai nghe**, để giọng học viên từ loa không lọt vào micro và bị coi là tiếng Trung.
 
 Phụ đề: tiếng Trung của giảng viên → tiếng Trung + bản dịch tiếng Việt; tiếng Việt của học viên → tiếng Việt + bản dịch tiếng Trung.
@@ -25,18 +51,18 @@ Phụ đề: tiếng Trung của giảng viên → tiếng Trung + bản dịch 
 - **Chia sẻ màn hình** (ở đâu cũng được): đánh dấu "Phụ đề luôn ở trên cùng" và chia sẻ màn hình trên Teams.
 - **Điện thoại** (học viên trong mạng công ty): bấm "Chia sẻ", học viên quét mã QR, nhập mật khẩu nhân viên và chọn ngôn ngữ. IT cần bật "Cho phép máy tính và điện thoại khác xem phụ đề".
 
-**Học viên muốn xem phụ đề trên máy của mình** (từ v2026.11.5.r9): cài ứng dụng trên máy học viên, mở "Phụ đề trực tiếp", chọn "**Tiếng Trung → Tiếng Việt**" (cũng có Indonesia, Hindi, Anh), bấm Bắt đầu. Học viên chỉ nghe nên không cần hai chiều và không cần tai nghe. Ứng dụng lấy giọng giảng viên từ Teams và hiển thị bằng tiếng Việt; máy giảng viên vẫn bật hai chiều. Không cần chia sẻ màn hình; mỗi người đọc ngôn ngữ của mình.
+**Học viên muốn xem phụ đề trên máy của mình** (từ v2026.11.5.r9): cài ứng dụng trên máy học viên, mở "Phụ đề trực tiếp", chọn tôi nói "**Tiếng Việt**": "**Tiếng Trung → Tiếng Việt**" được chọn sẵn (Indonesia, Hindi, Anh cũng vậy). Bấm Bắt đầu. Học viên chỉ nghe nên không cần tai nghe. Ứng dụng lấy giọng giảng viên từ Teams và hiển thị bằng tiếng Việt; máy giảng viên vẫn bật hai chiều. Không cần chia sẻ màn hình; mỗi người đọc ngôn ngữ của mình.
 
 ## 2. Chỉ cần hiểu bên kia nói gì
 
-Chọn ngôn ngữ của bên kia, **không** đánh dấu "Tôi cũng sẽ nói", bấm Bắt đầu. Không cần tai nghe.
+Tôi nói "中文" → loại cuộc họp "**Họp hoặc lớp online, tôi chỉ đọc phụ đề**" → ngôn ngữ của bên kia, bấm Bắt đầu. Không cần tai nghe.
 
 ## 3. Cùng một phòng họp hoặc lớp học, một micro (chế độ lớp học)
 
 > Ví dụ: giảng viên và học viên Việt Nam nói chuyện trong cùng lớp học. (từ v2026.11.5.r9)
 
 1. Kết nối một micro thu được âm thanh cả phòng (micro hội nghị hoặc micro để bàn).
-2. "Phụ đề trực tiếp" → chọn "**Tiếng Việt**" → đánh dấu "**Chế độ lớp học**" → Bắt đầu. (Indonesia, Hindi và tiếng Anh cũng được.)
+2. "Phụ đề trực tiếp" → tôi nói "中文" → loại cuộc họp "**Cùng một phòng học, một micro**" → "**Tiếng Việt**" → Bắt đầu. (Indonesia, Hindi và tiếng Anh cũng được.)
 3. Chiếu phụ đề lên máy chiếu, hoặc học viên quét mã QR từ "Chia sẻ".
 
 Mỗi câu được tự nhận biết là tiếng Trung hay tiếng Việt: tiếng Trung → tiếng Trung + bản dịch tiếng Việt; tiếng Việt → tiếng Việt + bản dịch tiếng Trung.

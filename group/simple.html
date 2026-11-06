@@ -57,6 +57,8 @@ input[type=text],input[type=number],input[type=password]{width:100%;margin-top:6
 .row{display:flex;gap:12px;flex-wrap:wrap}
 .row>label{flex:1 1 220px}
 .check{display:flex;gap:10px;align-items:flex-start;margin-top:14px;cursor:pointer}
+.linkbtn{background:none;border:0;color:var(--accent);font:inherit;font-size:14px;cursor:pointer;padding:8px 0 0;text-decoration:underline}
+.step.next{margin-top:22px}
 .check input{width:20px;height:20px;margin-top:3px;flex:none}
 .check small{display:block;color:var(--dim);font-size:13px}
 .btn{appearance:none;border:0;border-radius:12px;padding:14px 22px;font:inherit;font-weight:700;font-size:17px;cursor:pointer;
@@ -139,11 +141,20 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
     </div>
     <div id="liveForm">
       <div class="card">
-        <p class="step"><b>1</b><span data-t="step_live_lang"></span></p>
+        <p class="step"><b>1</b><span data-t="step_me"></span></p>
+        <div class="grid" id="liveMe" role="radiogroup"></div>
+        <div id="sceneBox">
+          <p class="step next"><b>2</b><span data-t="step_scene"></span></p>
+          <div class="grid" id="liveScene" role="radiogroup"></div>
+          <p class="note" id="sceneNote"></p>
+        </div>
+        <p class="step next"><b id="stepLangN">3</b><span data-t="step_live_lang"></span></p>
         <div class="grid" id="liveScenarios"></div>
-        <label class="check"><input type="checkbox" id="liveSpeak">
+        <p class="note" id="meNote" data-t="me_note" hidden></p>
+        <button class="linkbtn" id="showAll" type="button"></button>
+        <label class="check" id="speakBox"><input type="checkbox" id="liveSpeak">
           <span><span data-t="speak_t"></span><small data-t="speak_s"></small></span></label>
-        <label class="check"><input type="checkbox" id="liveRoom">
+        <label class="check" id="roomBox"><input type="checkbox" id="liveRoom">
           <span><span data-t="room_t"></span><small data-t="room_s"></small></span></label>
         <label class="check"><input type="checkbox" id="liveOverlay">
           <span><span data-t="overlay_t"></span><small data-t="overlay_s"></small></span></label>
@@ -214,7 +225,7 @@ zh:{
   tour_btn:'導覽',tour_next:'下一步',tour_prev:'上一步',tour_skip:'略過',tour_done:'開始使用',tour_n:'第 {i} 步，共 {n} 步',it_link:'IT 設定',
   tr_lang:'先選你看得懂的語言，整個畫面會跟著換。',
   tr_tabs:'這裡有兩個功能：「即時字幕」在開會時看翻譯，「錄音 → 會議紀錄」把錄好的檔案轉成文字。',
-  tr_live_lang:'開會前，先選「對方說什麼語言」。',
+  tr_live_lang:'最後選「對方說什麼語言」。',step_me:'你說什麼語言？',step_scene:'哪一種場合？',sc_listen:'線上會議／上課，我只看字幕',sc_speak:'線上會議／上課，我也要說話（戴耳機）',sc_room:'同一間教室，一支麥克風',sc_listen_s:'對方說的話翻成中文顯示。',show_all:'顯示全部選項',show_less:'只顯示建議的選項',me_note:'對方說中文時，字幕會翻成你的語言。',tr_live_me:'先選你自己說的語言，下面只會留下適合你的選項。',tr_live_scene:'再選場合：只看字幕、自己也要說話（戴耳機），或同一間教室用一支麥克風。',
   tr_live_speak:'如果你也要說話（例如說中文給對方看翻譯），勾這個。記得戴耳機。',
   tr_live_start:'按這裡開始，畫面會切到字幕。結束時按字幕畫面下方的「停止」。',
   tr_file_drop:'會後有錄音或 Teams 錄影？點這裡選檔，或直接把檔案拖進來。',
@@ -260,7 +271,7 @@ en:{
   tour_btn:'Tour',tour_next:'Next',tour_prev:'Back',tour_skip:'Skip',tour_done:'Get started',tour_n:'Step {i} of {n}',it_link:'IT settings',
   tr_lang:'First, choose a language you read; the whole page switches to it.',
   tr_tabs:'Two features: “Live subtitles” shows translations during a meeting; “Recording → Minutes” turns a recorded file into text.',
-  tr_live_lang:'Before the meeting, choose the language the others speak.',
+  tr_live_lang:'Then choose the language the others speak.',step_me:'What language do you speak?',step_scene:'What kind of meeting?',sc_listen:'Online meeting or class, I only read subtitles',sc_speak:'Online meeting or class, I will speak too (headset)',sc_room:'Same classroom, one microphone',sc_listen_s:'What the others say is shown in Chinese.',show_all:'Show all options',show_less:'Show suggested options only',me_note:'When the others speak Chinese, subtitles are translated into your language.',tr_live_me:'First choose the language you speak; only the options that fit you stay below.',tr_live_scene:'Then choose the setting: only read subtitles, speak too (with a headset), or one microphone in the same classroom.',
   tr_live_speak:'If you will speak too (for example, Chinese translated for the others), tick this. Wear headphones.',
   tr_live_start:'Click here to start; the subtitle screen opens. Press “Stop” on that screen to end.',
   tr_file_drop:'Have a recording or a Teams video after the meeting? Click here to choose it, or drag it in.',
@@ -306,7 +317,7 @@ id:{
   tour_btn:'Panduan',tour_next:'Berikutnya',tour_prev:'Kembali',tour_skip:'Lewati',tour_done:'Mulai',tour_n:'Langkah {i} dari {n}',it_link:'Pengaturan IT',
   tr_lang:'Pertama, pilih bahasa yang Anda pahami; seluruh halaman akan berganti bahasa.',
   tr_tabs:'Ada dua fitur: “Subtitle langsung” menampilkan terjemahan saat rapat; “Rekaman → Notulen” mengubah file rekaman menjadi teks.',
-  tr_live_lang:'Sebelum rapat, pilih bahasa yang dipakai lawan bicara.',
+  tr_live_lang:'Lalu pilih bahasa yang dipakai lawan bicara.',step_me:'Anda berbicara bahasa apa?',step_scene:'Jenis rapat apa?',sc_listen:'Rapat atau kelas online, saya hanya membaca subtitle',sc_speak:'Rapat atau kelas online, saya juga berbicara (pakai headset)',sc_room:'Satu ruang kelas, satu mikrofon',sc_listen_s:'Ucapan lawan bicara ditampilkan dalam bahasa Mandarin.',show_all:'Tampilkan semua pilihan',show_less:'Tampilkan pilihan yang disarankan saja',me_note:'Saat lawan bicara berbahasa Mandarin, subtitle diterjemahkan ke bahasa Anda.',tr_live_me:'Pertama pilih bahasa yang Anda gunakan; di bawah hanya tersisa pilihan yang cocok untuk Anda.',tr_live_scene:'Lalu pilih situasinya: hanya membaca subtitle, ikut berbicara (pakai headset), atau satu mikrofon di ruang kelas yang sama.',
   tr_live_speak:'Jika Anda juga akan berbicara (misalnya bahasa Mandarin yang diterjemahkan untuk lawan bicara), centang ini. Gunakan headphone.',
   tr_live_start:'Klik di sini untuk mulai; layar subtitle akan terbuka. Tekan “Berhenti” di layar itu untuk selesai.',
   tr_file_drop:'Punya rekaman atau video Teams setelah rapat? Klik di sini untuk memilihnya, atau seret file ke sini.',
@@ -352,7 +363,7 @@ vi:{
   tour_btn:'Hướng dẫn',tour_next:'Tiếp',tour_prev:'Quay lại',tour_skip:'Bỏ qua',tour_done:'Bắt đầu',tour_n:'Bước {i}/{n}',it_link:'Cài đặt IT',
   tr_lang:'Trước tiên, chọn ngôn ngữ bạn đọc được; cả trang sẽ đổi theo.',
   tr_tabs:'Có hai chức năng: “Phụ đề trực tiếp” hiện bản dịch trong cuộc họp; “Ghi âm → Biên bản” chuyển tệp ghi âm thành văn bản.',
-  tr_live_lang:'Trước cuộc họp, chọn ngôn ngữ mà người kia nói.',
+  tr_live_lang:'Sau đó chọn ngôn ngữ mà người kia nói.',step_me:'Bạn nói tiếng gì?',step_scene:'Loại cuộc họp nào?',sc_listen:'Họp hoặc lớp online, tôi chỉ đọc phụ đề',sc_speak:'Họp hoặc lớp online, tôi cũng nói (đeo tai nghe)',sc_room:'Cùng một phòng học, một micro',sc_listen_s:'Lời người kia được hiển thị bằng tiếng Trung.',show_all:'Hiện tất cả lựa chọn',show_less:'Chỉ hiện lựa chọn gợi ý',me_note:'Khi người kia nói tiếng Trung, phụ đề được dịch sang ngôn ngữ của bạn.',tr_live_me:'Trước tiên chọn ngôn ngữ bạn nói; bên dưới chỉ còn các lựa chọn phù hợp với bạn.',tr_live_scene:'Sau đó chọn tình huống: chỉ đọc phụ đề, cũng nói (đeo tai nghe), hoặc một micro trong cùng phòng học.',
   tr_live_speak:'Nếu bạn cũng sẽ nói (ví dụ nói tiếng Trung để dịch cho người kia), hãy đánh dấu ô này. Nhớ đeo tai nghe.',
   tr_live_start:'Bấm vào đây để bắt đầu; màn hình phụ đề sẽ mở ra. Bấm “Dừng” trên màn hình đó để kết thúc.',
   tr_file_drop:'Có bản ghi âm hoặc video Teams sau cuộc họp? Bấm vào đây để chọn, hoặc kéo tệp vào.',
@@ -398,7 +409,7 @@ hi:{
   tour_btn:'गाइड',tour_next:'आगे',tour_prev:'पीछे',tour_skip:'छोड़ें',tour_done:'शुरू करें',tour_n:'चरण {i} / {n}',it_link:'IT सेटिंग',
   tr_lang:'पहले वह भाषा चुनें जो आप पढ़ते हैं; पूरा पेज उसी भाषा में हो जाएगा।',
   tr_tabs:'दो सुविधाएँ हैं: “लाइव सबटाइटल” मीटिंग के दौरान अनुवाद दिखाता है; “रिकॉर्डिंग → मिनट्स” रिकॉर्ड की गई फ़ाइल को टेक्स्ट में बदलता है।',
-  tr_live_lang:'मीटिंग से पहले, चुनें कि सामने वाले कौन-सी भाषा बोलते हैं।',
+  tr_live_lang:'फिर चुनें कि सामने वाले कौन-सी भाषा बोलते हैं।',step_me:'आप कौन-सी भाषा बोलते हैं?',step_scene:'किस तरह की मीटिंग?',sc_listen:'ऑनलाइन मीटिंग या क्लास, सिर्फ़ सबटाइटल देखने हैं',sc_speak:'ऑनलाइन मीटिंग या क्लास, मुझे भी बोलना है (हेडसेट)',sc_room:'एक ही क्लासरूम, एक माइक्रोफ़ोन',sc_listen_s:'सामने वालों की बात चीनी में दिखेगी।',show_all:'सभी विकल्प दिखाएँ',show_less:'सिर्फ़ सुझाए गए विकल्प दिखाएँ',me_note:'जब सामने वाले चीनी बोलें, सबटाइटल आपकी भाषा में अनुवादित होंगे।',tr_live_me:'पहले अपनी भाषा चुनें; नीचे सिर्फ़ आपके लिए सही विकल्प रहेंगे।',tr_live_scene:'फिर स्थिति चुनें: सिर्फ़ सबटाइटल देखना, खुद भी बोलना (हेडसेट के साथ), या एक ही क्लासरूम में एक माइक्रोफ़ोन।',
   tr_live_speak:'अगर आप भी बोलेंगे (जैसे चीनी, जिसका अनुवाद सामने वालों को दिखे), तो इसे चुनें। हेडफ़ोन लगाएँ।',
   tr_live_start:'शुरू करने के लिए यहाँ क्लिक करें; सबटाइटल स्क्रीन खुलेगी। बंद करने के लिए उस स्क्रीन पर “रोकें” दबाएँ।',
   tr_file_drop:'मीटिंग के बाद रिकॉर्डिंग या Teams वीडियो है? चुनने के लिए यहाँ क्लिक करें, या फ़ाइल यहाँ खींचकर लाएँ।',
@@ -533,8 +544,32 @@ function cardsHtml(list,name,title,sub){
   return list.map(s=>`<label class="opt"><input type="radio" name="${name}" value="${esc(s.id)}"${s.id===cur?' checked':''}>
     <span class="flag">${esc(s.flag)}</span><span><span class="t">${esc(title(s))}</span>${sub&&sub(s)?`<br><span class="s">${esc(sub(s))}</span>`:''}</span></label>`).join('');
 }
+/* 先問「你說什麼語言」「哪一種場合」，下面只留下適合的選項（「顯示全部選項」可看全部） */
+const ME=[['zh','中','中文'],['id','ID','Bahasa Indonesia'],['vi','VI','Tiếng Việt'],['hi','HI','हिन्दी'],['en','EN','English']];
+const SCENES=[['listen','💻','sc_listen'],['speak','🎧','sc_speak'],['room','🏫','sc_room']];
+let me=store.get('pcg_me');if(!ME.some(m=>m[0]===me))me=ME.some(m=>m[0]===lang)?lang:'zh';
+let scene=store.get('pcg_scene');if(!SCENES.some(x=>x[0]===scene))scene='listen';
+let showAll=false;
+function visibleScen(){
+  if(showAll)return liveScen;
+  if(me!=='zh')return liveScen.filter(s=>s.id==='zh2'+me);
+  return liveScen.filter(s=>!s.id.startsWith('zh2')&&(scene!=='room'||s.can_room)&&(scene!=='speak'||s.can_bidi));
+}
+const radioCard=(name,val,flag,text,on)=>`<label class="opt"><input type="radio" name="${name}" value="${esc(val)}"${on?' checked':''}><span class="flag">${esc(flag)}</span><span class="t">${esc(text)}</span></label>`;
 function renderScenarios(){
-  $('liveScenarios').innerHTML=cardsHtml(liveScen,'live',liveTitle);
+  const zh=me==='zh';
+  $('liveMe').innerHTML=ME.map(([c,f,n])=>radioCard('me',c,f,n,c===me)).join('');
+  $('liveScene').innerHTML=SCENES.map(([c,f,k])=>radioCard('scene',c,f,t(k),c===scene)).join('');
+  $('sceneBox').hidden=!zh||showAll;
+  $('sceneNote').textContent=t(scene==='speak'?'speak_s':scene==='room'?'room_s':'sc_listen_s');
+  $('stepLangN').textContent=zh&&!showAll?'3':'2';
+  const list=visibleScen();
+  $('liveScenarios').innerHTML=cardsHtml(list,'live',liveTitle);
+  if(list.length===1&&!picked('live'))document.querySelector('input[name=live]').checked=true;
+  $('meNote').hidden=zh||showAll;
+  $('speakBox').hidden=$('roomBox').hidden=!showAll;
+  $('showAll').textContent=t(showAll?'show_less':'show_all');
+  onLivePick();
   $('fileScenarios').innerHTML=cardsHtml(fileScen,'file',fileTitle,fileSub);
 }
 const picked=name=>document.querySelector(`input[name=${name}]:checked`)?.value;
@@ -542,11 +577,15 @@ const picked=name=>document.querySelector(`input[name=${name}]:checked`)?.value;
 /* ── 即時字幕 ─────────────────────────────────────────── */
 function onLivePick(){
   const s=liveScen.find(x=>x.id===picked('live'));
+  if(!showAll){$('liveSpeak').checked=me==='zh'&&scene==='speak';$('liveRoom').checked=me==='zh'&&scene==='room'}
   $('liveSpeak').disabled=!s?.can_bidi;if(!s?.can_bidi)$('liveSpeak').checked=false;
   $('liveRoom').disabled=!s?.can_room;if(!s?.can_room)$('liveRoom').checked=false;
   $('liveStart').disabled=!s;if(s)store.set('pcg_live',s.id);
 }
 $('liveScenarios').addEventListener('change',onLivePick);
+$('liveMe').addEventListener('change',e=>{me=e.target.value;store.set('pcg_me',me);renderScenarios()});
+$('liveScene').addEventListener('change',e=>{scene=e.target.value;store.set('pcg_scene',scene);renderScenarios()});
+$('showAll').onclick=()=>{showAll=!showAll;renderScenarios()};
 // 「我也要說話」（耳機＋麥克風分流）與「教室模式」（同一支麥克風自動判斷）二選一
 $('liveSpeak').addEventListener('change',()=>{if($('liveSpeak').checked)$('liveRoom').checked=false});
 $('liveRoom').addEventListener('change',()=>{if($('liveRoom').checked)$('liveSpeak').checked=false});
@@ -656,8 +695,9 @@ $('jobList').onclick=async e=>{
 const TOUR=[
   {el:'langSel',key:'tr_lang'},
   {el:'.tabs',key:'tr_tabs'},
+  {el:'liveMe',key:'tr_live_me',tab:'pLive',needLocal:true},
+  {el:'liveScene',key:'tr_live_scene',tab:'pLive',needLocal:true},
   {el:'liveScenarios',key:'tr_live_lang',tab:'pLive',needLocal:true},
-  {el:'liveSpeak',key:'tr_live_speak',tab:'pLive',needLocal:true,box:'label'},
   {el:'liveStart',key:'tr_live_start',tab:'pLive',needLocal:true},
   {el:'drop',key:'tr_file_drop',tab:'pFile'},
   {el:'fileScenarios',key:'tr_file_lang',tab:'pFile'},
@@ -677,7 +717,7 @@ function tourEnd(){
 function tourShow(){
   const st=tourSteps[tourI];if(!st)return tourEnd();
   if(st.tab)showTab(st.tab);
-  const e=tourEl(st);if(!e){tourI++;return tourShow()}
+  const e=tourEl(st);if(!e||!e.getClientRects().length){tourI++;return tourShow()}   // 沒顯示的（例如外語同仁沒有「場合」）跳過
   e.scrollIntoView({block:'center',behavior:'instant'});
   requestAnimationFrame(()=>{
     const r=e.getBoundingClientRect(),pad=6,spot=$('tourSpot'),tip=$('tourTip');
