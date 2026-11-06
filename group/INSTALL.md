@@ -174,10 +174,12 @@ GPU 伺服器有填但當下連不上時，會自動改在同仁電腦上用小�
 
 | 模型包 | 用途 | 大小 | 授權 |
 |---|---|---|---|
-| PhoWhisper small／medium | 越南文語音辨識 | 約 250／780 MB | BSD-3-Clause |
-| Whisper small／medium 印尼文（cahya） | 印尼文語音辨識 | 約 250／780 MB | Apache-2.0 |
-| Whisper small／medium 印地語（vasista22） | 印地語語音辨識 | 約 250／780 MB | Apache-2.0 |
-| MADLAD-400 3B | 本機翻譯（印尼文、越南文、印地語較準、較慢） | 約 3 GB | Apache-2.0 |
+| PhoWhisper small／medium | 越南文語音辨識 | 約 240／740 MB | BSD-3-Clause |
+| Whisper medium 印尼文（cahya） | 印尼文語音辨識 | 約 740 MB | Apache-2.0 |
+| Whisper small／medium 印地語（vasista22） | 印地語語音辨識 | 約 240／740 MB | Apache-2.0 |
+| MADLAD-400 3B | 本機翻譯（較慢；試翻有加料的情況，先實測再換） | 約 2.8 GB | Apache-2.0 |
+
+印尼文 small（cahya/whisper-small-id）的授權只寫「cc」、無法確認能商用，打包時自動略過。
 
 - **來源**：GitHub 的 [model-packs 發布頁](https://github.com/fairy715/PCG-live-whisper/releases/tag/model-packs)；不能上網的電腦：IT 把那一頁的 `catalog.json` 與模型包檔案放到「更新」的公司共用資料夾（或它的 `models` 子資料夾）
 - **安裝**：只能在那台電腦上按（要 IT 密碼）；每個檔案比對 SHA-256，不符就不裝；裝到 `models\packs\<代號>`

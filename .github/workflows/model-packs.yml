@@ -12,6 +12,10 @@ on:
         description: "要做的模型包代號（逗號分隔，空白＝全部）：phowhisper-small,phowhisper-medium,whisper-id-small,whisper-id-medium,whisper-hi-small,whisper-hi-medium,madlad400-3b"
         default: ""
         required: false
+      notes_only:
+        description: "只更新發布頁的說明文字（不重做模型包）"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -26,32 +30,41 @@ jobs:
       HF_HUB_DISABLE_TELEMETRY: "1"
     steps:
       - uses: actions/checkout@v4
+      - name: 只更新發布頁的說明
+        if: inputs.notes_only
+        run: gh release edit model-packs --repo "$GITHUB_REPOSITORY" --notes-file group/model-packs-notes.md
       - uses: actions/setup-python@v5
+        if: ${{ !inputs.notes_only }}
         with:
           python-version: "3.12"
 
       - name: 空出磁碟空間（模型很大）
+        if: ${{ !inputs.notes_only }}
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
           df -h /
 
       - name: 安裝轉檔工具
+        if: ${{ !inputs.notes_only }}
         run: |
           sudo apt-get update -qq && sudo apt-get install -y -qq espeak-ng
           python -m pip install --quiet torch --index-url https://download.pytorch.org/whl/cpu
           python -m pip install --quiet ctranslate2 faster-whisper "transformers<5" sentencepiece huggingface_hub
 
       - name: 下載發布頁上原本的清單（只做部分模型包時沿用其他的）
+        if: ${{ !inputs.notes_only }}
         run: |
           gh release download model-packs --repo "$GITHUB_REPOSITORY" --pattern catalog.json --dir old || echo "還沒有發布過"
 
       - name: 製作模型包
+        if: ${{ !inputs.notes_only }}
         run: |
           python group/build_model_packs.py --out dist/packs --packs "${{ inputs.packs }}" \
             --version "$GITHUB_RUN_NUMBER" --old-catalog old/catalog.json
           ls -la dist/packs
 
       - name: 用集團版的程式實際安裝一次（共用資料夾的方式）
+        if: ${{ !inputs.notes_only }}
         run: |
           python -m pip install --quiet fastapi
           python - <<'EOF'
@@ -74,6 +87,7 @@ jobs:
           EOF
 
       - name: 發布（固定的 model-packs 發布頁，不是最新版）
+        if: ${{ !inputs.notes_only }}
         run: |
           cd dist/packs
           notes="$GITHUB_WORKSPACE/group/model-packs-notes.md"
