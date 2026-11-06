@@ -166,7 +166,7 @@ Saat subtitle langsung dan rekaman diproses di CPU komputer karyawan (mode lokal
 
 - Pengenalan suara + terjemahan lokal bersama-sama memakai sekitar **3/4 inti**, tidak pernah lebih dari jumlah inti fisik (laptop 4 inti: pengenalan 2–3, terjemahan 1), menyisakan ruang untuk Teams dan program lain
 - Di Windows prosesnya berjalan dengan prioritas **di bawah normal**: saat CPU sibuk, program di depan didahulukan, sehingga Teams dan mouse tidak tersendat
-- Komputer lama masih berat, subtitle tertinggal: ganti "Model subtitle langsung lokal" menjadi base di halaman pengaturan IT (lebih cepat, lebih banyak salah; penginstal offline hanya berisi small, jadi komputer perlu internet sekali untuk mengunduh base)
+- Komputer lama masih berat, subtitle tertinggal: pasang dulu paket **Whisper base (multibahasa)** di "Model", lalu pilih sebagai "Model subtitle langsung lokal" (lebih cepat, lebih banyak salah). **Aplikasi tidak pernah mengunduh model sendiri** (instalasi offline tidak mengunduh), jadi halaman pengaturan hanya menampilkan model yang ada di komputer ini
 - Penyesuaian (variabel lingkungan sistem Windows, lalu buka ulang aplikasi):
   - `PCG_CPU_THREADS=8`: jumlah total thread (misalnya PC desktop kuat yang ingin berjalan penuh)
   - `PCG_NORMAL_PRIORITY=1`: kembali ke prioritas normal
@@ -181,6 +181,7 @@ Penginstal utama hanya berisi yang dasar (Whisper small, M2M100, Moonshine untuk
 | Whisper small bahasa Indonesia (maleo-ai) | Pengenalan suara bahasa Indonesia | sekitar 240 MB | Apache-2.0 |
 | Whisper medium bahasa Indonesia (cahya) | Pengenalan suara bahasa Indonesia | sekitar 740 MB | Apache-2.0 |
 | Whisper small / medium bahasa Hindi (vasista22) | Pengenalan suara bahasa Hindi | sekitar 240 / 740 MB | Apache-2.0 |
+| Whisper base / medium / large-v3-turbo (multibahasa, OpenAI) | "Model pengenalan lokal" untuk semua bahasa (termasuk Mandarin), juga dipakai untuk dua arah dan mode kelas | sekitar 80 / 740 / 800 MB | MIT |
 | MADLAD-400 3B | Terjemahan lokal (lebih lambat; dalam uji terjemahan ada tambahan isi, bandingkan dulu sebelum mengganti) | sekitar 2,8 GB | Apache-2.0 |
 
 Bahasa Indonesia small memakai maleo-ai/whisper-small-id (Apache-2.0); cahya/whisper-small-id hanya bertanda "cc", sehingga pemakaian komersial tidak bisa dipastikan dan otomatis dilewati saat pembuatan paket.
@@ -200,6 +201,19 @@ Bahasa Indonesia small memakai maleo-ai/whisper-small-id (Apache-2.0); cahya/whi
 - medium 2–3 kali lebih lambat dari small di CPU: pakai small untuk subtitle langsung di laptop biasa, medium untuk rekaman
 - Uji pengenalan saat pembuatan paket (suara sintetis): PhoWhisper medium dan Indonesia small benar seluruhnya; PhoWhisper small dan Indonesia medium masing-masing salah satu kata. Uji dengan rekaman nyata
 - Dalam mode server dengan server GPU, pengenalan suara dilakukan di server dan paket di komputer karyawan tidak dipakai
+
+#### Menurut spesifikasi komputer (laptop baru)
+
+Periksa dulu apakah ada kartu grafis NVIDIA (Task Manager → "Performance" → GPU):
+
+| Komputer | Model pengenalan lokal (Mandarin, dua arah, mode kelas) | Subtitle langsung bahasa asing | Rekaman |
+|---|---|---|---|
+| **Dengan kartu NVIDIA** (RTX 4050/4060/5050/5060 dll.) | Pasang paket GPU, lalu Whisper medium atau large-v3-turbo (multibahasa) dan pilih | medium untuk setiap bahasa | medium untuk setiap bahasa; large-v3-turbo untuk Mandarin |
+| **Laptop baru 2025–2026** (Core Ultra, Ryzen AI; RAM 16 GB, 8 inti ke atas) | small bawaan; coba Whisper medium (multibahasa), kembali ke small jika subtitle tertinggal | small untuk setiap bahasa (coba medium) | medium untuk setiap bahasa |
+| **Laptop biasa atau lama** (RAM 8 GB, 4 inti) | small bawaan; jika tertinggal, Whisper base (multibahasa) | small untuk setiap bahasa | medium untuk setiap bahasa (lebih lama) |
+
+- "Chip AI (NPU)" yang diiklankan di laptop baru tidak dipakai: pengenalan suara hanya memakai CPU atau kartu NVIDIA
+- Disarankan RAM 16 GB ke atas: dengan Teams, browser, dan model medium terbuka, 8 GB akan sesak
 
 #### Langkah pemasangan (sekali di setiap komputer yang membutuhkan)
 

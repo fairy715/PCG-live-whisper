@@ -236,6 +236,34 @@ class AdminApi(unittest.TestCase):
         self.c.post("/api/simple/live", json={"scenario": "vi"})
         self.assertEqual(self.started[-1]["model"], "small")
 
+    def test_multilingual_pack_as_local_model(self):
+        """本機辨識模型選多語模型包（例如 whisper-medium）：字幕與錄音都用它；被移除後改回 small、設定一起清掉"""
+        item, blobs = make_pack("whisper-medium", langs=("zh", "en", "id", "vi", "hi", "ja", "ko"))
+        item["multilingual"] = True
+        for n, b in blobs.items():
+            (self.share / "models" / n).write_bytes(b)
+        (self.share / "models" / "catalog.json").write_text(json.dumps({"packs": [item]}), encoding="utf-8")
+        self.c.get("/api/simple/admin/models?refresh=1", headers=self.h)
+        self.c.post("/api/simple/admin/models/install", json={"id": "whisper-medium"}, headers=self.h)
+        self.wait("whisper-medium")
+        cfg = json.loads(self.cfg.read_text(encoding="utf-8"))
+        cfg["pcg_simple"].update(local_live_model="pack:whisper-medium", local_file_model="pack:whisper-medium")
+        self.cfg.write_text(json.dumps(cfg), encoding="utf-8")
+        self.c.post("/api/simple/live", json={"scenario": "zh"})
+        self.assertEqual(self.started[-1]["model"], "pack:whisper-medium")
+        args = self.q._args({"path": "a.wav", "mode": "zh"})
+        self.assertEqual(args[args.index("-m") + 1], "pack:whisper-medium")
+        # 模型包不見了（例如手動刪掉）：不讓字幕失敗，改用內建 small
+        shutil.rmtree(self.base / "models" / "packs" / "whisper-medium")
+        self.c.post("/api/simple/live", json={"scenario": "zh"})
+        self.assertEqual(self.started[-1]["model"], "small")
+        # 從設定頁移除：設定一起清掉
+        mp.install(self.base, mp.catalog(str(self.share), use_github=False)[0]["whisper-medium"])
+        self.c.post("/api/simple/admin/models/remove", json={"id": "whisper-medium"}, headers=self.h)
+        s = json.loads(self.cfg.read_text(encoding="utf-8"))["pcg_simple"]
+        self.assertNotIn("local_live_model", s)
+        self.assertNotIn("local_file_model", s)
+
     def test_file_job_uses_file_pack(self):
         item, blobs = make_pack("whisper-id-medium", langs=("id",), purpose=("file",))
         for n, b in blobs.items():

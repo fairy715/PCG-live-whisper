@@ -86,6 +86,13 @@ _OUTPUT_KINDS = [
 ]
 
 
+def local_model_ok(base_dir, name):
+    """本機辨識模型：pack:<id> 要真的裝在這台；沒有（被移除、設定檔從別台複製）就用內建的 small，不讓字幕或錄音失敗"""
+    if isinstance(name, str) and name.startswith("pack:") and not model_packs.find(base_dir, name[5:], "asr"):
+        return "small"
+    return name
+
+
 def profile(s, has_gpu=True):
     """混合模式：依 pcg_simple.backend 決定怎麼跑。
     - "local"（預設，沒有 GPU 伺服器時）：全部在這台電腦的 CPU 上跑。辨識用小模型、翻譯用 M2M100（可商用），
@@ -255,7 +262,8 @@ class SimpleQueue:
         s = self.settings()
         pf = profile(s, self.has_gpu())
         args = [sys.executable, str(self.base / "translate_meeting.py"),
-                "--input", job["path"], "--mode", job["mode"], "-m", pf["file_model"]]
+                "--input", job["path"], "--mode", job["mode"], "-m",
+                local_model_ok(self.base, pf["file_model"]) if pf["local_asr"] else pf["file_model"]]
         if pf["summarize"]:
             args.append("--summarize")
             if s.get("summary_model"):
@@ -737,7 +745,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         start = {
             "mode": mode,
             "room": room,
-            "model": pf["live_model"],
+            "model": local_model_ok(base_dir, pf["live_model"]) if pf["local_asr"] else pf["live_model"],
             "scene": s.get("live_scene") or "meeting",
             # 本機模式：WebUI 的 nllb 路徑在集團版會改用 M2M100（見 translate_meeting.py 的 NllbTranslator.__new__）
             "engine": None if mode == "zh" else ("llm" if pf["engine"] == "llm" else "nllb"),
@@ -1059,6 +1067,9 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             s.pop("asr_packs", None)
         if s.get("mt_pack") == pid:
             s.pop("mt_pack")
+        for k in ("local_live_model", "local_file_model"):        # 本機辨識模型用的是它：改回內建的 small
+            if s.get(k) == f"pack:{pid}":
+                s.pop(k)
         write_config(cfg)
         return {"ok": True}
 

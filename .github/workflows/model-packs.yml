@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       packs:
-        description: "要做的模型包代號（逗號分隔，空白＝全部）：phowhisper-small,phowhisper-medium,whisper-id-small,whisper-id-medium,whisper-hi-small,whisper-hi-medium,madlad400-3b"
+        description: "要做的模型包代號（逗號分隔，空白＝全部）：whisper-base,whisper-medium,whisper-large-v3-turbo,phowhisper-small,phowhisper-medium,whisper-id-small,whisper-id-medium,whisper-hi-small,whisper-hi-medium,madlad400-3b"
         default: ""
         required: false
       notes_only:

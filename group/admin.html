@@ -119,9 +119,9 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <h2 data-t="local_title"></h2>
       <div class="row" style="grid-template-columns:1fr 1fr">
         <label class="f"><span data-t="live_model"></span>
-          <select id="liveModel"><option value="base">base</option><option value="small">small</option><option value="medium">medium</option></select></label>
+          <select id="liveModel"></select></label>
         <label class="f"><span data-t="file_model"></span>
-          <select id="fileModel"><option value="base">base</option><option value="small">small</option><option value="medium">medium</option><option value="large-v3-turbo">large-v3-turbo</option></select></label>
+          <select id="fileModel"></select></label>
       </div>
       <p class="note" data-t="local_models_note"></p>
     </div>
@@ -196,7 +196,7 @@ zh:{title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式
   gpu_ok:'GPU 伺服器連線正常',gpu_fail:'GPU 伺服器連不上',llm_ok:'大模型伺服器連線正常（{type}，{n} 個模型）',llm_fail:'大模型伺服器連不上',
   llm_model:'翻譯模型',summary_model:'會議紀錄（摘要）模型',default_ph:'留空＝主程式預設',asr_model:'辨識模型（GPU 伺服器）',
   local_title:'本機辨識模型',live_model:'即時字幕',file_model:'錄音檔',
-  local_models_note:'沒有獨立顯示卡的電腦：即時字幕建議 small（base 較快但錯字多）；錄音檔不趕時間可以用 medium，較準但要久很多。',
+  local_models_note:'離線安裝檔只附 small。要換 base（較快、錯字多）、medium 或 large-v3-turbo（較準、較慢），先在下方「模型管理」安裝多語模型包，這裡才會出現。',
   remote_view:'允許其他電腦或手機連進來看字幕',remote_view_note:'開會時一台電腦收音，其他人掃字幕畫面上「分享」的 QR Code 用手機看（只能看、不能停止），要輸入同仁密碼。關閉時只有這台電腦能用。變更後要關掉程式再開一次才生效。',
   other_title:'其他',diarize:'區分講者（講者辨識）',diarize_note:'會議紀錄會標出誰說了什麼。本機模式下會讓處理時間再多一些。',
   staff_pw:'同仁密碼（從別台電腦用簡易頁面、看分享的字幕時要輸入；這台電腦不用）',staff_pw_set:'同仁密碼：已設定（要改才填）',staff_pw_ph:'留空＝不變更',clear_staff_pw:'取消同仁密碼（不需要密碼）',
@@ -210,7 +210,7 @@ zh:{title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式
   m_none_inst:'還沒有安裝模型包',m_none_avail:'清單是空的（按「重新整理清單」）',m_install:'安裝',m_update:'更新',m_remove:'移除',
   m_confirm_remove:'確定要移除「{n}」？用到它的語言會改回內建模型。',m_dl:'下載中 {a}／{b} MB',m_inst_ing:'安裝中…',m_failed:'安裝失敗：{e}',
   m_done:'已安裝',m_size:'{n} MB',m_ver:'版本 {v}',m_from_share:'公司共用資料夾',m_from_gh:'GitHub',
-  m_lang_zh:'中文',m_lang_en:'英文',m_lang_ja:'日文',m_lang_ko:'韓文',m_lang_id:'印尼文',m_lang_vi:'越南文',m_lang_hi:'印地語',m_use_note:'只用在「對方說這種語言」的單向即時字幕與錄音檔；雙向、教室模式照舊用內建的多語模型。',
+  m_small_builtin:'small（內建）',m_missing:'{n}（這台沒有，請到下方「模型管理」安裝多語模型包）',m_lang_zh:'中文',m_lang_en:'英文',m_lang_ja:'日文',m_lang_ko:'韓文',m_lang_id:'印尼文',m_lang_vi:'越南文',m_lang_hi:'印地語',m_use_note:'只用在「對方說這種語言」的單向即時字幕與錄音檔；雙向、教室模式照舊用內建的多語模型。',
   models_remote:'只能在這台電腦上安裝模型',no_pack:'清單裡沒有這個模型包，請重新整理',busy:'正在進行中，請稍候',bad_pack:'模型包沒有裝，或不能用在這個語言',
   upd_title:'更新',upd_check:'自動檢查新版本（同仁頁面上方會出現「立即更新」）',upd_who:'誰可以按更新',
   upd_who_staff:'同仁自己按（建議）',upd_who_it:'只有 IT（要輸入 IT 密碼）',upd_share:'公司共用資料夾（選填）',upd_share_ph:'例如 \\\\檔案伺服器\\PCG\\更新',
@@ -241,7 +241,7 @@ en:{title:'PCG Meeting Translator: IT settings',tagline:'Switch between local an
   gpu_ok:'GPU server is reachable',gpu_fail:'Cannot reach the GPU server',llm_ok:'LLM server is reachable ({type}, {n} models)',llm_fail:'Cannot reach the LLM server',
   llm_model:'Translation model',summary_model:'Minutes (summary) model',default_ph:'Blank = program default',asr_model:'Recognition model (GPU server)',
   local_title:'Local recognition models',live_model:'Live subtitles',file_model:'Recordings',
-  local_models_note:'Computers without a dedicated GPU: use small for live subtitles (base is faster but less accurate); medium is more accurate for recordings but much slower.',
+  local_models_note:'The offline installer only includes small. To use base (faster, more mistakes), medium or large-v3-turbo (more accurate, slower), install the multilingual pack under “Models” below first; it then appears here.',
   remote_view:'Allow other computers and phones to view subtitles',remote_view_note:'One computer captures the meeting audio; others scan the QR code from “Share” on the subtitle screen to watch on their phones (view only, staff password required). When off, only this computer can use it. Takes effect after restarting the program.',
   other_title:'Other',diarize:'Identify speakers (diarization)',diarize_note:'Shows who said what. Adds processing time in local mode.',
   staff_pw:'Staff password (needed from other computers for the simple page and shared subtitles; not on this computer)',staff_pw_set:'Staff password: set (fill in only to change)',staff_pw_ph:'Blank = unchanged',clear_staff_pw:'Remove the staff password',
@@ -255,7 +255,7 @@ en:{title:'PCG Meeting Translator: IT settings',tagline:'Switch between local an
   m_none_inst:'No model packs installed yet',m_none_avail:'The list is empty (click “Refresh list”)',m_install:'Install',m_update:'Update',m_remove:'Remove',
   m_confirm_remove:'Remove “{n}”? Languages that use it go back to the built-in model.',m_dl:'Downloading {a} / {b} MB',m_inst_ing:'Installing…',m_failed:'Install failed: {e}',
   m_done:'Installed',m_size:'{n} MB',m_ver:'version {v}',m_from_share:'company shared folder',m_from_gh:'GitHub',
-  m_lang_zh:'Chinese',m_lang_en:'English',m_lang_ja:'Japanese',m_lang_ko:'Korean',m_lang_id:'Indonesian',m_lang_vi:'Vietnamese',m_lang_hi:'Hindi',m_use_note:'Used only for one-way live subtitles and recordings in that language; two-way and classroom mode keep the built-in multilingual model.',
+  m_small_builtin:'small (built-in)',m_missing:'{n} (not on this computer; install a multilingual pack under “Models” below)',m_lang_zh:'Chinese',m_lang_en:'English',m_lang_ja:'Japanese',m_lang_ko:'Korean',m_lang_id:'Indonesian',m_lang_vi:'Vietnamese',m_lang_hi:'Hindi',m_use_note:'Used only for one-way live subtitles and recordings in that language; two-way and classroom mode keep the built-in multilingual model.',
   models_remote:'Models can only be installed on this computer',no_pack:'This pack is not in the list; refresh it',busy:'Already in progress, please wait',bad_pack:'The pack is not installed or does not support this language',
   upd_title:'Updates',upd_check:'Check for new versions (staff see “Update now” at the top of their page)',upd_who:'Who can update',
   upd_who_staff:'Staff themselves (recommended)',upd_who_it:'IT only (IT password required)',upd_share:'Company shared folder (optional)',upd_share_ph:'e.g. \\\\fileserver\\PCG\\updates',
@@ -286,7 +286,7 @@ id:{title:'Penerjemah Rapat PCG: Pengaturan IT',tagline:'Beralih antara mode lok
   gpu_ok:'Server GPU bisa dijangkau',gpu_fail:'Server GPU tidak bisa dijangkau',llm_ok:'Server LLM bisa dijangkau ({type}, {n} model)',llm_fail:'Server LLM tidak bisa dijangkau',
   llm_model:'Model terjemahan',summary_model:'Model notulen (ringkasan)',default_ph:'Kosong = bawaan program',asr_model:'Model pengenalan (server GPU)',
   local_title:'Model pengenalan lokal',live_model:'Subtitle langsung',file_model:'Rekaman',
-  local_models_note:'Komputer tanpa GPU terpisah: pakai small untuk subtitle langsung (base lebih cepat tetapi kurang akurat); medium lebih akurat untuk rekaman tetapi jauh lebih lambat.',
+  local_models_note:'Penginstal offline hanya berisi small. Untuk memakai base (lebih cepat, lebih banyak salah), medium atau large-v3-turbo (lebih akurat, lebih lambat), pasang dulu paket multibahasa di “Model” di bawah; setelah itu muncul di sini.',
   remote_view:'Izinkan komputer dan ponsel lain menonton subtitle',remote_view_note:'Satu komputer menangkap suara rapat; yang lain memindai kode QR dari “Bagikan” di layar subtitle untuk menonton di ponsel (hanya menonton, perlu kata sandi karyawan). Jika mati, hanya komputer ini yang bisa memakainya. Berlaku setelah program dibuka ulang.',
   other_title:'Lainnya',diarize:'Kenali pembicara (diarisasi)',diarize_note:'Menampilkan siapa yang berbicara. Menambah waktu pemrosesan di mode lokal.',
   staff_pw:'Kata sandi karyawan (diperlukan dari komputer lain untuk halaman sederhana dan subtitle yang dibagikan; tidak di komputer ini)',staff_pw_set:'Kata sandi karyawan: sudah diatur (isi hanya untuk mengganti)',staff_pw_ph:'Kosong = tidak berubah',clear_staff_pw:'Hapus kata sandi karyawan',
@@ -300,7 +300,7 @@ id:{title:'Penerjemah Rapat PCG: Pengaturan IT',tagline:'Beralih antara mode lok
   m_none_inst:'Belum ada paket model yang terpasang',m_none_avail:'Daftar kosong (klik “Muat ulang daftar”)',m_install:'Pasang',m_update:'Perbarui',m_remove:'Hapus',
   m_confirm_remove:'Hapus “{n}”? Bahasa yang memakainya kembali ke model bawaan.',m_dl:'Mengunduh {a} / {b} MB',m_inst_ing:'Memasang…',m_failed:'Pemasangan gagal: {e}',
   m_done:'Terpasang',m_size:'{n} MB',m_ver:'versi {v}',m_from_share:'folder bersama perusahaan',m_from_gh:'GitHub',
-  m_lang_zh:'Mandarin',m_lang_en:'Inggris',m_lang_ja:'Jepang',m_lang_ko:'Korea',m_lang_id:'Indonesia',m_lang_vi:'Vietnam',m_lang_hi:'Hindi',m_use_note:'Hanya dipakai untuk subtitle langsung dan rekaman satu arah dalam bahasa itu; dua arah dan mode kelas tetap memakai model multibahasa bawaan.',
+  m_small_builtin:'small (bawaan)',m_missing:'{n} (tidak ada di komputer ini; pasang paket multibahasa di “Model” di bawah)',m_lang_zh:'Mandarin',m_lang_en:'Inggris',m_lang_ja:'Jepang',m_lang_ko:'Korea',m_lang_id:'Indonesia',m_lang_vi:'Vietnam',m_lang_hi:'Hindi',m_use_note:'Hanya dipakai untuk subtitle langsung dan rekaman satu arah dalam bahasa itu; dua arah dan mode kelas tetap memakai model multibahasa bawaan.',
   models_remote:'Model hanya bisa dipasang di komputer ini',no_pack:'Paket ini tidak ada di daftar; muat ulang daftarnya',busy:'Sedang berjalan, harap tunggu',bad_pack:'Paket belum terpasang atau tidak mendukung bahasa ini',
   upd_title:'Pembaruan',upd_check:'Periksa versi baru (karyawan melihat “Perbarui sekarang” di atas halamannya)',upd_who:'Siapa yang boleh memperbarui',
   upd_who_staff:'Karyawan sendiri (disarankan)',upd_who_it:'Hanya IT (perlu kata sandi IT)',upd_share:'Folder bersama perusahaan (opsional)',upd_share_ph:'mis. \\\\fileserver\\PCG\\update',
@@ -362,10 +362,19 @@ function showMain(){
   $('llmKey').value='';$('clearKey').checked=false;$('clearKeyWrap').hidden=!state.llm_api_key_set;
   $('llmModel').value=state.llm_model||'';$('sumModel').value=state.summary_model||'';
   $('asrModel').value=state.asr_model||'large-v3-turbo';
-  $('liveModel').value=state.local_live_model||'small';$('fileModel').value=state.local_file_model||'small';
+  fillLocalModels();
   $('updCheck').checked=state.update_check!==false;$('updWho').value=state.update_who||'staff';$('updShare').value=state.update_share||'';
   $('diarize').checked=!!state.diarize;$('remoteView').checked=!!state.allow_remote_view;$('clearStaffWrap').hidden=!state.staff_password_set;
   modeVis();applyLang();loadModels();
+}
+/* 本機辨識模型：內建 small＋裝好的多語模型包（離線安裝的電腦不會自己下載模型，所以只列出這台有的） */
+function fillLocalModels(){
+  const packs=((models&&models.installed)||[]).filter(p=>p.type==='asr'&&p.multilingual);
+  for(const [id,cur] of [['liveModel',state.local_live_model||'small'],['fileModel',state.local_file_model||'small']]){
+    const opts=[['small',t('m_small_builtin')]].concat(packs.map(p=>['pack:'+p.id,p.name||p.id]));
+    if(!opts.some(o=>o[0]===cur))opts.push([cur,t('m_missing',{n:cur})]);
+    $(id).innerHTML=opts.map(([v,n])=>`<option value="${escH(v)}">${escH(n)}</option>`).join('');$(id).value=cur;
+  }
 }
 function styleVis(){
   const st=$('llmStyle').value,k={openwebui:'owui',auto:'auto',openai:'ext'}[st]||'auto';
@@ -427,7 +436,7 @@ const escH=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'
 async function loadModels(refresh){
   const j=await api('/api/simple/admin/models'+(refresh?'?refresh=1':''));
   if(!j.ok){$('mErr').hidden=false;$('mErr').textContent=errMsg(j);return}
-  models=j;renderModels();
+  models=j;renderModels();if(state)fillLocalModels();
   const busy=Object.values(j.jobs||{}).some(x=>x.state==='downloading'||x.state==='installing');
   clearTimeout(mTimer);if(busy)mTimer=setTimeout(()=>loadModels(),2000);
 }

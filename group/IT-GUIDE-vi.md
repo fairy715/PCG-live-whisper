@@ -168,7 +168,7 @@ Khi phụ đề trực tiếp và bản ghi âm chạy trên CPU của máy nhâ
 
 - Nhận dạng giọng nói + dịch cục bộ cộng lại chỉ dùng khoảng **3/4 số nhân**, không bao giờ vượt quá số nhân vật lý (laptop 4 nhân: nhận dạng 2–3, dịch 1), chừa chỗ cho Teams và chương trình khác
 - Trên Windows tiến trình chạy ở mức ưu tiên **thấp hơn bình thường**: khi CPU bận, chương trình đang dùng được ưu tiên, Teams và chuột không bị giật
-- Máy cũ vẫn nặng, phụ đề bị chậm: đổi "Local live subtitle model" sang base trên trang cài đặt IT (nhanh hơn nhưng sai nhiều hơn; bộ cài ngoại tuyến chỉ kèm small, nên máy cần internet một lần để tải base)
+- Máy cũ vẫn nặng, phụ đề bị chậm: trước hết cài gói **Whisper base (đa ngôn ngữ)** ở "Models", rồi chọn nó làm "Local live subtitle model" (nhanh hơn nhưng sai nhiều hơn). **Ứng dụng không bao giờ tự tải mô hình** (bản cài ngoại tuyến không tải), nên trang cài đặt chỉ liệt kê các mô hình có trên máy này
 - Điều chỉnh (biến môi trường hệ thống Windows, sau đó mở lại ứng dụng):
   - `PCG_CPU_THREADS=8`: tổng số luồng (ví dụ máy bàn mạnh muốn chạy hết tốc độ)
   - `PCG_NORMAL_PRIORITY=1`: trở về mức ưu tiên bình thường
@@ -183,6 +183,7 @@ Bộ cài chính chỉ có phần cơ bản (Whisper small, M2M100, Moonshine ch
 | Whisper small tiếng Indonesia (maleo-ai) | Nhận dạng giọng nói tiếng Indonesia | khoảng 240 MB | Apache-2.0 |
 | Whisper medium tiếng Indonesia (cahya) | Nhận dạng giọng nói tiếng Indonesia | khoảng 740 MB | Apache-2.0 |
 | Whisper small / medium tiếng Hindi (vasista22) | Nhận dạng giọng nói tiếng Hindi | khoảng 240 / 740 MB | Apache-2.0 |
+| Whisper base / medium / large-v3-turbo (đa ngôn ngữ, OpenAI) | "Mô hình nhận dạng cục bộ" cho mọi ngôn ngữ (kể cả tiếng Trung), cũng dùng cho hai chiều và chế độ lớp học | khoảng 80 / 740 / 800 MB | MIT |
 | MADLAD-400 3B | Dịch cục bộ (chậm hơn; khi dịch thử có thêm nội dung không có trong câu gốc, hãy so sánh trước khi đổi) | khoảng 2,8 GB | Apache-2.0 |
 
 Tiếng Indonesia small dùng maleo-ai/whisper-small-id (Apache-2.0); cahya/whisper-small-id chỉ ghi "cc" nên không xác nhận được việc dùng thương mại, khi đóng gói tự động bỏ qua.
@@ -202,6 +203,19 @@ Tiếng Indonesia small dùng maleo-ai/whisper-small-id (Apache-2.0); cahya/whis
 - Trên CPU, medium chậm hơn small 2–3 lần: laptop thường dùng small cho phụ đề trực tiếp, medium để cho bản ghi âm
 - Nhận dạng thử khi đóng gói (giọng tổng hợp): PhoWhisper medium và tiếng Indonesia small đúng hoàn toàn; PhoWhisper small và tiếng Indonesia medium mỗi gói sai một từ. Hãy thử với bản ghi âm thật
 - Ở chế độ máy chủ có máy chủ GPU, nhận dạng chạy trên máy chủ và các gói trên máy nhân viên không được dùng
+
+#### Theo cấu hình máy (laptop mới)
+
+Trước hết xem máy có card NVIDIA không (Task Manager → "Performance" → GPU):
+
+| Máy | Mô hình nhận dạng cục bộ (tiếng Trung, hai chiều, lớp học) | Phụ đề trực tiếp tiếng nước ngoài | Bản ghi âm |
+|---|---|---|---|
+| **Có card NVIDIA** (RTX 4050/4060/5050/5060, v.v.) | Cài gói GPU, rồi cài và chọn Whisper medium hoặc large-v3-turbo (đa ngôn ngữ) | medium cho từng ngôn ngữ | medium cho từng ngôn ngữ; tiếng Trung dùng large-v3-turbo |
+| **Laptop mới 2025–2026** (Core Ultra, Ryzen AI; RAM 16 GB, từ 8 nhân) | small có sẵn; thử Whisper medium (đa ngôn ngữ), phụ đề chậm thì quay lại small | small cho từng ngôn ngữ (thử medium) | medium cho từng ngôn ngữ |
+| **Laptop thường hoặc cũ** (RAM 8 GB, 4 nhân) | small có sẵn; nếu chậm, dùng Whisper base (đa ngôn ngữ) | small cho từng ngôn ngữ | medium cho từng ngôn ngữ (lâu hơn) |
+
+- "Chip AI (NPU)" quảng cáo trên laptop mới hiện không được dùng: nhận dạng giọng nói chỉ dùng CPU hoặc card NVIDIA
+- Nên có RAM từ 16 GB: mở Teams, trình duyệt và mô hình medium cùng lúc thì 8 GB sẽ chật
 
 #### Các bước cài đặt (một lần trên mỗi máy cần dùng)
 

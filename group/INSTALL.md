@@ -167,7 +167,7 @@ GPU 伺服器有填但當下連不上時，會自動改在同仁電腦上用小�
 
 - 語音辨識＋本機翻譯合計只用約 **3/4 的核心**、而且不超過實體核心數（4 核筆電：辨識 2～3、翻譯 1），留給 Teams 和其他程式
 - Windows 上用「**低於標準**」的優先順序：CPU 忙的時候先讓給前景的程式，Teams、滑鼠不會頓
-- 舊電腦還是很吃力、字幕跟不上：在 IT 設定頁把「本機即時字幕模型」換成 base（較快但錯字多；離線安裝檔只附 small，換 base 時這台電腦要能上網下載一次）
+- 舊電腦還是很吃力、字幕跟不上：先在「模型管理」安裝 **Whisper base（多語）** 模型包，再把「本機即時字幕模型」換成它（較快但錯字多）。**程式不會自己上網下載模型**（離線安裝固定不下載），設定頁只列出這台已經有的模型
 - 要調整（Windows 系統環境變數，設定後重開程式）：
   - `PCG_CPU_THREADS=8`：指定總共用幾個執行緒（例如效能好的桌機要全速跑）
   - `PCG_NORMAL_PRIORITY=1`：改回一般優先順序
@@ -182,6 +182,7 @@ GPU 伺服器有填但當下連不上時，會自動改在同仁電腦上用小�
 | Whisper small 印尼文（maleo-ai） | 印尼文語音辨識 | 約 240 MB | Apache-2.0 |
 | Whisper medium 印尼文（cahya） | 印尼文語音辨識 | 約 740 MB | Apache-2.0 |
 | Whisper small／medium 印地語（vasista22） | 印地語語音辨識 | 約 240／740 MB | Apache-2.0 |
+| Whisper base／medium／large-v3-turbo（多語，OpenAI） | 所有語言（含中文）的「本機辨識模型」，也用在雙向、教室模式 | 約 80／740 MB／800 MB | MIT |
 | MADLAD-400 3B | 本機翻譯（較慢；試翻有加料的情況，先實測再換） | 約 2.8 GB | Apache-2.0 |
 
 印尼文 small 用 maleo-ai/whisper-small-id（Apache-2.0）；cahya/whisper-small-id 的授權只寫「cc」、無法確認能商用，打包時自動略過。
@@ -201,6 +202,19 @@ GPU 伺服器有填但當下連不上時，會自動改在同仁電腦上用小�
 - medium 在 CPU 上比 small 慢 2～3 倍：一般筆電即時字幕用 small，medium 留給錄音檔
 - 打包時的試辨識（電腦合成語音）：PhoWhisper medium、印尼文 small 全對；PhoWhisper small、印尼文 medium 各錯 1 個字。真人錄音的效果請實測
 - 伺服器模式而且有 GPU 伺服器時，辨識在伺服器上做，同仁電腦的模型包用不到
+
+#### 依電腦規格（新筆電建議）
+
+先看有沒有 NVIDIA 顯示卡（工作管理員 →「效能」→ GPU）：
+
+| 電腦 | 本機辨識模型（中文、雙向、教室模式） | 外語即時字幕 | 錄音檔 |
+|---|---|---|---|
+| **有 NVIDIA 顯示卡**（RTX 4050／4060／5050／5060 等） | 先裝 GPU 加速包，再裝 Whisper medium 或 large-v3-turbo（多語）並選用 | 各語言 medium | 各語言 medium；中文用 large-v3-turbo |
+| **2025～2026 年的新筆電**（Core Ultra、Ryzen AI；16 GB 記憶體、8 核以上） | 內建 small；可以試 Whisper medium（多語），字幕跟不上就改回 small | 各語言 small（可以試 medium） | 各語言 medium |
+| **一般或較舊的筆電**（8 GB 記憶體、4 核） | 內建 small；跟不上就換 Whisper base（多語） | 各語言 small | 各語言 medium（會比較久） |
+
+- 新筆電標榜的「AI 晶片（NPU）」目前用不到：語音辨識只會用 CPU 或 NVIDIA 顯示卡
+- 記憶體建議 16 GB 以上：同時開 Teams、瀏覽器和 medium 模型，8 GB 會很吃緊
 
 #### 安裝步驟（每台要用的電腦做一次）
 

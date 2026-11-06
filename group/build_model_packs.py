@@ -44,6 +44,16 @@ PACKS = [
     {"id": "whisper-hi-medium", "repo": "vasista22/whisper-hindi-medium", "base": "openai/whisper-medium",
      "name": "Whisper medium 印地語（vasista22）", "languages": ["hi"],
      "note": "比 small 準、慢約 2～3 倍：建議錄音檔用；有 NVIDIA 顯示卡時即時字幕也可以用"},
+    # 多語 Whisper（OpenAI，MIT）：中文等所有語言、雙向、教室模式都用得到；離線安裝檔只附 small
+    {"id": "whisper-base", "repo": "openai/whisper-base", "base": "openai/whisper-base", "multilingual": True,
+     "name": "Whisper base（多語）", "languages": ALL_LANGS, "say": "id",
+     "note": "比內建的 small 快、錯字多：給很舊、跟不上的電腦用"},
+    {"id": "whisper-medium", "repo": "openai/whisper-medium", "base": "openai/whisper-medium", "multilingual": True,
+     "name": "Whisper medium（多語）", "languages": ALL_LANGS, "say": "id",
+     "note": "所有語言（含中文）都比內建的 small 準、慢約 2～3 倍：有 NVIDIA 顯示卡、或效能好的新筆電即時字幕用；一般電腦錄音檔用"},
+    {"id": "whisper-large-v3-turbo", "repo": "openai/whisper-large-v3-turbo", "base": "openai/whisper-large-v3-turbo",
+     "multilingual": True, "name": "Whisper large-v3-turbo（多語）", "languages": ALL_LANGS, "say": "id",
+     "note": "最準的多語模型（中文明顯更好）；要 NVIDIA 顯示卡（GPU 加速包）才跑得動即時字幕，CPU 上只適合錄音檔"},
     {"id": "madlad400-3b", "repo": "Nextcloud-AI/madlad400-3b-mt-ct2-int8", "type": "mt", "engine": "madlad",
      "name": "MADLAD-400 3B 翻譯（Google）", "languages": ALL_LANGS, "license_fallback": "apache-2.0",
      "note": "400 多種語言的翻譯模型，印尼文、越南文、印地語比內建的 M2M100 好；約 3 GB，CPU 上一句要幾秒：適合錄音檔、效能好的電腦"},
@@ -106,7 +116,7 @@ def build_asr(spec, work, out):
     shutil.rmtree(src, ignore_errors=True)
     # 試辨識一次（合成語音）：載得起來、不出錯；印出結果給人看
     from faster_whisper import WhisperModel
-    lang = spec["languages"][0]
+    lang = spec.get("say") or spec["languages"][0]
     wav = work / "say.wav"
     try:
         subprocess.run(["espeak-ng", "-v", lang, "-w", str(wav), SAY[lang]], check=True, capture_output=True)
@@ -147,7 +157,7 @@ def package(spec, dest, out, lic, version):
     name = spec["name"] + (f"（{spec['repo'].split('/')[0]}）" if spec.get("repos") else "")
     meta = {"id": spec["id"], "name": name, "type": spec.get("type", "asr"),
             "engine": spec.get("engine", "faster-whisper"), "languages": spec["languages"],
-            "purpose": ["live", "file"], "version": version, "license": lic, "source": f"https://huggingface.co/{spec['repo']}",
+            "purpose": ["live", "file"], "multilingual": bool(spec.get("multilingual")), "version": version, "license": lic, "source": f"https://huggingface.co/{spec['repo']}",
             "note": spec["note"]}
     size = sum(f.stat().st_size for f in dest.rglob("*") if f.is_file())
     meta["size_mb"] = round(size / 1048576)

@@ -166,7 +166,7 @@ When live subtitles and recordings run on the staff computer's CPU (local mode, 
 
 - Speech recognition + local translation use about **3/4 of the cores** together, never more than the physical cores (4-core laptop: recognition 2–3, translation 1), leaving room for Teams and other programs
 - On Windows the worker runs at **below-normal** priority: when the CPU is busy, foreground programs come first, so Teams and the mouse do not stutter
-- Old computers still struggling, subtitles lagging: switch "Local live subtitle model" to base on the IT settings page (faster, more mistakes; the offline installer only includes small, so the computer needs internet once to download base)
+- Old computers still struggling, subtitles lagging: install the **Whisper base (multilingual)** pack under "Models" first, then choose it as the "Local live subtitle model" (faster, more mistakes). **The app never downloads models by itself** (offline installs do not download), so the settings page only lists models that are on this computer
 - Adjust (Windows system environment variables, restart the app afterwards):
   - `PCG_CPU_THREADS=8`: total number of threads (e.g. a powerful desktop that should run at full speed)
   - `PCG_NORMAL_PRIORITY=1`: back to normal priority
@@ -181,6 +181,7 @@ The main installer only contains the basics (Whisper small, M2M100, Moonshine fo
 | Whisper small Indonesian (maleo-ai) | Indonesian speech recognition | about 240 MB | Apache-2.0 |
 | Whisper medium Indonesian (cahya) | Indonesian speech recognition | about 740 MB | Apache-2.0 |
 | Whisper small / medium Hindi (vasista22) | Hindi speech recognition | about 240 / 740 MB | Apache-2.0 |
+| Whisper base / medium / large-v3-turbo (multilingual, OpenAI) | The "local recognition model" for all languages (including Chinese), also used for two-way and classroom mode | about 80 / 740 / 800 MB | MIT |
 | MADLAD-400 3B | Local translation (slower; added content in test translations, compare before switching) | about 2.8 GB | Apache-2.0 |
 
 Indonesian small uses maleo-ai/whisper-small-id (Apache-2.0); cahya/whisper-small-id is tagged only "cc", so commercial use cannot be confirmed and the build skips it automatically.
@@ -200,6 +201,19 @@ Indonesian small uses maleo-ai/whisper-small-id (Apache-2.0); cahya/whisper-smal
 - medium is 2–3 times slower than small on the CPU: use small for live subtitles on ordinary laptops and keep medium for recordings
 - Test recognition during packaging (synthetic speech): PhoWhisper medium and Indonesian small were fully correct; PhoWhisper small and Indonesian medium had one wrong word each. Test with real recordings
 - In server mode with a GPU server, recognition happens on the server and the packs on staff computers are not used
+
+#### By computer (new laptops)
+
+First check for an NVIDIA graphics card (Task Manager → "Performance" → GPU):
+
+| Computer | Local recognition model (Chinese, two-way, classroom) | Foreign-language live subtitles | Recordings |
+|---|---|---|---|
+| **With an NVIDIA card** (RTX 4050/4060/5050/5060 etc.) | Install the GPU pack, then Whisper medium or large-v3-turbo (multilingual) and choose it | medium for each language | medium for each language; large-v3-turbo for Chinese |
+| **New 2025–2026 laptops** (Core Ultra, Ryzen AI; 16 GB RAM, 8+ cores) | Built-in small; try Whisper medium (multilingual) and go back to small if subtitles lag | small for each language (try medium) | medium for each language |
+| **Ordinary or older laptops** (8 GB RAM, 4 cores) | Built-in small; if it lags, Whisper base (multilingual) | small for each language | medium for each language (takes longer) |
+
+- The "AI chip (NPU)" advertised on new laptops is not used: speech recognition only uses the CPU or an NVIDIA card
+- 16 GB RAM or more is recommended: with Teams, a browser and a medium model open, 8 GB is tight
 
 #### Installation steps (once on each computer that needs them)
 
