@@ -19,6 +19,7 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 60
     env:
+      IN_MODELS: ${{ inputs.models }}   # 手動輸入的參數一律經環境變數傳進指令（不直接拼進 run，避免指令注入）
       PYTHONUTF8: "1"
       PYTHONIOENCODING: utf-8
     steps:
@@ -40,7 +41,7 @@ jobs:
           }
 
       - name: 製作離線資源包（翻譯模型轉成 int8，約 0.5 GB）
-        run: python group/windows/build_bundle.py --out dist/PCG-offline --models "${{ inputs.models }}" --m2m-convert
+        run: python group/windows/build_bundle.py --out dist/PCG-offline --models "$env:IN_MODELS" --m2m-convert
 
       - name: 編譯單一安裝檔
         shell: pwsh
@@ -177,7 +178,7 @@ jobs:
           $vals = [ordered]@{
             '{PATCH_LINE_EN}' = $lineEn; '{PATCH_LINE}' = $line; '{PATCH_TESTED}' = $tested; '{VER}' = $env:VER; '{FULL_MB}' = "$mb"
             '{FULL_GB}' = "$([math]::Round($exe.Length / 1GB, 2))"; '{FULL}' = $exe.Name
-            '{MODELS}' = "${{ inputs.models }}"; '{COMMIT}' = $env:GITHUB_SHA.Substring(0, 7)
+            '{MODELS}' = "$env:IN_MODELS"; '{COMMIT}' = $env:GITHUB_SHA.Substring(0, 7)
           }
           foreach ($k in $vals.Keys) { $notes = $notes.Replace($k, $vals[$k]) }
           [System.IO.File]::WriteAllText("notes.md", $notes, (New-Object System.Text.UTF8Encoding($false)))

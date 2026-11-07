@@ -30,6 +30,9 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 60
     env:
+      IN_CUBLAS: ${{ inputs.cublas }}   # 手動輸入的參數一律經環境變數傳進指令（不直接拼進 run，避免指令注入）
+      IN_CUDNN: ${{ inputs.cudnn }}   # 手動輸入的參數一律經環境變數傳進指令（不直接拼進 run，避免指令注入）
+      IN_NVRTC: ${{ inputs.nvrtc }}   # 手動輸入的參數一律經環境變數傳進指令（不直接拼進 run，避免指令注入）
       PYTHONUTF8: "1"
       PYTHONIOENCODING: utf-8
       GH_TOKEN: ${{ github.token }}
@@ -51,10 +54,10 @@ jobs:
         shell: pwsh
         run: |
           python -m pip download --only-binary=:all: --platform win_amd64 --python-version 3.12 --no-deps -d wheels `
-            "nvidia-cublas-cu12==${{ inputs.cublas }}" "nvidia-cudnn-cu12==${{ inputs.cudnn }}" "nvidia-cuda-nvrtc-cu12==${{ inputs.nvrtc }}"
+            "nvidia-cublas-cu12==$env:IN_CUBLAS" "nvidia-cudnn-cu12==$env:IN_CUDNN" "nvidia-cuda-nvrtc-cu12==$env:IN_NVRTC"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python group/windows/gpu_pack_stage.py wheels dist/gpu-stage `
-            --versions "cublas=${{ inputs.cublas }},cudnn=${{ inputs.cudnn }},nvrtc=${{ inputs.nvrtc }}"
+            --versions "cublas=$env:IN_CUBLAS,cudnn=$env:IN_CUDNN,nvrtc=$env:IN_NVRTC"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: 確認 CTranslate2 要的檔案都在
@@ -135,7 +138,7 @@ jobs:
           (Get-FileHash $exe.FullName -Algorithm SHA256).Hash.ToLower() + "  " + $exe.Name | Out-File -Encoding ascii $sha
           $mb = [math]::Round($exe.Length / 1MB)
           $notes = Get-Content group/windows/gpu-pack-notes.md -Raw -Encoding utf8
-          $vals = @{ '{FILE}' = $exe.Name; '{MB}' = "$mb"; '{CUBLAS}' = "${{ inputs.cublas }}"; '{CUDNN}' = "${{ inputs.cudnn }}"; '{NVRTC}' = "${{ inputs.nvrtc }}"; '{COMMIT}' = $env:GITHUB_SHA.Substring(0, 7) }
+          $vals = @{ '{FILE}' = $exe.Name; '{MB}' = "$mb"; '{CUBLAS}' = "$env:IN_CUBLAS"; '{CUDNN}' = "$env:IN_CUDNN"; '{NVRTC}' = "$env:IN_NVRTC"; '{COMMIT}' = $env:GITHUB_SHA.Substring(0, 7) }
           foreach ($k in $vals.Keys) { $notes = $notes.Replace($k, $vals[$k]) }
           [System.IO.File]::WriteAllText("notes.md", $notes, (New-Object System.Text.UTF8Encoding($false)))
           $tag = "gpu-cuda12-v$env:GITHUB_RUN_NUMBER"

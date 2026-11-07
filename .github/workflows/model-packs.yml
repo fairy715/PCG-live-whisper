@@ -25,6 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     env:
+      IN_PACKS: ${{ inputs.packs }}   # 手動輸入的參數一律經環境變數傳進指令（不直接拼進 run，避免指令注入）
       GH_TOKEN: ${{ github.token }}
       PYTHONUTF8: "1"
       HF_HUB_DISABLE_TELEMETRY: "1"
@@ -59,7 +60,7 @@ jobs:
       - name: 製作模型包
         if: ${{ !inputs.notes_only }}
         run: |
-          python group/build_model_packs.py --out dist/packs --packs "${{ inputs.packs }}" \
+          python group/build_model_packs.py --out dist/packs --packs "$IN_PACKS" \
             --version "$GITHUB_RUN_NUMBER" --old-catalog old/catalog.json
           ls -la dist/packs
 

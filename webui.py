@@ -2651,6 +2651,9 @@ try:
                          live_running=lambda: _proc is not None and _proc.poll() is None,
                          live_args=lambda: list(_proc.args) if _proc is not None and _proc.poll() is None else None,
                          set_view_password=_pcg_set_view_password, stop_live=_pcg_stop_live)
+    # 擋瀏覽器裡別的網站打這台的 WebUI（偷改字幕轉發、偷連字幕通道、DNS rebinding）：見 group/security.py
+    from group import security as _pcg_security
+    _pcg_security.protect(app)
 except ImportError as _pcg_e:          # group/ 不在（例如只複製了上游的檔案）：簡易頁面不提供，其他照舊
     print(f"  [提示] 簡易頁面未載入：{_pcg_e}")
 
