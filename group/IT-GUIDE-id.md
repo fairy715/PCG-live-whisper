@@ -106,6 +106,7 @@ Pengaturan disimpan di `config.json` yang sama (kata sandi berupa hash), dengan 
   - Folder bersama: taruh `.exe` dan `.sha256` bersamaan; sidik jari dicocokkan sebelum memasang dan pembaruan ditolak jika tidak cocok; tanpa `.sha256` tetap terpasang, tetapi tanpa pemeriksaan
   - GitHub: file ini tidak diperlukan; aplikasi membaca sidik jari aset rilis langsung, dan tidak memasang jika tidak ada
   - Pemeriksaan manual (PowerShell): `Get-FileHash .\PCG-Update-<versi>.exe -Algorithm SHA256`; file utuh jika hash sama dengan isi `.sha256` (huruf besar/kecil tidak berpengaruh)
+- **Jendela fitur baru** (pembaruan setelah r19): saat staf membuka halaman, jendela "Ada versi baru" menampilkan fitur baru versi ini, dengan pilihan "Perbarui sekarang" atau "Nanti saja"; "Nanti saja" tetap menampilkan pemberitahuan pembaruan di atas halaman seperti biasa dan jendela tidak muncul lagi sampai halaman dibuka berikutnya. Di folder bersama Anda bisa menaruh juga `PCG-Update-<versi>.whats-new.json` (halaman rilis menyertakan `whats-new.json`; cukup ganti namanya); tanpa file itu hanya nomor versi yang ditampilkan
 
 ### Mode server: tiga cara menghubungkan LLM
 

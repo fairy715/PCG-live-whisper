@@ -106,6 +106,7 @@ Settings are stored in the same `config.json` (passwords are hashed), in the sam
   - Shared folder: put the `.exe` and `.sha256` together; the fingerprint is checked before installing and the update is refused if it does not match; without a `.sha256` it still installs, but unchecked
   - GitHub: this file is not needed; the app reads the fingerprint of the release asset directly, and does not install when there is none
   - Manual check (PowerShell): `Get-FileHash .\PCG-Update-<version>.exe -Algorithm SHA256`; the file is intact when the hash equals the content of the `.sha256` (case does not matter)
+- **What's-new window** (updates after r19): when staff open the page, a "New version" window lists what this version adds, with "Update now" or "Later"; "Later" keeps the update notice at the top of the page as before and the window does not pop up again until the page is opened next time. In the shared folder you can also put `PCG-Update-<version>.whats-new.json` (the release page has `whats-new.json`; just rename it); without it only the version number is shown
 
 ### Server mode: three ways to connect an LLM
 

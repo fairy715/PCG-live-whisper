@@ -203,7 +203,7 @@ $('tag1').textContent=X.tag;$('cap2').innerHTML=`<i></i>${X.cap2}`;$('line7').te
 ['t1','t2','t3'].forEach((k,i)=>$(k).textContent=X.t[i]);
 $('ui').src=`ui-${LANG}-a.png`;$('uiB').src=`ui-${LANG}-b.png`;$('uiC').src=`ui-${LANG}-c.png`;
 // 新介面上的兩下：「我也要說話」的場合、對方的語言（截圖座標 × 0.526，減掉游標尖端的位移）
-const CLK={zh:[[189,164],[85,250]],id:[[189,176],[85,294]],vi:[[189,169],[189,276]]}[LANG];
+const CLK={zh:[[189,164],[85,250]],id:[[189,176],[85,294]],vi:[[189,174],[189,287]]}[LANG];   // r19：多了第 4 個場合，越南文的卡片變高
 const D=X.doc;$('doc').innerHTML=`<h4>${D[0]}</h4><div class="k">${D[1]}</div><div class="dl">• ${D[2]}</div><div class="k">${D[3]}</div><div class="dl">• ${D[4]}</div><div class="dl">• ${D[5]}</div><div class="k">${D[6]}</div><div class="dl">• ${D[7]}</div>`;
 const tag=l=>`<span class="lg ${l}">${l==='zh'?'中':l.toUpperCase()}</span>`;
 $('b0b').innerHTML=`${tag(FL)}${F.hook}`;

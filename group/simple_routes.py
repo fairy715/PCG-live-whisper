@@ -850,7 +850,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         latest = res.get("latest") or {}
         return {"ok": True, "enabled": True, "current": app_version(base_dir)["version"],
                 "available": bool(res.get("available")),
-                "latest": {k: latest.get(k) for k in ("version", "kind", "source", "notes_url")} if latest else None,
+                "latest": {k: latest.get(k) for k in ("version", "kind", "source", "notes_url", "highlights")}
+                if latest else None,
                 "who": us["who"], "installing": _upd_busy["on"]}
 
     @app.post("/api/simple/update")

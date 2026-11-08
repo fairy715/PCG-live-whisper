@@ -108,6 +108,7 @@ Phần "Updates" trên trang cài đặt IT:
   - Thư mục dùng chung: đặt `.exe` và `.sha256` cùng nhau; dấu vân tay được so trước khi cài, không khớp thì từ chối; không có `.sha256` vẫn cài, nhưng không kiểm tra
   - GitHub: không cần tệp này; ứng dụng đọc trực tiếp dấu vân tay của tệp đính kèm trên trang phát hành, không có thì không cài
   - Kiểm tra thủ công (PowerShell): `Get-FileHash .\PCG-Update-<phiên bản>.exe -Algorithm SHA256`; tệp nguyên vẹn khi mã băm trùng với nội dung `.sha256` (không phân biệt hoa thường)
+- **Cửa sổ tính năng mới** (các bản cập nhật sau r19): khi nhân viên mở trang, cửa sổ "Có phiên bản mới" liệt kê tính năng mới của phiên bản này, có thể chọn "Cập nhật ngay" hoặc "Để sau"; chọn "Để sau" thì thông báo cập nhật vẫn nằm ở đầu trang như trước và cửa sổ không bật lại cho đến lần mở trang sau. Trong thư mục dùng chung có thể đặt thêm `PCG-Update-<phiên bản>.whats-new.json` (trang phát hành có kèm `whats-new.json`, chỉ cần đổi tên); không có tệp này thì chỉ hiện số phiên bản
 
 ### Chế độ máy chủ: ba cách kết nối LLM
 

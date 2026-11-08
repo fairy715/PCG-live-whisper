@@ -24,6 +24,26 @@ GITHUB_DL_PREFIX = f"https://github.com/{GITHUB_REPO}/releases/download/"
 PATCH_RE = re.compile(r"^PCG-Update-(\d{4}\.\d{1,2}\.\d{1,2}\.r\d+)\.exe$", re.I)
 FULL_RE = re.compile(r"^PCG-Meeting-Translator-Setup-(\d{4}\.\d{1,2}\.\d{1,2}\.r\d+)\.exe$", re.I)
 MAX_PATCH_BYTES = 300 * 1024 * 1024
+# 這一版新增的功能（r19）：發布頁附 whats-new.json，共用資料夾放 PCG-Update-<版本>.whats-new.json。
+# 同仁頁面打開時用它跳出「有新版本、這次新增了什麼」。內容只當純文字顯示；版本對不上就不用（避免舊說明配新版）
+WHATS_NEW = "whats-new.json"
+WN_LANGS = ("zh", "en", "id", "vi", "hi")
+WN_MAX_ITEMS = 8
+WN_MAX_CHARS = 240
+
+
+def highlights(data, version):
+    """whats-new.json 的內容 → {語言: [重點, …]}；格式不對或版本不是這一版 → {}"""
+    if not isinstance(data, dict) or str(data.get("version") or "").lstrip("v") != str(version):
+        return {}
+    out = {}
+    for L in WN_LANGS:
+        items = data.get(L)
+        if isinstance(items, list):
+            clean = [str(x).strip()[:WN_MAX_CHARS] for x in items if isinstance(x, str) and x.strip()]
+            if clean:
+                out[L] = clean[:WN_MAX_ITEMS]
+    return out
 
 
 def parse_ver(v):
@@ -69,8 +89,17 @@ def from_share(folder):
             sha = side.read_text(encoding="utf-8", errors="replace").split()[0].lower()
         except (OSError, IndexError):
             sha = ""
+    wn = {}
+    for cand in (d / f"PCG-Update-{ver}.whats-new.json", d / WHATS_NEW):
+        if cand.is_file():
+            try:
+                wn = highlights(json.loads(cand.read_text(encoding="utf-8-sig")[:65536]), ver)
+            except (OSError, ValueError):
+                wn = {}
+            if wn:
+                break
     return {"version": ver, "kind": kind, "path": str(d / name), "sha256": sha, "source": "share",
-            "notes_url": ""}
+            "notes_url": "", "highlights": wn}
 
 
 def from_github(timeout=8, fetch=None):
@@ -90,13 +119,21 @@ def from_github(timeout=8, fetch=None):
         return None
     patch = None
     full = False
+    wn_url = ""
     for a in rel.get("assets") or []:
         name = str(a.get("name") or "")
         if PATCH_RE.match(name):
             patch = a
         elif FULL_RE.match(name):
             full = True
-    out = {"version": ver, "source": "github", "notes_url": str(rel.get("html_url") or "")}
+        elif name == WHATS_NEW:
+            wn_url = str(a.get("browser_download_url") or "")
+    out = {"version": ver, "source": "github", "notes_url": str(rel.get("html_url") or ""), "highlights": {}}
+    if wn_url.startswith(GITHUB_DL_PREFIX):
+        try:
+            out["highlights"] = highlights(fetch(wn_url), ver)
+        except Exception:  # noqa: BLE001  沒有說明也照常更新
+            pass
     if patch:
         url = str(patch.get("browser_download_url") or "")
         digest = str(patch.get("digest") or "")

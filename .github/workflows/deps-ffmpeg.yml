@@ -1,0 +1,60 @@
+# PCG 集團版：把製作安裝檔用的 ffmpeg（LGPL 版）備份到固定的 deps-ffmpeg 發布頁（手動執行）
+# BtbN 的「latest」下載點不穩定時（2026-11-08 一直 504），group/windows/bundle_ci.py 優先從這裡下載。
+# 不是「最新版」，不影響一鍵更新；要換新版 ffmpeg 時再執行一次。
+name: 備份 ffmpeg（製作安裝檔用）
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+      F: ffmpeg-master-latest-win64-lgpl-shared.zip
+    steps:
+      - uses: actions/checkout@v4
+      - name: 下載（多試幾次）
+        run: |
+          for u in "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$F" \
+                   "https://github.com/FFmpeg-Builds/FFmpeg-Builds/releases/download/latest/$F"; do
+            for i in 1 2 3 4 5 6; do
+              if curl -fsSL --max-time 900 -o "$F" "$u"; then echo "下載成功：$u"; break 2; fi
+              echo "第 $i 次失敗：$u"; sleep 30
+            done
+          done
+          test -s "$F"
+      - name: 檢查內容（LGPL 版、有 ffmpeg.exe 與 ffprobe.exe）
+        run: |
+          python3 - <<'PY'
+          import os, zipfile
+          z = zipfile.ZipFile(os.environ["F"])
+          assert z.testzip() is None, "壓縮檔損壞"
+          names = z.namelist()
+          for need in ("/bin/ffmpeg.exe", "/bin/ffprobe.exe"):
+              assert any(n.endswith(need) for n in names), f"找不到 {need}"
+          lic = [n for n in names if n.endswith("LICENSE.txt") and n.count("/") == 1]
+          assert lic and "LESSER GENERAL PUBLIC" in z.read(lic[0]).decode("utf-8", "replace"), "不是 LGPL 版"
+          print("內容正確：", len(names), "個檔案")
+          PY
+          sha256sum "$F" > "$F.sha256"
+          cat "$F.sha256"
+      - name: 發布到 deps-ffmpeg（不是最新版）
+        run: |
+          cat > notes.md <<NOTES
+          製作離線安裝檔用的 ffmpeg 備份：BtbN FFmpeg-Builds 的 master／win64／LGPL／shared（$(date -u +%Y-%m-%d) 下載）。
+
+          BtbN 的「latest」下載點不穩定時，GitHub Actions 優先從這裡下載（group/windows/bundle_ci.py）。**同仁不需要下載這一頁的檔案。**
+          授權：LGPL v3（壓縮檔裡的 LICENSE.txt）；原始碼：https://github.com/FFmpeg/FFmpeg ；建置方式：https://github.com/BtbN/FFmpeg-Builds
+          NOTES
+          if gh release view deps-ffmpeg --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release edit deps-ffmpeg --repo "$GITHUB_REPOSITORY" --notes-file notes.md
+            gh release upload deps-ffmpeg --repo "$GITHUB_REPOSITORY" --clobber "$F" "$F.sha256"
+          else
+            gh release create deps-ffmpeg --repo "$GITHUB_REPOSITORY" --title "製作安裝檔用的 ffmpeg 備份（CI 用）" \
+              --notes-file notes.md --latest=false --target "$GITHUB_SHA" "$F" "$F.sha256"
+          fi

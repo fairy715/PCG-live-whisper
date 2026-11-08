@@ -36,6 +36,42 @@ class Download(unittest.TestCase):
             return "ok"
         bundle_ci._orig_download = dl
 
+    def test_mirror_first_when_hash_known(self):
+        self.fake(set())
+        self._sha = bundle_ci.bb.sha256
+        bundle_ci.bb.sha256 = lambda p: "a" * 64
+        try:
+            self.assertEqual(bundle_ci.download(LATEST, Path("d"), sleep=self.slept.append, fallbacks=lambda: [],
+                                                mirror_hash=lambda: "a" * 64), "ok")
+            self.assertEqual(self.calls, [bundle_ci.MIRROR])
+            # 指紋不符：不用備份，改 BtbN
+            self.calls.clear()
+            self.assertEqual(bundle_ci.download(LATEST, Path("d"), sleep=self.slept.append, fallbacks=lambda: [],
+                                                mirror_hash=lambda: "b" * 64), "ok")
+            self.assertEqual(self.calls, [bundle_ci.MIRROR, LATEST])
+        finally:
+            bundle_ci.bb.sha256 = self._sha
+
+    def test_404_is_not_retried(self):
+        def dl(u, dest):
+            self.calls.append(u)
+            if u == bundle_ci.MIRROR:
+                raise urllib.error.HTTPError(u, 404, "Not Found", {}, None)
+            return "ok"
+        bundle_ci._orig_download = dl
+        self.assertEqual(bundle_ci.download(LATEST, Path("d"), sleep=self.slept.append, fallbacks=lambda: [],
+                                            mirror_hash=lambda: "a" * 64), "ok")
+        self.assertEqual(self.calls, [bundle_ci.MIRROR, LATEST])
+        self.assertEqual(self.slept, [])
+
+    def test_mirror_hash_parsing(self):
+        self.assertEqual(bundle_ci.mirror_sha256(lambda u: "A" * 64 + "  f.zip\n"), "a" * 64)
+        self.assertEqual(bundle_ci.mirror_sha256(lambda u: "nope"), "")
+
+        def boom(u):
+            raise OSError("404")
+        self.assertEqual(bundle_ci.mirror_sha256(boom), "")
+
     def test_retries_then_succeeds(self):
         n = {"i": 0}
 
@@ -52,7 +88,8 @@ class Download(unittest.TestCase):
     def test_ffmpeg_falls_back_to_recent_build(self):
         alt = "https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-x/ffmpeg-N-1-gabc-win64-lgpl-shared.zip"
         self.fake({LATEST})
-        self.assertEqual(bundle_ci.download(LATEST, Path("d"), sleep=self.slept.append, fallbacks=lambda: [alt]), "ok")
+        self.assertEqual(bundle_ci.download(LATEST, Path("d"), sleep=self.slept.append, fallbacks=lambda: [alt],
+                                            mirror_hash=lambda: ""), "ok")
         self.assertEqual(self.calls, [LATEST] * 3 + [alt])
 
     def test_other_files_have_no_fallback(self):
@@ -64,7 +101,8 @@ class Download(unittest.TestCase):
     def test_gives_up_with_last_error(self):
         self.fake({LATEST, "https://alt"})
         with self.assertRaises(urllib.error.HTTPError):
-            bundle_ci.download(LATEST, Path("d"), sleep=self.slept.append, fallbacks=lambda: ["https://alt"])
+            bundle_ci.download(LATEST, Path("d"), sleep=self.slept.append, fallbacks=lambda: ["https://alt"],
+                               mirror_hash=lambda: "")
 
 
 class Fallbacks(unittest.TestCase):

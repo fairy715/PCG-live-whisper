@@ -4,8 +4,10 @@
 
 2026-11-08：BtbN 的 ffmpeg「latest」下載點一直回 504 Gateway Time-out，資源包做不出來，
 安裝測試與發布全部停住。這裡把 build_bundle.py 的下載換成：
-  1. 每個網址失敗會重試（等 15、45 秒）
-  2. ffmpeg 的「latest」不能用時，用 GitHub API 找 BtbN 最近幾次自動建置裡同一種檔案
+  1. ffmpeg 優先從我們自己的備份下載（deps-ffmpeg 發布頁，.github/workflows/deps-ffmpeg.yml 建的），
+     比對旁邊 .sha256 的指紋；備份沒有或不對，才用 BtbN 的「latest」
+  2. 每個網址失敗會重試（等 15、45 秒）；404（檔案不存在）不重試，直接換下一個
+  3. BtbN 的「latest」也不能用時，用 GitHub API 找 BtbN 最近幾次自動建置裡同一種檔案
      （master、win64、LGPL、shared），一樣是 LGPL 版
 不直接改 build_bundle.py：它的內容（指紋）決定已裝的電腦能不能用小更新包，改了就要全部重裝完整安裝檔。
 """
@@ -22,6 +24,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_bundle as bb  # noqa: E402
 
 BTBN_API = "https://api.github.com/repos/BtbN/FFmpeg-Builds/releases?per_page=10"
+REPO = os.environ.get("GITHUB_REPOSITORY") or "fairy715/PCG-live-whisper"
+MIRROR = f"https://github.com/{REPO}/releases/download/deps-ffmpeg/ffmpeg-master-latest-win64-lgpl-shared.zip"
 FFMPEG_ASSET = re.compile(r"^ffmpeg-(?:master-latest|N-[\w.-]+)-win64-lgpl-shared\.zip$")
 WAITS = (15, 45)
 _orig_download = bb.download
@@ -53,9 +57,39 @@ def ffmpeg_fallbacks(api_json=_api_json):
     return out
 
 
-def download(url, dest, sleep=time.sleep, fallbacks=ffmpeg_fallbacks):
+def mirror_sha256(fetch_text=None):
+    """備份旁邊的 .sha256（第一個欄位）；拿不到 → ""（備份就不用）"""
+    try:
+        if fetch_text is None:
+            req = urllib.request.Request(MIRROR + ".sha256", headers={"User-Agent": "pcg-bundle-builder"})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                text = r.read(4096).decode("utf-8", "replace")
+        else:
+            text = fetch_text(MIRROR + ".sha256")
+        h = (text.split() or [""])[0].lower()
+        return h if len(h) == 64 else ""
+    except Exception:  # noqa: BLE001
+        return ""
+
+
+def _mirror_ok(dest, want):
+    got = bb.sha256(dest)
+    if got != want:
+        print(f"   [注意] 備份的指紋不符（{got[:12]}… ≠ {want[:12]}…），改用 BtbN", flush=True)
+        return False
+    print("   備份指紋相符", flush=True)
+    return True
+
+
+def download(url, dest, sleep=time.sleep, fallbacks=ffmpeg_fallbacks, mirror_hash=mirror_sha256):
     last = None
     urls = [url]
+    if url == bb.FFMPEG_URL:
+        want = mirror_hash()
+        if want:
+            urls.insert(0, MIRROR)
+        else:
+            print("   [注意] 我們的 ffmpeg 備份（deps-ffmpeg）還沒有或讀不到指紋，用 BtbN", flush=True)
     tried_fallbacks = False
     i = 0
     while i < len(urls):
@@ -65,10 +99,15 @@ def download(url, dest, sleep=time.sleep, fallbacks=ffmpeg_fallbacks):
                 print(f"   {wait} 秒後重試（第 {n + 1} 次）", flush=True)
                 sleep(wait)
             try:
-                return _orig_download(u, dest)
+                res = _orig_download(u, dest)
+                if u == MIRROR and not _mirror_ok(dest, want):
+                    break
+                return res
             except (urllib.error.URLError, OSError) as e:   # HTTPError 也是 URLError
                 last = e
                 print(f"   [注意] 下載失敗：{e}", flush=True)
+                if getattr(e, "code", None) == 404:
+                    break
         if url == bb.FFMPEG_URL and not tried_fallbacks:
             tried_fallbacks = True
             more = fallbacks()

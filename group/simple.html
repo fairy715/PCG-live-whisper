@@ -93,7 +93,12 @@ input[type=text],input[type=number],input[type=password]{width:100%;margin-top:6
 .empty{color:var(--dim);text-align:center;padding:24px}
 dialog{border:0;border-radius:var(--radius);padding:24px;background:var(--card);color:var(--text);width:min(380px,92vw)}
 dialog::backdrop{background:rgba(0,0,0,.4)}
-#repDlg{width:min(480px,94vw)}
+#repDlg,#updDlg{width:min(480px,94vw)}
+#updDlg ul{margin:6px 0 0;padding-left:20px;line-height:1.6}
+#updDlg li{margin:4px 0}
+#updDlg .b{display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:16px;flex-wrap:wrap}
+#updDlg .b .btn{width:auto}
+#updDlg .b a{margin-right:auto;font-size:14px}
 #repDesc{width:100%;min-height:96px;font:inherit;padding:8px;border:1px solid var(--line,#ccc);border-radius:8px;box-sizing:border-box;background:var(--card);color:var(--text)}
 #repDlg .b{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
 #repDlg .b .btn{width:auto}
@@ -234,11 +239,22 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
   </form>
 </dialog>
 
+<!-- 打開頁面時有新版本：說明這次新增什麼，可以馬上更新或下次再說（r19） -->
+<dialog id="updDlg">
+  <h3 style="margin-top:0" id="udTitle"></h3>
+  <p class="note" style="margin-top:0" id="udLead"></p>
+  <ul id="udList"></ul>
+  <p class="note" id="udFull" hidden></p>
+  <div class="b"><a id="udNotes" target="_blank" rel="noopener" hidden></a>
+    <button class="btn ghost" type="button" id="udLater"></button><button class="btn" type="button" id="udNow"></button></div>
+</dialog>
+
 <script>
 /* ── 多國語言 ─────────────────────────────────────────────── */
 const LANGS=[['zh','繁體中文','zh-TW'],['en','English','en-US'],['id','Bahasa Indonesia','id-ID'],['vi','Tiếng Việt','vi-VN'],['hi','हिन्दी','hi-IN']];
 const I18N={
 zh:{
+  ud_title:"有新版本 v{v}",ud_lead:"這一版新增：",ud_none:"這一版有改進與修正。",ud_now:"立即更新（約 1 分鐘）",ud_later:"下次再說",ud_ok:"知道了",
   sc_hub:"會議室字幕機，大家用手機看",sc_hub_s:"這台接會議室麥克風，每一句自動判斷是中文還是對方的語言。開始後會直接顯示 QR Code，大家用手機掃描、各自選自己的語言（多語字幕）。",sc_hub_s_x:"這台接會議室麥克風，每一句自動判斷是你的語言還是對方的語言。開始後會直接顯示 QR Code，大家用手機掃描、各自選自己的語言（多語字幕）。",hub_off:"IT 還沒開啟「允許其他電腦或手機連進來看字幕」，手機會連不進來。請 IT 到「IT 設定」開啟（開啟後要把程式關掉再開一次）。",
   lv_to:"翻成{l}",sc_listen_s_x:"對方說的話翻成你的語言顯示。",speak_s_x:"用麥克風：你說你的語言，會翻成對方的語言顯示出來。請戴耳機，避免把對方的聲音錄進麥克風。",room_s_x:"兩種語言都可以說：每一句自動判斷是哪一種語言，再翻成另一種。一次一個人講效果最好；很短的話（例如「好」）可能判斷錯。",
   rep_link:"回報問題",rep_title:"回報問題",rep_hint:"寫下發生了什麼事，按「產生診斷檔」會下載一個 zip 檔。裡面有版本、電腦規格、設定（金鑰和密碼已遮掉）和最近的程式記錄，不含錄音、逐字稿和會議紀錄。",rep_ph:"例如：下午 2 點左右，選「對方說印尼文」按開始，字幕一直沒有出現",rep_logs:"附上最近的程式記錄（IT 查問題最需要；可能含部分字幕文字）",rep_make:"產生診斷檔",rep_making:"正在產生…",rep_done:"已下載 {n}（在瀏覽器的「下載」資料夾）。",rep_send:"請把這個檔案寄給：{c}",rep_send_it:"請把這個檔案交給 IT。",rep_mail:"寫信給 IT",rep_close:"關閉",rep_subject:"PCG 會議翻譯：問題回報（v{v}）",rep_attach:"（請附上檔案：{n}）",rep_failed:"沒有產生診斷檔：{e}",
@@ -288,6 +304,7 @@ zh:{
   fs_sub_zh:'中文逐字稿',fs_sub:'翻成中文',fs_sub_hi2zh:'印度・翻成中文'
 },
 en:{
+  ud_title:"New version v{v}",ud_lead:"What is new:",ud_none:"This version has improvements and fixes.",ud_now:"Update now (about 1 minute)",ud_later:"Later",ud_ok:"OK",
   sc_hub:"Meeting room subtitle computer, everyone reads on their phones",sc_hub_s:"This computer uses the room microphone and detects whether each sentence is Chinese or the other language. After Start the QR code is shown right away; everyone scans it and chooses their own language (multi-language subtitles).",sc_hub_s_x:"This computer uses the room microphone and detects whether each sentence is your language or the other language. After Start the QR code is shown right away; everyone scans it and chooses their own language (multi-language subtitles).",hub_off:"IT has not turned on “Allow other computers and phones to view subtitles”, so phones cannot connect. Ask IT to turn it on in IT settings (then close the app and open it again).",
   lv_to:"to {l}",sc_listen_s_x:"What the others say is shown in your language.",speak_s_x:"Uses your microphone: what you say in your language is translated into their language. Please wear headphones so the microphone does not pick up the other side.",room_s_x:"Both languages can be spoken: each sentence is detected automatically and translated into the other language. Works best one speaker at a time; very short replies may be detected wrongly.",
   rep_link:"Report a problem",rep_title:"Report a problem",rep_hint:"Describe what happened and press “Create report” to download a zip file. It has the version, computer specs, settings (keys and passwords removed) and recent program logs. It does not include recordings, transcripts or minutes.",rep_ph:"e.g. Around 2 pm I chose “Indonesian” and pressed Start, but no subtitles appeared",rep_logs:"Include recent program logs (IT needs these most; they may contain some subtitle text)",rep_make:"Create report",rep_making:"Creating…",rep_done:"Downloaded {n} (in your browser’s Downloads folder).",rep_send:"Please send this file to: {c}",rep_send_it:"Please send this file to IT.",rep_mail:"Email IT",rep_close:"Close",rep_subject:"PCG Meeting Translator: problem report (v{v})",rep_attach:"(Please attach the file: {n})",rep_failed:"The report was not created: {e}",
@@ -337,6 +354,7 @@ en:{
   fs_sub_zh:'Chinese transcript',fs_sub:'Translated to Chinese',fs_sub_hi2zh:'India · to Chinese'
 },
 id:{
+  ud_title:"Versi baru v{v}",ud_lead:"Yang baru:",ud_none:"Versi ini berisi perbaikan dan penyempurnaan.",ud_now:"Perbarui sekarang (sekitar 1 menit)",ud_later:"Nanti saja",ud_ok:"Mengerti",
   sc_hub:"Komputer subtitle ruang rapat, semua membaca di ponsel",sc_hub_s:"Komputer ini memakai mikrofon ruangan dan mengenali apakah setiap kalimat bahasa Mandarin atau bahasa lawan bicara. Setelah Mulai, kode QR langsung tampil; semua orang memindai dan memilih bahasanya sendiri (subtitle multibahasa).",sc_hub_s_x:"Komputer ini memakai mikrofon ruangan dan mengenali apakah setiap kalimat bahasa Anda atau bahasa lawan bicara. Setelah Mulai, kode QR langsung tampil; semua orang memindai dan memilih bahasanya sendiri (subtitle multibahasa).",hub_off:"IT belum mengaktifkan “Izinkan komputer dan ponsel lain menonton subtitle”, jadi ponsel tidak bisa terhubung. Minta IT mengaktifkannya di Pengaturan IT (lalu tutup aplikasi dan buka lagi).",
   lv_to:"ke {l}",sc_listen_s_x:"Ucapan lawan bicara ditampilkan dalam bahasa Anda.",speak_s_x:"Memakai mikrofon: ucapan Anda dalam bahasa Anda diterjemahkan ke bahasa lawan bicara. Gunakan headphone agar suara lawan bicara tidak masuk ke mikrofon.",room_s_x:"Kedua bahasa boleh dipakai: setiap kalimat dikenali otomatis lalu diterjemahkan ke bahasa lainnya. Paling baik satu orang berbicara bergantian; jawaban sangat pendek bisa salah dikenali.",
   rep_link:"Laporkan masalah",rep_title:"Laporkan masalah",rep_hint:"Tulis apa yang terjadi, lalu tekan “Buat laporan” untuk mengunduh file zip. Isinya versi, spesifikasi komputer, pengaturan (kunci dan kata sandi dihapus) dan log program terbaru. Tidak berisi rekaman, transkrip, atau notulen.",rep_ph:"mis. Sekitar jam 2 siang saya pilih “Bahasa Indonesia” dan tekan Mulai, tetapi subtitle tidak muncul",rep_logs:"Sertakan log program terbaru (paling dibutuhkan IT; mungkin berisi sebagian teks subtitle)",rep_make:"Buat laporan",rep_making:"Sedang membuat…",rep_done:"{n} sudah diunduh (di folder Unduhan browser).",rep_send:"Kirim file ini ke: {c}",rep_send_it:"Kirim file ini ke IT.",rep_mail:"Email IT",rep_close:"Tutup",rep_subject:"PCG Penerjemah Rapat: laporan masalah (v{v})",rep_attach:"(Lampirkan file: {n})",rep_failed:"Laporan tidak dibuat: {e}",
@@ -386,6 +404,7 @@ id:{
   fs_sub_zh:'Transkrip Mandarin',fs_sub:'Ke bahasa Mandarin',fs_sub_hi2zh:'India · ke Mandarin'
 },
 vi:{
+  ud_title:"Có phiên bản mới v{v}",ud_lead:"Có gì mới:",ud_none:"Phiên bản này có cải tiến và sửa lỗi.",ud_now:"Cập nhật ngay (khoảng 1 phút)",ud_later:"Để sau",ud_ok:"Đã hiểu",
   sc_hub:"Máy phụ đề phòng họp, mọi người xem trên điện thoại",sc_hub_s:"Máy này dùng micro của phòng và tự nhận biết mỗi câu là tiếng Trung hay ngôn ngữ của người kia. Sau khi bấm Bắt đầu, mã QR hiện ngay; mọi người quét và tự chọn ngôn ngữ của mình (phụ đề đa ngôn ngữ).",sc_hub_s_x:"Máy này dùng micro của phòng và tự nhận biết mỗi câu là ngôn ngữ của bạn hay của người kia. Sau khi bấm Bắt đầu, mã QR hiện ngay; mọi người quét và tự chọn ngôn ngữ của mình (phụ đề đa ngôn ngữ).",hub_off:"IT chưa bật “Cho phép máy tính và điện thoại khác xem phụ đề”, nên điện thoại không kết nối được. Hãy nhờ IT bật trong Cài đặt IT (sau đó đóng ứng dụng và mở lại).",
   lv_to:"sang {l}",sc_listen_s_x:"Lời người kia được hiển thị bằng ngôn ngữ của bạn.",speak_s_x:"Dùng micro: bạn nói bằng ngôn ngữ của mình, sẽ được dịch sang ngôn ngữ của người kia. Hãy đeo tai nghe để micro không thu tiếng của bên kia.",room_s_x:"Có thể nói cả hai ngôn ngữ: mỗi câu được tự nhận biết rồi dịch sang ngôn ngữ còn lại. Tốt nhất là từng người nói một; câu quá ngắn có thể bị nhận sai.",
   rep_link:"Báo lỗi",rep_title:"Báo lỗi",rep_hint:"Mô tả chuyện gì đã xảy ra rồi bấm “Tạo báo cáo” để tải về một tệp zip. Trong đó có phiên bản, cấu hình máy, cài đặt (đã xóa khóa và mật khẩu) và nhật ký chương trình gần đây. Không có bản ghi âm, bản ghi lời hay biên bản họp.",rep_ph:"VD: Khoảng 2 giờ chiều tôi chọn “Tiếng Việt” và bấm Bắt đầu nhưng không thấy phụ đề",rep_logs:"Kèm nhật ký chương trình gần đây (IT cần nhất; có thể có một phần nội dung phụ đề)",rep_make:"Tạo báo cáo",rep_making:"Đang tạo…",rep_done:"Đã tải {n} (trong thư mục Tải xuống của trình duyệt).",rep_send:"Vui lòng gửi tệp này cho: {c}",rep_send_it:"Vui lòng gửi tệp này cho IT.",rep_mail:"Gửi email cho IT",rep_close:"Đóng",rep_subject:"PCG Dịch cuộc họp: báo lỗi (v{v})",rep_attach:"(Vui lòng đính kèm tệp: {n})",rep_failed:"Chưa tạo được báo cáo: {e}",
@@ -435,6 +454,7 @@ vi:{
   fs_sub_zh:'Bản ghi tiếng Trung',fs_sub:'Dịch sang tiếng Trung',fs_sub_hi2zh:'Ấn Độ · sang tiếng Trung'
 },
 hi:{
+  ud_title:"नया संस्करण v{v}",ud_lead:"इस संस्करण में नया:",ud_none:"इस संस्करण में सुधार और फ़िक्स हैं।",ud_now:"अभी अपडेट करें (लगभग 1 मिनट)",ud_later:"बाद में",ud_ok:"ठीक है",
   sc_hub:"मीटिंग रूम सबटाइटल कंप्यूटर, सब अपने फ़ोन पर देखें",sc_hub_s:"यह कंप्यूटर कमरे का माइक्रोफ़ोन इस्तेमाल करता है और हर वाक्य की भाषा (चीनी या सामने वाले की भाषा) अपने आप पहचानता है। शुरू करते ही QR कोड दिखेगा; सब स्कैन करके अपनी भाषा चुनें (बहुभाषी सबटाइटल)।",sc_hub_s_x:"यह कंप्यूटर कमरे का माइक्रोफ़ोन इस्तेमाल करता है और हर वाक्य की भाषा (आपकी या सामने वाले की) अपने आप पहचानता है। शुरू करते ही QR कोड दिखेगा; सब स्कैन करके अपनी भाषा चुनें (बहुभाषी सबटाइटल)।",hub_off:"IT ने “दूसरे कंप्यूटर और फ़ोन को सबटाइटल देखने दें” चालू नहीं किया है, इसलिए फ़ोन कनेक्ट नहीं हो पाएँगे। IT से IT सेटिंग में चालू करवाएँ (फिर ऐप बंद करके दोबारा खोलें)।",
   lv_to:"{l} में",sc_listen_s_x:"सामने वालों की बात आपकी भाषा में दिखेगी।",speak_s_x:"माइक्रोफ़ोन से: आप अपनी भाषा में बोलेंगे तो सामने वाले की भाषा में अनुवाद दिखेगा। कृपया हेडफ़ोन लगाएँ, ताकि सामने वाले की आवाज़ माइक्रोफ़ोन में न जाए।",room_s_x:"दोनों भाषाएँ बोली जा सकती हैं: हर वाक्य की भाषा अपने आप पहचानी जाती है और दूसरी भाषा में अनुवाद होता है। एक समय में एक व्यक्ति बोले तो सबसे अच्छा; बहुत छोटे जवाब गलत पहचाने जा सकते हैं।",
   rep_link:"समस्या बताएँ",rep_title:"समस्या बताएँ",rep_hint:"लिखें कि क्या हुआ, फिर “रिपोर्ट बनाएँ” दबाएँ; एक zip फ़ाइल डाउनलोड होगी। इसमें संस्करण, कंप्यूटर की जानकारी, सेटिंग्स (कुंजी और पासवर्ड हटाए गए) और हाल के प्रोग्राम लॉग होते हैं। इसमें रिकॉर्डिंग, ट्रांसक्रिप्ट या मीटिंग नोट्स नहीं होते।",rep_ph:"जैसे: दोपहर 2 बजे के आसपास “हिन्दी” चुनकर शुरू दबाया, पर सबटाइटल नहीं आए",rep_logs:"हाल के प्रोग्राम लॉग जोड़ें (IT को इनकी सबसे ज़्यादा ज़रूरत होती है; इनमें कुछ सबटाइटल टेक्स्ट हो सकता है)",rep_make:"रिपोर्ट बनाएँ",rep_making:"बन रही है…",rep_done:"{n} डाउनलोड हो गई (ब्राउज़र के Downloads फ़ोल्डर में)।",rep_send:"कृपया यह फ़ाइल यहाँ भेजें: {c}",rep_send_it:"कृपया यह फ़ाइल IT को भेजें।",rep_mail:"IT को ईमेल करें",rep_close:"बंद करें",rep_subject:"PCG मीटिंग अनुवाद: समस्या रिपोर्ट (v{v})",rep_attach:"(कृपया फ़ाइल संलग्न करें: {n})",rep_failed:"रिपोर्ट नहीं बनी: {e}",
@@ -539,10 +559,29 @@ async function updCheck(force){
   if(force&&j.ok&&j.enabled===false){alert(t('upd_off'));return}
   if(!j.ok||!j.enabled||!j.available||!j.latest){if(force&&j.ok)alert(t('upd_none',{c:j.current||''}));return}
   upd=j;const v=j.latest.version;
+  if(!force)updPopup(j);
   const n=$('updNotes');n.hidden=!j.latest.notes_url;if(j.latest.notes_url)n.href=j.latest.notes_url;
   if(j.latest.kind!=='patch'){updShow('info',t('upd_full',{v}));$('updBtn').hidden=true;return}
   updShow('info',t('upd_avail',{v,c:j.current}));
   const b=$('updBtn');b.hidden=false;b.textContent=t(j.who==='it'?'upd_it_btn':'upd_btn');b.onclick=updRun;
+}
+/* 新版本視窗：這個瀏覽器每次打開（新的工作階段）跳一次；「下次再說」或關掉之後，上方照舊有更新提示 */
+function updPopup(j){
+  const v=j.latest.version,k='pcg_upd_pop_'+v;
+  try{if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,'1')}catch(e){}
+  const hl=j.latest.highlights||{},items=hl[lang]||hl.en||hl.zh||[];
+  $('udTitle').textContent=t('ud_title',{v});
+  $('udLead').textContent=t(items.length?'ud_lead':'ud_none');
+  $('udList').innerHTML='';items.forEach(x=>{const li=document.createElement('li');li.textContent=x;$('udList').appendChild(li)});
+  const patch=j.latest.kind==='patch';
+  $('udFull').hidden=patch;$('udFull').textContent=t('upd_full',{v});
+  const n=$('udNotes');n.hidden=!j.latest.notes_url;n.textContent=t('upd_notes');if(j.latest.notes_url)n.href=j.latest.notes_url;
+  $('udNow').hidden=!patch;$('udNow').textContent=t(j.who==='it'?'upd_it_btn':'ud_now');
+  $('udLater').textContent=t(patch?'ud_later':'ud_ok');
+  $('udLater').onclick=()=>$('updDlg').close();
+  $('udNow').onclick=()=>{$('updDlg').close();updRun()};
+  const d=$('updDlg');if(!d.open)d.showModal();
+  (patch?$('udNow'):$('udLater')).focus();
 }
 async function updRun(){
   const v=upd.latest.version,h={'Content-Type':'application/json'};
