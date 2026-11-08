@@ -22,6 +22,8 @@ header{flex:none;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding
 .dot.on{background:#2da44e;box-shadow:0 0 0 4px rgba(45,164,78,.2)}
 .st{font-weight:700}
 .mode{color:var(--dim);font-size:14px}
+.mode.xl{color:var(--accent);font-weight:600}
+.mylang{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--dim)}
 .sp{flex:1}
 select,button{font:inherit}
 select{color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:6px 8px}
@@ -65,9 +67,9 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 </head>
 <body>
 <header>
-  <span class="dot" id="dot"></span><span class="st" id="st"></span><span class="mode" id="mode"></span>
+  <span class="dot" id="dot"></span><span class="st" id="st"></span><span class="mode" id="mode"></span><span class="mode xl" id="xl" hidden></span>
   <span class="sp"></span>
-  <label title=""><span class="sr" hidden></span><select id="langSel" aria-label="Language"></select></label>
+  <label class="mylang"><span id="myLangL"></span><select id="langSel" aria-label="Language"></select></label>
   <button class="ic" id="fsDn" type="button" aria-label="A-">A−</button><button class="ic" id="fsUp" type="button" aria-label="A+">A+</button>
 </header>
 <main id="main">
@@ -106,23 +108,23 @@ function showVer(v){const e=document.getElementById('ver');if(!e||!v)return;
 
 const LANGS=[['zh','繁體中文'],['en','English'],['id','Bahasa Indonesia'],['vi','Tiếng Việt'],['hi','हिन्दी']];
 const I18N={
-zh:{share:'分享',share_title:'讓其他人用手機看字幕',share_scan:'用手機相機掃描，或在瀏覽器輸入下面的網址（要連同一個公司網路）。每個人可以選自己的語言。',share_copy:'複製網址',copied:'已複製',close:'關閉',share_pw:'打開時要輸入同仁密碼。',share_nopw:'注意：沒有設定同仁密碼，同一個網路上的人都看得到。請 IT 在設定頁設定。',share_off:'IT 還沒有開啟「允許其他電腦或手機連進來看字幕」。請 IT 到「IT 設定」開啟。',share_restart:'已開啟分享，但要把程式完全關掉再開一次才會生效。',share_noip:'找不到這台電腦的網路位址，請確認有連上公司網路。',running:'字幕進行中',waiting:'等待字幕…',paused:'已暫停',ended:'字幕已結束',empty:'開始說話後，字幕會出現在這裡',stop:'停止',pause:'暫停',resume:'繼續',
+zh:{my_lang:"我要看",xl_on:"{l}由字幕機另外翻譯",xl_off:"這場字幕沒有{l}",share:'分享',share_title:'讓其他人用手機看字幕',share_scan:"用手機相機掃描，或在瀏覽器輸入下面的網址（要連同一個公司網路）。打開後在右上角選自己的語言：中文、印尼文、越南文、印地語、英文都可以。",share_copy:'複製網址',copied:'已複製',close:'關閉',share_pw:'打開時要輸入同仁密碼。',share_nopw:'注意：沒有設定同仁密碼，同一個網路上的人都看得到。請 IT 在設定頁設定。',share_off:'IT 還沒有開啟「允許其他電腦或手機連進來看字幕」。請 IT 到「IT 設定」開啟。',share_restart:'已開啟分享，但要把程式完全關掉再開一次才會生效。',share_noip:'找不到這台電腦的網路位址，請確認有連上公司網路。',running:'字幕進行中',waiting:'等待字幕…',paused:'已暫停',ended:'字幕已結束',empty:'開始說話後，字幕會出現在這裡',stop:'停止',pause:'暫停',resume:'繼續',
   to_sub:'字幕模式',to_chat:'對話模式',overlay:'懸浮字幕',only_mine:'只顯示我的語言',back:'回到首頁',confirm_stop:'確定要停止字幕？',
   pw:'請輸入同仁密碼（向 IT 詢問）',reconnect:'連線中斷，重新連線中…',ovl_fail:'懸浮字幕開不起來',fail:'（翻譯失敗）',
   n_zh:'中文',n_en:'英文',n_ja:'日文',n_ko:'韓文',n_id:'印尼文',n_vi:'越南文',n_hi:'印地語',tr:'{a}轉錄'},
-en:{share:'Share',share_title:'Let others watch on their phones',share_scan:'Scan with a phone camera, or type the address below in a browser (same company network). Everyone can choose their own language.',share_copy:'Copy address',copied:'Copied',close:'Close',share_pw:'Viewers will be asked for the staff password.',share_nopw:'Note: no staff password is set, so anyone on the same network can watch. Ask IT to set one.',share_off:'IT has not turned on “Allow other computers and phones to view subtitles”. Ask IT to enable it in IT settings.',share_restart:'Sharing is on, but the program must be fully closed and reopened first.',share_noip:'This computer has no network address. Check that it is connected to the company network.',running:'Subtitles running',waiting:'Waiting for subtitles…',paused:'Paused',ended:'Subtitles ended',empty:'Subtitles will appear here when someone speaks',stop:'Stop',pause:'Pause',resume:'Resume',
+en:{my_lang:"I read",xl_on:"{l}: translated by the subtitle computer",xl_off:"No {l} in this session",share:'Share',share_title:'Let others watch on their phones',share_scan:"Scan with a phone camera, or type the address below in a browser (same company network). Then choose your language at the top right: Chinese, Indonesian, Vietnamese, Hindi or English.",share_copy:'Copy address',copied:'Copied',close:'Close',share_pw:'Viewers will be asked for the staff password.',share_nopw:'Note: no staff password is set, so anyone on the same network can watch. Ask IT to set one.',share_off:'IT has not turned on “Allow other computers and phones to view subtitles”. Ask IT to enable it in IT settings.',share_restart:'Sharing is on, but the program must be fully closed and reopened first.',share_noip:'This computer has no network address. Check that it is connected to the company network.',running:'Subtitles running',waiting:'Waiting for subtitles…',paused:'Paused',ended:'Subtitles ended',empty:'Subtitles will appear here when someone speaks',stop:'Stop',pause:'Pause',resume:'Resume',
   to_sub:'Subtitle view',to_chat:'Chat view',overlay:'Floating subtitles',only_mine:'Only my language',back:'Back to home',confirm_stop:'Stop the subtitles?',
   pw:'Enter the staff password (ask IT)',reconnect:'Connection lost, reconnecting…',ovl_fail:'Could not open floating subtitles',fail:'(translation failed)',
   n_zh:'Chinese',n_en:'English',n_ja:'Japanese',n_ko:'Korean',n_id:'Indonesian',n_vi:'Vietnamese',n_hi:'Hindi',tr:'{a} transcription'},
-id:{share:'Bagikan',share_title:'Biarkan orang lain menonton di ponsel',share_scan:'Pindai dengan kamera ponsel, atau ketik alamat di bawah di browser (jaringan perusahaan yang sama). Setiap orang dapat memilih bahasanya sendiri.',share_copy:'Salin alamat',copied:'Tersalin',close:'Tutup',share_pw:'Penonton akan diminta kata sandi karyawan.',share_nopw:'Perhatian: kata sandi karyawan belum diatur, jadi siapa pun di jaringan yang sama bisa menonton. Minta IT mengaturnya.',share_off:'IT belum mengaktifkan “Izinkan komputer dan ponsel lain menonton subtitle”. Minta IT mengaktifkannya di Pengaturan IT.',share_restart:'Berbagi sudah aktif, tetapi program harus ditutup sepenuhnya lalu dibuka lagi.',share_noip:'Komputer ini tidak punya alamat jaringan. Pastikan terhubung ke jaringan perusahaan.',running:'Subtitle berjalan',waiting:'Menunggu subtitle…',paused:'Dijeda',ended:'Subtitle selesai',empty:'Subtitle akan muncul di sini saat ada yang berbicara',stop:'Berhenti',pause:'Jeda',resume:'Lanjut',
+id:{my_lang:"Saya baca",xl_on:"{l}: diterjemahkan oleh komputer subtitle",xl_off:"Sesi ini tidak ada {l}",share:'Bagikan',share_title:'Biarkan orang lain menonton di ponsel',share_scan:"Pindai dengan kamera ponsel, atau ketik alamat di bawah di browser (jaringan perusahaan yang sama). Lalu pilih bahasa Anda di kanan atas: Mandarin, Indonesia, Vietnam, Hindi, atau Inggris.",share_copy:'Salin alamat',copied:'Tersalin',close:'Tutup',share_pw:'Penonton akan diminta kata sandi karyawan.',share_nopw:'Perhatian: kata sandi karyawan belum diatur, jadi siapa pun di jaringan yang sama bisa menonton. Minta IT mengaturnya.',share_off:'IT belum mengaktifkan “Izinkan komputer dan ponsel lain menonton subtitle”. Minta IT mengaktifkannya di Pengaturan IT.',share_restart:'Berbagi sudah aktif, tetapi program harus ditutup sepenuhnya lalu dibuka lagi.',share_noip:'Komputer ini tidak punya alamat jaringan. Pastikan terhubung ke jaringan perusahaan.',running:'Subtitle berjalan',waiting:'Menunggu subtitle…',paused:'Dijeda',ended:'Subtitle selesai',empty:'Subtitle akan muncul di sini saat ada yang berbicara',stop:'Berhenti',pause:'Jeda',resume:'Lanjut',
   to_sub:'Tampilan subtitle',to_chat:'Tampilan obrolan',overlay:'Subtitle mengambang',only_mine:'Hanya bahasa saya',back:'Kembali ke beranda',confirm_stop:'Hentikan subtitle?',
   pw:'Masukkan kata sandi karyawan (tanyakan IT)',reconnect:'Koneksi terputus, menyambung ulang…',ovl_fail:'Subtitle mengambang tidak bisa dibuka',fail:'(gagal diterjemahkan)',
   n_zh:'Mandarin',n_en:'Inggris',n_ja:'Jepang',n_ko:'Korea',n_id:'Indonesia',n_vi:'Vietnam',n_hi:'Hindi',tr:'Transkripsi {a}'},
-vi:{share:'Chia sẻ',share_title:'Cho người khác xem trên điện thoại',share_scan:'Quét bằng camera điện thoại, hoặc nhập địa chỉ bên dưới vào trình duyệt (cùng mạng công ty). Mỗi người có thể chọn ngôn ngữ của mình.',share_copy:'Sao chép địa chỉ',copied:'Đã sao chép',close:'Đóng',share_pw:'Người xem sẽ được yêu cầu nhập mật khẩu nhân viên.',share_nopw:'Lưu ý: chưa đặt mật khẩu nhân viên, nên ai cùng mạng cũng xem được. Hãy nhờ IT đặt mật khẩu.',share_off:'IT chưa bật “Cho phép máy tính và điện thoại khác xem phụ đề”. Hãy nhờ IT bật trong Cài đặt IT.',share_restart:'Đã bật chia sẻ, nhưng cần đóng hẳn chương trình rồi mở lại.',share_noip:'Máy này không có địa chỉ mạng. Hãy kiểm tra kết nối mạng công ty.',running:'Đang hiện phụ đề',waiting:'Đang chờ phụ đề…',paused:'Đã tạm dừng',ended:'Phụ đề đã kết thúc',empty:'Phụ đề sẽ hiện ở đây khi có người nói',stop:'Dừng',pause:'Tạm dừng',resume:'Tiếp tục',
+vi:{my_lang:"Tôi xem",xl_on:"{l}: do máy phụ đề dịch thêm",xl_off:"Phiên này không có {l}",share:'Chia sẻ',share_title:'Cho người khác xem trên điện thoại',share_scan:"Quét bằng camera điện thoại, hoặc nhập địa chỉ bên dưới vào trình duyệt (cùng mạng công ty). Sau đó chọn ngôn ngữ của bạn ở góc trên bên phải: tiếng Trung, Indonesia, Việt, Hindi hoặc Anh.",share_copy:'Sao chép địa chỉ',copied:'Đã sao chép',close:'Đóng',share_pw:'Người xem sẽ được yêu cầu nhập mật khẩu nhân viên.',share_nopw:'Lưu ý: chưa đặt mật khẩu nhân viên, nên ai cùng mạng cũng xem được. Hãy nhờ IT đặt mật khẩu.',share_off:'IT chưa bật “Cho phép máy tính và điện thoại khác xem phụ đề”. Hãy nhờ IT bật trong Cài đặt IT.',share_restart:'Đã bật chia sẻ, nhưng cần đóng hẳn chương trình rồi mở lại.',share_noip:'Máy này không có địa chỉ mạng. Hãy kiểm tra kết nối mạng công ty.',running:'Đang hiện phụ đề',waiting:'Đang chờ phụ đề…',paused:'Đã tạm dừng',ended:'Phụ đề đã kết thúc',empty:'Phụ đề sẽ hiện ở đây khi có người nói',stop:'Dừng',pause:'Tạm dừng',resume:'Tiếp tục',
   to_sub:'Chế độ phụ đề',to_chat:'Chế độ hội thoại',overlay:'Phụ đề nổi',only_mine:'Chỉ ngôn ngữ của tôi',back:'Về trang chính',confirm_stop:'Dừng phụ đề?',
   pw:'Nhập mật khẩu nhân viên (hỏi IT)',reconnect:'Mất kết nối, đang kết nối lại…',ovl_fail:'Không mở được phụ đề nổi',fail:'(dịch thất bại)',
   n_zh:'tiếng Trung',n_en:'tiếng Anh',n_ja:'tiếng Nhật',n_ko:'tiếng Hàn',n_id:'tiếng Indonesia',n_vi:'tiếng Việt',n_hi:'tiếng Hindi',tr:'Ghi {a}'},
-hi:{share:'शेयर करें',share_title:'दूसरों को फ़ोन पर सबटाइटल दिखाएँ',share_scan:'फ़ोन कैमरे से स्कैन करें, या ब्राउज़र में नीचे का पता डालें (एक ही कंपनी नेटवर्क)। हर कोई अपनी भाषा चुन सकता है।',share_copy:'पता कॉपी करें',copied:'कॉपी हो गया',close:'बंद करें',share_pw:'देखने वालों से कर्मचारी पासवर्ड पूछा जाएगा।',share_nopw:'ध्यान दें: कर्मचारी पासवर्ड सेट नहीं है, इसलिए एक ही नेटवर्क पर कोई भी देख सकता है। IT से सेट करवाएँ।',share_off:'IT ने “दूसरे कंप्यूटर और फ़ोन को सबटाइटल देखने दें” चालू नहीं किया है। IT से IT सेटिंग में चालू करवाएँ।',share_restart:'शेयरिंग चालू है, लेकिन पहले प्रोग्राम को पूरी तरह बंद करके फिर खोलना होगा।',share_noip:'इस कंप्यूटर का नेटवर्क पता नहीं मिला। कंपनी नेटवर्क से कनेक्शन जाँचें।',running:'सबटाइटल चल रहे हैं',waiting:'सबटाइटल का इंतज़ार…',paused:'रुका हुआ',ended:'सबटाइटल बंद हो गए',empty:'कोई बोलेगा तो सबटाइटल यहाँ दिखेंगे',stop:'रोकें',pause:'विराम',resume:'जारी रखें',
+hi:{my_lang:"मैं पढ़ूँगा",xl_on:"{l}: सबटाइटल कंप्यूटर अलग से अनुवाद करेगा",xl_off:"इस सत्र में {l} नहीं है",share:'शेयर करें',share_title:'दूसरों को फ़ोन पर सबटाइटल दिखाएँ',share_scan:"फ़ोन कैमरे से स्कैन करें, या ब्राउज़र में नीचे का पता डालें (एक ही कंपनी नेटवर्क)। फिर ऊपर दाईं ओर अपनी भाषा चुनें: चीनी, इंडोनेशियाई, वियतनामी, हिंदी या अंग्रेज़ी।",share_copy:'पता कॉपी करें',copied:'कॉपी हो गया',close:'बंद करें',share_pw:'देखने वालों से कर्मचारी पासवर्ड पूछा जाएगा।',share_nopw:'ध्यान दें: कर्मचारी पासवर्ड सेट नहीं है, इसलिए एक ही नेटवर्क पर कोई भी देख सकता है। IT से सेट करवाएँ।',share_off:'IT ने “दूसरे कंप्यूटर और फ़ोन को सबटाइटल देखने दें” चालू नहीं किया है। IT से IT सेटिंग में चालू करवाएँ।',share_restart:'शेयरिंग चालू है, लेकिन पहले प्रोग्राम को पूरी तरह बंद करके फिर खोलना होगा।',share_noip:'इस कंप्यूटर का नेटवर्क पता नहीं मिला। कंपनी नेटवर्क से कनेक्शन जाँचें।',running:'सबटाइटल चल रहे हैं',waiting:'सबटाइटल का इंतज़ार…',paused:'रुका हुआ',ended:'सबटाइटल बंद हो गए',empty:'कोई बोलेगा तो सबटाइटल यहाँ दिखेंगे',stop:'रोकें',pause:'विराम',resume:'जारी रखें',
   to_sub:'सबटाइटल व्यू',to_chat:'चैट व्यू',overlay:'तैरते सबटाइटल',only_mine:'केवल मेरी भाषा',back:'होम पर लौटें',confirm_stop:'सबटाइटल बंद करें?',
   pw:'कर्मचारी पासवर्ड डालें (IT से पूछें)',reconnect:'कनेक्शन टूटा, दोबारा जुड़ रहा है…',ovl_fail:'तैरते सबटाइटल नहीं खुल सके',fail:'(अनुवाद असफल)',
   n_zh:'चीनी',n_en:'अंग्रेज़ी',n_ja:'जापानी',n_ko:'कोरियाई',n_id:'इंडोनेशियाई',n_vi:'वियतनामी',n_hi:'हिंदी',tr:'{a} ट्रांसक्रिप्शन'}};
@@ -135,10 +137,17 @@ const t=(k,v={})=>String(I18N[lang][k]??I18N.zh[k]??k).replace(/\{(\w+)\}/g,(_,x
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 // 字幕事件的語言標籤 → 語言代碼（台語辨識結果是漢字，當中文看）
 const LABEL={'中':'zh','台':'zh','EN':'en','日':'ja','韓':'ko','ID':'id','VI':'vi','HI':'hi'};
+// 多語字幕（r19）：看字幕的人可以選的語言 → 字幕標籤
+const XLANG={zh:'中',en:'EN',id:'ID',vi:'VI',hi:'HI'};
 
-let state={running:false,paused:false,ended:false,local:false,mode:''},events=[],sub=store.get('pcg_live_sub')==='1';
+let state={running:false,paused:false,ended:false,local:false,mode:'',multi:true},events=[],sub=store.get('pcg_live_sub')==='1';
 let fs=+store.get('pcg_live_fs')||22,onlyMine=store.get('pcg_live_only')==='1',token=store.get('pcg_token')||'';   // 同仁密碼（與簡易頁面共用）
 
+function modeLangs(m){
+  if(!m)return [];let x;
+  if((x=m.match(/^([a-z]+)[_2]([a-z]+)$/)))return [x[1]==='nan'?'zh':x[1],x[2]];
+  return [m==='nan'?'zh':m];
+}
 function modeName(m){
   if(!m)return '';
   let x;
@@ -189,6 +198,11 @@ function paint(){
   $('dot').classList.toggle('on',state.running&&!state.ended&&!state.paused);
   $('st').textContent=t(state.ended?'ended':state.paused?'paused':state.running?'running':'waiting');
   $('mode').textContent=modeName(state.mode);
+  // 多語字幕（r19）：我選的語言不是這場的兩種語言時，說明字幕機會另外翻（或 IT 關掉了就說這場沒有）
+  const ml=modeLangs(state.mode),xl=$('xl');
+  xl.hidden=!(ml.length&&XLANG[lang]&&!ml.includes(lang));
+  if(!xl.hidden)xl.textContent=t(state.multi?'xl_on':'xl_off',{l:t('n_'+lang)});
+  $('myLangL').textContent=t('my_lang');
   $('stopBtn').textContent=t('stop');$('pauseBtn').textContent=t(state.paused?'resume':'pause');
   $('modeBtn').textContent=t(sub?'to_chat':'to_sub');$('ovlBtn').textContent=t('overlay');$('onlyMineL').textContent=t('only_mine');
   $('endText').textContent=t('ended');$('backBtn').textContent=t('back');$('endBanner').hidden=!state.ended;
@@ -231,7 +245,6 @@ $('shCopy').onclick=async()=>{try{await navigator.clipboard.writeText(shareUrl);
 let ws=null,retry=null;
 function send(o){if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}
 // 多語字幕（r19）：告訴字幕機「我要看哪種語言」；這一句沒有這種語言時，字幕機會另外翻一份（transcription_extra）
-const XLANG={zh:'中',en:'EN',id:'ID',vi:'VI',hi:'HI'};
 function wantLang(){send({action:'want_lang',lang:XLANG[lang]?lang:''})}
 function addExtra(ev){
   const e=events.find(x=>x.id===ev.id);if(!e||!ev.text)return;
@@ -254,7 +267,7 @@ function conn(){
   };
 }
 (async()=>{
-  try{const j=await(await fetch('/api/simple/live')).json();showVer(j.version);state.local=!!j.local;state.running=!!j.running;state.mode=j.mode||'';state.ended=!j.running&&false}catch(e){}
+  try{const j=await(await fetch('/api/simple/live')).json();showVer(j.version);state.local=!!j.local;state.running=!!j.running;state.mode=j.mode||'';state.multi=j.multi_lang!==false;state.ended=!j.running&&false}catch(e){}
   paint();render();conn();
 })();
 </script>

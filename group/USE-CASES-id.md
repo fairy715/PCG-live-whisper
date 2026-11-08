@@ -79,7 +79,7 @@ Setiap kalimat dikenali otomatis sebagai Mandarin atau Indonesia: Mandarin → M
 
 1. IT mengaktifkan "Izinkan komputer dan ponsel lain melihat subtitle" dan membuat kata sandi staf (lalu aplikasi dibuka ulang).
 2. Mulai subtitle langsung, klik "Bagikan", tampilkan kode QR.
-3. Peserta memindai, memasukkan kata sandi staf, dan memilih bahasa (hanya melihat). Ponsel harus terhubung ke komputer itu, biasanya di jaringan perusahaan.
+3. Peserta memindai, memasukkan kata sandi staf, dan memilih bahasanya di "Saya baca" di kanan atas: Mandarin, Indonesia, Vietnam, Hindi, atau Inggris. Jika sebuah kalimat tidak dalam bahasa itu, komputer rapat menerjemahkan satu salinan lagi (subtitle multibahasa, mulai r19), dan bagian atas halaman menjelaskannya. Ponsel hanya bisa melihat. Ponsel harus terhubung ke komputer itu, biasanya di jaringan perusahaan.
 
 ## 5. Notulen setelah rapat
 

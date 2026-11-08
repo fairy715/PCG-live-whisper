@@ -79,7 +79,7 @@ Mỗi câu được tự nhận biết là tiếng Trung hay tiếng Việt: ti�
 
 1. IT bật "Cho phép máy tính và điện thoại khác xem phụ đề" và đặt mật khẩu nhân viên (sau đó mở lại ứng dụng).
 2. Bắt đầu phụ đề trực tiếp, bấm "Chia sẻ", chiếu mã QR.
-3. Mọi người quét mã, nhập mật khẩu nhân viên và chọn ngôn ngữ (chỉ xem). Điện thoại phải kết nối được tới máy đó, thường là trong mạng công ty.
+3. Mọi người quét mã, nhập mật khẩu nhân viên và chọn ngôn ngữ ở "Tôi xem" góc trên bên phải: tiếng Trung, Indonesia, Việt, Hindi hoặc Anh. Khi một câu không có ngôn ngữ đó, máy chủ trì cuộc họp dịch thêm một bản (phụ đề đa ngôn ngữ, từ r19), và phía trên trang có ghi chú. Điện thoại chỉ xem được. Điện thoại phải kết nối được tới máy đó, thường là trong mạng công ty.
 
 ## 5. Biên bản sau cuộc họp
 

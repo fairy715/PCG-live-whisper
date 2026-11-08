@@ -722,6 +722,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         return {"ok": True, "local": bool(is_local(request)), "available": start_live is not None,
                 "running": bool(live_running and live_running()),
                 "mode": mode, "is_file": bool(args and "--input" in args), "version": app_version(base_dir),
+                "multi_lang": settings().get("multi_lang", True) is not False,
                 "scenarios": [{k: s[k] for k in ("id", "title", "flag")}
                               | {"can_bidi": bool(s["bidi"]), "can_room": s["id"] in ROOM_SCENARIOS}
                               for s in LIVE_SCENARIOS]}
