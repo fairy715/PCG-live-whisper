@@ -34,7 +34,7 @@ Cách dùng cho họp trực tuyến, lớp học và biên bản: xem [các tì
 2. Lần đầu sẽ có phần hướng dẫn ngắn. Hãy xem qua một lần.
 3. Có thể đổi ngôn ngữ trang ở góc trên bên phải (中文 / English / Bahasa Indonesia / Tiếng Việt / हिन्दी).
 4. Phụ đề trực tiếp: chọn ngôn ngữ của bạn (Tiếng Việt) → "Tiếng Trung → Tiếng Việt" được chọn sẵn → "Bắt đầu". Bản ghi âm: tải tệp lên → khi xử lý xong, tải biên bản cuộc họp về.
-5. Phiên bản được hiển thị ở cuối trang (ví dụ v2026.11.5.r5). Hãy ghi kèm khi báo lỗi (bấm vào để sao chép).
+5. Phiên bản được hiển thị ở cuối trang (ví dụ v2026.11.7.r18). Hãy ghi kèm khi báo lỗi (bấm vào để sao chép).
 
 ## 4. Cập nhật
 

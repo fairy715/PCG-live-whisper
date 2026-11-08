@@ -34,7 +34,7 @@ How to use it for online meetings, classes and minutes: see [use cases](USE-CASE
 2. A short guided tour runs the first time. Follow it once.
 3. You can switch the page language at the top right (中文 / English / Bahasa Indonesia / Tiếng Việt / हिन्दी).
 4. Live subtitles: choose the language you speak → the kind of meeting → the language the others speak → "Start" (if you speak Indonesian, Vietnamese, Hindi or English, it is chosen for you). Recordings: upload → when processing is done, download the minutes.
-5. The version is shown at the bottom of the page (e.g. v2026.11.5.r5). Include it when you report a problem (click it to copy).
+5. The version is shown at the bottom of the page (e.g. v2026.11.7.r18). Include it when you report a problem (click it to copy).
 
 ## 4. Update
 
