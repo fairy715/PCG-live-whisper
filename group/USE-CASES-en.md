@@ -112,6 +112,20 @@ Translated directly, not through Chinese. Any two of Indonesian, Vietnamese, Hin
 
 ---
 
+## 8. Multinational meeting, Taiwanese staff speak Chinese
+
+For example, a Taiwanese manager chairs the meeting in Chinese, with Indonesian, Vietnamese and Indian staff attending, and everyone wants subtitles in their own language.
+
+**Online meeting (Teams): everyone opens subtitles on their own computer (works now)**
+- **Foreign staff**: on your own computer choose I speak "your language" → "I only read subtitles" → "Chinese". The Chinese in Teams is translated into your language; everyone reads their own language independently.
+- **Taiwanese staff following what foreign staff say**: choose "Indonesian" and so on. Only one foreign language at a time; when someone speaks another language, choose that language and click Start (the previous session is replaced).
+
+**Same meeting room**
+- The room's "subtitle computer" (one computer with a graphics card; people scan a QR code with their phones; setup in the IT guide) handles two languages per session, e.g. "Chinese ⇄ Indonesian". Viewers can only choose between Chinese and Indonesian; Vietnamese staff do not get Vietnamese.
+- For in-room meetings with three or more languages, we currently recommend **also starting a Teams meeting**: foreign staff join Teams on their own computers and read their own language as described above.
+
+---
+
 ## Tips
 
 - Speak clearly, one person at a time, microphone close to the speaker. Fill in the meeting topic for meetings with many technical terms.

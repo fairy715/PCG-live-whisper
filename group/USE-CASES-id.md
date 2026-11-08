@@ -106,6 +106,20 @@ Diterjemahkan langsung, tidak lewat bahasa Mandarin. Dua bahasa mana pun dari In
 
 ---
 
+## 7. Rapat multinasional, karyawan Taiwan berbahasa Mandarin
+
+Misalnya atasan dari Taiwan memimpin rapat dalam bahasa Mandarin, dihadiri karyawan Indonesia, Vietnam, dan India, dan setiap orang ingin subtitle dalam bahasanya sendiri.
+
+**Rapat online (Teams): setiap orang membuka subtitle di komputernya sendiri (sudah bisa)**
+- **Karyawan asing**: di komputer sendiri pilih saya berbicara "bahasa Anda" → "saya hanya membaca subtitle" → "Mandarin". Bahasa Mandarin di Teams diterjemahkan ke bahasa Anda; setiap orang membaca bahasanya sendiri.
+- **Karyawan Taiwan yang ingin memahami ucapan karyawan asing**: pilih "Bahasa Indonesia" dan seterusnya. Hanya satu bahasa asing sekaligus; saat orang lain berbicara bahasa lain, pilih bahasa itu lalu klik Mulai (sesi sebelumnya otomatis diganti).
+
+**Satu ruang rapat**
+- "Komputer subtitle" ruang rapat (satu komputer dengan kartu grafis; peserta memindai kode QR dengan ponsel; pengaturan di panduan IT) hanya menangani dua bahasa per sesi, mis. "Mandarin ⇄ Indonesia". Penonton hanya bisa memilih Mandarin atau Indonesia; karyawan Vietnam tidak mendapat bahasa Vietnam.
+- Untuk rapat di ruangan dengan tiga bahasa atau lebih, saat ini disarankan **sekaligus membuka rapat Teams**: karyawan asing bergabung ke Teams dari komputer sendiri dan membaca bahasanya sendiri seperti di atas.
+
+---
+
 ## Tips
 
 - Bicara jelas, satu per satu, mikrofon dekat pembicara. Isi topik rapat jika banyak istilah teknis.

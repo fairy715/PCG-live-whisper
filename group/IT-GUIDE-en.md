@@ -255,6 +255,38 @@ Many computers: IT first puts `catalog.json` and the `*.zip` files you need from
 - Compute type is chosen automatically: GTX 10 / MX series (compute capability 6.x) use int8, RTX 20 series and newer use float16
 - The cloud build has no graphics card to test with: try it on a computer with an NVIDIA card before rolling it out
 
+### Meeting room subtitle computer (one computer with a graphics card, everyone connects to it)
+
+The main installer only has the small model: it runs on ordinary laptops, but Indonesian and Vietnamese have more recognition mistakes. For better subtitles, let **one computer with an NVIDIA graphics card be the "subtitle computer"**: it listens, recognizes and translates, and everyone else reads the subtitles in the browser on their phone or laptop. Staff computers need no changes.
+
+**Recommended**: NVIDIA graphics card with at least 4 GB of video memory (e.g. RTX 3050 or better). A 2 GB card such as the MX330 may be too slow; test it first.
+
+**Setup (IT, once, on the subtitle computer)**
+
+1. Install the full installer, then the NVIDIA GPU pack (it checks the graphics card automatically when installed).
+2. IT settings page → "Models (model packs)" → install "Whisper large-v3-turbo (multilingual)".
+3. Under "Local recognition models", choose large-v3-turbo for "Live subtitles" and click "Save".
+4. (Optional) Language packs (medium) for Indonesian, Vietnamese and Hindi: choose them in "Model for each language" and click "Apply model settings". They are used only for "I only read subtitles".
+5. Tick "Allow other computers and phones to view subtitles", set a "Staff password", save, then **close the app and open it again**.
+6. Allow incoming connections in Windows Firewall (needs an administrator: open PowerShell as administrator):
+   ```powershell
+   New-NetFirewallRule -DisplayName "PCG Meeting Translator" -Direction Inbound -Protocol TCP -LocalPort 19781 -RemoteAddress LocalSubnet -Action Allow -Profile Domain,Private
+   ```
+   This only allows the local subnet. If the company network has several subnets, replace `LocalSubnet` with the real range (e.g. `10.10.0.0/16`).
+7. Give the subtitle computer a fixed IP address (or a DHCP reservation) so the QR code address does not change.
+
+**During the meeting**
+
+1. The subtitle computer joins the Teams meeting (online), or uses the room microphone (in the room: choose "Same classroom, one microphone").
+2. Choose the languages, click Start, then click "Share" on the subtitle screen and project the QR code.
+3. Everyone scans the QR code (or opens `http://<subtitle computer IP>:19781/simple/live`), enters the staff password and picks the language to show in large text with the language menu at the top right. Phones can only view; they cannot stop the subtitles.
+
+**Limits**
+
+- **One session has two languages**: each sentence is translated into one language only (e.g. in a "Chinese ⇄ Indonesian" session every sentence has a Chinese and an Indonesian version). Viewers can choose between those two; choosing a third language (e.g. Vietnamese) does not produce Vietnamese. For meetings with three or more languages, see "Multinational meeting" in the use cases.
+- Only computers and phones on the same company network can connect.
+- Security: from r18 only connections by IP address or computer name are accepted; use a long staff password (there is no lockout after wrong attempts yet).
+
 ## ③ Staff computers that need live subtitles
 
 ### Windows

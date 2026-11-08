@@ -106,6 +106,20 @@ Dịch trực tiếp, không qua tiếng Trung. Hai ngôn ngữ bất kỳ trong
 
 ---
 
+## 7. Cuộc họp đa quốc gia, nhân viên Đài Loan nói tiếng Trung
+
+Ví dụ quản lý người Đài Loan chủ trì bằng tiếng Trung, có nhân viên Indonesia, Việt Nam, Ấn Độ tham dự, và ai cũng muốn phụ đề bằng ngôn ngữ của mình.
+
+**Họp trực tuyến (Teams): mỗi người mở phụ đề trên máy của mình (dùng được ngay)**
+- **Nhân viên nước ngoài**: trên máy của mình chọn tôi nói "ngôn ngữ của bạn" → "tôi chỉ đọc phụ đề" → "Tiếng Trung". Tiếng Trung trong Teams được dịch sang ngôn ngữ của bạn; mỗi người đọc ngôn ngữ của mình, không ảnh hưởng nhau.
+- **Nhân viên Đài Loan muốn hiểu lời nhân viên nước ngoài**: chọn "Tiếng Việt" v.v. Mỗi lần chỉ một ngoại ngữ; khi người khác nói ngôn ngữ khác, chọn ngôn ngữ đó rồi bấm Bắt đầu (phiên trước tự được thay).
+
+**Cùng một phòng họp**
+- "Máy phụ đề" của phòng họp (một máy có card đồ họa; mọi người quét mã QR bằng điện thoại; cài đặt trong hướng dẫn IT) mỗi phiên chỉ xử lý hai ngôn ngữ, ví dụ "Tiếng Trung ⇄ Tiếng Indonesia". Người xem chỉ chọn được tiếng Trung hoặc tiếng Indonesia; nhân viên Việt Nam không có tiếng Việt.
+- Họp tại chỗ có từ ba ngôn ngữ trở lên: hiện khuyến nghị **mở thêm một cuộc họp Teams**: nhân viên nước ngoài tham gia Teams bằng máy của mình và đọc ngôn ngữ của mình như trên.
+
+---
+
 ## Mẹo
 
 - Nói rõ ràng, từng người một, micro gần người nói. Điền chủ đề cuộc họp nếu có nhiều thuật ngữ.

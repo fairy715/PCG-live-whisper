@@ -257,6 +257,38 @@ Nhiều máy: IT đặt trước `catalog.json` và các tệp `*.zip` cần dù
 - Định dạng tính toán chọn tự động: dòng GTX 10 / MX (compute capability 6.x) dùng int8, từ dòng RTX 20 trở lên dùng float16
 - Bản dựng trên đám mây không có card đồ họa để thử: hãy thử trên máy có card NVIDIA trước khi triển khai rộng
 
+### Máy phụ đề phòng họp (một máy có card đồ họa, mọi người kết nối vào)
+
+Bộ cài chính chỉ có mô hình small: chạy được trên laptop thường, nhưng tiếng Indonesia và tiếng Việt nhận dạng sai nhiều hơn. Muốn phụ đề chính xác hơn, hãy dùng **một máy có card đồ họa NVIDIA làm "máy phụ đề"**: máy này thu âm, nhận dạng và dịch, mọi người khác xem phụ đề trên trình duyệt của điện thoại hoặc laptop. Máy của nhân viên không cần thay đổi. (Trang cài đặt IT hiển thị bằng tiếng Anh; tên nút được ghi bằng tiếng Anh.)
+
+**Khuyến nghị**: card đồ họa NVIDIA có ít nhất 4 GB bộ nhớ video (ví dụ RTX 3050 trở lên). Card 2 GB như MX330 có thể quá chậm; hãy thử trước.
+
+**Cài đặt (IT, một lần, trên máy phụ đề)**
+
+1. Cài bộ cài đầy đủ, rồi cài gói tăng tốc GPU NVIDIA (sau khi cài sẽ tự kiểm tra card đồ họa).
+2. Trang cài đặt IT → "**Models (model packs)**" → cài "Whisper large-v3-turbo (multilingual)".
+3. Ở "**Local recognition models**", chọn large-v3-turbo cho "**Live subtitles**", rồi bấm "**Save**".
+4. (Tùy chọn) Gói ngôn ngữ (medium) cho tiếng Indonesia, Việt, Hindi: chọn ở "**Model for each language**", rồi bấm "**Apply model settings**". Chỉ dùng cho "tôi chỉ đọc phụ đề".
+5. Đánh dấu "**Allow other computers and phones to view subtitles**", đặt "**Staff password**", lưu, rồi **đóng ứng dụng và mở lại**.
+6. Cho phép kết nối đến trong Windows Firewall (cần quyền quản trị: mở PowerShell bằng quyền quản trị):
+   ```powershell
+   New-NetFirewallRule -DisplayName "PCG Meeting Translator" -Direction Inbound -Protocol TCP -LocalPort 19781 -RemoteAddress LocalSubnet -Action Allow -Profile Domain,Private
+   ```
+   Lệnh này chỉ cho phép mạng con nội bộ. Nếu mạng công ty có nhiều mạng con, thay `LocalSubnet` bằng dải thật (ví dụ `10.10.0.0/16`).
+7. Đặt IP cố định cho máy phụ đề (hoặc giữ chỗ DHCP) để địa chỉ trong mã QR không đổi.
+
+**Khi họp**
+
+1. Máy phụ đề tham gia cuộc họp Teams (trực tuyến), hoặc dùng micro của phòng họp (họp tại chỗ: chọn "Cùng một phòng học, một micro").
+2. Chọn ngôn ngữ, bấm Bắt đầu, rồi bấm "Chia sẻ" trên màn hình phụ đề và chiếu mã QR.
+3. Mọi người quét mã QR (hoặc mở `http://<IP máy phụ đề>:19781/simple/live`), nhập mật khẩu nhân viên và chọn ngôn ngữ hiển thị chữ lớn bằng menu ngôn ngữ ở góc trên bên phải. Điện thoại chỉ xem được, không dừng được phụ đề.
+
+**Giới hạn**
+
+- **Mỗi phiên chỉ có hai ngôn ngữ**: mỗi câu chỉ được dịch sang một ngôn ngữ (ví dụ phiên "Tiếng Trung ⇄ Tiếng Indonesia" thì mỗi câu chỉ có bản tiếng Trung và tiếng Indonesia). Người xem có thể chọn giữa hai bản đó; chọn ngôn ngữ thứ ba (ví dụ tiếng Việt) sẽ không có bản tiếng Việt. Cuộc họp có từ ba ngôn ngữ trở lên: xem "Cuộc họp đa quốc gia" trong các tình huống sử dụng.
+- Chỉ máy tính và điện thoại trong cùng mạng nội bộ công ty mới kết nối được.
+- Bảo mật: từ r18 chỉ chấp nhận kết nối bằng địa chỉ IP hoặc tên máy; hãy đặt mật khẩu nhân viên dài (hiện chưa khóa sau nhiều lần nhập sai).
+
 ## ③ Máy nhân viên cần phụ đề trực tiếp
 
 ### Windows

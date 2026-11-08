@@ -257,6 +257,38 @@ Catatan: halaman pengaturan IT tersedia dalam bahasa Indonesia: pilih **Bahasa I
 - Format komputasi dipilih otomatis: seri GTX 10 / MX (compute capability 6.x) memakai int8, seri RTX 20 ke atas memakai float16
 - Pembuatan di cloud tidak memiliki kartu grafis untuk diuji: coba dulu di komputer dengan kartu NVIDIA sebelum disebarkan
 
+### Komputer subtitle ruang rapat (satu komputer dengan kartu grafis, semua orang terhubung ke sana)
+
+Penginstal utama hanya berisi model small: berjalan di laptop biasa, tetapi bahasa Indonesia dan Vietnam lebih banyak salah kenal. Untuk subtitle yang lebih akurat, jadikan **satu komputer dengan kartu grafis NVIDIA sebagai "komputer subtitle"**: komputer ini menangkap suara, mengenali, dan menerjemahkan, sementara yang lain membaca subtitle di browser ponsel atau laptop. Komputer karyawan tidak perlu diubah.
+
+**Disarankan**: kartu grafis NVIDIA dengan memori video minimal 4 GB (mis. RTX 3050 ke atas). Kartu 2 GB seperti MX330 mungkin terlalu lambat; uji dulu.
+
+**Pengaturan (IT, sekali, di komputer subtitle)**
+
+1. Pasang penginstal lengkap, lalu paket GPU NVIDIA (setelah terpasang, kartu grafis diperiksa otomatis).
+2. Halaman pengaturan IT → "Model (paket model)" → pasang "Whisper large-v3-turbo (multibahasa)".
+3. Di "Model pengenalan lokal", pilih large-v3-turbo untuk "Subtitle langsung", lalu klik "Simpan".
+4. (Opsional) Paket bahasa (medium) untuk Indonesia, Vietnam, dan Hindi: pilih di "Model untuk setiap bahasa", lalu klik "Terapkan pengaturan model". Hanya dipakai untuk "saya hanya membaca subtitle".
+5. Centang "Izinkan komputer dan ponsel lain menonton subtitle", isi "Kata sandi karyawan", simpan, lalu **tutup aplikasi dan buka lagi**.
+6. Izinkan koneksi masuk di Windows Firewall (perlu administrator: buka PowerShell sebagai administrator):
+   ```powershell
+   New-NetFirewallRule -DisplayName "PCG Meeting Translator" -Direction Inbound -Protocol TCP -LocalPort 19781 -RemoteAddress LocalSubnet -Action Allow -Profile Domain,Private
+   ```
+   Ini hanya mengizinkan subnet lokal. Jika jaringan perusahaan punya beberapa subnet, ganti `LocalSubnet` dengan rentang sebenarnya (mis. `10.10.0.0/16`).
+7. Beri komputer subtitle IP tetap (atau reservasi DHCP) agar alamat di kode QR tidak berubah.
+
+**Saat rapat**
+
+1. Komputer subtitle bergabung ke rapat Teams (online), atau memakai mikrofon ruang rapat (di ruangan: pilih "Satu ruang kelas, satu mikrofon").
+2. Pilih bahasa, klik Mulai, lalu klik "Bagikan" di layar subtitle dan tampilkan kode QR di proyektor.
+3. Semua orang memindai kode QR (atau membuka `http://<IP komputer subtitle>:19781/simple/live`), memasukkan kata sandi karyawan, dan memilih bahasa yang ditampilkan besar lewat menu bahasa di kanan atas. Ponsel hanya bisa melihat, tidak bisa menghentikan subtitle.
+
+**Batasan**
+
+- **Satu sesi hanya dua bahasa**: setiap kalimat hanya diterjemahkan ke satu bahasa (mis. di sesi "Mandarin ⇄ Indonesia" setiap kalimat punya versi Mandarin dan Indonesia). Penonton bisa memilih di antara keduanya; memilih bahasa ketiga (mis. Vietnam) tidak menghasilkan bahasa Vietnam. Untuk rapat dengan tiga bahasa atau lebih, lihat "Rapat multinasional" di contoh penggunaan.
+- Hanya komputer dan ponsel di jaringan perusahaan yang sama yang bisa terhubung.
+- Keamanan: mulai r18 hanya koneksi lewat alamat IP atau nama komputer yang diterima; gunakan kata sandi karyawan yang panjang (belum ada penguncian setelah salah berulang).
+
 ## ③ Komputer karyawan yang perlu subtitle langsung
 
 ### Windows
