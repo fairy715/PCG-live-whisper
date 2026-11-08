@@ -24,7 +24,7 @@ html,body{width:1280px;height:720px;overflow:hidden;background:#050b18;color:var
 .av.t{background:#ffd166}.av.b{background:#7bdff2}.av.m{background:#b6f09c}
 .bub{position:absolute;max-width:470px;white-space:nowrap;border-radius:22px;padding:18px 22px;font-size:26px;font-weight:800;background:#fff;color:#1d2330;box-shadow:0 20px 50px rgba(0,0,0,.45)}
 .lg{display:inline-block;font-size:13px;font-weight:900;border-radius:6px;padding:2px 7px;color:#fff;vertical-align:3px;margin-right:6px}
-.lg.zh{background:#e5484d}.lg.id,.lg.vi{background:#1f6feb}.lg.vi.x{background:#2f9e44}
+.lg.zh{background:#e5484d}.lg.id,.lg.vi{background:#1f6feb}.lg.hi{background:#c2410c}.lg.en{background:#6d28d9}.lg.vi.x{background:#2f9e44}
 .slam{position:absolute;left:0;right:0;top:520px;text-align:center;font-size:56px;font-weight:900;letter-spacing:.02em}
 .qm{position:absolute;font-size:46px;font-weight:900;color:var(--warn)}
 .logo{width:170px;height:170px;border-radius:42px;background:linear-gradient(135deg,#4c9dff,#3ecf8e);display:grid;place-items:center;font-size:58px;font-weight:900;color:#fff;
@@ -173,19 +173,19 @@ const FL=LANG==='vi'?'vi':'id';  // 故事裡外國同事說的語言：越南�
 const X={
 zh:{n0t:'林老師・台灣',n0b:'Budi・印尼',slam:'聽不懂，會就白開了。',name:'PCG AI 會議翻譯',tag:'讓每個人都聽得懂',
  h2:'線上課，雙向字幕',s2:'選你和對方的語言，按開始',cap2:'老師說中文、學生說印尼文，字幕即時互翻',
- h3:'掃一下，手機就能看',s3:'每個人看自己的語言',h4:'訓練教室：一支麥克風就夠',s4:'每一句自動判斷是中文還是印尼文',det:'自動判斷：',lzh:'中文',lid:'Bahasa Indonesia',seT:'林老師',seB:'Budi',
+ h3:'掃一下，手機就能看',s3:'多語字幕：每個人選自己的語言',h4:'訓練教室：一支麥克風就夠',s4:'每一句自動判斷是中文還是印尼文',det:'自動判斷：',lzh:'中文',lid:'Bahasa Indonesia',seT:'林老師',seB:'Budi',
  h5:'課後，會議紀錄自動整理好',s5:'上傳錄音 → 逐字稿、決議、待辦',doc:['會議紀錄','決議','新設備下週一開始試產','待辦','準備訓練教材（林老師，11/12）','確認安全檢查表（Budi，11/10）','風險','備品到貨可能延後'],
  t:['不用網路','不用伺服器','5 種語言'],t4:'離線安裝 ・ 不需系統管理員 ・ 一鍵更新',line:'語言，不再是距離。',cta:'安裝與使用，請洽 IT',
  h8:'越南同仁 ⇄ 印尼同仁，直接互翻',s8:'不經過中文：印尼文、越南文、印地語、英文任兩種',nM:'Minh・越南',nB:'Budi・印尼',xb:'VI ⇄ ID ・ 不經過中文'},
 id:{n0t:'Guru Lin ・ Taiwan',n0b:'Budi ・ Indonesia',slam:'Tidak paham, rapat jadi sia-sia.',name:'Penerjemah Rapat AI PCG',tag:'Semua orang bisa saling paham',
  h2:'Kelas online, subtitle dua arah',s2:'Pilih bahasa Anda dan lawan bicara, tekan Mulai',cap2:'Guru berbahasa Mandarin, siswa menjawab bahasa Indonesia — langsung diterjemahkan',
- h3:'Pindai, langsung di ponsel',s3:'Setiap orang membaca bahasanya sendiri',h4:'Kelas pelatihan: cukup satu mikrofon',s4:'Setiap kalimat dikenali otomatis: Mandarin atau Indonesia',det:'Deteksi otomatis: ',lzh:'Mandarin',lid:'Bahasa Indonesia',seT:'Guru Lin',seB:'Budi',
+ h3:'Pindai, langsung di ponsel',s3:'Subtitle multibahasa: setiap orang memilih bahasanya sendiri',h4:'Kelas pelatihan: cukup satu mikrofon',s4:'Setiap kalimat dikenali otomatis: Mandarin atau Indonesia',det:'Deteksi otomatis: ',lzh:'Mandarin',lid:'Bahasa Indonesia',seT:'Guru Lin',seB:'Budi',
  h5:'Setelah kelas, notulen langsung jadi',s5:'Unggah rekaman → transkrip, keputusan, tindak lanjut',doc:['Notulen','Keputusan','Mesin baru mulai uji produksi Senin depan','Tindak lanjut','Siapkan materi pelatihan (Guru Lin, 12/11)','Periksa daftar keselamatan (Budi, 10/11)','Risiko','Suku cadang mungkin terlambat'],
  t:['Tanpa internet','Tanpa server','5 bahasa'],t4:'Instalasi offline ・ Tanpa hak admin ・ Pembaruan sekali klik',line:'Bahasa bukan lagi penghalang.',cta:'Hubungi IT untuk pemasangan',
  h8:'Karyawan Vietnam ⇄ Indonesia, langsung',s8:'Tanpa lewat Mandarin: dua bahasa mana pun dari Indonesia, Vietnam, Hindi, Inggris',nM:'Minh ・ Vietnam',nB:'Budi ・ Indonesia',xb:'VI ⇄ ID ・ tanpa lewat Mandarin'},
 vi:{n0t:'Giảng viên Lin ・ Đài Loan',n0b:'Minh ・ Việt Nam',slam:'Không hiểu thì họp cũng vô ích.',name:'Phiên dịch cuộc họp AI PCG',tag:'Ai cũng hiểu được nhau',
  h2:'Lớp học online, phụ đề hai chiều',s2:'Chọn ngôn ngữ của bạn và người kia, bấm Bắt đầu',cap2:'Giảng viên nói tiếng Trung, học viên trả lời tiếng Việt — dịch ngay lập tức',
- h3:'Quét mã, xem ngay trên điện thoại',s3:'Mỗi người đọc ngôn ngữ của mình',h4:'Phòng đào tạo: chỉ cần một micro',s4:'Tự nhận biết từng câu: tiếng Trung hay tiếng Việt',det:'Tự nhận biết: ',lzh:'Tiếng Trung',lid:'Tiếng Việt',seT:'Giảng viên Lin',seB:'Minh',
+ h3:'Quét mã, xem ngay trên điện thoại',s3:'Phụ đề đa ngôn ngữ: mỗi người chọn ngôn ngữ của mình',h4:'Phòng đào tạo: chỉ cần một micro',s4:'Tự nhận biết từng câu: tiếng Trung hay tiếng Việt',det:'Tự nhận biết: ',lzh:'Tiếng Trung',lid:'Tiếng Việt',seT:'Giảng viên Lin',seB:'Minh',
  h5:'Sau buổi học, biên bản tự động xong',s5:'Tải bản ghi âm lên → bản ghi lời, quyết định, việc cần làm',doc:['Biên bản họp','Quyết định','Máy mới chạy thử từ thứ Hai tuần sau','Việc cần làm','Chuẩn bị tài liệu đào tạo (GV Lin, 12/11)','Kiểm tra danh sách an toàn (Minh, 10/11)','Rủi ro','Phụ tùng có thể về trễ'],
  t:['Không cần internet','Không cần máy chủ','5 ngôn ngữ'],t4:'Cài đặt offline ・ Không cần quyền admin ・ Cập nhật một chạm',line:'Ngôn ngữ không còn là khoảng cách.',cta:'Liên hệ IT để cài đặt',
  h8:'Nhân viên Việt Nam ⇄ Indonesia, dịch trực tiếp',s8:'Không qua tiếng Trung: hai ngôn ngữ bất kỳ trong tiếng Indonesia, Việt, Hindi, Anh',nM:'Minh ・ Việt Nam',nB:'Budi ・ Indonesia',xb:'VI ⇄ ID ・ không qua tiếng Trung'}}[LANG];
@@ -216,8 +216,10 @@ const L2=[['zh','設備要先關電源，再做安全檢查。',FL,F.l2[0]],
           ['zh','對，手套和安全帽都要。',FL,F.l2[2]]];
 $('cards2').innerHTML=L2.map((x,i)=>`<div class="card" id="c2${i}" style="left:690px;top:${200+i*128}px"><div class="o">${tag(x[0])}${x[1]}</div><div class="t">${tag(x[2])}<span id="c2t${i}"></span></div></div>`).join('');
 L2.forEach((x,i)=>$('lm'+i).innerHTML=`${tag(x[0])}${x[1]}<b>${x[3]}</b>`);
-const PH=[[FL,F.l2[2]],['zh','對，手套和安全帽都要。'],[FL,F.l2[2]],['zh','對，手套和安全帽都要。'],[FL,F.l2[2]]];
-$('phones').innerHTML=PH.map((p,i)=>`<div class="phone" id="ph${i}" style="left:${560+i*130}px;top:${215+Math.abs(i-2)*18}px"><div class="ln">${tag(p[0])}${p[1]}</div></div>`).join('');
+// 多語字幕（r19）：同一句話，五支手機各選自己的語言
+const PH=[['zh','對，手套和安全帽都要。'],['id','Ya, sarung tangan dan helm wajib.'],['vi','Đúng, phải đeo cả găng tay và mũ bảo hộ.'],
+          ['hi','हाँ, दस्ताने और हेलमेट दोनों ज़रूरी हैं।'],['en','Yes, gloves and helmets are both required.']];
+$('phones').innerHTML=PH.map((p,i)=>`<div class="phone" id="ph${i}" style="left:${468+i*158}px;top:${215+Math.abs(i-2)*18}px;width:150px"><div class="ln">${tag(p[0])}${p[1]}</div></div>`).join('');
 (function(){const q=$('qr');const p='111111101100000110101110100101110100101110110101110100101111111101000000011010110101101011001011011101011100101011000001011110101011';for(let i=0;i<81;i++){const c=document.createElement('i');if(p[i%p.length]==='0')c.className='w';q.insertBefore(c,$('scan'))}})();
 const ROOM=[['zh','請大家戴上安全帽。',F.room[0]],[FL,F.room[1],'安全帽要放在哪裡？'],['zh','放在門口的架子上。',F.room[2]]];
 $('wave').innerHTML=[...Array(36)].map(()=>'<i></i>').join('');

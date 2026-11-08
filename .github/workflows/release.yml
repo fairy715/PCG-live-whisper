@@ -41,7 +41,10 @@ jobs:
           }
 
       - name: 製作離線資源包（翻譯模型轉成 int8，約 0.5 GB）
-        run: python group/windows/build_bundle.py --out dist/PCG-offline --models "$env:IN_MODELS" --m2m-convert
+        # 包一層 bundle_ci.py：下載重試、ffmpeg「latest」壞掉時改用 BtbN 最近的自動建置（不改 build_bundle.py，小更新包才不受影響）
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python group/windows/bundle_ci.py --out dist/PCG-offline --models "$env:IN_MODELS" --m2m-convert
 
       - name: 編譯單一安裝檔
         shell: pwsh
