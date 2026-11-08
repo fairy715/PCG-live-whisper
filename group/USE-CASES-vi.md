@@ -115,8 +115,9 @@ Ví dụ quản lý người Đài Loan chủ trì bằng tiếng Trung, có nh�
 - **Nhân viên Đài Loan muốn hiểu lời nhân viên nước ngoài**: chọn "Tiếng Việt" v.v. Mỗi lần chỉ một ngoại ngữ; khi người khác nói ngôn ngữ khác, chọn ngôn ngữ đó rồi bấm Bắt đầu (phiên trước tự được thay).
 
 **Cùng một phòng họp**
-- "Máy phụ đề" của phòng họp (một máy có card đồ họa; mọi người quét mã QR bằng điện thoại; cài đặt trong hướng dẫn IT) mỗi phiên chỉ xử lý hai ngôn ngữ, ví dụ "Tiếng Trung ⇄ Tiếng Indonesia". Người xem chỉ chọn được tiếng Trung hoặc tiếng Indonesia; nhân viên Việt Nam không có tiếng Việt.
-- Họp tại chỗ có từ ba ngôn ngữ trở lên: hiện khuyến nghị **mở thêm một cuộc họp Teams**: nhân viên nước ngoài tham gia Teams bằng máy của mình và đọc ngôn ngữ của mình như trên.
+- Dùng "máy phụ đề" của phòng họp (một máy có card đồ họa; cài đặt trong hướng dẫn IT): chọn "Cùng một phòng học, một micro" và ngôn ngữ mà nhiều người kia nói nhất (ví dụ tiếng Indonesia), bấm Bắt đầu, rồi "Chia sẻ" và chiếu mã QR.
+- Mọi người quét mã QR và tự chọn ngôn ngữ ở góc trên bên phải (phụ đề đa ngôn ngữ, từ r19): người xem tiếng Trung và tiếng Indonesia đọc phụ đề bình thường; với người chọn tiếng Việt, Hindi hoặc Anh, máy phụ đề dịch thêm một bản.
+- Micro chỉ phân biệt tiếng Trung và một ngoại ngữ đã chọn. Nhân viên nói ngôn ngữ khác nên dùng tiếng Anh hoặc nhờ người khác chuyển lời.
 
 ---
 

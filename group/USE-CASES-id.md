@@ -115,8 +115,9 @@ Misalnya atasan dari Taiwan memimpin rapat dalam bahasa Mandarin, dihadiri karya
 - **Karyawan Taiwan yang ingin memahami ucapan karyawan asing**: pilih "Bahasa Indonesia" dan seterusnya. Hanya satu bahasa asing sekaligus; saat orang lain berbicara bahasa lain, pilih bahasa itu lalu klik Mulai (sesi sebelumnya otomatis diganti).
 
 **Satu ruang rapat**
-- "Komputer subtitle" ruang rapat (satu komputer dengan kartu grafis; peserta memindai kode QR dengan ponsel; pengaturan di panduan IT) hanya menangani dua bahasa per sesi, mis. "Mandarin ⇄ Indonesia". Penonton hanya bisa memilih Mandarin atau Indonesia; karyawan Vietnam tidak mendapat bahasa Vietnam.
-- Untuk rapat di ruangan dengan tiga bahasa atau lebih, saat ini disarankan **sekaligus membuka rapat Teams**: karyawan asing bergabung ke Teams dari komputer sendiri dan membaca bahasanya sendiri seperti di atas.
+- Gunakan "komputer subtitle" ruang rapat (satu komputer dengan kartu grafis; pengaturan di panduan IT): pilih "Satu ruang kelas, satu mikrofon" dan bahasa yang paling banyak dipakai peserta lain (mis. Indonesia), klik Mulai, lalu "Bagikan" dan tampilkan kode QR.
+- Semua orang memindai kode QR dan memilih bahasanya sendiri di kanan atas (subtitle multibahasa, mulai r19): penonton Mandarin dan Indonesia membaca subtitle biasa; untuk penonton Vietnam, Hindi, atau Inggris, komputer subtitle menerjemahkan satu salinan lagi.
+- Mikrofon hanya membedakan Mandarin dan satu bahasa asing yang dipilih. Karyawan yang berbicara bahasa lain sebaiknya memakai bahasa Inggris atau dibantu orang lain.
 
 ---
 

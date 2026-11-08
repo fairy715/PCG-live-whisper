@@ -3475,6 +3475,11 @@ def _webui_send(event: dict):
             for k in ("src_text", "dst_text", "detail"):
                 if k in event and isinstance(event[k], str):
                     event[k] = event[k].replace("\ufffd", "")
+            if event.get("type") == "transcription":
+                try:
+                    _pcg_extra.feed(event)               # 集團版多語字幕：加編號、有人要看別的語言就另外翻
+                except Exception:  # noqa: BLE001
+                    pass
             _webui_queue.put_nowait(event)
         except Exception:
             pass
@@ -5241,6 +5246,7 @@ class OllamaTranslator:
             except Exception as e:
                 print(f"\n[錯誤] 無法連接 {srv_label}: {e}", file=sys.stderr)
                 sys.exit(1)
+        _pcg_note_translator(self)          # 集團版多語字幕：額外的語言用同一台大模型伺服器
 
     def _build_prompt(self, text, context):
         _dispatch = {"zh2en": self._build_prompt_zh2en,
@@ -5966,6 +5972,7 @@ class M2M100Translator(NllbTranslator):
     LABEL = "M2M100"
     _LANG_MAP = {"en": "__en__", "zh": "__zh__", "ja": "__ja__", "ko": "__ko__",
                  "id": "__id__", "vi": "__vi__", "hi": "__hi__"}
+    _SHARED = {}            # (模型資料夾, CTranslate2 類別) → (sentencepiece, CTranslate2 Translator)
     BEAM_SIZE = 2          # CPU 上即時字幕要快；5 會慢一倍以上，品質差異不大
 
     def __init__(self, direction="en2zh"):
@@ -5979,13 +5986,21 @@ class M2M100Translator(NllbTranslator):
         spm = os.path.join(M2M_MODEL_DIR, "sentencepiece.bpe.model")
         if not os.path.isfile(spm):
             raise FileNotFoundError(f"M2M100 模型缺少 sentencepiece.bpe.model：{M2M_MODEL_DIR}")
+        # 多語字幕（r19）會同時有好幾個翻譯方向：模型只載入一份，大家共用（CTranslate2 可以多執行緒同時呼叫）
+        key = (M2M_MODEL_DIR, ctranslate2.Translator)
+        shared = M2M100Translator._SHARED.get(key)
+        if shared:
+            self.sp, self.ct2 = shared
+            print(f"{C_OK}{BOLD}完成！{RESET}")
+            _pcg_note_translator(self)
+            return
         self.sp = sentencepiece.SentencePieceProcessor()
         self.sp.Load(spm)
         # 執行緒：大部分留給語音辨識（即時字幕兩者同時在跑），總數不吃滿整台電腦（見 _pcg_cpu_threads）
-        _threads = _pcg_cpu_threads()[1]
-        self.ct2 = ctranslate2.Translator(M2M_MODEL_DIR, device="cpu", compute_type="int8",
-                                          intra_threads=_threads)
+        self.ct2 = _pcg_ct2_translator(M2M_MODEL_DIR, _pcg_cpu_threads()[1])
+        M2M100Translator._SHARED[key] = (self.sp, self.ct2)
         print(f"{C_OK}{BOLD}完成！{RESET}")
+        _pcg_note_translator(self)
 
     def _translate_short(self, text):
         tokens = self.sp.Encode(text, out_type=str)
@@ -6040,12 +6055,135 @@ class MadladTranslator(NllbTranslator):
         self.ct2 = ctranslate2.Translator(d, device="cpu", compute_type="int8",
                                           intra_threads=_pcg_cpu_threads()[0])
         print(f"{C_OK}{BOLD}完成！{RESET}")
+        _pcg_note_translator(self)
 
     def _translate_short(self, text):
         tokens = self.sp.Encode(f"<2{self.tgt_lang}> {text}", out_type=str)
         results = self.ct2.translate_batch([tokens], beam_size=self.BEAM_SIZE, no_repeat_ngram_size=4,
                                            repetition_penalty=1.2, max_decoding_length=256)
         return self.sp.Decode(results[0].hypotheses[0])
+
+
+# ══ 集團版 r19：多語字幕 ══════════════════════════════════════════
+# 每一句原本只翻成一種語言（例如中文 ⇄ 印尼文）。看字幕的人（分享的 QR Code、這台的字幕畫面）選了別的語言時，
+# WebUI 把「有人要看的語言」寫進 .extra_langs，這裡每一句再額外翻成那些語言，用 transcription_extra 事件送出。
+# 語音辨識只做一次，多的只有翻譯：本機模式用同一份 M2M100（有顯示卡就用 GPU），伺服器模式用同一台大模型；
+# 幾種語言同時翻（不排隊），沒人選的語言不翻。IT 可以在設定頁關掉（pcg_simple.multi_lang = false）。
+_PCG_XT_FLAG = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".extra_langs")
+_PCG_XT_LANGS = ("zh", "id", "vi", "hi", "en")
+_PCG_LABEL_LANG = {"中": "zh", "台": "zh", "EN": "en", "ID": "id", "VI": "vi", "HI": "hi", "日": "ja", "韓": "ko"}
+_PCG_LANG_LABEL = {"zh": "中", "en": "EN", "id": "ID", "vi": "VI", "hi": "HI"}
+_pcg_tr_note = {"tr": None, "building": False}   # building：正在建多語字幕自己的翻譯器（不要蓋掉主程式的）
+
+
+def _pcg_note_translator(tr):
+    """記下主程式在用的翻譯器（多語字幕照同樣的方式建其他方向）；建多語字幕自己的翻譯器時不記"""
+    if not _pcg_tr_note["building"]:
+        _pcg_tr_note["tr"] = tr
+
+
+def _pcg_ct2_translator(model_dir, cpu_threads):
+    """本機翻譯模型（CTranslate2）：顯示卡能用就放顯示卡（GPU 加速包），不行就 CPU int8"""
+    if _fw_local_cuda_ok():
+        try:
+            types = ctranslate2.get_supported_compute_types("cuda")
+            return ctranslate2.Translator(model_dir, device="cuda",
+                                          compute_type=_cuda_compute_type(types, _cuda_compute_capability()))
+        except Exception as e:  # noqa: BLE001
+            print(f"  {C_DIM}[提示] 翻譯模型用不了顯示卡（{str(e)[:120]}），改用 CPU{RESET}", flush=True)
+    return ctranslate2.Translator(model_dir, device="cpu", compute_type="int8", intra_threads=cpu_threads)
+
+
+class _PcgExtraSubs:
+    WORKERS = 3
+
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.trs = {}
+        self.pool = None
+        self.want = frozenset()
+        self.checked = 0.0
+        self.seq = 0
+        self.enabled = None
+
+    def on(self):
+        if self.enabled is None:
+            try:
+                self.enabled = (_config.get("pcg_simple") or {}).get("multi_lang", True) is not False
+            except Exception:
+                self.enabled = True
+        return self.enabled
+
+    def wanted(self):
+        """有人要看的語言（每秒最多讀一次旗標檔）"""
+        now = time.monotonic()
+        if now - self.checked >= 1.0:
+            self.checked = now
+            try:
+                with open(_PCG_XT_FLAG, encoding="utf-8") as f:
+                    raw = f.read(200)
+                self.want = frozenset(x for x in raw.replace(",", " ").split() if x in _PCG_XT_LANGS)
+            except OSError:
+                self.want = frozenset()
+        return self.want
+
+    def translator(self, direction):
+        """某個方向的翻譯器：照主程式在用的那一種建（本機 M2M100／MADLAD 或大模型），建好就留著"""
+        with self.lock:
+            tr = self.trs.get(direction)
+            if tr is not None:
+                return tr
+            base = _pcg_tr_note["tr"]
+            _pcg_tr_note["building"] = True
+            try:
+                if isinstance(base, OllamaTranslator):
+                    tr = OllamaTranslator(base.model, base.host, base.port, direction=direction, skip_check=True,
+                                          server_type=base.server_type, meeting_topic=base.meeting_topic)
+                elif isinstance(base, MadladTranslator):
+                    tr = MadladTranslator(direction=direction)
+                else:
+                    tr = M2M100Translator(direction=direction)       # 主程式沒翻譯（例如大家都說中文）也用它
+            finally:
+                _pcg_tr_note["building"] = False
+            self.trs[direction] = tr
+            return tr
+
+    def feed(self, event):
+        """每一句字幕：加上編號（額外的翻譯靠它對回這一句），有人要看別的語言就送去翻"""
+        self.seq += 1
+        event["id"] = self.seq
+        if not self.on():
+            return
+        want = self.wanted()
+        if not want:
+            return
+        src = _PCG_LABEL_LANG.get(event.get("src_lang") or "")
+        text = (event.get("src_text") or "").strip()
+        if not src or not text:
+            return
+        have = {src, _PCG_LABEL_LANG.get(event.get("dst_lang") or "")}
+        todo = [L for L in sorted(want) if L not in have and f"{src}2{L}" in NllbTranslator._DIRECTION_MAP]
+        if not todo:
+            return
+        if self.pool is None:
+            from concurrent.futures import ThreadPoolExecutor
+            self.pool = ThreadPoolExecutor(max_workers=self.WORKERS, thread_name_prefix="pcg-extra")
+        for L in todo:
+            self.pool.submit(self._one, event["id"], f"{src}2{L}", text, L, event.get("source"))
+
+    def _one(self, eid, direction, text, lang, source):
+        t0 = time.monotonic()
+        try:
+            out = self.translator(direction).translate(text)
+        except Exception:  # noqa: BLE001
+            return
+        if not out or isinstance(out, _TranslateFailed) or not str(out).strip():
+            return
+        _webui_send({"type": "transcription_extra", "id": eid, "lang": _PCG_LANG_LABEL[lang], "lang_code": lang,
+                     "text": str(out).strip(), "source": source, "translate_time": round(time.monotonic() - t0, 2)})
+
+
+_pcg_extra = _PcgExtraSubs()
 
 
 def _is_private_host(host):

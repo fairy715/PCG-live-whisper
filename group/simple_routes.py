@@ -962,6 +962,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "diarize": bool(s.get("diarize", s.get("backend") == "server" and bool(rw.get("host")))),
                 "staff_password_set": bool(s.get("password_hash") or s.get("password")),
                 "allow_remote_view": bool(s.get("allow_remote_view", False)),
+                "multi_lang": s.get("multi_lang", True) is not False,
                 "m2m_installed": (base_dir / "models" / "m2m100_418m" / "model.bin").is_file(),
                 "update_check": bool(s.get("update_check", True)),
                 "update_who": "it" if s.get("update_who") == "it" else "staff",
@@ -1249,6 +1250,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             else:
                 s.pop("support_contact", None)
         s["allow_remote_view"] = bool(body.get("allow_remote_view"))
+        if "multi_lang" in body:
+            s["multi_lang"] = bool(body.get("multi_lang"))
         if gh:
             rw = cfg.get("remote_whisper") if isinstance(cfg.get("remote_whisper"), dict) else {}
             rw.update(host=gh, whisper_port=int(body.get("gpu_port") or 8978))

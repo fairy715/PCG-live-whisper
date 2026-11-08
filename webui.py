@@ -2509,6 +2509,9 @@ def _tts_args(body):
     return args
 
 
+_pcg_wants = None          # 集團版多語字幕：看字幕的人要哪種語言（group/multilang.py，檔案後面的集團版區塊設定）
+
+
 @app.websocket("/ws")
 async def websocket_endpoint(ws: WebSocket):
     # v2.22.2 前這裡自己寫一套授權：(1) 拿 token 直接比對設定檔裡的**雜湊**（正確密碼被拒、雜湊本身反而能登入）；
@@ -2550,6 +2553,9 @@ async def websocket_endpoint(ws: WebSocket):
                     # 暫停／繼續（v2.26.3）：寫入／刪除旗標檔，translate_meeting.py 看到變化才切換。
                     # 以前送 SIGUSR1：Windows 沒有這個訊號（暫停在 Windows 一直沒作用），而且是「切換」，漏一次就永遠相反
                     _set_pause_flag(msg.get("action") == "pause")
+                elif msg.get("action") == "want_lang" and _pcg_wants is not None:
+                    # 集團版多語字幕：這個畫面要看的語言（唯讀也可以送：只是告訴主程式多翻哪一種）
+                    _pcg_wants.set(ws, msg.get("lang"))
                 elif msg.get("action") == "tts_pos":
                     # 瀏覽器播放的朗讀：播到第幾段（主程式看這個決定字幕出哪段、預先合成到哪裡）
                     job = str(msg.get("job", ""))
@@ -2562,6 +2568,8 @@ async def websocket_endpoint(ws: WebSocket):
     finally:
         if ws in connected_clients:
             connected_clients.remove(ws)
+        if _pcg_wants is not None:
+            _pcg_wants.drop(ws)
 
 
 def _tls_hosts_default():
@@ -2654,6 +2662,8 @@ try:
     # 擋瀏覽器裡別的網站打這台的 WebUI（偷改字幕轉發、偷連字幕通道、DNS rebinding）：見 group/security.py
     from group import security as _pcg_security
     _pcg_security.protect(app)
+    from group import multilang as _pcg_multilang
+    _pcg_wants = _pcg_multilang.Wants(BASE_DIR / ".extra_langs")
 except ImportError as _pcg_e:          # group/ 不在（例如只複製了上游的檔案）：簡易頁面不提供，其他照舊
     print(f"  [提示] 簡易頁面未載入：{_pcg_e}")
 

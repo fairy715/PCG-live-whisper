@@ -121,8 +121,9 @@ For example, a Taiwanese manager chairs the meeting in Chinese, with Indonesian,
 - **Taiwanese staff following what foreign staff say**: choose "Indonesian" and so on. Only one foreign language at a time; when someone speaks another language, choose that language and click Start (the previous session is replaced).
 
 **Same meeting room**
-- The room's "subtitle computer" (one computer with a graphics card; people scan a QR code with their phones; setup in the IT guide) handles two languages per session, e.g. "Chinese ⇄ Indonesian". Viewers can only choose between Chinese and Indonesian; Vietnamese staff do not get Vietnamese.
-- For in-room meetings with three or more languages, we currently recommend **also starting a Teams meeting**: foreign staff join Teams on their own computers and read their own language as described above.
+- Use the room's "subtitle computer" (one computer with a graphics card; setup in the IT guide): choose "Same classroom, one microphone" and the language most of the others speak (e.g. Indonesian), click Start, then "Share" and project the QR code.
+- Everyone scans the QR code and chooses their own language at the top right (multi-language subtitles, from r19): Chinese and Indonesian viewers read the normal subtitles; for Vietnamese, Hindi or English viewers the subtitle computer translates one more copy.
+- The microphone only tells apart Chinese and the one foreign language you chose. Staff speaking other languages should use English or have someone relay.
 
 ---
 

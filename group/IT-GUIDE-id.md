@@ -285,7 +285,7 @@ Penginstal utama hanya berisi model small: berjalan di laptop biasa, tetapi baha
 
 **Batasan**
 
-- **Satu sesi hanya dua bahasa**: setiap kalimat hanya diterjemahkan ke satu bahasa (mis. di sesi "Mandarin ⇄ Indonesia" setiap kalimat punya versi Mandarin dan Indonesia). Penonton bisa memilih di antara keduanya; memilih bahasa ketiga (mis. Vietnam) tidak menghasilkan bahasa Vietnam. Untuk rapat dengan tiga bahasa atau lebih, lihat "Rapat multinasional" di contoh penggunaan.
+- **Subtitle multibahasa (mulai r19)**: penonton memilih bahasanya sendiri di kanan atas (Mandarin, Indonesia, Vietnam, Hindi, Inggris). Jika sebuah kalimat tidak dalam bahasa itu, komputer subtitle menerjemahkan satu salinan lagi; mis. di sesi "Mandarin ⇄ Indonesia", penonton yang memilih Vietnam melihat bahasa Vietnam. Pengenalan suara tidak bertambah, hanya terjemahan: di CPU komputer subtitle pada mode lokal (kartu grafis jika ada paket GPU), atau di server LLM pada mode server; bahasa yang tidak dipilih siapa pun tidak diterjemahkan. Di komputer yang lambat, hapus centang "Subtitle multibahasa" di halaman IT. Ucapan bahasa Jepang dan Korea hanya bisa ditambah ke Mandarin.
 - Hanya komputer dan ponsel di jaringan perusahaan yang sama yang bisa terhubung.
 - Keamanan: mulai r18 hanya koneksi lewat alamat IP atau nama komputer yang diterima; gunakan kata sandi karyawan yang panjang (belum ada penguncian setelah salah berulang).
 

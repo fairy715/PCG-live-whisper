@@ -285,7 +285,7 @@ Bộ cài chính chỉ có mô hình small: chạy được trên laptop thườ
 
 **Giới hạn**
 
-- **Mỗi phiên chỉ có hai ngôn ngữ**: mỗi câu chỉ được dịch sang một ngôn ngữ (ví dụ phiên "Tiếng Trung ⇄ Tiếng Indonesia" thì mỗi câu chỉ có bản tiếng Trung và tiếng Indonesia). Người xem có thể chọn giữa hai bản đó; chọn ngôn ngữ thứ ba (ví dụ tiếng Việt) sẽ không có bản tiếng Việt. Cuộc họp có từ ba ngôn ngữ trở lên: xem "Cuộc họp đa quốc gia" trong các tình huống sử dụng.
+- **Phụ đề đa ngôn ngữ (từ r19)**: người xem tự chọn ngôn ngữ ở góc trên bên phải (tiếng Trung, Indonesia, Việt, Hindi, Anh). Khi một câu không có ngôn ngữ đó, máy phụ đề dịch thêm một bản; ví dụ phiên "Tiếng Trung ⇄ Tiếng Indonesia", người chọn tiếng Việt sẽ thấy tiếng Việt. Nhận dạng giọng nói không tăng, chỉ thêm phần dịch: trên CPU của máy phụ đề ở chế độ cục bộ (card đồ họa nếu có gói GPU), hoặc trên máy chủ LLM ở chế độ máy chủ; ngôn ngữ không ai chọn thì không dịch. Máy yếu có thể bỏ chọn "**Multi-language subtitles**" trên trang IT. Lời nói tiếng Nhật, tiếng Hàn chỉ thêm được bản tiếng Trung.
 - Chỉ máy tính và điện thoại trong cùng mạng nội bộ công ty mới kết nối được.
 - Bảo mật: từ r18 chỉ chấp nhận kết nối bằng địa chỉ IP hoặc tên máy; hãy đặt mật khẩu nhân viên dài (hiện chưa khóa sau nhiều lần nhập sai).
 

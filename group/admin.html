@@ -132,6 +132,8 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <p class="note" data-t="diarize_note"></p>
       <label class="check"><input type="checkbox" id="remoteView"><span data-t="remote_view"></span></label>
       <p class="note" data-t="remote_view_note"></p>
+      <label class="check"><input type="checkbox" id="multiLang"><span data-t="multi_lang"></span></label>
+      <p class="note" data-t="multi_lang_note"></p>
       <label class="f"><span id="staffPwLabel"></span><input type="password" id="staffPw" autocomplete="new-password" data-t-ph="staff_pw_ph"></label>
       <label class="check" id="clearStaffWrap" hidden><input type="checkbox" id="clearStaff"><span data-t="clear_staff_pw"></span></label>
     </div>
@@ -180,7 +182,8 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
 
 <script>
 const I18N={
-zh:{sup_title:"問題回報",sup_contact:"同仁回報問題時寄給誰（信箱或 Teams 群組，選填）",sup_contact_ph:"例如 it-helpdesk@pcg.com.tw",sup_note:"同仁頁面下方有「回報問題」：寫下發生什麼事、按一下就下載診斷檔（版本、電腦規格、遮掉金鑰與密碼的設定、最近的程式記錄；不含錄音、逐字稿和會議紀錄）。這裡填的聯絡方式會顯示給同仁；填信箱時會多一個「寫信給 IT」按鈕。",sup_make:"產生這台電腦的診斷檔",sup_making:"正在產生…",sup_done:"已下載 {n}",sup_failed:"沒有產生診斷檔：{e}",bad_contact:"聯絡方式格式不正確",
+zh:{multi_lang:"多語字幕：看字幕的人可以選自己的語言",multi_lang_note:"分享出去的字幕（QR Code）或這台的字幕畫面選了中文、印尼文、越南文、印地語、英文，而這一句沒有那種語言時，這台會另外翻一份。語音辨識不會增加，只多翻譯：本機模式在這台的 CPU（有 NVIDIA 加速包就用顯示卡），伺服器模式在大模型伺服器。沒人選的語言不翻；電腦較弱時可以關掉。改了之後，下一場字幕開始生效。",
+  sup_title:"問題回報",sup_contact:"同仁回報問題時寄給誰（信箱或 Teams 群組，選填）",sup_contact_ph:"例如 it-helpdesk@pcg.com.tw",sup_note:"同仁頁面下方有「回報問題」：寫下發生什麼事、按一下就下載診斷檔（版本、電腦規格、遮掉金鑰與密碼的設定、最近的程式記錄；不含錄音、逐字稿和會議紀錄）。這裡填的聯絡方式會顯示給同仁；填信箱時會多一個「寫信給 IT」按鈕。",sup_make:"產生這台電腦的診斷檔",sup_making:"正在產生…",sup_done:"已下載 {n}",sup_failed:"沒有產生診斷檔：{e}",bad_contact:"聯絡方式格式不正確",
   title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式、設定伺服器位址。存檔後立即生效，同仁電腦不用重裝。',
   it_password:'IT 密碼',it_password_again:'再輸入一次',login:'登入',set_pw_title:'設定 IT 密碼',set_pw_note:'第一次使用，請設定 IT 密碼（至少 6 個字）。之後進入這一頁都要輸入。同仁不需要知道這組密碼。',
   login_title:'IT 登入',login_note:'這一頁只給 IT 使用。',set_pw_btn:'設定密碼',pw_mismatch:'兩次輸入的密碼不一樣',
@@ -226,7 +229,8 @@ zh:{sup_title:"問題回報",sup_contact:"同仁回報問題時寄給誰（信�
   upd_note:'能上網的電腦會從 GitHub 發布頁取得小更新包。不能上網的電腦：把發布頁上的 PCG-Update-<版本>.exe（和同名的 .sha256 檔）放進這個資料夾，同仁電腦就能一鍵更新。只會安裝比目前新的小更新包，安裝前會比對檔案指紋；需要完整安裝檔的版本只會提示找 IT。',
   bad_share:'共用資料夾路徑格式不正確',
   need_llm:'伺服器模式要填大模型的網址',bad_host:'位址格式不正確',bad_key:'API 金鑰格式不正確',error:'發生錯誤'},
-en:{sup_title:"Problem reports",sup_contact:"Where staff send problem reports (email or Teams group, optional)",sup_contact_ph:"e.g. it-helpdesk@example.com",sup_note:"The staff page has “Report a problem” at the bottom: staff describe what happened and download a diagnostic file with one click (version, computer specs, settings with keys and passwords removed, recent program logs; no recordings, transcripts or minutes). The contact entered here is shown to staff; an email address also adds an “Email IT” button.",sup_make:"Create a diagnostic file for this computer",sup_making:"Creating…",sup_done:"Downloaded {n}",sup_failed:"The diagnostic file was not created: {e}",bad_contact:"The contact is not valid",
+en:{multi_lang:"Multi-language subtitles: viewers can choose their own language",multi_lang_note:"When someone viewing shared subtitles (QR code) or this computer's subtitle screen chooses Chinese, Indonesian, Vietnamese, Hindi or English and a sentence is not in that language, this computer translates one more copy. Speech recognition does not increase, only translation: on this computer's CPU in local mode (the graphics card with the NVIDIA pack), or on the LLM server in server mode. Languages nobody chose are not translated; turn it off on slow computers. Takes effect from the next subtitle session.",
+  sup_title:"Problem reports",sup_contact:"Where staff send problem reports (email or Teams group, optional)",sup_contact_ph:"e.g. it-helpdesk@example.com",sup_note:"The staff page has “Report a problem” at the bottom: staff describe what happened and download a diagnostic file with one click (version, computer specs, settings with keys and passwords removed, recent program logs; no recordings, transcripts or minutes). The contact entered here is shown to staff; an email address also adds an “Email IT” button.",sup_make:"Create a diagnostic file for this computer",sup_making:"Creating…",sup_done:"Downloaded {n}",sup_failed:"The diagnostic file was not created: {e}",bad_contact:"The contact is not valid",
   title:'PCG Meeting Translator: IT settings',tagline:'Switch between local and server mode and set server addresses. Changes take effect immediately; no reinstall needed.',
   it_password:'IT password',it_password_again:'Enter it again',login:'Sign in',set_pw_title:'Set the IT password',set_pw_note:'First use: set an IT password (at least 6 characters). It will be required to open this page. Staff do not need it.',
   login_title:'IT sign-in',login_note:'This page is for IT only.',set_pw_btn:'Set password',pw_mismatch:'The two passwords do not match',
@@ -272,7 +276,8 @@ en:{sup_title:"Problem reports",sup_contact:"Where staff send problem reports (e
   upd_note:'Computers with internet get the small update from the GitHub release page. For computers without internet, put PCG-Update-<version>.exe (and its .sha256 file) from the release page in this folder and staff can update with one click. Only newer small updates are installed, and the file fingerprint is checked first; versions that need the full installer only show “ask IT”.',
   bad_share:'Invalid shared folder path',
   need_llm:'Server mode needs the LLM URL',bad_host:'Invalid address',bad_key:'Invalid API key',error:'Something went wrong'},
-id:{sup_title:"Laporan masalah",sup_contact:"Ke mana karyawan mengirim laporan masalah (email atau grup Teams, opsional)",sup_contact_ph:"mis. it-helpdesk@contoh.com",sup_note:"Halaman karyawan punya “Laporkan masalah” di bagian bawah: karyawan menulis apa yang terjadi dan mengunduh file diagnostik dengan satu klik (versi, spesifikasi komputer, pengaturan tanpa kunci dan kata sandi, log program terbaru; tanpa rekaman, transkrip, atau notulen). Kontak yang diisi di sini ditampilkan ke karyawan; alamat email juga menambahkan tombol “Email IT”.",sup_make:"Buat file diagnostik komputer ini",sup_making:"Sedang membuat…",sup_done:"{n} sudah diunduh",sup_failed:"File diagnostik tidak dibuat: {e}",bad_contact:"Kontak tidak valid",
+id:{multi_lang:"Subtitle multibahasa: penonton bisa memilih bahasanya sendiri",multi_lang_note:"Jika seseorang yang menonton subtitle yang dibagikan (kode QR) atau layar subtitle di komputer ini memilih Mandarin, Indonesia, Vietnam, Hindi, atau Inggris dan sebuah kalimat tidak dalam bahasa itu, komputer ini menerjemahkan satu salinan lagi. Pengenalan suara tidak bertambah, hanya terjemahan: di CPU komputer ini pada mode lokal (kartu grafis jika ada paket NVIDIA), atau di server LLM pada mode server. Bahasa yang tidak dipilih siapa pun tidak diterjemahkan; matikan di komputer yang lambat. Berlaku mulai sesi subtitle berikutnya.",
+  sup_title:"Laporan masalah",sup_contact:"Ke mana karyawan mengirim laporan masalah (email atau grup Teams, opsional)",sup_contact_ph:"mis. it-helpdesk@contoh.com",sup_note:"Halaman karyawan punya “Laporkan masalah” di bagian bawah: karyawan menulis apa yang terjadi dan mengunduh file diagnostik dengan satu klik (versi, spesifikasi komputer, pengaturan tanpa kunci dan kata sandi, log program terbaru; tanpa rekaman, transkrip, atau notulen). Kontak yang diisi di sini ditampilkan ke karyawan; alamat email juga menambahkan tombol “Email IT”.",sup_make:"Buat file diagnostik komputer ini",sup_making:"Sedang membuat…",sup_done:"{n} sudah diunduh",sup_failed:"File diagnostik tidak dibuat: {e}",bad_contact:"Kontak tidak valid",
   title:'Penerjemah Rapat PCG: Pengaturan IT',tagline:'Beralih antara mode lokal dan mode server serta atur alamat server. Perubahan langsung berlaku; tidak perlu memasang ulang.',
   it_password:'Kata sandi IT',it_password_again:'Masukkan sekali lagi',login:'Masuk',set_pw_title:'Buat kata sandi IT',set_pw_note:'Pertama kali: buat kata sandi IT (minimal 6 karakter). Kata sandi ini diperlukan untuk membuka halaman ini. Karyawan tidak memerlukannya.',
   login_title:'Masuk IT',login_note:'Halaman ini hanya untuk IT.',set_pw_btn:'Buat kata sandi',pw_mismatch:'Kedua kata sandi tidak sama',
@@ -375,7 +380,7 @@ function showMain(){
   $('asrModel').value=state.asr_model||'large-v3-turbo';
   fillLocalModels();
   $('updCheck').checked=state.update_check!==false;$('updWho').value=state.update_who||'staff';$('updShare').value=state.update_share||'';$('supContact').value=state.support_contact||'';
-  $('diarize').checked=!!state.diarize;$('remoteView').checked=!!state.allow_remote_view;$('clearStaffWrap').hidden=!state.staff_password_set;
+  $('diarize').checked=!!state.diarize;$('remoteView').checked=!!state.allow_remote_view;$('multiLang').checked=state.multi_lang!==false;$('clearStaffWrap').hidden=!state.staff_password_set;
   modeVis();applyLang();loadModels();
 }
 /* 本機辨識模型：內建 small＋裝好的多語模型包（離線安裝的電腦不會自己下載模型，所以只列出這台有的） */
@@ -427,7 +432,7 @@ $('pMain').onsubmit=async e=>{
     gpu_host:$('gpuHost').value,gpu_port:$('gpuPort').value,
     llm_url:$('llmUrl').value,llm_api_style:$('llmStyle').value,llm_api_key:$('llmKey').value,clear_llm_api_key:$('clearKey').checked,
     llm_model:$('llmModel').value,summary_model:$('sumModel').value,asr_model:$('asrModel').value,
-    local_live_model:$('liveModel').value,local_file_model:$('fileModel').value,diarize:$('diarize').checked,allow_remote_view:$('remoteView').checked,
+    local_live_model:$('liveModel').value,local_file_model:$('fileModel').value,diarize:$('diarize').checked,allow_remote_view:$('remoteView').checked,multi_lang:$('multiLang').checked,
     staff_password:$('staffPw').value,clear_staff_password:$('clearStaff').checked,
     update_check:$('updCheck').checked,update_who:$('updWho').value,update_share:$('updShare').value,support_contact:$('supContact').value});
   const r=$('saveRes');r.hidden=false;r.className='res '+(j.ok?'ok':'err');r.textContent=j.ok?t('saved'):errMsg(j);

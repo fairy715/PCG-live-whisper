@@ -283,7 +283,7 @@ The main installer only has the small model: it runs on ordinary laptops, but In
 
 **Limits**
 
-- **One session has two languages**: each sentence is translated into one language only (e.g. in a "Chinese ⇄ Indonesian" session every sentence has a Chinese and an Indonesian version). Viewers can choose between those two; choosing a third language (e.g. Vietnamese) does not produce Vietnamese. For meetings with three or more languages, see "Multinational meeting" in the use cases.
+- **Multi-language subtitles (from r19)**: viewers choose their own language at the top right (Chinese, Indonesian, Vietnamese, Hindi, English). When a sentence is not in that language, the subtitle computer translates one more copy; e.g. in a "Chinese ⇄ Indonesian" session, viewers who chose Vietnamese see Vietnamese. Speech recognition does not increase, only translation: on the subtitle computer's CPU in local mode (the graphics card with the GPU pack), or on the LLM server in server mode; languages nobody chose are not translated. On slow computers, untick "Multi-language subtitles" on the IT page. Japanese and Korean speech can only be added in Chinese.
 - Only computers and phones on the same company network can connect.
 - Security: from r18 only connections by IP address or computer name are accepted; use a long staff password (there is no lockout after wrong attempts yet).
 

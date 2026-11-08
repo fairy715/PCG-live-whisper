@@ -151,6 +151,8 @@ function modeName(m){
 function pick(ev){
   const a={lang:LABEL[ev.src_lang]||'',text:ev.src_text||'',tag:ev.src_lang||''};
   const b=ev.dst_text?{lang:LABEL[ev.dst_lang]||'',text:ev.dst_text,tag:ev.dst_lang||''}:null;
+  const x=ev.extra&&ev.extra[lang];                 // 多語字幕：字幕機另外翻成我的語言
+  if(a.lang!==lang&&(!b||b.lang!==lang)&&x)return [x,a];
   if(!b)return [a,null];
   if(a.lang===lang)return [a,b];
   if(b.lang===lang)return [b,a];
@@ -198,7 +200,7 @@ function paint(){
   $('onlyMine').checked=onlyMine;
 }
 $('langSel').innerHTML=LANGS.map(([c,n])=>`<option value="${c}">${n}</option>`).join('');$('langSel').value=lang;
-$('langSel').onchange=()=>{lang=$('langSel').value;store.set('pcg_lang',lang);paint();render()};
+$('langSel').onchange=()=>{lang=$('langSel').value;store.set('pcg_lang',lang);wantLang();paint();render()};
 $('fsUp').onclick=()=>{fs=Math.min(64,fs+2);store.set('pcg_live_fs',fs);paint()};
 $('fsDn').onclick=()=>{fs=Math.max(14,fs-2);store.set('pcg_live_fs',fs);paint()};
 $('modeBtn').onclick=()=>{sub=!sub;store.set('pcg_live_sub',sub?'1':'0');paint();render()};
@@ -228,12 +230,21 @@ $('shCopy').onclick=async()=>{try{await navigator.clipboard.writeText(shareUrl);
 
 let ws=null,retry=null;
 function send(o){if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}
+// 多語字幕（r19）：告訴字幕機「我要看哪種語言」；這一句沒有這種語言時，字幕機會另外翻一份（transcription_extra）
+const XLANG={zh:'中',en:'EN',id:'ID',vi:'VI',hi:'HI'};
+function wantLang(){send({action:'want_lang',lang:XLANG[lang]?lang:''})}
+function addExtra(ev){
+  const e=events.find(x=>x.id===ev.id);if(!e||!ev.text)return;
+  (e.extra=e.extra||{})[ev.lang_code]={lang:ev.lang_code,text:ev.text,tag:ev.lang};
+  if(ev.lang_code===lang)render();
+}
 function conn(){
   const url=(location.protocol==='https:'?'wss:':'ws:')+'//'+location.host+'/ws'+(token?'?token='+encodeURIComponent(token):'');
   ws=new WebSocket(url);
-  ws.onopen=()=>{if(retry){clearTimeout(retry);retry=null}};
+  ws.onopen=()=>{if(retry){clearTimeout(retry);retry=null}wantLang()};
   ws.onmessage=e=>{let ev;try{ev=JSON.parse(e.data)}catch(x){return}
     if(ev.type==='transcription')add(ev);
+    else if(ev.type==='transcription_extra')addExtra(ev);
     else if(ev.type==='started'){state.running=true;state.ended=false;state.mode=ev.mode||state.mode;paint()}
     else if(ev.type==='stopped'||ev.type==='disconnected'){state.ended=true;state.running=false;paint()}};
   ws.onclose=e=>{

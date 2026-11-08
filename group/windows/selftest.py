@@ -122,6 +122,41 @@ def report():
     return f"{sysinfo['cpu']}，記憶體 {sysinfo['ram_gb']} GB，{len(names)} 個檔案"
 
 
+def multilang():
+    """多語字幕（r19）：同一句同時翻成四種語言（字幕機有人選了不同語言時），量時間；翻譯模型只能載入一份"""
+    import time as _t
+    from concurrent.futures import ThreadPoolExecutor
+    sys.argv = [sys.argv[0]]
+    import translate_meeting as t
+    if not t.LOCAL_MT_IS_M2M:
+        raise RuntimeError("找不到 M2M100 模型")
+    t._pcg_tr_note["tr"] = None
+    x = t._PcgExtraSubs()
+    dirs = ("zh2id", "zh2vi", "zh2hi", "zh2en")
+    trs = [x.translator(d) for d in dirs]
+    if len(t.M2M100Translator._SHARED) != 1:
+        raise RuntimeError(f"翻譯模型載入了 {len(t.M2M100Translator._SHARED)} 份（應該共用一份）")
+    text = "新設備下週一開始試產，請大家先完成安全檢查。"
+    trs[0].translate("暖機")
+    t0 = _t.monotonic()
+    one = trs[0].translate(text)
+    t_one = _t.monotonic() - t0
+    t0 = _t.monotonic()
+    with ThreadPoolExecutor(max_workers=x.WORKERS) as pool:
+        outs = list(pool.map(lambda tr: tr.translate(text), trs))
+    t_all = _t.monotonic() - t0
+    for d, o in zip(dirs, outs):
+        if not o or not o.strip():
+            raise RuntimeError(f"{d} 沒有譯文")
+        if any("\u4e00" <= c <= "\u9fff" for c in o):
+            raise RuntimeError(f"{d} 譯文還有中文：{o}")
+    if not any("\u0900" <= c <= "\u097f" for c in outs[2]):
+        raise RuntimeError(f"zh2hi 譯文沒有天城文：{outs[2]}")
+    dev = getattr(trs[0].ct2, "device", "?")
+    return (f"翻 1 種 {t_one:.2f}s、同時翻 4 種 {t_all:.2f}s（{dev}）\n       "
+            + "\n       ".join(f"{d}: {o}" for d, o in zip(dirs, outs)) + f"\n       zh2id（單獨）: {one}")
+
+
 def translations(quick):
     sys.argv = [sys.argv[0]]
     import translate_meeting as t
@@ -175,6 +210,7 @@ def main():
         check("英文即時字幕 Moonshine", moonshine)
         check("CPU 用量限制", cpu_budget)
         check("回報問題的診斷檔", report)
+        check("多語字幕（同時翻成四種語言）", multilang)
     print("結果：" + ("全部通過" if ok else "有項目沒通過"))
     sys.exit(0 if ok else 1)
 
