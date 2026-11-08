@@ -1,6 +1,7 @@
-"""廣告版動畫（promo-ad.html，48 秒）的配樂：程式自己合成，沒有外部音源，不會有版權問題。
+"""廣告版動畫（promo-ad.html，54.5 秒）的配樂：程式自己合成，沒有外部音源，不會有版權問題。
 120 BPM（一小節 2 秒）：0–6 秒懸疑（小調、只有墊音與時鐘聲，最後一小節上升音效）→ 6 秒重拍揭曉
-→ 10 秒起主段（鼓、貝斯、琶音）→ 44 秒收尾重拍、淡出。
+→ 10 秒起主段（鼓、貝斯、琶音）→ 50 秒收尾重拍、淡出。
+r18：動畫在教室之後插入 6 秒（3 小節）的「外語同仁直接互翻」，主段跟著長 3 小節，收尾重拍從第 22 小節移到第 25 小節。
 執行：python3 music_ad.py music-ad.wav
 """
 import sys
@@ -11,7 +12,8 @@ SR = 44100
 BPM = 120
 BEAT = 60 / BPM
 BAR = BEAT * 4
-DUR = 48.5
+INSERT_BARS = 3          # 插入的段落（外語對外語）
+DUR = 48.5 + INSERT_BARS * 2
 N = int(SR * DUR)
 L = np.zeros(N)
 R = np.zeros(N)
@@ -106,7 +108,7 @@ def section(bar):
         return "hook"
     if bar < 5:
         return "reveal"
-    if bar >= 22:
+    if bar >= 22 + INSERT_BARS:
         return "outro"
     return "main"
 
@@ -150,7 +152,7 @@ for b in range(nbars):
             f = hz(root - 12)
             add(bass(f, BEAT / 2 - 0.02), tq, gain=0.35)
             add(bass(f, BEAT / 2 - 0.02), tq + BEAT / 2, gain=0.28)
-    if sec == "outro" and b == 22:
+    if sec == "outro" and b == 22 + INSERT_BARS:
         add(kick(), t0, gain=1.0)
         add(noise_hit(1.5, 2.5, hp=False) * 0.5, t0, gain=0.15)                  # 收尾的鈸聲
 

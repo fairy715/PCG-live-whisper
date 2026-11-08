@@ -8,15 +8,15 @@
 **IT 必讀**：架構與設定、模型包、GPU 加速包（[中文](group/INSTALL.md) · [English](group/IT-GUIDE-en.md) · [Bahasa Indonesia](group/IT-GUIDE-id.md) · [Tiếng Việt](group/IT-GUIDE-vi.md)） ·
 **姊妹工具**：[PCG 文件工具](https://github.com/fairy715/PCG-doc-tools)（PDF／Office 文件處理）
 
-## 宣傳影片（48 秒，有配樂）
+## 宣傳影片（54 秒，有配樂）
 
-從「聽不懂，會就白開了」的情境開始，跟著林老師和外國同事走一遍：線上課雙向字幕 → 手機掃 QR Code → 訓練教室一支麥克風 → 會後自動整理紀錄。印尼文版的同事是 Budi，越南文版是 Minh，台詞和介面都是該語言。
+從「聽不懂，會就白開了」的情境開始，跟著林老師和外國同事走一遍：線上課雙向字幕 → 手機掃 QR Code → 訓練教室一支麥克風 → 越南同仁和印尼同仁直接互翻（不經過中文）→ 會後自動整理紀錄。印尼文版的同事是 Budi，越南文版是 Minh，台詞和介面都是該語言。
 
 | 中文版 | Bahasa Indonesia | Tiếng Việt |
 |---|---|---|
 | [![PCG AI 會議翻譯宣傳影片](group/docs/promo/poster-ad-zh.png)](group/docs/promo/PCG-AI-ad-zh.mp4) | [![Video Penerjemah Rapat AI PCG](group/docs/promo/poster-ad-id.png)](group/docs/promo/PCG-AI-ad-id.mp4) | [![Video Phiên dịch cuộc họp AI PCG](group/docs/promo/poster-ad-vi.png)](group/docs/promo/PCG-AI-ad-vi.mp4) |
 
-點圖片下載影片（MP4，約 7 MB），可以直接放到 Teams、LINE 或簡報裡。
+點圖片下載影片（MP4，約 8 MB），可以直接放到 Teams、LINE 或簡報裡。
 配樂是程式合成的原創音樂（`group/docs/promo/music_ad.py`），沒有版權問題；影片由 `promo-ad.html` 逐格產生（`render3d.js`）。
 
 ## 功能

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <title>PCG AI Meeting Translator</title>
-<!-- 廣告版（48 秒，1280×720）：問題 → 揭曉 → 線上課 → 手機 → 教室 → 會後紀錄 → 信任 → 行動呼籲。
+<!-- 廣告版（54.5 秒，1280×720）：問題 → 揭曉 → 線上課 → 手機 → 教室 → 外語同仁直接互翻（r17）→ 會後紀錄 → 信任 → 行動呼籲。
      所有段落放在同一個 3D 空間，鏡頭在段落之間飛行。?lang=zh|id|vi；畫面由 seek(秒) 決定，render3d.js 逐格錄 -->
 <style>
 :root{--accent:#4c9dff;--ok:#3ecf8e;--ink:#f3f6fb;--dim:#a9b8d3;--warn:#ffb547}
@@ -21,10 +21,10 @@ html,body{width:1280px;height:720px;overflow:hidden;background:#050b18;color:var
 .head{position:absolute;left:0;right:0;top:56px;text-align:center;font-size:44px;font-weight:900;text-shadow:0 8px 30px rgba(0,0,0,.45)}
 .subh{position:absolute;left:0;right:0;top:118px;text-align:center;font-size:22px;color:var(--dim)}
 .av{border-radius:50%;display:grid;place-items:center;font-weight:900;color:#0b1a33}
-.av.t{background:#ffd166}.av.b{background:#7bdff2}
+.av.t{background:#ffd166}.av.b{background:#7bdff2}.av.m{background:#b6f09c}
 .bub{position:absolute;max-width:470px;white-space:nowrap;border-radius:22px;padding:18px 22px;font-size:26px;font-weight:800;background:#fff;color:#1d2330;box-shadow:0 20px 50px rgba(0,0,0,.45)}
 .lg{display:inline-block;font-size:13px;font-weight:900;border-radius:6px;padding:2px 7px;color:#fff;vertical-align:3px;margin-right:6px}
-.lg.zh{background:#e5484d}.lg.id,.lg.vi{background:#1f6feb}
+.lg.zh{background:#e5484d}.lg.id,.lg.vi{background:#1f6feb}.lg.vi.x{background:#2f9e44}
 .slam{position:absolute;left:0;right:0;top:520px;text-align:center;font-size:56px;font-weight:900;letter-spacing:.02em}
 .qm{position:absolute;font-size:46px;font-weight:900;color:var(--warn)}
 .logo{width:170px;height:170px;border-radius:42px;background:linear-gradient(135deg,#4c9dff,#3ecf8e);display:grid;place-items:center;font-size:58px;font-weight:900;color:#fff;
@@ -69,6 +69,12 @@ html,body{width:1280px;height:720px;overflow:hidden;background:#050b18;color:var
 .trust div{width:330px;height:190px;border-radius:24px;background:linear-gradient(160deg,rgba(76,157,255,.95),rgba(62,207,142,.9));display:grid;place-items:center;font-size:40px;font-weight:900;text-align:center;padding:10px;box-shadow:0 30px 70px rgba(0,0,0,.45)}
 .cta{position:absolute;left:0;right:0;top:560px;text-align:center}
 .cta span{display:inline-block;font-size:26px;background:linear-gradient(135deg,#4c9dff,#3ecf8e);color:#fff;border-radius:16px;padding:16px 38px;font-weight:900}
+.xp{position:absolute;display:flex;flex-direction:column;align-items:center;gap:10px;font-size:18px;color:var(--dim);top:300px}
+.xp .av{width:110px;height:110px;font-size:40px;position:relative;z-index:1}
+.xp .halo{top:-22px;width:154px;height:154px;margin-left:-77px}
+.xcard{width:600px}
+.xbadge{position:absolute;left:0;right:0;top:600px;text-align:center}
+.xbadge span{display:inline-block;font-size:22px;font-weight:900;border-radius:999px;padding:9px 22px;background:rgba(62,207,142,.15);border:1.5px solid var(--ok);color:var(--ok)}
 #flash{position:absolute;inset:0;background:#fff;pointer-events:none}
 #fade{position:absolute;inset:0;background:#000;pointer-events:none}
 </style>
@@ -149,6 +155,15 @@ html,body{width:1280px;height:720px;overflow:hidden;background:#050b18;color:var
     <div class="big" id="name7" style="top:380px;font-size:30px;color:var(--dim);font-weight:700"></div>
     <div class="cta" id="cta7"><span id="ctaT"></span></div>
   </div>
+  <!-- 8 外語同仁直接互翻（r17；鏡頭在教室之後、會後之前來到這裡） -->
+  <div class="st" id="st8">
+    <div class="head" id="h8"></div><div class="subh" id="s8"></div>
+    <div class="xp" id="xpM" style="left:95px"><div class="halo" id="hM"></div><div class="av m">M</div><span id="nM"></span></div>
+    <div class="xp" id="xpB" style="right:95px"><div class="halo" id="hB8"></div><div class="av b">B</div><span id="nB"></span></div>
+    <div class="card xcard" id="x0" style="left:300px;top:215px"><div class="o" id="x0o"></div><div class="t" id="x0t"></div></div>
+    <div class="card xcard" id="x1" style="left:380px;top:395px"><div class="o" id="x1o"></div><div class="t" id="x1t"></div></div>
+    <div class="xbadge"><span id="xb"></span></div>
+  </div>
 </div></div>
 <div id="flash"></div><div id="fade"></div>
 
@@ -160,17 +175,20 @@ zh:{n0t:'林老師・台灣',n0b:'Budi・印尼',slam:'聽不懂，會就白開�
  h2:'線上課，雙向字幕',s2:'選你和對方的語言，按開始',cap2:'老師說中文、學生說印尼文，字幕即時互翻',
  h3:'掃一下，手機就能看',s3:'每個人看自己的語言',h4:'訓練教室：一支麥克風就夠',s4:'每一句自動判斷是中文還是印尼文',det:'自動判斷：',lzh:'中文',lid:'Bahasa Indonesia',seT:'林老師',seB:'Budi',
  h5:'課後，會議紀錄自動整理好',s5:'上傳錄音 → 逐字稿、決議、待辦',doc:['會議紀錄','決議','新設備下週一開始試產','待辦','準備訓練教材（林老師，11/12）','確認安全檢查表（Budi，11/10）','風險','備品到貨可能延後'],
- t:['不用網路','不用伺服器','5 種語言'],t4:'離線安裝 ・ 不需系統管理員 ・ 一鍵更新',line:'語言，不再是距離。',cta:'安裝與使用，請洽 IT'},
+ t:['不用網路','不用伺服器','5 種語言'],t4:'離線安裝 ・ 不需系統管理員 ・ 一鍵更新',line:'語言，不再是距離。',cta:'安裝與使用，請洽 IT',
+ h8:'越南同仁 ⇄ 印尼同仁，直接互翻',s8:'不經過中文：印尼文、越南文、印地語、英文任兩種',nM:'Minh・越南',nB:'Budi・印尼',xb:'VI ⇄ ID ・ 不經過中文'},
 id:{n0t:'Guru Lin ・ Taiwan',n0b:'Budi ・ Indonesia',slam:'Tidak paham, rapat jadi sia-sia.',name:'Penerjemah Rapat AI PCG',tag:'Semua orang bisa saling paham',
  h2:'Kelas online, subtitle dua arah',s2:'Pilih bahasa Anda dan lawan bicara, tekan Mulai',cap2:'Guru berbahasa Mandarin, siswa menjawab bahasa Indonesia — langsung diterjemahkan',
  h3:'Pindai, langsung di ponsel',s3:'Setiap orang membaca bahasanya sendiri',h4:'Kelas pelatihan: cukup satu mikrofon',s4:'Setiap kalimat dikenali otomatis: Mandarin atau Indonesia',det:'Deteksi otomatis: ',lzh:'Mandarin',lid:'Bahasa Indonesia',seT:'Guru Lin',seB:'Budi',
  h5:'Setelah kelas, notulen langsung jadi',s5:'Unggah rekaman → transkrip, keputusan, tindak lanjut',doc:['Notulen','Keputusan','Mesin baru mulai uji produksi Senin depan','Tindak lanjut','Siapkan materi pelatihan (Guru Lin, 12/11)','Periksa daftar keselamatan (Budi, 10/11)','Risiko','Suku cadang mungkin terlambat'],
- t:['Tanpa internet','Tanpa server','5 bahasa'],t4:'Instalasi offline ・ Tanpa hak admin ・ Pembaruan sekali klik',line:'Bahasa bukan lagi penghalang.',cta:'Hubungi IT untuk pemasangan'},
+ t:['Tanpa internet','Tanpa server','5 bahasa'],t4:'Instalasi offline ・ Tanpa hak admin ・ Pembaruan sekali klik',line:'Bahasa bukan lagi penghalang.',cta:'Hubungi IT untuk pemasangan',
+ h8:'Karyawan Vietnam ⇄ Indonesia, langsung',s8:'Tanpa lewat Mandarin: dua bahasa mana pun dari Indonesia, Vietnam, Hindi, Inggris',nM:'Minh ・ Vietnam',nB:'Budi ・ Indonesia',xb:'VI ⇄ ID ・ tanpa lewat Mandarin'},
 vi:{n0t:'Giảng viên Lin ・ Đài Loan',n0b:'Minh ・ Việt Nam',slam:'Không hiểu thì họp cũng vô ích.',name:'Phiên dịch cuộc họp AI PCG',tag:'Ai cũng hiểu được nhau',
  h2:'Lớp học online, phụ đề hai chiều',s2:'Chọn ngôn ngữ của bạn và người kia, bấm Bắt đầu',cap2:'Giảng viên nói tiếng Trung, học viên trả lời tiếng Việt — dịch ngay lập tức',
  h3:'Quét mã, xem ngay trên điện thoại',s3:'Mỗi người đọc ngôn ngữ của mình',h4:'Phòng đào tạo: chỉ cần một micro',s4:'Tự nhận biết từng câu: tiếng Trung hay tiếng Việt',det:'Tự nhận biết: ',lzh:'Tiếng Trung',lid:'Tiếng Việt',seT:'Giảng viên Lin',seB:'Minh',
  h5:'Sau buổi học, biên bản tự động xong',s5:'Tải bản ghi âm lên → bản ghi lời, quyết định, việc cần làm',doc:['Biên bản họp','Quyết định','Máy mới chạy thử từ thứ Hai tuần sau','Việc cần làm','Chuẩn bị tài liệu đào tạo (GV Lin, 12/11)','Kiểm tra danh sách an toàn (Minh, 10/11)','Rủi ro','Phụ tùng có thể về trễ'],
- t:['Không cần internet','Không cần máy chủ','5 ngôn ngữ'],t4:'Cài đặt offline ・ Không cần quyền admin ・ Cập nhật một chạm',line:'Ngôn ngữ không còn là khoảng cách.',cta:'Liên hệ IT để cài đặt'}}[LANG];
+ t:['Không cần internet','Không cần máy chủ','5 ngôn ngữ'],t4:'Cài đặt offline ・ Không cần quyền admin ・ Cập nhật một chạm',line:'Ngôn ngữ không còn là khoảng cách.',cta:'Liên hệ IT để cài đặt',
+ h8:'Nhân viên Việt Nam ⇄ Indonesia, dịch trực tiếp',s8:'Không qua tiếng Trung: hai ngôn ngữ bất kỳ trong tiếng Indonesia, Việt, Hindi, Anh',nM:'Minh ・ Việt Nam',nB:'Budi ・ Indonesia',xb:'VI ⇄ ID ・ không qua tiếng Trung'}}[LANG];
 // 外國同事（印尼 Budi／越南 Minh）的台詞
 const F={id:{av:'B',hook:'Maaf… maksudnya apa?',l2:['Matikan listrik dulu, lalu periksa keselamatan.','Apakah sarung tangan juga wajib?','Ya, sarung tangan dan helm wajib.'],
   room:['Silakan semua memakai helm.','Helm disimpan di mana?','Di rak dekat pintu.']},
@@ -179,7 +197,7 @@ const F={id:{av:'B',hook:'Maaf… maksudnya apa?',l2:['Matikan listrik dulu, lal
 document.querySelectorAll('.av.b').forEach(e=>e.textContent=F.av);
 
 const $=id=>document.getElementById(id);
-for(const k of ['n0t','n0b','h2','s2','h3','s3','h4','s4','h5','s5','seT','seB','t4']) $(k).textContent=X[k];
+for(const k of ['n0t','n0b','h2','s2','h3','s3','h4','s4','h5','s5','seT','seB','t4','h8','s8','nM','nB','xb']) $(k).textContent=X[k];
 $('slam').textContent=X.slam;$('name1').innerHTML=[...X.name].map(c=>`<span style="display:inline-block">${c===' '?'&nbsp;':c}</span>`).join('');
 $('tag1').textContent=X.tag;$('cap2').innerHTML=`<i></i>${X.cap2}`;$('line7').textContent=X.line;$('name7').textContent=X.name;$('ctaT').textContent=X.cta;
 ['t1','t2','t3'].forEach((k,i)=>$(k).textContent=X.t[i]);
@@ -189,6 +207,9 @@ const CLK={zh:[[189,164],[85,250]],id:[[189,176],[85,294]],vi:[[189,169],[189,27
 const D=X.doc;$('doc').innerHTML=`<h4>${D[0]}</h4><div class="k">${D[1]}</div><div class="dl">• ${D[2]}</div><div class="k">${D[3]}</div><div class="dl">• ${D[4]}</div><div class="dl">• ${D[5]}</div><div class="k">${D[6]}</div><div class="dl">• ${D[7]}</div>`;
 const tag=l=>`<span class="lg ${l}">${l==='zh'?'中':l.toUpperCase()}</span>`;
 $('b0b').innerHTML=`${tag(FL)}${F.hook}`;
+// 外語互翻段落：Budi 一律是 B（上面把外國同事的頭像都換成 F.av）；越南文版的 Minh 用前面段落外國同事的顏色
+document.querySelector('#xpB .av').textContent='B';
+if(LANG==='vi'){document.querySelector('#xpM .av').className='av b';document.querySelector('#xpB .av').className='av m'}
 if(LANG==='vi'){['t1','t2','t3'].forEach(k=>$(k).style.fontSize='34px');$('line7').style.fontSize='58px';$('name1').style.fontSize='58px'}
 const L2=[['zh','設備要先關電源，再做安全檢查。',FL,F.l2[0]],
           [FL,F.l2[1],'zh','手套也一定要戴嗎？'],
@@ -200,6 +221,10 @@ $('phones').innerHTML=PH.map((p,i)=>`<div class="phone" id="ph${i}" style="left:
 (function(){const q=$('qr');const p='111111101100000110101110100101110100101110110101110100101111111101000000011010110101101011001011011101011100101011000001011110101011';for(let i=0;i<81;i++){const c=document.createElement('i');if(p[i%p.length]==='0')c.className='w';q.insertBefore(c,$('scan'))}})();
 const ROOM=[['zh','請大家戴上安全帽。',F.room[0]],[FL,F.room[1],'安全帽要放在哪裡？'],['zh','放在門口的架子上。',F.room[2]]];
 $('wave').innerHTML=[...Array(36)].map(()=>'<i></i>').join('');
+const XT=[['vi','Máy số 3 đã chạy thử xong chưa?','id','Apakah mesin nomor 3 sudah selesai uji coba?'],
+          ['id','Sudah, hasilnya normal.','vi','Rồi, kết quả bình thường.']];
+const tagx=l=>`<span class="lg ${l}${l==='vi'?' x':''}">${l.toUpperCase()}</span>`;
+XT.forEach((x,i)=>{$(`x${i}o`).innerHTML=`${tagx(x[0])}${x[1]}`;$(`x${i}t`).innerHTML=`${tagx(x[2])}<span id="x${i}s"></span>`});
 
 // ── 工具 ──
 const cl=(x,a=0,b=1)=>Math.min(b,Math.max(a,x)),P=(t,a,b)=>cl((t-a)/(b-a));
@@ -211,10 +236,13 @@ let seed=11;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
 const PART=[...Array(90)].map(()=>({x:rnd()*1280,y:rnd()*720,z:.3+rnd()*.9,s:rnd()*6.28}));
 const ctx=$('cv').getContext('2d');
 // 各段落在 3D 空間的位置（x, z, 轉角）與鏡頭飛行時間（[開始飛, 抵達]）
-const ST=[[0,0,0],[0,-1500,0],[1700,-1500,-28],[3000,-1100,-50],[4400,-1100,-14],[5800,-1500,16],[7100,-1500,0],[7100,-2900,0]];
-const FLY=[[5.5,6.15],[9.3,10.3],[19.3,20.3],[23.3,24.3],[33.3,34.3],[39.3,40.1],[43.3,44.2]];
+const ST=[[0,0,0],[0,-1500,0],[1700,-1500,-28],[3000,-1100,-50],[4400,-1100,-14],[5800,-1500,16],[7100,-1500,0],[7100,-2900,0],[4400,-2900,0]];
+// 外語對外語（st8）插在教室之後：之後的段落整體晚 XD 秒（3 小節，配樂的重拍才對得上）
+const XD=6,ORDER=[0,1,2,3,4,8,5,6,7],POS=ORDER.map(i=>ST[i]);
+const FLY=[[5.5,6.15],[9.3,10.3],[19.3,20.3],[23.3,24.3],[33.3,34.3],[33.3+XD,34.3+XD],[39.3+XD,40.1+XD],[43.3+XD,44.2+XD]];
+const DUR=48.5+XD;
 function camAt(t){let i=0;for(let k=0;k<FLY.length;k++)if(t>=FLY[k][0])i=k+1;
-  if(i===0)return ST[0].slice();const [a,b]=FLY[i-1];const p=eio(P(t,a,b));const A=ST[i-1],B=ST[i];
+  if(i===0)return POS[0].slice();const [a,b]=FLY[i-1];const p=eio(P(t,a,b));const A=POS[i-1],B=POS[i];
   return [A[0]+(B[0]-A[0])*p,A[1]+(B[1]-A[1])*p,A[2]+(B[2]-A[2])*p, Math.sin(p*Math.PI)];}
 document.querySelectorAll('.st').forEach((el,i)=>el.style.transform=`translate3d(${ST[i][0]}px,0,${ST[i][1]}px) rotateY(${ST[i][2]}deg)`);
 
@@ -269,6 +297,15 @@ function seek(t){
      $('det').textContent=X.det+(l==='zh'?X.lzh:X.lid);const f=P(t,S[cur],S[cur]+.35);$('det').style.transform=`perspective(600px) rotateX(${(1-eo(f))*90}deg)`;
      const pu=.75+.25*Math.sin(t*6);$('hT').style.opacity=l==='zh'?pu:0;$('hB').style.opacity=l!=='zh'?pu:0;}
    else{$('pO').textContent='';$('pT').textContent='';$('det').textContent='';$('hT').style.opacity=0;$('hB').style.opacity=0}}
+  // 8 外語同仁直接互翻 34.3–39.3
+  {css($('h8'),eo(P(t,34.4,35)));css($('s8'),eo(P(t,34.7,35.3)));
+   const av=eo(P(t,34.5,35.2));css($('xpM'),av,`translateX(${(1-av)*-160}px)`);css($('xpB'),av,`translateX(${(1-av)*160}px)`);
+   const X0=35.3,X1=37.1;
+   const c0=eo(P(t,X0,X0+.6));css($('x0'),c0,`perspective(1200px) translateX(${(1-c0)*-220}px) rotateY(${(1-c0)*30}deg)`);type($('x0s'),XT[0][3],P(t,X0+.5,X0+1.5));
+   const c1=eo(P(t,X1,X1+.6));css($('x1'),c1,`perspective(1200px) translateX(${(1-c1)*220}px) rotateY(${(1-c1)*-30}deg)`);type($('x1s'),XT[1][3],P(t,X1+.5,X1+1.3));
+   const pu=.75+.25*Math.sin(t*6);$('hM').style.opacity=t>=X0&&t<X1?pu:0;$('hB8').style.opacity=t>=X1&&t<38.9?pu:0;
+   const xb=eo(P(t,38.2,38.7));css($('xb'),xb,`scale(${.7+.3*back(xb)})`);}
+  t-=XD;   // 以下是會後、信任、行動呼籲：整段晚 XD 秒
   // 5 會後 34–40
   {css($('h5'),eo(P(t,34.2,34.8)));css($('s5'),eo(P(t,34.5,35.1)));
    [...$('wave').children].forEach((b,i)=>{const on=P(t,34.4+i*.02,34.8+i*.02);b.style.height=(on*(20+70*Math.abs(Math.sin(i*.7+t*5))*(.6+.4*Math.sin(i*.31))))+'%'});
@@ -283,10 +320,10 @@ function seek(t){
   {const l=eo(P(t,44.2,45));css($('logo7'),l,`perspective(800px) rotateY(${(1-l)*-120}deg)`);$('sw7').style.left=(-80+P(t,45,45.9)*260)+'%';
    const ln=P(t,44.6,45.3);css($('line7'),ln,`scale(${1.4-.4*eo(ln)})`);css($('name7'),eo(P(t,45.5,46.1)));
    const c=P(t,46,46.6);css($('cta7'),c,`scale(${.6+.4*back(c)})`);}
-  $('fade').style.opacity=Math.max(1-P(t,0,.3),P(t,47.6,48.5));
+  $('fade').style.opacity=Math.max(1-P(t+XD,0,.3),P(t,47.6,48.5));
 }
 window.seek=seek;seek(0);
-if(!/render/.test(location.search)){const t0=performance.now();(function loop(){const t=(performance.now()-t0)/1000;seek(t);if(t<48.5)requestAnimationFrame(loop)})()}
+if(!/render/.test(location.search)){const t0=performance.now();(function loop(){const t=(performance.now()-t0)/1000;seek(t);if(t<DUR)requestAnimationFrame(loop)})()}
 </script>
 </body>
 </html>
