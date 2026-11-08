@@ -6013,6 +6013,56 @@ class M2M100Translator(NllbTranslator):
         )
         return self.sp.Decode(results[0].hypotheses[0][1:])     # 去掉開頭的語言代碼
 
+    # ── 多語字幕（r19）：同一句一次翻成好幾種語言 ──
+    # 同一段原文放進同一批、每一筆帶自己的目標語言代碼：模型一次算完，比一種一種翻快
+    # （CPU 上「同時」呼叫好幾次其實是輪流算，2026-11-08 Windows CI：1 種 1.97 秒、4 種 5.81 秒）
+    def _translate_short_multi(self, text, tgts):
+        tokens = self.sp.Encode(text, out_type=str)
+        src = [self.src_lang] + tokens + ["</s>"]
+        results = self.ct2.translate_batch(
+            [list(src) for _ in tgts],
+            target_prefix=[[self._LANG_MAP[L]] for L in tgts],
+            beam_size=self.BEAM_SIZE,
+            no_repeat_ngram_size=4,
+            max_decoding_length=256,
+        )
+        return {L: self.sp.Decode(r.hypotheses[0][1:]) for L, r in zip(tgts, results)}
+
+    def translate_multi(self, text, tgts):
+        """text 翻成 tgts（語言代碼，例如 ["vi", "hi"]）→ {語言: 譯文}。斷句、重複偵測、簡轉繁同 translate()"""
+        import re
+        text = (text or "").strip()
+        tgts = [L for L in tgts if L in self._LANG_MAP]
+        if not text or not tgts:
+            return {}
+        chunks, buf = [], ""
+        for sent in re.split(r'(?<=[.!?,;。！？，；])\s*', text):
+            if buf and len(buf) + len(sent) > 80:
+                chunks.append(buf)
+                buf = sent
+            else:
+                buf = (buf + " " + sent).strip() if buf else sent
+        if buf:
+            chunks.append(buf)
+        parts = {L: [] for L in tgts}
+        for chunk in chunks:
+            for L, part in self._translate_short_multi(chunk, tgts).items():
+                if not self._has_repetition(part):
+                    parts[L].append(part)
+                    continue
+                # 這一種語言出現重複（幻覺）：拆成一句一句再翻這一種
+                for one in re.split(r'(?<=[.!?,;。！？，；])\s*', chunk):
+                    one = one.strip()
+                    if one:
+                        p2 = self._translate_short_multi(one, [L])[L]
+                        if not self._has_repetition(p2):
+                            parts[L].append(p2)
+        out = {}
+        for L, ps in parts.items():
+            r = " ".join(ps).strip()
+            out[L] = _s2twp_safe(r) if L == "zh" else r
+        return out
+
 
 def _pcg_mt_pack():
     """IT 在設定頁選的本機翻譯模型包（config.json 的 pcg_simple.mt_pack）：回傳資料夾；沒選、沒裝回 None"""
@@ -6168,8 +6218,30 @@ class _PcgExtraSubs:
         if self.pool is None:
             from concurrent.futures import ThreadPoolExecutor
             self.pool = ThreadPoolExecutor(max_workers=self.WORKERS, thread_name_prefix="pcg-extra")
+        base = _pcg_tr_note["tr"]
+        if len(todo) > 1 and not isinstance(base, (OllamaTranslator, MadladTranslator)):
+            # 本機 M2M100：同一句的幾種語言放進同一批，一次算完
+            self.pool.submit(self._batch, event["id"], src, text, todo, event.get("source"))
+            return
         for L in todo:
             self.pool.submit(self._one, event["id"], f"{src}2{L}", text, L, event.get("source"))
+
+    def _batch(self, eid, src, text, langs, source):
+        t0 = time.monotonic()
+        try:
+            tr = self.translator(f"{src}2{langs[0]}")
+            if hasattr(tr, "translate_multi"):
+                res = tr.translate_multi(text, langs)
+            else:
+                res = {L: self.translator(f"{src}2{L}").translate(text) for L in langs}
+        except Exception:  # noqa: BLE001
+            return
+        took = round(time.monotonic() - t0, 2)
+        for L in langs:
+            out = res.get(L)
+            if out and not isinstance(out, _TranslateFailed) and str(out).strip():
+                _webui_send({"type": "transcription_extra", "id": eid, "lang": _PCG_LANG_LABEL[L], "lang_code": L,
+                             "text": str(out).strip(), "source": source, "translate_time": took})
 
     def _one(self, eid, direction, text, lang, source):
         t0 = time.monotonic()

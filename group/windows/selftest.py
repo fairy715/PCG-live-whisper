@@ -123,7 +123,8 @@ def report():
 
 
 def multilang():
-    """多語字幕（r19）：同一句同時翻成四種語言（字幕機有人選了不同語言時），量時間；翻譯模型只能載入一份"""
+    """多語字幕（r19）：同一句翻成四種語言（字幕機有人選了不同語言時），量時間：
+    一種、四種一起送（舊做法，CPU 上其實輪流算）、四種批次一次算（新做法）。翻譯模型只能載入一份"""
     import time as _t
     from concurrent.futures import ThreadPoolExecutor
     sys.argv = [sys.argv[0]]
@@ -132,29 +133,33 @@ def multilang():
         raise RuntimeError("找不到 M2M100 模型")
     t._pcg_tr_note["tr"] = None
     x = t._PcgExtraSubs()
-    dirs = ("zh2id", "zh2vi", "zh2hi", "zh2en")
-    trs = [x.translator(d) for d in dirs]
+    langs = ("id", "vi", "hi", "en")
+    trs = [x.translator(f"zh2{L}") for L in langs]
     if len(t.M2M100Translator._SHARED) != 1:
         raise RuntimeError(f"翻譯模型載入了 {len(t.M2M100Translator._SHARED)} 份（應該共用一份）")
     text = "新設備下週一開始試產，請大家先完成安全檢查。"
     trs[0].translate("暖機")
     t0 = _t.monotonic()
-    one = trs[0].translate(text)
+    trs[0].translate(text)
     t_one = _t.monotonic() - t0
     t0 = _t.monotonic()
     with ThreadPoolExecutor(max_workers=x.WORKERS) as pool:
-        outs = list(pool.map(lambda tr: tr.translate(text), trs))
-    t_all = _t.monotonic() - t0
-    for d, o in zip(dirs, outs):
-        if not o or not o.strip():
-            raise RuntimeError(f"{d} 沒有譯文")
+        list(pool.map(lambda tr: tr.translate(text), trs))
+    t_par = _t.monotonic() - t0
+    t0 = _t.monotonic()
+    outs = trs[0].translate_multi(text, list(langs))
+    t_batch = _t.monotonic() - t0
+    for L in langs:
+        o = outs.get(L) or ""
+        if not o.strip():
+            raise RuntimeError(f"zh2{L} 沒有譯文")
         if any("\u4e00" <= c <= "\u9fff" for c in o):
-            raise RuntimeError(f"{d} 譯文還有中文：{o}")
-    if not any("\u0900" <= c <= "\u097f" for c in outs[2]):
-        raise RuntimeError(f"zh2hi 譯文沒有天城文：{outs[2]}")
+            raise RuntimeError(f"zh2{L} 譯文還有中文：{o}")
+    if not any("\u0900" <= c <= "\u097f" for c in outs["hi"]):
+        raise RuntimeError(f"zh2hi 譯文沒有天城文：{outs['hi']}")
     dev = getattr(trs[0].ct2, "device", "?")
-    return (f"翻 1 種 {t_one:.2f}s、同時翻 4 種 {t_all:.2f}s（{dev}）\n       "
-            + "\n       ".join(f"{d}: {o}" for d, o in zip(dirs, outs)) + f"\n       zh2id（單獨）: {one}")
+    return (f"翻 1 種 {t_one:.2f}s；4 種一起送 {t_par:.2f}s；4 種批次 {t_batch:.2f}s（{dev}）\n       "
+            + "\n       ".join(f"zh2{L}: {outs[L]}" for L in langs))
 
 
 def translations(quick):

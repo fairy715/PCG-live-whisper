@@ -76,7 +76,7 @@ class Extra(unittest.TestCase):
         self.assertTrue(all(e["id"] == main["id"] for e in extra))             # 對回同一句
         self.assertEqual(extra[1]["text"], "[zh2vi] 設備要先關電源")
         self.assertEqual(extra[1]["lang"], "VI")
-        self.assertEqual(sorted(self.made), ["zh2hi", "zh2vi"])
+        self.assertEqual(set(self.made), {"zh2hi", "zh2vi"})
 
     def test_nobody_wants_nothing_translated(self):
         self.send(src_lang="中", src_text="你好", dst_lang="ID", dst_text="Halo")
@@ -109,6 +109,32 @@ class Extra(unittest.TestCase):
         extra = [e for e in self.drain(4) if e["type"] == "transcription_extra"]
         self.assertEqual(sorted(e["text"] for e in extra), ["[en2zh] Hello", "[vi2zh] Xin chào"])
 
+    def test_local_model_translates_all_languages_in_one_call(self):
+        """本機 M2M100：同一句的幾種語言一次翻（translate_multi），不是一種一種"""
+        calls = []
+
+        class Multi:
+            def translate_multi(self, text, langs):
+                calls.append(list(langs))
+                return {L: f"<{L}> {text}" for L in langs}
+        t._pcg_extra.translator = lambda d: Multi()
+        self.want("vi hi en")
+        self.send(src_lang="中", src_text="你好", dst_lang="ID", dst_text="Halo")
+        extra = [e for e in self.drain(4) if e["type"] == "transcription_extra"]
+        self.assertEqual(calls, [["en", "hi", "vi"]])
+        self.assertEqual(sorted(e["text"] for e in extra), ["<en> 你好", "<hi> 你好", "<vi> 你好"])
+
+    def test_llm_keeps_one_request_per_language(self):
+        old = t._pcg_tr_note["tr"]
+        try:
+            t._pcg_tr_note["tr"] = t.OllamaTranslator("m", direction="zh2id", skip_check=True)
+            self.want("vi hi")
+            self.send(src_lang="中", src_text="你好", dst_lang="ID", dst_text="Halo")
+            self.drain(3)
+            self.assertEqual(sorted(self.made), ["zh2hi", "zh2vi"])
+        finally:
+            t._pcg_tr_note["tr"] = old
+
     def test_translation_failure_is_quiet(self):
         self.want("vi")
 
@@ -117,6 +143,33 @@ class Extra(unittest.TestCase):
         t._pcg_extra.translator = broken
         self.send(src_lang="中", src_text="你好")
         self.assertEqual([e["type"] for e in self.drain(2, timeout=0.5)], ["transcription"])
+
+
+class BatchM2M(unittest.TestCase):
+    """M2M100 的批次翻譯：同一段原文、每一筆帶自己的目標語言代碼，一次 translate_batch"""
+
+    def test_one_batch_with_target_prefixes(self):
+        calls = []
+
+        class SP:
+            def Encode(self, text, out_type=str): return ["▁" + w for w in text.split()]
+            def Decode(self, toks): return " ".join(toks).replace("▁", "").strip()
+
+        class CT2:
+            def translate_batch(self, src, **kw):
+                calls.append((src, kw["target_prefix"]))
+                return [types.SimpleNamespace(hypotheses=[p + ["X" + p[0].strip("_")]]) for p in kw["target_prefix"]]
+
+        tr = t.M2M100Translator.__new__(t.M2M100Translator)
+        tr.sp, tr.ct2, tr.src_lang, tr.direction = SP(), CT2(), "__zh__", "zh2vi"
+        out = tr.translate_multi("我們 明天 開會", ["vi", "hi", "zh", "ja", "xx"])
+        self.assertEqual(len(calls), 1)                                   # 一次就好
+        src, prefixes = calls[0]
+        self.assertEqual(prefixes, [["__vi__"], ["__hi__"], ["__zh__"], ["__ja__"]])   # 不認得的語言略過
+        self.assertTrue(all(x == ["__zh__", "▁我們", "▁明天", "▁開會", "</s>"] for x in src))
+        self.assertEqual(out["vi"], "Xvi")
+        self.assertEqual(set(out), {"vi", "hi", "zh", "ja"})
+        self.assertEqual(tr.translate_multi("", ["vi"]), {})
 
 
 class Translators(unittest.TestCase):
