@@ -279,8 +279,8 @@ Bộ cài chính chỉ có mô hình small: chạy được trên laptop thườ
 
 **Khi họp**
 
-1. Máy phụ đề tham gia cuộc họp Teams (trực tuyến), hoặc dùng micro của phòng họp (họp tại chỗ: chọn "Cùng một phòng học, một micro").
-2. Chọn ngôn ngữ, bấm Bắt đầu, rồi bấm "Chia sẻ" trên màn hình phụ đề và chiếu mã QR.
+1. Máy phụ đề tham gia cuộc họp Teams (trực tuyến), hoặc dùng micro của phòng họp (họp tại chỗ: chọn "**Máy phụ đề phòng họp, mọi người xem trên điện thoại**", từ r19).
+2. Chọn ngôn ngữ rồi bấm Bắt đầu: với lựa chọn phòng họp, mã QR hiện ngay (các lựa chọn khác thì bấm "Chia sẻ" trên màn hình phụ đề); chiếu mã QR lên.
 3. Mọi người quét mã QR (hoặc mở `http://<IP máy phụ đề>:19781/simple/live`), nhập mật khẩu nhân viên và chọn ngôn ngữ hiển thị chữ lớn bằng menu ngôn ngữ ở góc trên bên phải. Điện thoại chỉ xem được, không dừng được phụ đề.
 
 **Giới hạn**

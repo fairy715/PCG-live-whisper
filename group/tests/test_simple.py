@@ -271,6 +271,17 @@ class SimpleFlow(unittest.TestCase):
         self.assertEqual(post(scenario="vi", me="xx")["mode"], "vi2zh")
         self.assertEqual(post(scenario="vi")["mode"], "vi2zh")
 
+    def test_live_info_for_meeting_room_scene(self):
+        """會議室字幕機（r19）：同仁頁面要知道 IT 有沒有開分享（沒開就先提醒）、多語字幕有沒有開"""
+        info = self.c.get("/api/simple/live").json()
+        self.assertEqual((info["remote_view"], info["multi_lang"]), (False, True))
+        self.cfg.write_text(json.dumps({"pcg_simple": {"allow_remote_view": True, "multi_lang": False}}), encoding="utf-8")
+        info = self.c.get("/api/simple/live").json()
+        self.assertEqual((info["remote_view"], info["multi_lang"]), (True, False))
+        # 會議室字幕機選「大家都說中文」：一般中文字幕（外國同仁靠多語字幕看自己的語言）
+        r = self.c.post("/api/simple/live", json={"scenario": "zh", "room": False}).json()
+        self.assertEqual((r["mode"], r["room"]), ("zh", False))
+
     def test_live_foreign_pair_uses_language_pack(self):
         """單向外語對外語：對方語言的模型包照樣用；雙向、教室模式不用（另一路是別的語言）"""
         pack = self.base / "models" / "packs" / "phowhisper-small"

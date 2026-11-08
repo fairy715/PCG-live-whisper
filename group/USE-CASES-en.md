@@ -18,6 +18,7 @@ So only **the computer running the meeting or class** needs the app. The other s
    - Online meeting or class, I only read subtitles
    - Online meeting or class, I will speak too (headset)
    - Same classroom, one microphone
+   - Meeting room subtitle computer, everyone reads on their phones (from r19; the QR code is shown right after Start and everyone chooses their own language)
 3. **What language do the others speak?** If you chose another language, you see "Chinese → your language" and the other foreign languages (from r17; e.g. Vietnamese staff see "Indonesian, to Vietnamese").
 
 Your last choice is remembered. If the option you want is not shown, click "Show all options".
@@ -121,7 +122,7 @@ For example, a Taiwanese manager chairs the meeting in Chinese, with Indonesian,
 - **Taiwanese staff following what foreign staff say**: choose "Indonesian" and so on. Only one foreign language at a time; when someone speaks another language, choose that language and click Start (the previous session is replaced).
 
 **Same meeting room**
-- Use the room's "subtitle computer" (one computer with a graphics card; setup in the IT guide): choose "Same classroom, one microphone" and the language most of the others speak (e.g. Indonesian), click Start, then "Share" and project the QR code.
+- Use the room's "subtitle computer" (one computer with a graphics card; setup in the IT guide): choose "**Meeting room subtitle computer, everyone reads on their phones**" and the language most of the others speak (e.g. Indonesian; if only Taiwanese staff speak, "Everyone speaks Chinese"), click Start; the QR code is shown right away, project it.
 - Everyone scans the QR code and chooses their own language at the top right (multi-language subtitles, from r19): Chinese and Indonesian viewers read the normal subtitles; for Vietnamese, Hindi or English viewers the subtitle computer translates one more copy.
 - The microphone only tells apart Chinese and the one foreign language you chose. Staff speaking other languages should use English or have someone relay.
 

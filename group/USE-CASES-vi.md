@@ -18,6 +18,7 @@ Vì vậy chỉ **máy tính chủ trì cuộc họp hoặc lớp học** cần 
    - Họp hoặc lớp online, tôi chỉ đọc phụ đề
    - Họp hoặc lớp online, tôi cũng nói (đeo tai nghe)
    - Cùng một phòng học, một micro
+   - Máy phụ đề phòng họp, mọi người xem trên điện thoại (từ r19; mã QR hiện ngay sau khi bấm Bắt đầu và mỗi người tự chọn ngôn ngữ)
 3. **Người kia nói tiếng gì?** Nếu bạn chọn tiếng Việt, bạn sẽ thấy "Tiếng Trung → Tiếng Việt" và các ngoại ngữ khác (từ r17; ví dụ "Tiếng Indonesia, sang tiếng Việt").
 
 Lựa chọn lần trước sẽ được ghi nhớ. Nếu không thấy lựa chọn cần dùng, bấm "Hiện tất cả lựa chọn".
@@ -115,7 +116,7 @@ Ví dụ quản lý người Đài Loan chủ trì bằng tiếng Trung, có nh�
 - **Nhân viên Đài Loan muốn hiểu lời nhân viên nước ngoài**: chọn "Tiếng Việt" v.v. Mỗi lần chỉ một ngoại ngữ; khi người khác nói ngôn ngữ khác, chọn ngôn ngữ đó rồi bấm Bắt đầu (phiên trước tự được thay).
 
 **Cùng một phòng họp**
-- Dùng "máy phụ đề" của phòng họp (một máy có card đồ họa; cài đặt trong hướng dẫn IT): chọn "Cùng một phòng học, một micro" và ngôn ngữ mà nhiều người kia nói nhất (ví dụ tiếng Indonesia), bấm Bắt đầu, rồi "Chia sẻ" và chiếu mã QR.
+- Dùng "máy phụ đề" của phòng họp (một máy có card đồ họa; cài đặt trong hướng dẫn IT): chọn "**Máy phụ đề phòng họp, mọi người xem trên điện thoại**" và ngôn ngữ mà nhiều người kia nói nhất (ví dụ tiếng Indonesia; nếu chỉ nhân viên Đài Loan nói, chọn chỉ tiếng Trung), bấm Bắt đầu; mã QR hiện ngay, hãy chiếu lên.
 - Mọi người quét mã QR và tự chọn ngôn ngữ ở góc trên bên phải (phụ đề đa ngôn ngữ, từ r19): người xem tiếng Trung và tiếng Indonesia đọc phụ đề bình thường; với người chọn tiếng Việt, Hindi hoặc Anh, máy phụ đề dịch thêm một bản.
 - Micro chỉ phân biệt tiếng Trung và một ngoại ngữ đã chọn. Nhân viên nói ngôn ngữ khác nên dùng tiếng Anh hoặc nhờ người khác chuyển lời.
 

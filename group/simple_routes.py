@@ -723,6 +723,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "running": bool(live_running and live_running()),
                 "mode": mode, "is_file": bool(args and "--input" in args), "version": app_version(base_dir),
                 "multi_lang": settings().get("multi_lang", True) is not False,
+                # 會議室字幕機（r19）：IT 有沒有開「允許其他電腦或手機連進來看字幕」，沒開就先提醒
+                "remote_view": bool(settings().get("allow_remote_view", False)),
                 "scenarios": [{k: s[k] for k in ("id", "title", "flag")}
                               | {"can_bidi": bool(s["bidi"]), "can_room": s["id"] in ROOM_SCENARIOS}
                               for s in LIVE_SCENARIOS]}

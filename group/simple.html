@@ -153,6 +153,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
           <p class="step next"><b>2</b><span data-t="step_scene"></span></p>
           <div class="grid" id="liveScene" role="radiogroup"></div>
           <p class="note" id="sceneNote"></p>
+          <div class="banner warn" id="hubWarn" hidden data-t="hub_off"></div>
         </div>
         <p class="step next"><b id="stepLangN">3</b><span data-t="step_live_lang"></span></p>
         <div class="grid" id="liveScenarios"></div>
@@ -238,6 +239,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 const LANGS=[['zh','繁體中文','zh-TW'],['en','English','en-US'],['id','Bahasa Indonesia','id-ID'],['vi','Tiếng Việt','vi-VN'],['hi','हिन्दी','hi-IN']];
 const I18N={
 zh:{
+  sc_hub:"會議室字幕機，大家用手機看",sc_hub_s:"這台接會議室麥克風，每一句自動判斷是中文還是對方的語言。開始後會直接顯示 QR Code，大家用手機掃描、各自選自己的語言（多語字幕）。",sc_hub_s_x:"這台接會議室麥克風，每一句自動判斷是你的語言還是對方的語言。開始後會直接顯示 QR Code，大家用手機掃描、各自選自己的語言（多語字幕）。",hub_off:"IT 還沒開啟「允許其他電腦或手機連進來看字幕」，手機會連不進來。請 IT 到「IT 設定」開啟（開啟後要把程式關掉再開一次）。",
   lv_to:"翻成{l}",sc_listen_s_x:"對方說的話翻成你的語言顯示。",speak_s_x:"用麥克風：你說你的語言，會翻成對方的語言顯示出來。請戴耳機，避免把對方的聲音錄進麥克風。",room_s_x:"兩種語言都可以說：每一句自動判斷是哪一種語言，再翻成另一種。一次一個人講效果最好；很短的話（例如「好」）可能判斷錯。",
   rep_link:"回報問題",rep_title:"回報問題",rep_hint:"寫下發生了什麼事，按「產生診斷檔」會下載一個 zip 檔。裡面有版本、電腦規格、設定（金鑰和密碼已遮掉）和最近的程式記錄，不含錄音、逐字稿和會議紀錄。",rep_ph:"例如：下午 2 點左右，選「對方說印尼文」按開始，字幕一直沒有出現",rep_logs:"附上最近的程式記錄（IT 查問題最需要；可能含部分字幕文字）",rep_make:"產生診斷檔",rep_making:"正在產生…",rep_done:"已下載 {n}（在瀏覽器的「下載」資料夾）。",rep_send:"請把這個檔案寄給：{c}",rep_send_it:"請把這個檔案交給 IT。",rep_mail:"寫信給 IT",rep_close:"關閉",rep_subject:"PCG 會議翻譯：問題回報（v{v}）",rep_attach:"（請附上檔案：{n}）",rep_failed:"沒有產生診斷檔：{e}",
   upd_avail:'有新版本 v{v}（目前 v{c}）。更新約 1 分鐘，期間程式會暫時關閉。',upd_btn:'立即更新',upd_check_now:'檢查更新',upd_none:'目前是最新版（v{c}）。如果已經知道有新版，可能是這台電腦連不到 GitHub 或公司共用資料夾，請找 IT。',upd_off:'IT 關閉了自動檢查更新，請找 IT。',upd_it_btn:'IT 更新',upd_it_pw:'請輸入 IT 密碼',upd_full:'有新版本 v{v}，這次要用完整安裝檔更新，請找 IT。',upd_notes:'更新內容',upd_running:'正在更新到 v{v}，約 1～2 分鐘，完成後這一頁會自動重新整理。請不要關閉電腦。',upd_failed:'更新沒有完成：{e}',upd_timeout:'更新似乎沒有完成。請重新整理頁面；還是舊版的話請找 IT。',upd_busy:'正在進行即時字幕或處理錄音，結束後再更新。',
@@ -286,6 +288,7 @@ zh:{
   fs_sub_zh:'中文逐字稿',fs_sub:'翻成中文',fs_sub_hi2zh:'印度・翻成中文'
 },
 en:{
+  sc_hub:"Meeting room subtitle computer, everyone reads on their phones",sc_hub_s:"This computer uses the room microphone and detects whether each sentence is Chinese or the other language. After Start the QR code is shown right away; everyone scans it and chooses their own language (multi-language subtitles).",sc_hub_s_x:"This computer uses the room microphone and detects whether each sentence is your language or the other language. After Start the QR code is shown right away; everyone scans it and chooses their own language (multi-language subtitles).",hub_off:"IT has not turned on “Allow other computers and phones to view subtitles”, so phones cannot connect. Ask IT to turn it on in IT settings (then close the app and open it again).",
   lv_to:"to {l}",sc_listen_s_x:"What the others say is shown in your language.",speak_s_x:"Uses your microphone: what you say in your language is translated into their language. Please wear headphones so the microphone does not pick up the other side.",room_s_x:"Both languages can be spoken: each sentence is detected automatically and translated into the other language. Works best one speaker at a time; very short replies may be detected wrongly.",
   rep_link:"Report a problem",rep_title:"Report a problem",rep_hint:"Describe what happened and press “Create report” to download a zip file. It has the version, computer specs, settings (keys and passwords removed) and recent program logs. It does not include recordings, transcripts or minutes.",rep_ph:"e.g. Around 2 pm I chose “Indonesian” and pressed Start, but no subtitles appeared",rep_logs:"Include recent program logs (IT needs these most; they may contain some subtitle text)",rep_make:"Create report",rep_making:"Creating…",rep_done:"Downloaded {n} (in your browser’s Downloads folder).",rep_send:"Please send this file to: {c}",rep_send_it:"Please send this file to IT.",rep_mail:"Email IT",rep_close:"Close",rep_subject:"PCG Meeting Translator: problem report (v{v})",rep_attach:"(Please attach the file: {n})",rep_failed:"The report was not created: {e}",
   upd_avail:'A new version v{v} is available (you have v{c}). Updating takes about 1 minute and the app closes briefly.',upd_btn:'Update now',upd_check_now:'Check for updates',upd_none:'You have the latest version (v{c}). If you know a newer one is out, this computer may not reach GitHub or the shared folder; ask IT.',upd_off:'IT has turned off update checks; ask IT.',upd_it_btn:'IT update',upd_it_pw:'Enter the IT password',upd_full:'A new version v{v} is available. It needs the full installer; please ask IT.',upd_notes:'What’s new',upd_running:'Updating to v{v}. This takes 1–2 minutes and the page will reload by itself. Do not turn off the computer.',upd_failed:'The update did not finish: {e}',upd_timeout:'The update does not seem to have finished. Reload the page; if it is still the old version, ask IT.',upd_busy:'Live subtitles or a recording are in progress. Update when they finish.',
@@ -334,6 +337,7 @@ en:{
   fs_sub_zh:'Chinese transcript',fs_sub:'Translated to Chinese',fs_sub_hi2zh:'India · to Chinese'
 },
 id:{
+  sc_hub:"Komputer subtitle ruang rapat, semua membaca di ponsel",sc_hub_s:"Komputer ini memakai mikrofon ruangan dan mengenali apakah setiap kalimat bahasa Mandarin atau bahasa lawan bicara. Setelah Mulai, kode QR langsung tampil; semua orang memindai dan memilih bahasanya sendiri (subtitle multibahasa).",sc_hub_s_x:"Komputer ini memakai mikrofon ruangan dan mengenali apakah setiap kalimat bahasa Anda atau bahasa lawan bicara. Setelah Mulai, kode QR langsung tampil; semua orang memindai dan memilih bahasanya sendiri (subtitle multibahasa).",hub_off:"IT belum mengaktifkan “Izinkan komputer dan ponsel lain menonton subtitle”, jadi ponsel tidak bisa terhubung. Minta IT mengaktifkannya di Pengaturan IT (lalu tutup aplikasi dan buka lagi).",
   lv_to:"ke {l}",sc_listen_s_x:"Ucapan lawan bicara ditampilkan dalam bahasa Anda.",speak_s_x:"Memakai mikrofon: ucapan Anda dalam bahasa Anda diterjemahkan ke bahasa lawan bicara. Gunakan headphone agar suara lawan bicara tidak masuk ke mikrofon.",room_s_x:"Kedua bahasa boleh dipakai: setiap kalimat dikenali otomatis lalu diterjemahkan ke bahasa lainnya. Paling baik satu orang berbicara bergantian; jawaban sangat pendek bisa salah dikenali.",
   rep_link:"Laporkan masalah",rep_title:"Laporkan masalah",rep_hint:"Tulis apa yang terjadi, lalu tekan “Buat laporan” untuk mengunduh file zip. Isinya versi, spesifikasi komputer, pengaturan (kunci dan kata sandi dihapus) dan log program terbaru. Tidak berisi rekaman, transkrip, atau notulen.",rep_ph:"mis. Sekitar jam 2 siang saya pilih “Bahasa Indonesia” dan tekan Mulai, tetapi subtitle tidak muncul",rep_logs:"Sertakan log program terbaru (paling dibutuhkan IT; mungkin berisi sebagian teks subtitle)",rep_make:"Buat laporan",rep_making:"Sedang membuat…",rep_done:"{n} sudah diunduh (di folder Unduhan browser).",rep_send:"Kirim file ini ke: {c}",rep_send_it:"Kirim file ini ke IT.",rep_mail:"Email IT",rep_close:"Tutup",rep_subject:"PCG Penerjemah Rapat: laporan masalah (v{v})",rep_attach:"(Lampirkan file: {n})",rep_failed:"Laporan tidak dibuat: {e}",
   upd_avail:'Versi baru v{v} tersedia (versi Anda v{c}). Pembaruan sekitar 1 menit dan aplikasi akan tertutup sebentar.',upd_btn:'Perbarui sekarang',upd_check_now:'Periksa pembaruan',upd_none:'Ini versi terbaru (v{c}). Jika Anda tahu ada versi baru, komputer ini mungkin tidak bisa terhubung ke GitHub atau folder bersama; hubungi IT.',upd_off:'IT mematikan pemeriksaan pembaruan; hubungi IT.',upd_it_btn:'Pembaruan oleh IT',upd_it_pw:'Masukkan kata sandi IT',upd_full:'Versi baru v{v} tersedia. Pembaruan ini memerlukan penginstal lengkap; hubungi IT.',upd_notes:'Yang baru',upd_running:'Memperbarui ke v{v}. Sekitar 1–2 menit, halaman akan dimuat ulang otomatis. Jangan matikan komputer.',upd_failed:'Pembaruan tidak selesai: {e}',upd_timeout:'Pembaruan tampaknya tidak selesai. Muat ulang halaman; jika masih versi lama, hubungi IT.',upd_busy:'Subtitle langsung atau pemrosesan rekaman sedang berjalan. Perbarui setelah selesai.',
@@ -382,6 +386,7 @@ id:{
   fs_sub_zh:'Transkrip Mandarin',fs_sub:'Ke bahasa Mandarin',fs_sub_hi2zh:'India · ke Mandarin'
 },
 vi:{
+  sc_hub:"Máy phụ đề phòng họp, mọi người xem trên điện thoại",sc_hub_s:"Máy này dùng micro của phòng và tự nhận biết mỗi câu là tiếng Trung hay ngôn ngữ của người kia. Sau khi bấm Bắt đầu, mã QR hiện ngay; mọi người quét và tự chọn ngôn ngữ của mình (phụ đề đa ngôn ngữ).",sc_hub_s_x:"Máy này dùng micro của phòng và tự nhận biết mỗi câu là ngôn ngữ của bạn hay của người kia. Sau khi bấm Bắt đầu, mã QR hiện ngay; mọi người quét và tự chọn ngôn ngữ của mình (phụ đề đa ngôn ngữ).",hub_off:"IT chưa bật “Cho phép máy tính và điện thoại khác xem phụ đề”, nên điện thoại không kết nối được. Hãy nhờ IT bật trong Cài đặt IT (sau đó đóng ứng dụng và mở lại).",
   lv_to:"sang {l}",sc_listen_s_x:"Lời người kia được hiển thị bằng ngôn ngữ của bạn.",speak_s_x:"Dùng micro: bạn nói bằng ngôn ngữ của mình, sẽ được dịch sang ngôn ngữ của người kia. Hãy đeo tai nghe để micro không thu tiếng của bên kia.",room_s_x:"Có thể nói cả hai ngôn ngữ: mỗi câu được tự nhận biết rồi dịch sang ngôn ngữ còn lại. Tốt nhất là từng người nói một; câu quá ngắn có thể bị nhận sai.",
   rep_link:"Báo lỗi",rep_title:"Báo lỗi",rep_hint:"Mô tả chuyện gì đã xảy ra rồi bấm “Tạo báo cáo” để tải về một tệp zip. Trong đó có phiên bản, cấu hình máy, cài đặt (đã xóa khóa và mật khẩu) và nhật ký chương trình gần đây. Không có bản ghi âm, bản ghi lời hay biên bản họp.",rep_ph:"VD: Khoảng 2 giờ chiều tôi chọn “Tiếng Việt” và bấm Bắt đầu nhưng không thấy phụ đề",rep_logs:"Kèm nhật ký chương trình gần đây (IT cần nhất; có thể có một phần nội dung phụ đề)",rep_make:"Tạo báo cáo",rep_making:"Đang tạo…",rep_done:"Đã tải {n} (trong thư mục Tải xuống của trình duyệt).",rep_send:"Vui lòng gửi tệp này cho: {c}",rep_send_it:"Vui lòng gửi tệp này cho IT.",rep_mail:"Gửi email cho IT",rep_close:"Đóng",rep_subject:"PCG Dịch cuộc họp: báo lỗi (v{v})",rep_attach:"(Vui lòng đính kèm tệp: {n})",rep_failed:"Chưa tạo được báo cáo: {e}",
   upd_avail:'Có phiên bản mới v{v} (bạn đang dùng v{c}). Cập nhật mất khoảng 1 phút, ứng dụng sẽ tạm đóng.',upd_btn:'Cập nhật ngay',upd_check_now:'Kiểm tra cập nhật',upd_none:'Đây là phiên bản mới nhất (v{c}). Nếu bạn biết đã có bản mới, có thể máy này không kết nối được GitHub hoặc thư mục dùng chung; hãy liên hệ IT.',upd_off:'IT đã tắt kiểm tra cập nhật; hãy liên hệ IT.',upd_it_btn:'IT cập nhật',upd_it_pw:'Nhập mật khẩu IT',upd_full:'Có phiên bản mới v{v}. Lần này cần bộ cài đầy đủ; hãy liên hệ IT.',upd_notes:'Có gì mới',upd_running:'Đang cập nhật lên v{v}, khoảng 1–2 phút, trang sẽ tự tải lại. Đừng tắt máy tính.',upd_failed:'Cập nhật chưa hoàn tất: {e}',upd_timeout:'Có vẻ cập nhật chưa hoàn tất. Hãy tải lại trang; nếu vẫn là bản cũ, hãy liên hệ IT.',upd_busy:'Đang chạy phụ đề trực tiếp hoặc xử lý bản ghi âm. Hãy cập nhật sau khi xong.',
@@ -430,6 +435,7 @@ vi:{
   fs_sub_zh:'Bản ghi tiếng Trung',fs_sub:'Dịch sang tiếng Trung',fs_sub_hi2zh:'Ấn Độ · sang tiếng Trung'
 },
 hi:{
+  sc_hub:"मीटिंग रूम सबटाइटल कंप्यूटर, सब अपने फ़ोन पर देखें",sc_hub_s:"यह कंप्यूटर कमरे का माइक्रोफ़ोन इस्तेमाल करता है और हर वाक्य की भाषा (चीनी या सामने वाले की भाषा) अपने आप पहचानता है। शुरू करते ही QR कोड दिखेगा; सब स्कैन करके अपनी भाषा चुनें (बहुभाषी सबटाइटल)।",sc_hub_s_x:"यह कंप्यूटर कमरे का माइक्रोफ़ोन इस्तेमाल करता है और हर वाक्य की भाषा (आपकी या सामने वाले की) अपने आप पहचानता है। शुरू करते ही QR कोड दिखेगा; सब स्कैन करके अपनी भाषा चुनें (बहुभाषी सबटाइटल)।",hub_off:"IT ने “दूसरे कंप्यूटर और फ़ोन को सबटाइटल देखने दें” चालू नहीं किया है, इसलिए फ़ोन कनेक्ट नहीं हो पाएँगे। IT से IT सेटिंग में चालू करवाएँ (फिर ऐप बंद करके दोबारा खोलें)।",
   lv_to:"{l} में",sc_listen_s_x:"सामने वालों की बात आपकी भाषा में दिखेगी।",speak_s_x:"माइक्रोफ़ोन से: आप अपनी भाषा में बोलेंगे तो सामने वाले की भाषा में अनुवाद दिखेगा। कृपया हेडफ़ोन लगाएँ, ताकि सामने वाले की आवाज़ माइक्रोफ़ोन में न जाए।",room_s_x:"दोनों भाषाएँ बोली जा सकती हैं: हर वाक्य की भाषा अपने आप पहचानी जाती है और दूसरी भाषा में अनुवाद होता है। एक समय में एक व्यक्ति बोले तो सबसे अच्छा; बहुत छोटे जवाब गलत पहचाने जा सकते हैं।",
   rep_link:"समस्या बताएँ",rep_title:"समस्या बताएँ",rep_hint:"लिखें कि क्या हुआ, फिर “रिपोर्ट बनाएँ” दबाएँ; एक zip फ़ाइल डाउनलोड होगी। इसमें संस्करण, कंप्यूटर की जानकारी, सेटिंग्स (कुंजी और पासवर्ड हटाए गए) और हाल के प्रोग्राम लॉग होते हैं। इसमें रिकॉर्डिंग, ट्रांसक्रिप्ट या मीटिंग नोट्स नहीं होते।",rep_ph:"जैसे: दोपहर 2 बजे के आसपास “हिन्दी” चुनकर शुरू दबाया, पर सबटाइटल नहीं आए",rep_logs:"हाल के प्रोग्राम लॉग जोड़ें (IT को इनकी सबसे ज़्यादा ज़रूरत होती है; इनमें कुछ सबटाइटल टेक्स्ट हो सकता है)",rep_make:"रिपोर्ट बनाएँ",rep_making:"बन रही है…",rep_done:"{n} डाउनलोड हो गई (ब्राउज़र के Downloads फ़ोल्डर में)।",rep_send:"कृपया यह फ़ाइल यहाँ भेजें: {c}",rep_send_it:"कृपया यह फ़ाइल IT को भेजें।",rep_mail:"IT को ईमेल करें",rep_close:"बंद करें",rep_subject:"PCG मीटिंग अनुवाद: समस्या रिपोर्ट (v{v})",rep_attach:"(कृपया फ़ाइल संलग्न करें: {n})",rep_failed:"रिपोर्ट नहीं बनी: {e}",
   upd_avail:'नया संस्करण v{v} उपलब्ध है (आपके पास v{c} है)। अपडेट में लगभग 1 मिनट लगता है और ऐप थोड़ी देर के लिए बंद होगा।',upd_btn:'अभी अपडेट करें',upd_check_now:'अपडेट जाँचें',upd_none:'यह नवीनतम संस्करण है (v{c})। अगर आपको पता है कि नया संस्करण आ गया है, तो शायद यह कंप्यूटर GitHub या साझा फ़ोल्डर तक नहीं पहुँच पा रहा; IT से संपर्क करें।',upd_off:'IT ने अपडेट जाँच बंद की है; IT से संपर्क करें।',upd_it_btn:'IT अपडेट',upd_it_pw:'IT पासवर्ड दर्ज करें',upd_full:'नया संस्करण v{v} उपलब्ध है। इसके लिए पूरा इंस्टॉलर चाहिए; IT से संपर्क करें।',upd_notes:'नया क्या है',upd_running:'v{v} पर अपडेट हो रहा है। 1–2 मिनट लगेंगे, पेज अपने आप रीलोड होगा। कंप्यूटर बंद न करें।',upd_failed:'अपडेट पूरा नहीं हुआ: {e}',upd_timeout:'लगता है अपडेट पूरा नहीं हुआ। पेज रीलोड करें; अगर अभी भी पुराना संस्करण है तो IT से संपर्क करें।',upd_busy:'लाइव सबटाइटल या रिकॉर्डिंग प्रोसेसिंग चल रही है। पूरा होने के बाद अपडेट करें।',
@@ -574,7 +580,7 @@ function cardsHtml(list,name,title,sub){
 }
 /* 先問「你說什麼語言」「哪一種場合」，下面只留下適合的選項（「顯示全部選項」可看全部） */
 const ME=[['zh','中','中文'],['id','ID','Bahasa Indonesia'],['vi','VI','Tiếng Việt'],['hi','HI','हिन्दी'],['en','EN','English']];
-const SCENES=[['listen','💻','sc_listen'],['speak','🎧','sc_speak'],['room','🏫','sc_room']];
+const SCENES=[['listen','💻','sc_listen'],['speak','🎧','sc_speak'],['room','🏫','sc_room'],['hub','📡','sc_hub']];   // hub：會議室字幕機（r19）
 let me=store.get('pcg_me');if(!ME.some(m=>m[0]===me))me=ME.some(m=>m[0]===lang)?lang:'zh';
 let scene=store.get('pcg_scene');if(!SCENES.some(x=>x[0]===scene))scene='listen';
 let showAll=false;
@@ -588,7 +594,8 @@ function caps(s){           // 這個選項能不能「我也要說話」、教�
 }
 function visibleScen(){
   if(showAll)return liveScen;
-  const ok=s=>(scene!=='room'||caps(s).r)&&(scene!=='speak'||caps(s).b);
+  // 會議室字幕機＝一支麥克風（教室模式）＋分享；「大家都說中文」也可以（外國同仁用多語字幕看自己的語言）
+  const ok=s=>(scene!=='room'||caps(s).r)&&(scene!=='speak'||caps(s).b)&&(scene!=='hub'||caps(s).r||s.id==='zh');
   if(me!=='zh')return liveScen.filter(s=>s.id==='zh2'+me||(FOREIGN.includes(s.id)&&s.id!==me)).filter(ok);
   return liveScen.filter(s=>!s.id.startsWith('zh2')).filter(ok);
 }
@@ -601,7 +608,8 @@ function renderScenarios(){
   $('liveScene').innerHTML=SCENES.map(([c,f,k])=>radioCard('scene',c,f,t(k),c===scene)).join('');
   $('sceneBox').hidden=showAll;
   const x=zh?'':'_x';      // 外語同仁的說明：翻成「你的語言」，不是中文
-  $('sceneNote').textContent=t((scene==='speak'?'speak_s':scene==='room'?'room_s':'sc_listen_s')+x);
+  $('sceneNote').textContent=t((scene==='speak'?'speak_s':scene==='room'?'room_s':scene==='hub'?'sc_hub_s':'sc_listen_s')+x);
+  $('hubWarn').hidden=!(scene==='hub'&&!showAll&&liveInfo&&!liveInfo.remote_view);
   $('stepLangN').textContent=!showAll?'3':'2';
   const list=visibleScen();
   $('liveScenarios').innerHTML=cardsHtml(list,'live',liveTitle,liveSub);
@@ -621,7 +629,7 @@ const picked=name=>document.querySelector(`input[name=${name}]:checked`)?.value;
 function onLivePick(){
   const s=liveScen.find(x=>x.id===picked('live'));
   const c=caps(s);
-  if(!showAll){$('liveSpeak').checked=scene==='speak';$('liveRoom').checked=scene==='room'}
+  if(!showAll){$('liveSpeak').checked=scene==='speak';$('liveRoom').checked=scene==='room'||(scene==='hub'&&c.r)}
   $('liveSpeak').disabled=!c.b;if(!c.b)$('liveSpeak').checked=false;
   $('liveRoom').disabled=!c.r;if(!c.r)$('liveRoom').checked=false;
   $('liveStart').disabled=!s;if(s){store.set('pcg_live',s.id);store.set('pcg_live_'+me,s.id)}
@@ -633,8 +641,9 @@ $('showAll').onclick=()=>{showAll=!showAll;renderScenarios()};
 // 「我也要說話」（耳機＋麥克風分流）與「教室模式」（同一支麥克風自動判斷）二選一
 $('liveSpeak').addEventListener('change',()=>{if($('liveSpeak').checked)$('liveRoom').checked=false});
 $('liveRoom').addEventListener('change',()=>{if($('liveRoom').checked)$('liveSpeak').checked=false});
+let liveInfo=null;
 async function initLive(){
-  const j=await api('/api/simple/live');
+  const j=await api('/api/simple/live');liveInfo=j;
   liveScen=j.scenarios||[];renderScenarios();
   const last=store.get('pcg_live');const el=last&&document.querySelector(`input[name=live][value="${CSS.escape(last)}"]`);
   if(el)el.checked=true;onLivePick();
@@ -654,7 +663,7 @@ $('liveStart').onclick=async()=>{
   const b=$('liveStart');b.disabled=true;b.textContent=t('preparing');
   const j=await api('/api/simple/live',{method:'POST',headers:{'Content-Type':'application/json'},
     body:JSON.stringify({scenario:picked('live'),me:foreignMe()?me:'zh',speak:$('liveSpeak').checked,room:$('liveRoom').checked,overlay:$('liveOverlay').checked,topic:$('liveTopic').value})});
-  if(j.ok){location.href='/simple/live';return}
+  if(j.ok){location.href='/simple/live'+(scene==='hub'&&!showAll?'?share=1':'');return}   // 會議室字幕機：一打開就顯示 QR Code
   alert(errText(j));b.disabled=false;b.textContent=t('start_live');
 };
 

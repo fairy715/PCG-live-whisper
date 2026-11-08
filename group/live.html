@@ -267,7 +267,9 @@ function conn(){
   };
 }
 (async()=>{
-  try{const j=await(await fetch('/api/simple/live')).json();showVer(j.version);state.local=!!j.local;state.running=!!j.running;state.mode=j.mode||'';state.multi=j.multi_lang!==false;state.ended=!j.running&&false}catch(e){}
+  try{const j=await(await fetch('/api/simple/live')).json();showVer(j.version);state.local=!!j.local;state.running=!!j.running;state.mode=j.mode||'';state.multi=j.multi_lang!==false;
+    // 會議室字幕機（r19）：從同仁頁面開始時直接顯示 QR Code
+    if(/[?&]share=1/.test(location.search)){history.replaceState(null,'',location.pathname);setTimeout(()=>$('shareBtn').click(),300)}state.ended=!j.running&&false}catch(e){}
   paint();render();conn();
 })();
 </script>

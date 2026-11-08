@@ -277,8 +277,8 @@ The main installer only has the small model: it runs on ordinary laptops, but In
 
 **During the meeting**
 
-1. The subtitle computer joins the Teams meeting (online), or uses the room microphone (in the room: choose "Same classroom, one microphone").
-2. Choose the languages, click Start, then click "Share" on the subtitle screen and project the QR code.
+1. The subtitle computer joins the Teams meeting (online), or uses the room microphone (in the room: choose "**Meeting room subtitle computer, everyone reads on their phones**", from r19).
+2. Choose the languages and click Start: in the room scene the QR code is shown right away (otherwise click "Share" on the subtitle screen); project the QR code.
 3. Everyone scans the QR code (or opens `http://<subtitle computer IP>:19781/simple/live`), enters the staff password and picks the language to show in large text with the language menu at the top right. Phones can only view; they cannot stop the subtitles.
 
 **Limits**

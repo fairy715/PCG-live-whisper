@@ -279,8 +279,8 @@ Penginstal utama hanya berisi model small: berjalan di laptop biasa, tetapi baha
 
 **Saat rapat**
 
-1. Komputer subtitle bergabung ke rapat Teams (online), atau memakai mikrofon ruang rapat (di ruangan: pilih "Satu ruang kelas, satu mikrofon").
-2. Pilih bahasa, klik Mulai, lalu klik "Bagikan" di layar subtitle dan tampilkan kode QR di proyektor.
+1. Komputer subtitle bergabung ke rapat Teams (online), atau memakai mikrofon ruang rapat (di ruangan: pilih "**Komputer subtitle ruang rapat, semua membaca di ponsel**", mulai r19).
+2. Pilih bahasa lalu klik Mulai: pada pilihan ruang rapat kode QR langsung tampil (selain itu klik "Bagikan" di layar subtitle); tampilkan kode QR di proyektor.
 3. Semua orang memindai kode QR (atau membuka `http://<IP komputer subtitle>:19781/simple/live`), memasukkan kata sandi karyawan, dan memilih bahasa yang ditampilkan besar lewat menu bahasa di kanan atas. Ponsel hanya bisa melihat, tidak bisa menghentikan subtitle.
 
 **Batasan**

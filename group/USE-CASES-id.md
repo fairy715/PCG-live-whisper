@@ -18,6 +18,7 @@ Jadi hanya **komputer yang menjalankan rapat atau kelas** yang perlu memasang ap
    - Rapat atau kelas online, saya hanya membaca subtitle
    - Rapat atau kelas online, saya juga berbicara (pakai headset)
    - Satu ruang kelas, satu mikrofon
+   - Komputer subtitle ruang rapat, semua membaca di ponsel (mulai r19; kode QR langsung tampil setelah Mulai dan setiap orang memilih bahasanya sendiri)
 3. **Lawan bicara berbahasa apa?** Jika Anda memilih bahasa Indonesia, Anda melihat "Mandarin → Indonesia" dan bahasa asing lain (mulai r17; mis. "Bahasa Vietnam, ke Indonesia").
 
 Pilihan terakhir Anda akan diingat. Jika opsi yang dicari tidak muncul, klik "Tampilkan semua pilihan".
@@ -115,7 +116,7 @@ Misalnya atasan dari Taiwan memimpin rapat dalam bahasa Mandarin, dihadiri karya
 - **Karyawan Taiwan yang ingin memahami ucapan karyawan asing**: pilih "Bahasa Indonesia" dan seterusnya. Hanya satu bahasa asing sekaligus; saat orang lain berbicara bahasa lain, pilih bahasa itu lalu klik Mulai (sesi sebelumnya otomatis diganti).
 
 **Satu ruang rapat**
-- Gunakan "komputer subtitle" ruang rapat (satu komputer dengan kartu grafis; pengaturan di panduan IT): pilih "Satu ruang kelas, satu mikrofon" dan bahasa yang paling banyak dipakai peserta lain (mis. Indonesia), klik Mulai, lalu "Bagikan" dan tampilkan kode QR.
+- Gunakan "komputer subtitle" ruang rapat (satu komputer dengan kartu grafis; pengaturan di panduan IT): pilih "**Komputer subtitle ruang rapat, semua membaca di ponsel**" dan bahasa yang paling banyak dipakai peserta lain (mis. Indonesia; jika hanya karyawan Taiwan yang berbicara, pilih bahasa Mandarin saja), klik Mulai; kode QR langsung tampil, tampilkan di proyektor.
 - Semua orang memindai kode QR dan memilih bahasanya sendiri di kanan atas (subtitle multibahasa, mulai r19): penonton Mandarin dan Indonesia membaca subtitle biasa; untuk penonton Vietnam, Hindi, atau Inggris, komputer subtitle menerjemahkan satu salinan lagi.
 - Mikrofon hanya membedakan Mandarin dan satu bahasa asing yang dipilih. Karyawan yang berbicara bahasa lain sebaiknya memakai bahasa Inggris atau dibantu orang lain.
 
