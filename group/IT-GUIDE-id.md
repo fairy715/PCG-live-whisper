@@ -167,6 +167,8 @@ Saat subtitle langsung dan rekaman diproses di CPU komputer karyawan (mode lokal
 
 - Pengenalan suara + terjemahan lokal bersama-sama memakai sekitar **3/4 inti**, tidak pernah lebih dari jumlah inti fisik (laptop 4 inti: pengenalan 2–3, terjemahan 1), menyisakan ruang untuk Teams dan program lain
 - Di Windows prosesnya berjalan dengan prioritas **di bawah normal**: saat CPU sibuk, program di depan didahulukan, sehingga Teams dan mouse tidak tersendat
+  - **Otomatis kembali ke normal saat subtitle tertinggal** (r20): jika satu potongan suara belum selesai dikenali lebih dari 6 detik (misalnya video Teams memakai seluruh CPU), prioritas sementara dikembalikan ke normal; subtitle sedikit lebih lambat tetapi tetap muncul. Setelah 30 detik berturut-turut lancar, prioritas diturunkan lagi. Sebelumnya, di laptop 2 inti dengan Teams terbuka subtitle berhenti total dan baru muncul sekaligus setelah Teams ditutup
+  - **Laptop hemat daya 2 inti 4 utas** (misalnya i3-10110U): pengenalan suara memakai 2 utas (sebelumnya 1)
 - Komputer lama masih berat, subtitle tertinggal: pasang dulu paket **Whisper base (multibahasa)** di "Model", lalu pilih sebagai "Model subtitle langsung lokal" (lebih cepat, lebih banyak salah). **Aplikasi tidak pernah mengunduh model sendiri** (instalasi offline tidak mengunduh), jadi halaman pengaturan hanya menampilkan model yang ada di komputer ini
 - Penyesuaian (variabel lingkungan sistem Windows, lalu buka ulang aplikasi):
   - `PCG_CPU_THREADS=8`: jumlah total thread (misalnya PC desktop kuat yang ingin berjalan penuh)

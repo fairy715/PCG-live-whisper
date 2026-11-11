@@ -167,6 +167,8 @@ When live subtitles and recordings run on the staff computer's CPU (local mode, 
 
 - Speech recognition + local translation use about **3/4 of the cores** together, never more than the physical cores (4-core laptop: recognition 2–3, translation 1), leaving room for Teams and other programs
 - On Windows the worker runs at **below-normal** priority: when the CPU is busy, foreground programs come first, so Teams and the mouse do not stutter
+  - **Back to normal automatically when subtitles fall behind** (r20): if a piece of audio waits more than 6 seconds for recognition (for example a Teams video call using the whole CPU), the priority goes back to normal for a while; subtitles are a bit slower but keep coming. After 30 seconds in a row of keeping up, it goes back down. Before, on a 2-core laptop with Teams open, subtitles stopped completely and only came out all at once after Teams was closed
+  - **2-core, 4-thread power-saving laptops** (for example i3-10110U): recognition uses 2 threads (was 1)
 - Old computers still struggling, subtitles lagging: install the **Whisper base (multilingual)** pack under "Models" first, then choose it as the "Local live subtitle model" (faster, more mistakes). **The app never downloads models by itself** (offline installs do not download), so the settings page only lists models that are on this computer
 - Adjust (Windows system environment variables, restart the app afterwards):
   - `PCG_CPU_THREADS=8`: total number of threads (e.g. a powerful desktop that should run at full speed)

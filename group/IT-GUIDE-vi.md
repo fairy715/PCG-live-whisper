@@ -169,6 +169,8 @@ Khi phụ đề trực tiếp và bản ghi âm chạy trên CPU của máy nhâ
 
 - Nhận dạng giọng nói + dịch cục bộ cộng lại chỉ dùng khoảng **3/4 số nhân**, không bao giờ vượt quá số nhân vật lý (laptop 4 nhân: nhận dạng 2–3, dịch 1), chừa chỗ cho Teams và chương trình khác
 - Trên Windows tiến trình chạy ở mức ưu tiên **thấp hơn bình thường**: khi CPU bận, chương trình đang dùng được ưu tiên, Teams và chuột không bị giật
+  - **Tự trở lại mức bình thường khi phụ đề bị chậm** (r20): nếu một đoạn âm thanh chờ nhận dạng quá 6 giây (ví dụ video Teams dùng hết CPU), mức ưu tiên tạm trở lại bình thường; phụ đề chậm hơn một chút nhưng vẫn hiện. Sau 30 giây liên tục theo kịp thì hạ lại. Trước đây, trên laptop 2 nhân khi mở Teams phụ đề dừng hẳn, đóng Teams mới hiện ra một lúc
+  - **Laptop tiết kiệm điện 2 nhân 4 luồng** (ví dụ i3-10110U): nhận dạng dùng 2 luồng (trước đây 1)
 - Máy cũ vẫn nặng, phụ đề bị chậm: trước hết cài gói **Whisper base (đa ngôn ngữ)** ở "Models", rồi chọn nó làm "Local live subtitle model" (nhanh hơn nhưng sai nhiều hơn). **Ứng dụng không bao giờ tự tải mô hình** (bản cài ngoại tuyến không tải), nên trang cài đặt chỉ liệt kê các mô hình có trên máy này
 - Điều chỉnh (biến môi trường hệ thống Windows, sau đó mở lại ứng dụng):
   - `PCG_CPU_THREADS=8`: tổng số luồng (ví dụ máy bàn mạnh muốn chạy hết tốc độ)

@@ -93,8 +93,13 @@ def cpu_budget():
         after = k32.GetPriorityClass(me)
         if after != 0x00004000:
             raise RuntimeError(f"優先順序沒有改成低於標準（0x{before:x} → 0x{after:x}）")
+        # r20：字幕跟不上時暫時調回標準、追上再讓回去（真的呼叫 Windows，不是假的）
+        if not t._pcg_set_priority(t._PRIORITY_NORMAL) or k32.GetPriorityClass(me) != t._PRIORITY_NORMAL:
+            raise RuntimeError(f"字幕跟不上時沒有辦法調回標準優先順序（0x{k32.GetPriorityClass(me):x}）")
+        if not t._pcg_set_priority(t._PRIORITY_BELOW_NORMAL) or k32.GetPriorityClass(me) != 0x00004000:
+            raise RuntimeError("追上後沒有辦法讓回低於標準")
         k32.SetPriorityClass(me, before)
-        pri = "，低於標準優先順序 OK"
+        pri = "，低於標準優先順序 OK、跟不上時調回標準 OK"
     return f"邏輯 {logical}、實體 {phys}：辨識 {asr}、翻譯 {mt} 執行緒{pri}"
 
 

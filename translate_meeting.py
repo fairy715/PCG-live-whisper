@@ -688,21 +688,112 @@ def _pcg_cpu_threads():
         phys = _pcg_physical_cores()
         if phys and 2 <= phys < budget:
             budget = phys
+        if phys == 2 and n >= 4:
+            # 雙核四緒的省電筆電（例如 i3-10110U）：照實體核心只剩辨識 1 個執行緒，Teams 一開就完全跟不上（r20，同仁實測）
+            budget = 3
     budget = min(budget, max(n, 2))
     mt = max(1, budget // 4)
     return max(1, min(8, budget - mt)), mt
 
 
-def _pcg_lower_priority():
-    """Windows：這個程序（即時字幕、錄音檔處理）用「低於標準」的優先順序，CPU 忙的時候先讓給前景的程式。
-    PCG_NORMAL_PRIORITY=1 可以關掉"""
-    if sys.platform != "win32" or os.environ.get("PCG_NORMAL_PRIORITY") == "1":
-        return
+_PRIORITY_BELOW_NORMAL = 0x00004000
+_PRIORITY_NORMAL = 0x00000020
+
+
+def _pcg_set_priority(cls):
+    """Windows：設定這個程序的優先順序類別；成功回傳 True"""
+    if sys.platform != "win32":
+        return False
     try:
         k32, me = _win_k32_process()
-        k32.SetPriorityClass(me, 0x00004000)    # BELOW_NORMAL_PRIORITY_CLASS
+        return bool(k32.SetPriorityClass(me, cls))
     except Exception:
-        pass
+        return False
+
+
+def _pcg_lower_priority():
+    """Windows：這個程序（即時字幕、錄音檔處理）用「低於標準」的優先順序，CPU 忙的時候先讓給前景的程式。
+    PCG_NORMAL_PRIORITY=1 可以關掉。即時字幕辨識跟不上時 _PCG_CPU_GUARD 會暫時調回標準（r20）"""
+    if sys.platform != "win32" or os.environ.get("PCG_NORMAL_PRIORITY") == "1":
+        return
+    if _pcg_set_priority(_PRIORITY_BELOW_NORMAL):
+        _PCG_CPU_GUARD.lowered = True
+
+
+class _PcgCpuGuard:
+    """即時字幕跟不上時暫時把優先順序調回「標準」，追上了再讓回去（r20）。
+
+    2026-11-11 同仁實測（i3-10110U 雙核筆電、開著 Teams）：字幕完全不出來，把 Teams 關掉，
+    剛剛那幾句才一口氣跑出來。「低於標準」的程序只在沒有標準程序要跑時才分得到 CPU，
+    Teams 開會時一直有事做，辨識就整個停住。所以：
+      - 有一段音訊送去辨識超過 BOOST_AFTER 秒還沒好 → 調回標準（跟 Teams 平分 CPU，字幕會慢一點但會出來）
+      - 連續 CALM_FOR 秒每一段都很快辨識完 → 再讓回低於標準
+    只在 _pcg_lower_priority 真的有降過時才動作（PCG_NORMAL_PRIORITY=1 或不是 Windows 就什麼都不做）"""
+    BOOST_AFTER = 6.0
+    CALM_UNDER = 2.5
+    CALM_FOR = 30.0
+
+    def __init__(self, set_priority=None, clock=None):
+        self.lowered = False
+        self.boosted = False
+        self.calm_since = None
+        self._inflight = {}
+        self._lock = threading.Lock()
+        self._thread = None
+        self._set = set_priority or _pcg_set_priority
+        self._clock = clock or time.monotonic
+
+    def begin(self):
+        key = object()
+        with self._lock:
+            self._inflight[key] = self._clock()
+            if self.lowered and self._thread is None:
+                self._thread = threading.Thread(target=self._loop, daemon=True, name="pcg-cpu-guard")
+                self._thread.start()
+        return key
+
+    def end(self, key):
+        with self._lock:
+            self._inflight.pop(key, None)
+
+    def oldest_age(self):
+        with self._lock:
+            return (self._clock() - min(self._inflight.values())) if self._inflight else 0.0
+
+    def check(self):
+        """看一次（背景每秒呼叫）；回傳 "boost"、"lower" 或 None"""
+        if not self.lowered:
+            return None
+        age, now = self.oldest_age(), self._clock()
+        if not self.boosted:
+            if age > self.BOOST_AFTER and self._set(_PRIORITY_NORMAL):
+                self.boosted, self.calm_since = True, None
+                return "boost"
+            return None
+        if age > self.CALM_UNDER:
+            self.calm_since = None
+            return None
+        if self.calm_since is None:
+            self.calm_since = now
+        elif now - self.calm_since >= self.CALM_FOR and self._set(_PRIORITY_BELOW_NORMAL):
+            self.boosted, self.calm_since = False, None
+            return "lower"
+        return None
+
+    def _loop(self):
+        while True:
+            time.sleep(1.0)
+            try:
+                r = self.check()
+            except Exception:
+                r = None
+            if r == "boost":
+                print(f"{C_DIM}  [CPU] 電腦太忙，字幕跟不上：暫時提高字幕的優先順序{RESET}", flush=True)
+            elif r == "lower":
+                print(f"{C_DIM}  [CPU] 字幕追上了：優先順序讓回給其他程式{RESET}", flush=True)
+
+
+_PCG_CPU_GUARD = _PcgCpuGuard()
 
 
 def _win_k32_process():
@@ -10393,6 +10484,7 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
     def transcribe_chunk(seq, wav_path):
         with _active_lock:
             _active_transcriptions[0] += 1
+        _guard_key = _PCG_CPU_GUARD.begin()
         try:
             if _serial_lock is not None:
                 with _serial_lock:
@@ -10415,6 +10507,7 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
             with results_lock:
                 pending_results[seq] = _TRANSCRIBE_FAILED
         finally:
+            _PCG_CPU_GUARD.end(_guard_key)
             with _active_lock:
                 _active_transcriptions[0] -= 1
             try:
@@ -11594,6 +11687,7 @@ def run_stream_bidirectional(lb_device_id, mic_device_id,
     def transcribe_chunk(seq, wav_path, lang, pending_res, res_lock, use_remote=False, reject_lang=None):
         with _active_lock:
             _active_transcriptions[0] += 1
+        _guard_key = _PCG_CPU_GUARD.begin()
         try:
             if not wav_path or not os.path.isfile(wav_path):
                 with res_lock:
@@ -11653,6 +11747,7 @@ def run_stream_bidirectional(lb_device_id, mic_device_id,
             with res_lock:
                 pending_res[seq] = _TRANSCRIBE_FAILED
         finally:
+            _PCG_CPU_GUARD.end(_guard_key)
             # 先刪檔再遞減 active，避免主迴圈寫新檔到同一路徑後被舊 thread 刪除
             try:
                 os.unlink(wav_path)

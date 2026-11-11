@@ -432,7 +432,8 @@ class CpuBudget(unittest.TestCase):
 
     def test_hyperthreading_uses_physical_cores(self):
         self.assertEqual(self.threads(8, phys=4), (3, 1))      # i5-10 代筆電：4 核 8 執行緒
-        self.assertEqual(self.threads(4, phys=2), (1, 1))      # 2 核 4 執行緒
+        self.assertEqual(self.threads(4, phys=2), (2, 1))      # 2 核 4 執行緒（i3-10110U）：辨識 1 個執行緒開 Teams 就停住（r20）
+        self.assertEqual(self.threads(2, phys=2), (1, 1))      # 2 核沒有超執行緒：照舊
         self.assertEqual(self.threads(8, phys=8), (5, 1))      # 沒有超執行緒：照 3/4
         self.assertEqual(self.threads(8, {"PCG_CPU_THREADS": "8"}, phys=4), (6, 2))   # IT 指定就照 IT
 
@@ -451,6 +452,56 @@ class CpuBudget(unittest.TestCase):
 
     def test_lower_priority_is_safe_off_windows(self):
         t._pcg_lower_priority()       # 不是 Windows：什麼都不做、不出錯
+
+
+class CpuGuard(unittest.TestCase):
+    """r20：即時字幕跟不上時暫時調回標準優先順序（i3 雙核筆電開 Teams，字幕要等 Teams 關掉才出來）"""
+
+    def make(self):
+        self.now = [100.0]
+        self.calls = []
+        g = t._PcgCpuGuard(set_priority=lambda c: self.calls.append(c) or True, clock=lambda: self.now[0])
+        g.lowered = True
+        g._thread = object()          # 測試裡不開背景執行緒，直接呼叫 check()
+        return g
+
+    def test_boost_when_a_chunk_waits_too_long_then_lower_after_calm(self):
+        g = self.make()
+        k = g.begin()
+        self.now[0] += 3
+        self.assertIsNone(g.check())                 # 3 秒：還正常
+        self.now[0] += 4
+        self.assertEqual(g.check(), "boost")         # 7 秒還沒辨識完 → 標準
+        self.assertEqual(self.calls, [t._PRIORITY_NORMAL])
+        g.end(k)
+        self.assertIsNone(g.check())                 # 開始算平靜時間
+        self.now[0] += 10
+        k2 = g.begin(); self.now[0] += 3
+        self.assertIsNone(g.check())                 # 又有一段等了 3 秒 → 平靜重新算
+        g.end(k2)
+        self.assertIsNone(g.check())
+        self.now[0] += 29
+        self.assertIsNone(g.check())
+        self.now[0] += 2
+        self.assertEqual(g.check(), "lower")         # 連續 30 秒都很快 → 讓回低於標準
+        self.assertEqual(self.calls, [t._PRIORITY_NORMAL, t._PRIORITY_BELOW_NORMAL])
+
+    def test_does_nothing_when_priority_was_never_lowered(self):
+        g = self.make()
+        g.lowered = False                            # PCG_NORMAL_PRIORITY=1、不是 Windows
+        g.begin()
+        self.now[0] += 60
+        self.assertIsNone(g.check())
+        self.assertEqual(self.calls, [])
+
+    def test_inflight_tracking(self):
+        g = self.make()
+        a = g.begin(); self.now[0] += 5; b = g.begin(); self.now[0] += 1
+        self.assertAlmostEqual(g.oldest_age(), 6.0)
+        g.end(a)
+        self.assertAlmostEqual(g.oldest_age(), 1.0)
+        g.end(b); g.end(b)                            # 重複結束不出錯
+        self.assertEqual(g.oldest_age(), 0.0)
 
 
 class GpuPack(unittest.TestCase):
