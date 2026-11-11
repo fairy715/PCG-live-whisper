@@ -270,7 +270,7 @@ Penginstal utama hanya berisi model small: berjalan di laptop biasa, tetapi baha
 2. Halaman pengaturan IT → "Model (paket model)" → pasang "Whisper large-v3-turbo (multibahasa)".
 3. Di "Model pengenalan lokal", pilih large-v3-turbo untuk "Subtitle langsung", lalu klik "Simpan".
 4. (Opsional) Paket bahasa (medium) untuk Indonesia, Vietnam, dan Hindi: pilih di "Model untuk setiap bahasa", lalu klik "Terapkan pengaturan model". Hanya dipakai untuk "saya hanya membaca subtitle".
-5. Centang "Izinkan komputer dan ponsel lain menonton subtitle", isi "Kata sandi karyawan", simpan, lalu **tutup aplikasi dan buka lagi**.
+5. Centang "Izinkan komputer dan ponsel lain menonton subtitle", isi "Kata sandi karyawan", simpan, lalu tekan "**Mulai ulang program sekarang**" yang muncul di halaman (sekitar 10 detik, mulai r20; tidak perlu mengakhiri python.exe di Task Manager). Jika staf memulai skenario "komputer subtitle ruang rapat" sebelum program dimulai ulang, program akan memulai ulang sendiri dulu
 6. Izinkan koneksi masuk di Windows Firewall (perlu administrator: buka PowerShell sebagai administrator):
    ```powershell
    New-NetFirewallRule -DisplayName "PCG Meeting Translator" -Direction Inbound -Protocol TCP -LocalPort 19781 -RemoteAddress LocalSubnet -Action Allow -Profile Domain,Private

@@ -177,6 +177,8 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <button class="btn ghost" id="chgPwBtn" type="button" data-t="change_it_pw" style="margin-left:auto"></button>
     </div>
     <div id="saveRes" hidden></div>
+    <div class="res warn" id="rsBox" hidden><span id="rsMsg"></span>
+      <div class="actions"><button class="btn" id="rsBtn" type="button" data-t="rs_btn"></button></div></div>
   </form>
 </div>
 
@@ -209,7 +211,8 @@ zh:{multi_lang:"多語字幕：看字幕的人可以選自己的語言",multi_la
   llm_model:'翻譯模型',summary_model:'會議紀錄（摘要）模型',default_ph:'留空＝主程式預設',asr_model:'辨識模型（GPU 伺服器）',
   local_title:'本機辨識模型',live_model:'即時字幕',file_model:'錄音檔',
   local_models_note:'離線安裝檔只附 small。要換 base（較快、錯字多）、medium 或 large-v3-turbo（較準、較慢），先在下方「模型管理」安裝多語模型包，這裡才會出現。',
-  remote_view:'允許其他電腦或手機連進來看字幕',remote_view_note:'開會時一台電腦收音，其他人掃字幕畫面上「分享」的 QR Code 用手機看（只能看、不能停止），要輸入同仁密碼。關閉時只有這台電腦能用。變更後要關掉程式再開一次才生效。',
+  rs_on:'已開啟「允許其他電腦或手機連進來看字幕」，要重新啟動程式才會生效。',rs_off:'已關閉「允許其他電腦或手機連進來看字幕」，要重新啟動程式才會真的關上。',rs_btn:'立即重新啟動程式（約 10 秒）',rs_wait:'正在重新啟動，請稍候…（進行中的即時字幕會停止）',rs_fail:'沒有自動重新啟動成功，請重新開機，或點桌面的「PCG 會議翻譯」。',rs_manual:'這台電腦不能自動重新啟動，請重新開機讓設定生效。',restart_busy_file:'正在處理錄音檔，處理完再重新啟動。',
+  remote_view:'允許其他電腦或手機連進來看字幕',remote_view_note:'開會時一台電腦收音，其他人掃字幕畫面上「分享」的 QR Code 用手機看（只能看、不能停止），要輸入同仁密碼。關閉時只有這台電腦能用。設定改了以後，會出現「立即重新啟動程式」按鈕，按一下約 10 秒就生效。',
   other_title:'其他',diarize:'區分講者（講者辨識）',diarize_note:'會議紀錄會標出誰說了什麼。本機模式下會讓處理時間再多一些。',
   staff_pw:'同仁密碼（從別台電腦用簡易頁面、看分享的字幕時要輸入；這台電腦不用）',staff_pw_set:'同仁密碼：已設定（要改才填）',staff_pw_ph:'留空＝不變更',clear_staff_pw:'取消同仁密碼（不需要密碼）',
   save:'儲存',saved:'已儲存，下一次開始字幕或處理錄音就會使用新設定',back:'回到簡易頁面',change_it_pw:'變更 IT 密碼',
@@ -256,7 +259,8 @@ en:{multi_lang:"Multi-language subtitles: viewers can choose their own language"
   llm_model:'Translation model',summary_model:'Minutes (summary) model',default_ph:'Blank = program default',asr_model:'Recognition model (GPU server)',
   local_title:'Local recognition models',live_model:'Live subtitles',file_model:'Recordings',
   local_models_note:'The offline installer only includes small. To use base (faster, more mistakes), medium or large-v3-turbo (more accurate, slower), install the multilingual pack under “Models” below first; it then appears here.',
-  remote_view:'Allow other computers and phones to view subtitles',remote_view_note:'One computer captures the meeting audio; others scan the QR code from “Share” on the subtitle screen to watch on their phones (view only, staff password required). When off, only this computer can use it. Takes effect after restarting the program.',
+  rs_on:'“Allow other computers and phones to view subtitles” is on. Restart the program for it to take effect.',rs_off:'“Allow other computers and phones to view subtitles” is off. Restart the program to really close it.',rs_btn:'Restart the program now (about 10 seconds)',rs_wait:'Restarting, please wait… (running live subtitles will stop)',rs_fail:'The program did not restart by itself. Restart Windows, or click “PCG Meeting Translator” on the desktop.',rs_manual:'This computer cannot restart the program by itself. Restart Windows for the setting to take effect.',restart_busy_file:'A recording is being processed. Restart after it finishes.',
+  remote_view:'Allow other computers and phones to view subtitles',remote_view_note:'One computer captures the meeting audio; others scan the QR code from “Share” on the subtitle screen to watch on their phones (view only, staff password required). When off, only this computer can use it. After you change it, a “Restart the program now” button appears; it takes effect in about 10 seconds.',
   other_title:'Other',diarize:'Identify speakers (diarization)',diarize_note:'Shows who said what. Adds processing time in local mode.',
   staff_pw:'Staff password (needed from other computers for the simple page and shared subtitles; not on this computer)',staff_pw_set:'Staff password: set (fill in only to change)',staff_pw_ph:'Blank = unchanged',clear_staff_pw:'Remove the staff password',
   save:'Save',saved:'Saved. New settings apply the next time subtitles start or a recording is processed',back:'Back to the simple page',change_it_pw:'Change IT password',
@@ -303,7 +307,8 @@ id:{multi_lang:"Subtitle multibahasa: penonton bisa memilih bahasanya sendiri",m
   llm_model:'Model terjemahan',summary_model:'Model notulen (ringkasan)',default_ph:'Kosong = bawaan program',asr_model:'Model pengenalan (server GPU)',
   local_title:'Model pengenalan lokal',live_model:'Subtitle langsung',file_model:'Rekaman',
   local_models_note:'Penginstal offline hanya berisi small. Untuk memakai base (lebih cepat, lebih banyak salah), medium atau large-v3-turbo (lebih akurat, lebih lambat), pasang dulu paket multibahasa di “Model” di bawah; setelah itu muncul di sini.',
-  remote_view:'Izinkan komputer dan ponsel lain menonton subtitle',remote_view_note:'Satu komputer menangkap suara rapat; yang lain memindai kode QR dari “Bagikan” di layar subtitle untuk menonton di ponsel (hanya menonton, perlu kata sandi karyawan). Jika mati, hanya komputer ini yang bisa memakainya. Berlaku setelah program dibuka ulang.',
+  rs_on:'“Izinkan komputer dan ponsel lain menonton subtitle” sudah aktif. Mulai ulang program agar berlaku.',rs_off:'“Izinkan komputer dan ponsel lain menonton subtitle” sudah dimatikan. Mulai ulang program agar benar-benar tertutup.',rs_btn:'Mulai ulang program sekarang (sekitar 10 detik)',rs_wait:'Sedang memulai ulang, harap tunggu… (subtitle yang berjalan akan berhenti)',rs_fail:'Program tidak berhasil dimulai ulang otomatis. Mulai ulang Windows, atau klik “Penerjemah Rapat PCG” di desktop.',rs_manual:'Komputer ini tidak bisa memulai ulang program otomatis. Mulai ulang Windows agar pengaturan berlaku.',restart_busy_file:'Rekaman sedang diproses. Mulai ulang setelah selesai.',
+  remote_view:'Izinkan komputer dan ponsel lain menonton subtitle',remote_view_note:'Satu komputer menangkap suara rapat; yang lain memindai kode QR dari “Bagikan” di layar subtitle untuk menonton di ponsel (hanya menonton, perlu kata sandi karyawan). Jika mati, hanya komputer ini yang bisa memakainya. Setelah diubah, muncul tombol “Mulai ulang program sekarang”; berlaku dalam sekitar 10 detik.',
   other_title:'Lainnya',diarize:'Kenali pembicara (diarisasi)',diarize_note:'Menampilkan siapa yang berbicara. Menambah waktu pemrosesan di mode lokal.',
   staff_pw:'Kata sandi karyawan (diperlukan dari komputer lain untuk halaman sederhana dan subtitle yang dibagikan; tidak di komputer ini)',staff_pw_set:'Kata sandi karyawan: sudah diatur (isi hanya untuk mengganti)',staff_pw_ph:'Kosong = tidak berubah',clear_staff_pw:'Hapus kata sandi karyawan',
   save:'Simpan',saved:'Tersimpan. Pengaturan baru berlaku saat subtitle berikutnya dimulai atau rekaman berikutnya diproses',back:'Kembali ke halaman sederhana',change_it_pw:'Ganti kata sandi IT',
@@ -337,16 +342,36 @@ function applyLang(){
   $('staffPwLabel').textContent=t(state&&state.staff_password_set?'staff_pw_set':'staff_pw');
   styleVis();
 }
-$('langSel').value=lang;$('langSel').onchange=()=>{lang=$('langSel').value;applyLang();if(typeof renderModels==='function')renderModels()};
+$('langSel').value=lang;$('langSel').onchange=()=>{lang=$('langSel').value;applyLang();if(typeof renderModels==='function')renderModels();if(state&&!$('rsBtn').disabled)rsShow()};
 async function api(path,body){
   const r=await fetch(path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json','X-IT-Token':token},body:body?JSON.stringify(body):undefined});
   return r.json().catch(()=>({ok:false}));
 }
 const errMsg=j=>j&&j.code&&I18N.zh[j.code]?t(j.code):(j&&j.code==='it_password_wrong'?t('pw_wrong'):t('error'));
 
+// 程式自己重新啟動（r20）：「允許其他電腦或手機連進來看字幕」改了以後，按一下就生效，不用去關 python.exe
+function rsShow(){
+  const need=state&&!!state.allow_remote_view!==!!state.remote_bound;
+  $('rsBox').hidden=!need;if(!need)return;
+  $('rsMsg').textContent=state.can_restart?t(state.allow_remote_view?'rs_on':'rs_off'):t('rs_manual');
+  $('rsBtn').hidden=!state.can_restart;$('rsBtn').disabled=false;
+}
+$('rsBtn').onclick=async()=>{
+  const b=$('rsBtn');b.disabled=true;$('rsMsg').textContent=t('rs_wait');
+  const j=await api('/api/simple/restart',{stop_live:true});
+  if(!j.ok){$('rsMsg').textContent=j.code==='restart_busy_file'?t('restart_busy_file'):(j.error||t('rs_fail'));b.disabled=false;return}
+  const want=!!state.allow_remote_view;
+  for(let i=0;i<60;i++){
+    await new Promise(r=>setTimeout(r,1000));
+    try{const s=await (await fetch('/api/simple/share',{cache:'no-store'})).json();
+      if(s.ok&&!!s.bound===want){location.reload();return}}catch(e){}
+  }
+  $('rsMsg').textContent=t('rs_fail');
+};
+
 async function load(){
   const j=await api('/api/simple/admin/state');
-  if(j.ok){state=j.state;showMain();return}
+  if(j.ok){state=j.state;showMain();rsShow();return}
   firstTime=j.code==='it_password_unset';
   $('pLogin').hidden=false;$('pMain').hidden=true;$('pw2Wrap').hidden=!firstTime;
   if(firstTime&&!j.can_set){$('loginRes').hidden=false;$('loginRes').textContent=t('local_only');$('loginBtn').disabled=true}
@@ -436,7 +461,7 @@ $('pMain').onsubmit=async e=>{
     staff_password:$('staffPw').value,clear_staff_password:$('clearStaff').checked,
     update_check:$('updCheck').checked,update_who:$('updWho').value,update_share:$('updShare').value,support_contact:$('supContact').value});
   const r=$('saveRes');r.hidden=false;r.className='res '+(j.ok?'ok':'err');r.textContent=j.ok?t('saved'):errMsg(j);
-  if(j.ok){state=j.state;$('staffPw').value='';$('clearStaff').checked=false;$('clearStaffWrap').hidden=!state.staff_password_set;
+  if(j.ok){state=j.state;rsShow();$('staffPw').value='';$('clearStaff').checked=false;$('clearStaffWrap').hidden=!state.staff_password_set;
     $('llmKey').value='';$('clearKey').checked=false;$('clearKeyWrap').hidden=!state.llm_api_key_set;applyLang()}
 };
 

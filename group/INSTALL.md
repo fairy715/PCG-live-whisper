@@ -269,7 +269,7 @@ GPU 伺服器有填但當下連不上時，會自動改在同仁電腦上用小�
 2. IT 設定頁 →「模型管理（模型包）」→ 安裝「Whisper large-v3-turbo（多語）」。
 3. 「本機辨識模型」的「即時字幕」選 large-v3-turbo，按「儲存」。
 4. （選用）印尼文、越南文、印地語的語言模型包（medium）：在「每種語言用哪個模型」指定，按「套用模型設定」。只用在「只看字幕」。
-5. 勾「允許其他電腦或手機連進來看字幕」，設定「同仁密碼」，存檔後**關掉程式再開一次**。
+5. 勾「允許其他電腦或手機連進來看字幕」，設定「同仁密碼」，存檔後按頁面上出現的「**立即重新啟動程式**」（約 10 秒，r20 起；不用去工作管理員關 python.exe）。同仁在「會議室字幕機」按開始時，如果程式還沒重開過，也會自動先重開
 6. Windows 防火牆開放連入（要系統管理員：用系統管理員身分開 PowerShell）：
    ```powershell
    New-NetFirewallRule -DisplayName "PCG Meeting Translator" -Direction Inbound -Protocol TCP -LocalPort 19781 -RemoteAddress LocalSubnet -Action Allow -Profile Domain,Private

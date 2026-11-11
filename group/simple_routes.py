@@ -696,10 +696,51 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         cfg = read_cfg()
         s = cfg.get("pcg_simple") or {}
         port = request.url.port or 19781
-        bound_all = (os.environ.get("PCG_WEBUI_HOST") or "0.0.0.0") not in ("127.0.0.1", "localhost", "::1")
-        return {"ok": True, "allowed": bool(s.get("allow_remote_view")), "bound": bound_all,
+        return {"ok": True, "allowed": bool(s.get("allow_remote_view")), "bound": bound_all(),
+                "can_restart": can_restart(),
                 "password_set": bool(s.get("password_hash") or (cfg.get("webui_passwords") or {}).get("read_sha256")),
                 "urls": [f"http://{ip}:{port}/simple/live" for ip in _lan_ips()]}
+
+    def bound_all():
+        """這次啟動有沒有開放其他電腦連進來（launch.ps1 依 IT 設定給 PCG_WEBUI_HOST）"""
+        return (os.environ.get("PCG_WEBUI_HOST") or "0.0.0.0") not in ("127.0.0.1", "localhost", "::1")
+
+    # ─── 程式自己重新啟動（r20）：IT 改了「允許其他電腦或手機連進來看字幕」之後，同仁按一下就生效，不用去關 python.exe ───
+    from group import restart as _restart
+    _rs = {"on": False}
+
+    def can_restart():
+        return bool((update_hooks or {}).get("restart")) or _restart.supported(base_dir)
+
+    @app.post("/api/simple/restart")
+    async def simple_restart(request: Request, body: dict = {}):
+        """只能在這台電腦上按。body.stop_live：即時字幕進行中也要重開（先停字幕）；處理錄音檔時不重開"""
+        if not is_local(request):
+            return JSONResponse({"ok": False, "code": "restart_remote", "error": "只能在這台電腦上重新啟動"}, status_code=403)
+        if not can_restart():
+            return JSONResponse({"ok": False, "code": "restart_unsupported",
+                                 "error": "這台電腦不能自動重新啟動，請重新開機"}, status_code=503)
+        if _rs["on"]:
+            return {"ok": True, "already": True}
+        q = _state.get("q")
+        if (q and any(j.get("state") == "running" for j in q.jobs.values())) \
+                or "--input" in (((live_args() if live_args else None) or []) if live_running and live_running() else []):
+            return JSONResponse({"ok": False, "code": "restart_busy_file",
+                                 "error": "正在處理錄音檔，處理完再重新啟動"}, status_code=409)
+        if live_running and live_running():
+            if not (isinstance(body, dict) and body.get("stop_live")) or stop_live is None:
+                return JSONResponse({"ok": False, "code": "restart_live",
+                                     "error": "即時字幕進行中，要先停止字幕"}, status_code=409)
+            await stop_live()
+        hooks_ = update_hooks or {}
+        try:
+            (hooks_.get("restart") or _restart.relaunch)(base_dir, os.getpid(), request.url.port or 19781)
+        except Exception as e:  # noqa: BLE001
+            return JSONResponse({"ok": False, "code": "restart_failed", "error": str(e)[:300]}, status_code=500)
+        _rs["on"] = True
+        import asyncio
+        asyncio.get_running_loop().call_later(0.8, hooks_.get("exit") or (lambda: os._exit(0)))
+        return {"ok": True}
 
     @app.get("/api/simple/share/qr.svg")
     async def simple_share_qr(request: Request, u: str = ""):
@@ -725,6 +766,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "multi_lang": settings().get("multi_lang", True) is not False,
                 # 會議室字幕機（r19）：IT 有沒有開「允許其他電腦或手機連進來看字幕」，沒開就先提醒
                 "remote_view": bool(settings().get("allow_remote_view", False)),
+                # 設定改了但還沒重新啟動（r20）：頁面要先重開程式，手機才連得進來（或關掉分享後才真的關上）
+                "bound": bound_all(), "can_restart": can_restart(),
                 "scenarios": [{k: s[k] for k in ("id", "title", "flag")}
                               | {"can_bidi": bool(s["bidi"]), "can_room": s["id"] in ROOM_SCENARIOS}
                               for s in LIVE_SCENARIOS]}
@@ -966,6 +1009,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "diarize": bool(s.get("diarize", s.get("backend") == "server" and bool(rw.get("host")))),
                 "staff_password_set": bool(s.get("password_hash") or s.get("password")),
                 "allow_remote_view": bool(s.get("allow_remote_view", False)),
+                "remote_bound": bound_all(), "can_restart": can_restart(),
                 "multi_lang": s.get("multi_lang", True) is not False,
                 "m2m_installed": (base_dir / "models" / "m2m100_418m" / "model.bin").is_file(),
                 "update_check": bool(s.get("update_check", True)),

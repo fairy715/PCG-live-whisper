@@ -270,7 +270,7 @@ Bộ cài chính chỉ có mô hình small: chạy được trên laptop thườ
 2. Trang cài đặt IT → "**Models (model packs)**" → cài "Whisper large-v3-turbo (multilingual)".
 3. Ở "**Local recognition models**", chọn large-v3-turbo cho "**Live subtitles**", rồi bấm "**Save**".
 4. (Tùy chọn) Gói ngôn ngữ (medium) cho tiếng Indonesia, Việt, Hindi: chọn ở "**Model for each language**", rồi bấm "**Apply model settings**". Chỉ dùng cho "tôi chỉ đọc phụ đề".
-5. Đánh dấu "**Allow other computers and phones to view subtitles**", đặt "**Staff password**", lưu, rồi **đóng ứng dụng và mở lại**.
+5. Đánh dấu "**Allow other computers and phones to view subtitles**", đặt "**Staff password**", lưu, rồi bấm "**Restart the program now**" xuất hiện trên trang (khoảng 10 giây, từ r20; không cần kết thúc python.exe trong Task Manager). Nếu nhân viên bấm bắt đầu cảnh "máy phụ đề phòng họp" khi chương trình chưa khởi động lại, chương trình sẽ tự khởi động lại trước
 6. Cho phép kết nối đến trong Windows Firewall (cần quyền quản trị: mở PowerShell bằng quyền quản trị):
    ```powershell
    New-NetFirewallRule -DisplayName "PCG Meeting Translator" -Direction Inbound -Protocol TCP -LocalPort 19781 -RemoteAddress LocalSubnet -Action Allow -Profile Domain,Private

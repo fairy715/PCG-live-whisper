@@ -268,7 +268,7 @@ The main installer only has the small model: it runs on ordinary laptops, but In
 2. IT settings page → "Models (model packs)" → install "Whisper large-v3-turbo (multilingual)".
 3. Under "Local recognition models", choose large-v3-turbo for "Live subtitles" and click "Save".
 4. (Optional) Language packs (medium) for Indonesian, Vietnamese and Hindi: choose them in "Model for each language" and click "Apply model settings". They are used only for "I only read subtitles".
-5. Tick "Allow other computers and phones to view subtitles", set a "Staff password", save, then **close the app and open it again**.
+5. Tick "Allow other computers and phones to view subtitles", set a "Staff password", save, then press "**Restart the program now**" that appears on the page (about 10 seconds, from r20; no need to end python.exe in Task Manager). If staff start the "meeting room subtitle computer" scene before the program has restarted, it restarts by itself first
 6. Allow incoming connections in Windows Firewall (needs an administrator: open PowerShell as administrator):
    ```powershell
    New-NetFirewallRule -DisplayName "PCG Meeting Translator" -Direction Inbound -Protocol TCP -LocalPort 19781 -RemoteAddress LocalSubnet -Action Allow -Profile Domain,Private

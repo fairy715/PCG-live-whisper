@@ -80,7 +80,7 @@ Each sentence is detected as Chinese or Indonesian automatically: Chinese → Ch
 
 ## 4. Many people want to read subtitles on their phones
 
-1. IT turns on "Allow other computers and phones to view subtitles" and sets a staff password (restart the app afterwards).
+1. IT turns on "Allow other computers and phones to view subtitles" and sets a staff password (then press "Restart the program now" on the page, about 10 seconds; if it is forgotten, pressing Start restarts it first).
 2. Start live subtitles, click "Share" and project the QR code.
 3. People scan it, enter the staff password and choose their language under "I read" at the top right: Chinese, Indonesian, Vietnamese, Hindi or English. When a sentence is not in that language, the meeting computer translates one more copy (multi-language subtitles, from r19), and the top of the page says so. Phones can only view. They must reach that computer, usually on the company network.
 
