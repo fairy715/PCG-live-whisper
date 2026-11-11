@@ -1,34 +1,29 @@
 {
  "_說明": "下一版發布時同仁頁面「有新版本」視窗顯示的新功能（每種語言 2～5 點，一點一句）。release 要等於這一次發布的 rN，發布流程才會附上；每次發布前更新這個檔",
- "release": "r19",
+ "release": "r20",
  "zh": [
-  "多語字幕：用手機掃 QR Code 看字幕時，每個人可以選自己的語言（中文、印尼文、越南文、印地語、英文）",
-  "新場合「會議室字幕機，大家用手機看」：一支麥克風，開始後直接顯示 QR Code",
-  "外語同仁之間（例如越南文和印尼文）可以直接互翻，不經過中文",
-  "字幕畫面右上角「我要看」選字幕語言；打開頁面時會顯示新版本與新增功能"
+  "開著 Teams 開會時字幕不再停住：電腦太忙、字幕跟不上時，會自動多分一點 CPU 給字幕，追上了再讓回去",
+  "雙核心的筆電辨識比較快（多用一個執行緒）",
+  "IT 開啟「讓手機連進來看字幕」後不用再去關程式：按「立即重新啟動程式」約 10 秒就生效，會議室字幕機按開始時也會自動先重開"
  ],
  "en": [
-  "Multi-language subtitles: everyone who scans the QR code can choose their own language (Chinese, Indonesian, Vietnamese, Hindi, English)",
-  "New choice “Meeting room subtitle computer, everyone reads on their phones”: one microphone, and the QR code is shown right after Start",
-  "Foreign-language staff (e.g. Vietnamese and Indonesian) can translate directly, not through Chinese",
-  "Choose the subtitle language under “I read” at the top right; new versions and what is new are shown when you open the page"
+  "Subtitles no longer stop during Teams meetings: when the computer is too busy and subtitles fall behind, they get more CPU until they catch up",
+  "Faster recognition on 2-core laptops (one more thread)",
+  "After IT allows phones to view subtitles, nobody needs to close the program: press “Restart the program now” (about 10 seconds); the meeting room subtitle computer also restarts by itself when you press Start"
  ],
  "id": [
-  "Subtitle multibahasa: setiap orang yang memindai kode QR bisa memilih bahasanya sendiri (Mandarin, Indonesia, Vietnam, Hindi, Inggris)",
-  "Pilihan baru “Komputer subtitle ruang rapat, semua membaca di ponsel”: satu mikrofon, kode QR langsung tampil setelah Mulai",
-  "Karyawan asing (mis. Vietnam dan Indonesia) bisa saling menerjemahkan langsung, tidak lewat bahasa Mandarin",
-  "Pilih bahasa subtitle di “Saya baca” di kanan atas; versi baru dan fitur barunya tampil saat halaman dibuka"
+  "Subtitle tidak berhenti lagi saat rapat Teams: jika komputer terlalu sibuk dan subtitle tertinggal, subtitle mendapat CPU lebih banyak sampai menyusul",
+  "Pengenalan suara lebih cepat di laptop 2 inti (satu utas tambahan)",
+  "Setelah IT mengizinkan ponsel menonton subtitle, program tidak perlu ditutup: tekan “Mulai ulang program sekarang” (sekitar 10 detik); komputer subtitle ruang rapat juga memulai ulang sendiri saat menekan Mulai"
  ],
  "vi": [
-  "Phụ đề đa ngôn ngữ: ai quét mã QR cũng có thể chọn ngôn ngữ của mình (tiếng Trung, Indonesia, Việt, Hindi, Anh)",
-  "Lựa chọn mới “Máy phụ đề phòng họp, mọi người xem trên điện thoại”: một micro, mã QR hiện ngay sau khi bấm Bắt đầu",
-  "Nhân viên nước ngoài (ví dụ Việt Nam và Indonesia) có thể dịch trực tiếp cho nhau, không qua tiếng Trung",
-  "Chọn ngôn ngữ phụ đề ở “Tôi xem” góc trên bên phải; khi mở trang sẽ hiện phiên bản mới và các tính năng mới"
+  "Phụ đề không còn bị dừng khi họp Teams: khi máy quá bận và phụ đề bị chậm, phụ đề được dùng thêm CPU cho đến khi theo kịp",
+  "Nhận dạng nhanh hơn trên laptop 2 nhân (thêm một luồng)",
+  "Sau khi IT cho phép điện thoại xem phụ đề, không cần đóng chương trình: bấm khởi động lại chương trình (khoảng 10 giây); máy phụ đề phòng họp cũng tự khởi động lại khi bấm Bắt đầu"
  ],
  "hi": [
-  "बहुभाषी सबटाइटल: QR कोड स्कैन करने वाला हर व्यक्ति अपनी भाषा चुन सकता है (चीनी, इंडोनेशियाई, वियतनामी, हिंदी, अंग्रेज़ी)",
-  "नया विकल्प “मीटिंग रूम सबटाइटल कंप्यूटर, सब अपने फ़ोन पर देखें”: एक माइक्रोफ़ोन, शुरू करते ही QR कोड दिखेगा",
-  "विदेशी भाषा वाले साथी (जैसे वियतनामी और इंडोनेशियाई) सीधे एक-दूसरे की भाषा में अनुवाद कर सकते हैं, चीनी के ज़रिए नहीं",
-  "ऊपर दाईं ओर “मैं पढ़ूँगा” में सबटाइटल की भाषा चुनें; पेज खोलने पर नया संस्करण और नई सुविधाएँ दिखेंगी"
+  "Teams मीटिंग के दौरान सबटाइटल अब नहीं रुकेंगे: कंप्यूटर बहुत व्यस्त हो और सबटाइटल पीछे रह जाएँ, तो पकड़ने तक उन्हें ज़्यादा CPU मिलेगा",
+  "2-कोर लैपटॉप पर पहचान तेज़ (एक थ्रेड ज़्यादा)",
+  "IT के फ़ोन से सबटाइटल देखने की अनुमति देने के बाद प्रोग्राम बंद करने की ज़रूरत नहीं: “प्रोग्राम अभी दोबारा शुरू करें” दबाएँ (लगभग 10 सेकंड); मीटिंग रूम सबटाइटल कंप्यूटर शुरू करें दबाने पर अपने आप दोबारा शुरू होता है"
  ]
 }
