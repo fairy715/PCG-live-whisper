@@ -123,6 +123,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
         <label class="f"><span data-t="file_model"></span>
           <select id="fileModel"></select></label>
       </div>
+      <p class="note" id="liveAutoNote" hidden></p>
       <p class="note" data-t="local_models_note"></p>
     </div>
 
@@ -225,7 +226,7 @@ zh:{multi_lang:"多語字幕：看字幕的人可以選自己的語言",multi_la
   m_none_inst:'還沒有安裝模型包',m_none_avail:'清單是空的（按「重新整理清單」）',m_install:'安裝',m_update:'更新',m_remove:'移除',
   m_confirm_remove:'確定要移除「{n}」？用到它的語言會改回內建模型。',m_dl:'下載中 {a}／{b} MB',m_inst_ing:'安裝中…',m_failed:'安裝失敗：{e}',
   m_done:'已安裝',m_size:'{n} MB',m_ver:'版本 {v}',m_from_share:'公司共用資料夾',m_from_gh:'GitHub',
-  m_small_builtin:'small（內建）',m_missing:'{n}（這台沒有，請到下方「模型管理」安裝多語模型包）',m_lang_zh:'中文',m_lang_en:'英文',m_lang_ja:'日文',m_lang_ko:'韓文',m_lang_id:'印尼文',m_lang_vi:'越南文',m_lang_hi:'印地語',m_use_note:'只用在「對方說這種語言」的單向即時字幕與錄音檔；雙向、教室模式照舊用內建的多語模型。',
+  m_small_builtin:'small（內建）',m_auto:'自動（建議）：這台用 {m}',auto_gpu:'自動：這台有顯示卡加速，即時字幕用 {m}。',auto_weak:'自動：這台是雙核心（{p} 核），即時字幕用 {m}。',auto_normal:'自動：這台 {p} 核心，即時字幕用 {m}。',auto_suggest:'建議在下方「模型管理」安裝「{k}」，這台的即時字幕會更順。',m_missing:'{n}（這台沒有，請到下方「模型管理」安裝多語模型包）',m_lang_zh:'中文',m_lang_en:'英文',m_lang_ja:'日文',m_lang_ko:'韓文',m_lang_id:'印尼文',m_lang_vi:'越南文',m_lang_hi:'印地語',m_use_note:'只用在「對方說這種語言」的單向即時字幕與錄音檔；雙向、教室模式照舊用內建的多語模型。',
   models_remote:'只能在這台電腦上安裝模型',no_pack:'清單裡沒有這個模型包，請重新整理',busy:'正在進行中，請稍候',bad_pack:'模型包沒有裝，或不能用在這個語言',
   upd_title:'更新',upd_check:'自動檢查新版本（同仁頁面上方會出現「立即更新」）',upd_who:'誰可以按更新',
   upd_who_staff:'同仁自己按（建議）',upd_who_it:'只有 IT（要輸入 IT 密碼）',upd_share:'公司共用資料夾（選填）',upd_share_ph:'例如 \\\\檔案伺服器\\PCG\\更新',
@@ -273,7 +274,7 @@ en:{multi_lang:"Multi-language subtitles: viewers can choose their own language"
   m_none_inst:'No model packs installed yet',m_none_avail:'The list is empty (click “Refresh list”)',m_install:'Install',m_update:'Update',m_remove:'Remove',
   m_confirm_remove:'Remove “{n}”? Languages that use it go back to the built-in model.',m_dl:'Downloading {a} / {b} MB',m_inst_ing:'Installing…',m_failed:'Install failed: {e}',
   m_done:'Installed',m_size:'{n} MB',m_ver:'version {v}',m_from_share:'company shared folder',m_from_gh:'GitHub',
-  m_small_builtin:'small (built-in)',m_missing:'{n} (not on this computer; install a multilingual pack under “Models” below)',m_lang_zh:'Chinese',m_lang_en:'English',m_lang_ja:'Japanese',m_lang_ko:'Korean',m_lang_id:'Indonesian',m_lang_vi:'Vietnamese',m_lang_hi:'Hindi',m_use_note:'Used only for one-way live subtitles and recordings in that language; two-way and classroom mode keep the built-in multilingual model.',
+  m_small_builtin:'small (built-in)',m_auto:'Automatic (recommended): {m} on this computer',auto_gpu:'Automatic: this computer has GPU acceleration, so live subtitles use {m}.',auto_weak:'Automatic: this computer has only {p} cores, so live subtitles use {m}.',auto_normal:'Automatic: {p} cores, live subtitles use {m}.',auto_suggest:'Install “{k}” under “Models” below for smoother live subtitles on this computer.',m_missing:'{n} (not on this computer; install a multilingual pack under “Models” below)',m_lang_zh:'Chinese',m_lang_en:'English',m_lang_ja:'Japanese',m_lang_ko:'Korean',m_lang_id:'Indonesian',m_lang_vi:'Vietnamese',m_lang_hi:'Hindi',m_use_note:'Used only for one-way live subtitles and recordings in that language; two-way and classroom mode keep the built-in multilingual model.',
   models_remote:'Models can only be installed on this computer',no_pack:'This pack is not in the list; refresh it',busy:'Already in progress, please wait',bad_pack:'The pack is not installed or does not support this language',
   upd_title:'Updates',upd_check:'Check for new versions (staff see “Update now” at the top of their page)',upd_who:'Who can update',
   upd_who_staff:'Staff themselves (recommended)',upd_who_it:'IT only (IT password required)',upd_share:'Company shared folder (optional)',upd_share_ph:'e.g. \\\\fileserver\\PCG\\updates',
@@ -321,7 +322,7 @@ id:{multi_lang:"Subtitle multibahasa: penonton bisa memilih bahasanya sendiri",m
   m_none_inst:'Belum ada paket model yang terpasang',m_none_avail:'Daftar kosong (klik “Muat ulang daftar”)',m_install:'Pasang',m_update:'Perbarui',m_remove:'Hapus',
   m_confirm_remove:'Hapus “{n}”? Bahasa yang memakainya kembali ke model bawaan.',m_dl:'Mengunduh {a} / {b} MB',m_inst_ing:'Memasang…',m_failed:'Pemasangan gagal: {e}',
   m_done:'Terpasang',m_size:'{n} MB',m_ver:'versi {v}',m_from_share:'folder bersama perusahaan',m_from_gh:'GitHub',
-  m_small_builtin:'small (bawaan)',m_missing:'{n} (tidak ada di komputer ini; pasang paket multibahasa di “Model” di bawah)',m_lang_zh:'Mandarin',m_lang_en:'Inggris',m_lang_ja:'Jepang',m_lang_ko:'Korea',m_lang_id:'Indonesia',m_lang_vi:'Vietnam',m_lang_hi:'Hindi',m_use_note:'Hanya dipakai untuk subtitle langsung dan rekaman satu arah dalam bahasa itu; dua arah dan mode kelas tetap memakai model multibahasa bawaan.',
+  m_small_builtin:'small (bawaan)',m_auto:'Otomatis (disarankan): {m} di komputer ini',auto_gpu:'Otomatis: komputer ini punya akselerasi GPU, subtitle langsung memakai {m}.',auto_weak:'Otomatis: komputer ini hanya {p} inti, subtitle langsung memakai {m}.',auto_normal:'Otomatis: {p} inti, subtitle langsung memakai {m}.',auto_suggest:'Pasang “{k}” di “Model” di bawah agar subtitle langsung di komputer ini lebih lancar.',m_missing:'{n} (tidak ada di komputer ini; pasang paket multibahasa di “Model” di bawah)',m_lang_zh:'Mandarin',m_lang_en:'Inggris',m_lang_ja:'Jepang',m_lang_ko:'Korea',m_lang_id:'Indonesia',m_lang_vi:'Vietnam',m_lang_hi:'Hindi',m_use_note:'Hanya dipakai untuk subtitle langsung dan rekaman satu arah dalam bahasa itu; dua arah dan mode kelas tetap memakai model multibahasa bawaan.',
   models_remote:'Model hanya bisa dipasang di komputer ini',no_pack:'Paket ini tidak ada di daftar; muat ulang daftarnya',busy:'Sedang berjalan, harap tunggu',bad_pack:'Paket belum terpasang atau tidak mendukung bahasa ini',
   upd_title:'Pembaruan',upd_check:'Periksa versi baru (karyawan melihat “Perbarui sekarang” di atas halamannya)',upd_who:'Siapa yang boleh memperbarui',
   upd_who_staff:'Karyawan sendiri (disarankan)',upd_who_it:'Hanya IT (perlu kata sandi IT)',upd_share:'Folder bersama perusahaan (opsional)',upd_share_ph:'mis. \\\\fileserver\\PCG\\update',
@@ -411,10 +412,24 @@ function showMain(){
 /* 本機辨識模型：內建 small＋裝好的多語模型包（離線安裝的電腦不會自己下載模型，所以只列出這台有的） */
 function fillLocalModels(){
   const packs=((models&&models.installed)||[]).filter(p=>p.type==='asr'&&p.multilingual);
-  for(const [id,cur] of [['liveModel',state.local_live_model||'small'],['fileModel',state.local_file_model||'small']]){
-    const opts=[['small',t('m_small_builtin')]].concat(packs.map(p=>['pack:'+p.id,p.name||p.id]));
+  const mName=v=>v==='small'?t('m_small_builtin'):((packs.find(p=>'pack:'+p.id===v)||{}).name||String(v).replace(/^pack:/,''));
+  const au=state.live_auto;
+  for(const [id,cur] of [['liveModel',state.local_live_model||'auto'],['fileModel',state.local_file_model||'small']]){
+    let opts=[['small',t('m_small_builtin')]].concat(packs.map(p=>['pack:'+p.id,p.name||p.id]));
+    if(id==='liveModel')opts=[['auto',t('m_auto',{m:au?mName(au.model):'small'})]].concat(opts);   // r21：依這台電腦的規格自動選
     if(!opts.some(o=>o[0]===cur))opts.push([cur,t('m_missing',{n:cur})]);
     $(id).innerHTML=opts.map(([v,n])=>`<option value="${escH(v)}">${escH(n)}</option>`).join('');$(id).value=cur;
+  }
+  liveAutoNote();
+}
+function liveAutoNote(){
+  const packs=((models&&models.installed)||[]).filter(p=>p.type==='asr'&&p.multilingual);
+  const mName=v=>v==='small'?t('m_small_builtin'):((packs.find(p=>'pack:'+p.id===v)||{}).name||String(v).replace(/^pack:/,''));
+  const au=state.live_auto,an=$('liveAutoNote'),isAuto=$('liveModel').value==='auto';
+  an.hidden=!(au&&isAuto);
+  if(au&&isAuto){
+    const sug=au.suggest?((((models&&models.available)||[]).find(p=>p.id===au.suggest)||{}).name||au.suggest):'';
+    an.textContent=t('auto_'+au.reason,{m:mName(au.model),p:au.physical||au.logical||'?'})+(sug?' '+t('auto_suggest',{k:sug}):'');
   }
 }
 function styleVis(){
@@ -450,6 +465,7 @@ $('testBtn').onclick=async()=>{
   for(const [ok,msg] of out){const d=document.createElement('div');d.className='res '+(ok?'ok':'err');d.textContent=msg;$('testRes').appendChild(d)}
 };
 
+$('liveModel').addEventListener('change',liveAutoNote);
 $('pMain').onsubmit=async e=>{
   e.preventDefault();
   const j=await api('/api/simple/admin/save',{

@@ -116,7 +116,11 @@ _OUTPUT_KINDS = [
 
 
 def local_model_ok(base_dir, name):
-    """本機辨識模型：pack:<id> 要真的裝在這台；沒有（被移除、設定檔從別台複製）就用內建的 small，不讓字幕或錄音失敗"""
+    """本機辨識模型：pack:<id> 要真的裝在這台；沒有（被移除、設定檔從別台複製）就用內建的 small，不讓字幕或錄音失敗。
+    "auto"（r21，即時字幕預設）：依這台電腦的規格選（group/hwtier.py）"""
+    if name == "auto":
+        from group import hwtier
+        name = hwtier.pick(base_dir)["model"]
     if isinstance(name, str) and name.startswith("pack:") and not model_packs.find(base_dir, name[5:], "asr"):
         return "small"
     return name
@@ -132,13 +136,13 @@ def profile(s, has_gpu=True):
     if local:
         return {"backend": "local", "engine": "m2m", "summarize": False,
                 "file_model": s.get("local_file_model") or "small",
-                "live_model": s.get("local_live_model") or "small",
+                "live_model": s.get("local_live_model") or "auto",
                 "diarize": bool(s.get("diarize", False)), "local_asr": True}
     if not has_gpu:
         # 伺服器模式但只接大模型伺服器（例如集團的 Open WebUI）：辨識留在這台電腦（小模型），翻譯與會議紀錄交給大模型
         return {"backend": "server", "engine": "llm", "summarize": True,
                 "file_model": s.get("local_file_model") or "small",
-                "live_model": s.get("local_live_model") or "small",
+                "live_model": s.get("local_live_model") or "auto",
                 "diarize": bool(s.get("diarize", False)), "local_asr": True}
     return {"backend": "server", "engine": "llm", "summarize": True,
             "file_model": s.get("asr_model") or "large-v3-turbo",
@@ -817,7 +821,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         pf = profile(s, has_gpu())
         if room:
             # 教室模式：每一句要先判斷語言，只做在這台電腦的辨識（GPU 伺服器不支援），用本機的即時字幕模型
-            pf = {**pf, "local_asr": True, "live_model": s.get("local_live_model") or "small"}
+            pf = {**pf, "local_asr": True, "live_model": s.get("local_live_model") or "auto"}
         start = {
             "mode": mode,
             "room": room,
@@ -976,6 +980,16 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
     # 一律要 IT 密碼（同仁就坐在這台電腦前，「本機」不能當成 IT）。還沒設定時，只能在本機設定第一組密碼
     admin_html = Path(__file__).with_name("admin.html")
 
+    def _live_auto():
+        """IT 設定頁「自動」這台電腦會選哪一個（顯示用）"""
+        try:
+            from group import hwtier
+            r = hwtier.pick(base_dir)
+            return {"model": r["model"], "reason": r["reason"], "suggest": r["suggest"],
+                    "physical": r["hw"].get("physical"), "logical": r["hw"].get("logical"), "gpu": r["hw"].get("gpu")}
+        except Exception:  # noqa: BLE001
+            return None
+
     def read_cfg():
         try:
             return json.loads(config_file.read_text(encoding="utf-8")) if config_file.exists() else {}
@@ -1005,7 +1019,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "llm_model": s.get("llm_model", ""), "summary_model": s.get("summary_model", ""),
                 "asr_model": s.get("asr_model", "large-v3-turbo"),
                 "local_file_model": s.get("local_file_model", "small"),
-                "local_live_model": s.get("local_live_model", "small"),
+                "local_live_model": s.get("local_live_model", "auto"),
+                "live_auto": _live_auto(),
                 "diarize": bool(s.get("diarize", s.get("backend") == "server" and bool(rw.get("host")))),
                 "staff_password_set": bool(s.get("password_hash") or s.get("password")),
                 "allow_remote_view": bool(s.get("allow_remote_view", False)),

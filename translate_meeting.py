@@ -796,6 +796,232 @@ class _PcgCpuGuard:
 _PCG_CPU_GUARD = _PcgCpuGuard()
 
 
+# ── 依停頓切句＋句子合併、重複迴圈處理（r21）────────────────────────────────
+# 參考 tinglongWu（https://github.com/sunososobro-hub/tinglongwu ，MIT License，Copyright (c) 2026 Alonso）
+# 的 segment.py、merge.py、repeat.py，依集團版的需求改寫（印地語句號「।」、韓文要空格、執行緒安全的 push／poll）。
+#
+# 以前的即時辨識：每 3 秒把最近 5 秒的聲音整段重新辨識一次（同一段聲音算 1.7 次），再用文字比對去掉重複。
+# 改成：講話停頓（Silero VAD）時才切一段，每段只辨識一次；翻譯等一句講完（句號、停頓、或等太久）才送。
+# 舊做法保留：環境變數 PCG_LIVE_SEGMENT=window 改回滑動視窗；VAD 載入失敗也自動用舊做法。
+
+_SEG_SR = 16000
+
+
+def _pcg_silero_spans(audio):
+    """語音區段（取樣點位置），用 faster-whisper 內建的 Silero VAD（ONNX，CPU 很輕）"""
+    from faster_whisper.vad import VadOptions, get_speech_timestamps
+    return [(t["start"], t["end"]) for t in get_speech_timestamps(audio, VadOptions(min_silence_duration_ms=300))]
+
+
+def _pcg_to_16k(audio, sr):
+    """單聲道 float32 → 16 kHz（48000、32000 整數倍直接平均；其他用線性內插）"""
+    import numpy as np
+    audio = np.asarray(audio, dtype=np.float32).reshape(-1)
+    if sr == _SEG_SR or not len(audio):
+        return audio
+    if sr % _SEG_SR == 0:
+        f = sr // _SEG_SR
+        n = len(audio) // f * f
+        return audio[:n].reshape(-1, f).mean(axis=1).astype(np.float32)
+    n_out = int(round(len(audio) * _SEG_SR / sr))
+    if n_out <= 0:
+        return np.zeros(0, np.float32)
+    x = np.linspace(0, len(audio) - 1, n_out)
+    return np.interp(x, np.arange(len(audio)), audio).astype(np.float32)
+
+
+class _PcgSegmenter:
+    """收進來的 16 kHz 聲音，講話停頓時切成一段（或講太久沒停時強制切，留 0.5 秒重疊）。
+
+    push() 給錄音的 callback 用（只是放進待處理清單）；poll() 給主迴圈用：新聲音滿 step 秒才跑一次 VAD。
+    回傳 [(audio, forced, pause_seconds)]：forced＝講太久被強制切（句子還沒完）；pause_seconds＝這段後面的靜音"""
+
+    def __init__(self, chunk=8.0, overlap=0.5, min_silence=0.6, step=0.5, vad_fn=None):
+        import numpy as np
+        self._np = np
+        self.chunk, self.ov = int(chunk * _SEG_SR), int(overlap * _SEG_SR)
+        self.min_sil, self.step = int(min_silence * _SEG_SR), int(step * _SEG_SR)
+        self.vad = vad_fn or _pcg_silero_spans
+        self._lock = threading.Lock()
+        self._new, self._new_n = [], 0
+        self.buf = np.zeros(0, np.float32)
+
+    def push(self, audio16k):
+        if len(audio16k):
+            with self._lock:
+                self._new.append(audio16k)
+                self._new_n += len(audio16k)
+
+    def reset(self):
+        with self._lock:
+            self._new, self._new_n = [], 0
+        self.buf = self._np.zeros(0, self._np.float32)
+
+    def poll(self):
+        with self._lock:
+            if self._new_n < self.step:
+                return []
+            new, self._new, self._new_n = self._new, [], 0
+        self.buf = self._np.concatenate([self.buf] + new)
+        seg = self._cut()
+        return [seg] if seg is not None else []
+
+    def _cut(self):
+        buf = self.buf
+        spans = self.vad(buf)
+        if not spans:                                   # 只有靜音：留一點尾巴（下一句的開頭可能在這裡）
+            self.buf = buf[-self.ov:] if len(buf) > 2 * self.ov else buf
+            return None
+        s, e = spans[0][0], spans[-1][1]
+        if len(buf) - e >= self.min_sil:                # 講完停下來了：切在這裡
+            self.buf = buf[e:]
+            return buf[max(0, s - self.ov):min(len(buf), e + self.ov)], False, (len(buf) - e) / _SEG_SR
+        if len(buf) - s >= self.chunk:                  # 講太久沒停：強制切，留重疊
+            self.buf = buf[-self.ov:]
+            return buf[s:], True, 0.0
+        self.buf = buf[max(0, s - self.ov):]            # 還在講：去掉前面的靜音，等下一次
+        return None
+
+
+_SM_SPLIT = re.compile(r"(?<=[.!?…])\s+|(?<=[。！？।॥])\s*")
+_SM_END = re.compile(r"[.!?…。！？।॥][\"'»”)\]」』]*\s*$")
+_SM_ABBREV = re.compile(r"(?:^|\s)(?:\w{1,2}\.)$")      # "Mr."、"No."、"Jl." 不算句尾
+_SM_NOSPACE = re.compile(r"[぀-ヿ㐀-鿿豈-﫿]")   # 中文、日文：接起來不加空格（韓文要空格）
+_SM_CJK = re.compile(r"[぀-ヿ㐀-鿿豈-﫿가-힯]")
+_SM_TRAIL_ELLIPSIS = re.compile(r"\s*(?:\.{2,}|…)+\s*$")
+_SM_WORD = re.compile(r"\w+", re.UNICODE)
+
+
+def _sm_units(text):
+    """長度上限用：英文等算字數，中日韓每個字算一個"""
+    return len(_SM_WORD.sub("x", _SM_CJK.sub(" x ", text)).split())
+
+
+def _sm_norm(w):
+    return "".join(c for c in w.lower() if c.isalnum())
+
+
+def _sm_is_end(text):
+    t = text.rstrip()
+    return bool(_SM_END.search(t)) and not _SM_ABBREV.search(re.sub(r"[\"'»”)\]」』]+$", "", t))
+
+
+class _PcgSentenceMerger:
+    """辨識出來的文字先暫存，到句尾（句號、問號、印地語「।」）才送去翻譯；
+    講話的人停頓 PAUSE_SEND 秒以上、暫存超過 max_wait 秒、或累積太長也送。語言換了（教室模式）先把前一種送出。
+    回傳 [(text, lang, forced)]；forced＝不是在句尾送出的"""
+    PAUSE_SEND = 0.8
+
+    def __init__(self, max_wait=3.0, max_words=45, min_overlap=2):
+        self.max_wait, self.max_words, self.min_overlap = max_wait, max_words, min_overlap
+        self.buf, self.lang, self.since = "", "", None
+        self._cut = False
+        self._tail = []
+
+    def _dedupe(self, text, min_overlap):
+        """去掉這段開頭跟上一段結尾重複的字（強制切的 0.5 秒重疊）"""
+        words = text.split()
+        n_new = [_sm_norm(w) for w in words]
+        for k in range(min(len(self._tail), len(words), 6), min_overlap - 1, -1):
+            if [_sm_norm(w) for w in self._tail[-k:]] == n_new[:k] and all(n_new[:k]):
+                return " ".join(words[k:])
+        return text
+
+    def add(self, text, lang, now, forced_cut=False, pause=0.0):
+        out = []
+        if self.buf and lang != self.lang:
+            out.append(self._take())
+        text = (text or "").strip()
+        if forced_cut:
+            text = _SM_TRAIL_ELLIPSIS.sub("", text)      # 強制切時 Whisper 加的「...」不是句尾
+        text = self._dedupe(text, 1 if self._cut else self.min_overlap)
+        self._cut = forced_cut
+        if not text:
+            return out + self.due(now)
+        self._tail = (self._tail + text.split())[-8:]
+        if not self.buf:
+            self.since = now
+        self.lang = lang
+        if self.buf and not (_SM_NOSPACE.search(text[:1]) and _SM_NOSPACE.search(self.buf[-1:])):
+            self.buf = f"{self.buf} {text}"
+        else:
+            self.buf += text
+        sents = []
+        for p in (x for x in _SM_SPLIT.split(self.buf) if x.strip()):
+            if sents and not _sm_is_end(sents[-1]):
+                sents[-1] = f"{sents[-1]} {p}"
+            else:
+                sents.append(p)
+        rest = sents.pop() if sents and not _sm_is_end(sents[-1]) else ""
+        out += [(x.strip(), lang, False) for x in sents]
+        self.buf = rest
+        if not rest:
+            self.since = None
+        elif sents:
+            self.since = now
+        if rest and not forced_cut and pause >= self.PAUSE_SEND:
+            out.append(self._take())                    # 講話的人停下來了，不用再等
+            return out
+        return out + self.due(now)
+
+    def due(self, now):
+        if self.buf and ((self.since is not None and now - self.since >= self.max_wait)
+                         or _sm_units(self.buf) >= self.max_words):
+            return [self._take()]
+        return []
+
+    def flush(self):
+        return [self._take()] if self.buf else []
+
+    def _take(self):
+        u = (self.buf.strip(), self.lang, True)
+        self.buf, self.since = "", None
+        return u
+
+
+_RP_CHAR_LOOP = re.compile(r"(.{3,80}?)\1{2,}", re.S)
+
+
+def _rp_collapse_words(text):
+    words = text.split()
+    n = [_sm_norm(w) or w.lower() for w in words]
+    out, i = [], 0
+    while i < len(words):
+        hit = None
+        for L in range(1, min(40, (len(words) - i) // 2) + 1):
+            unit, k = n[i:i + L], 1
+            while n[i + k * L:i + (k + 1) * L] == unit:
+                k += 1
+            if k >= (4 if L == 1 else 3):               # 「ya ya ya」是正常說話；同一個字 4 次以上才算卡住
+                hit = (L, k)
+                break
+        if hit is None:
+            out.append(words[i])
+            i += 1
+            continue
+        L, k = hit
+        out.extend(words[i:i + L])
+        j, m = i + k * L, 0
+        while m < L and j + m < len(words) and n[j + m] == n[i + m]:
+            m += 1                                       # 卡在一半的最後一份也拿掉
+        i = j + m
+    return " ".join(out)
+
+
+def _pcg_collapse_repeats(text):
+    """Whisper 卡住一直重複同一句（「A B C A B C A B C …」）：只留一份。連續 3 次以上（單一個字 4 次以上）才算"""
+    t = " ".join((text or "").split())
+    if not t:
+        return t
+    t = _rp_collapse_words(t)
+    return _RP_CHAR_LOOP.sub(lambda m: m.group(1) if _SM_CJK.search(m.group(1)) else m.group(0), t)
+
+
+def _pcg_has_loop(text):
+    t = " ".join((text or "").split())
+    return bool(t) and len(_pcg_collapse_repeats(t)) < 0.7 * len(t)
+
+
 def _win_k32_process():
     """(kernel32, 這個程序的 handle)：函式的參數與回傳型別要宣告成 HANDLE，
     不然 64 位元 Python 會把 handle 當成 32 位元整數傳，Windows 不認得、什麼都沒改（2026-11-06 自我檢查抓到）"""
@@ -10271,6 +10497,7 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
     print(f"{C_TITLE}{'=' * 60}{RESET}")
     print()
 
+    _seg = None                          # 依停頓切句（r21），下面決定要不要用
     # ── 環形緩衝（原始取樣率 mono float32）──
     ring_size = sd_samplerate * length_ms // 1000  # 例如 48000*8=384000
     ring_buffer = np.zeros(ring_size, dtype=np.float32)
@@ -10301,6 +10528,8 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
         else:
             audio = audio.flatten()
         _push_rms(float(np.sqrt(np.mean(audio ** 2))))
+        if _seg is not None and not pause_event.is_set():
+            _seg.push(_pcg_to_16k(audio, sd_samplerate))     # 依停頓切句（r21）
         if recorder and rec_stream is None:
             recorder.write(audio)
         n = len(audio)
@@ -10321,6 +10550,16 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
 
     # ── 降噪 ──
     _denoise = _make_denoiser(denoise)
+
+    # ── 依停頓切句（r21）：講話停頓時才切一段、每段只辨識一次；PCG_LIVE_SEGMENT=window 改回舊的滑動視窗 ──
+    if not use_mlx and os.environ.get("PCG_LIVE_SEGMENT", "vad").strip().lower() != "window":
+        try:
+            import faster_whisper.vad  # noqa: F401
+            _pcg_silero_spans(np.zeros(_SEG_SR // 2, np.float32))     # 先載入一次 VAD 模型，壞掉就用舊做法
+            _seg = _PcgSegmenter()
+            print(f"  {C_DIM}切句：依講話停頓（VAD），每段只辨識一次{RESET}", flush=True)
+        except Exception as _seg_e:
+            print(f"  {C_DIM}[提示] 依停頓切句無法使用（{str(_seg_e)[:120]}），改用滑動視窗{RESET}", flush=True)
 
     # ── 提取音訊並寫入暫存 WAV（原始取樣率，讓 faster-whisper 正確 resample）──
     import tempfile as _tempfile
@@ -10366,8 +10605,9 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
 
     _room_tls = threading.local()   # 這一段判斷出的語言（同時有兩個辨識執行緒，不能共用一個變數）
 
-    def local_transcribe(wav_path):
-        """用 mlx-whisper / faster-whisper 辨識 WAV 檔，回傳 (segments_list, full_text, proc_time)"""
+    def local_transcribe(wav_path, _seg_audio=False, _retry=False):
+        """用 mlx-whisper / faster-whisper 辨識 WAV 檔（依停頓切句時是 16 kHz 的 numpy 陣列），回傳 (segments_list, full_text, proc_time)
+        _seg_audio：已經是切好的一句話（VAD 切過，不用再做一次）；_retry：上一次卡在重複迴圈，換溫度重新辨識（r21）"""
         t0 = time.monotonic()
         segments = []
         texts = []
@@ -10403,8 +10643,10 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
                 except Exception:              # 整段是靜音等：照「對方的語言」辨識
                     _lang = whisper_lang
                 _room_tls.lang = _lang
-            segments_iter, info = fw_model.transcribe(
-                wav_path, language=_lang, beam_size=5, vad_filter=True)
+            _fw_kw = dict(language=_lang, beam_size=5, vad_filter=not _seg_audio)
+            if _retry:
+                _fw_kw.update(temperature=(0.2, 0.4, 0.6, 0.8), condition_on_previous_text=False)
+            segments_iter, info = fw_model.transcribe(wav_path, **_fw_kw)
             for seg in segments_iter:
                 text = seg.text.strip()
                 if text:
@@ -10540,6 +10782,43 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
         hallucination_check = _is_zh_hallucination
     src_color, src_label = _MODE_LABELS[mode][0], _MODE_LABELS[mode][1]
 
+    def _emit_line(line, proc_time, seg_lang, dedupe=True):
+        """顯示一行辨識結果（要翻譯的話送去翻譯）。滑動視窗與依停頓切句共用"""
+        # 教室模式：這一段是我方語言（預設中文）→ 用「我方→對方語言」的翻譯器、我方語言的過濾與標籤
+        room_zh = bool(room_lang) and seg_lang == room_mine
+        line_check = _HALLU_BY_LANG.get(room_mine, _is_zh_hallucination) if room_zh else hallucination_check
+        line_tr = room_translator if room_zh else translator
+        line_mode = f"{room_mine}2{room_lang}" if room_zh else mode
+        line = _pcg_collapse_repeats(line)
+        if not line:
+            return
+        if line_mode in _ZH_INPUT_MODES:
+            line = _s2twp_safe(line)
+        if line_check(line):
+            return
+        if dedupe and is_duplicate(line):
+            return
+        recent_texts.append(line.lower().strip())
+        if mode in _TRANSLATE_MODES and line_tr:
+            seq = _trans_seq[0]; _trans_seq[0] += 1
+            threading.Thread(
+                target=translate_and_print,
+                args=(seq, line, log_path, proc_time, line_tr, line_mode),
+                daemon=True,
+            ).start()
+        else:
+            with print_lock:
+                print(f"{src_color}{BOLD}[{src_label}] {line}{RESET}", flush=True)
+                print(flush=True)
+                _status_bar_state["count"] += 1
+                refresh_status_bar()
+            timestamp = time.strftime("%H:%M:%S")
+            with open(log_path, "a", encoding="utf-8") as log_f:
+                log_f.write(f"[{timestamp}] [{src_label}] {line}\n\n")
+            _webui_send({"type": "transcription", "source": "main",
+                         "src_lang": src_label, "src_text": line,
+                         "asr_time": round(proc_time, 1), "timestamp": timestamp})
+
     def drain_ordered_results():
         _NOT_READY = object()
         while True:
@@ -10553,11 +10832,6 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
             segments, full_text, proc_time, seg_lang = result
             if not full_text:
                 continue
-            # 教室模式：這一段是我方語言（預設中文）→ 用「我方→對方語言」的翻譯器、我方語言的過濾與標籤
-            room_zh = bool(room_lang) and seg_lang == room_mine
-            line_check = _HALLU_BY_LANG.get(room_mine, _is_zh_hallucination) if room_zh else hallucination_check
-            line_tr = room_translator if room_zh else translator
-            line_mode = f"{room_mine}2{room_lang}" if room_zh else mode
             lines = []
             if segments:
                 for seg in segments:
@@ -10567,34 +10841,7 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
             else:
                 lines = [full_text]
             for line in lines:
-                if not line:
-                    continue
-                if line_mode in _ZH_INPUT_MODES:
-                    line = _s2twp_safe(line)
-                if line_check(line):
-                    continue
-                if is_duplicate(line):
-                    continue
-                recent_texts.append(line.lower().strip())
-                if mode in _TRANSLATE_MODES and line_tr:
-                    seq = _trans_seq[0]; _trans_seq[0] += 1
-                    threading.Thread(
-                        target=translate_and_print,
-                        args=(seq, line, log_path, proc_time, line_tr, line_mode),
-                        daemon=True,
-                    ).start()
-                else:
-                    with print_lock:
-                        print(f"{src_color}{BOLD}[{src_label}] {line}{RESET}", flush=True)
-                        print(flush=True)
-                        _status_bar_state["count"] += 1
-                        refresh_status_bar()
-                    timestamp = time.strftime("%H:%M:%S")
-                    with open(log_path, "a", encoding="utf-8") as log_f:
-                        log_f.write(f"[{timestamp}] [{src_label}] {line}\n\n")
-                    _webui_send({"type": "transcription", "source": "main",
-                                 "src_lang": src_label, "src_text": line,
-                                 "asr_time": round(proc_time, 1), "timestamp": timestamp})
+                _emit_line(line, proc_time, seg_lang)
 
     # ── 清理 ──
     _cleaned_up = [False]
@@ -10695,7 +10942,86 @@ def run_stream_local_whisper(capture_id: int, translator, model_name: str,
     if hasattr(signal, 'SIGWINCH'):
         signal.signal(signal.SIGWINCH, _handle_sigwinch)
 
-    # ── 主迴圈 ──
+    # ── 主迴圈：依停頓切句（r21）──
+    if _seg is not None:
+        import queue as _queue
+        _seg_q = _queue.Queue()
+        _merger = _PcgSentenceMerger()
+        _merge_lock = threading.Lock()
+        _seg_last_proc = [0.0]
+        _seg_drop_warned = [False]
+        _SEG_Q_MAX = 40                  # 約 5 分鐘的話；電腦實在跟不上時丟最舊的，不讓記憶體一直長
+
+        def _emit_units(units, proc_time):
+            for _text, _lang, _forced in units:
+                _emit_line(_text, proc_time, _lang, dedupe=False)
+
+        def _seg_worker():
+            """依序辨識切好的每一段（只有一個執行緒：段落不重疊，不需要同時辨識兩段）"""
+            while not stop_event.is_set():
+                try:
+                    audio, forced, pause_s, gkey = _seg_q.get(timeout=0.5)
+                except _queue.Empty:
+                    continue
+                try:
+                    a = _denoise(audio, _SEG_SR)
+                    segs, full, proc = local_transcribe(a, _seg_audio=True)
+                    text = " ".join(x["text"] for x in segs) or full
+                    if _pcg_has_loop(text):      # Whisper 卡在重複迴圈：換溫度重新辨識一次
+                        segs2, full2, proc2 = local_transcribe(a, _seg_audio=True, _retry=True)
+                        text2 = " ".join(x["text"] for x in segs2) or full2
+                        proc += proc2
+                        if text2 and not _pcg_has_loop(text2):
+                            text = text2
+                    lang = (getattr(_room_tls, "lang", None) if room_lang else None) or whisper_lang or ""
+                    _seg_last_proc[0] = proc
+                    with _merge_lock:
+                        units = _merger.add(text, lang, time.monotonic(), forced, pause_s)
+                    _emit_units(units, proc)
+                except Exception as e:
+                    with print_lock:
+                        print(f"{C_DIM}  [本機辨識失敗: {e}]{RESET}", flush=True)
+                finally:
+                    _PCG_CPU_GUARD.end(gkey)
+
+        threading.Thread(target=_seg_worker, daemon=True, name="pcg-seg-asr").start()
+        try:
+            while not stop_event.is_set():
+                time.sleep(0.2)
+                if _status_bar_active:
+                    with print_lock:
+                        refresh_status_bar()
+                if pause_event.is_set():
+                    _seg.reset()
+                    with _merge_lock:
+                        units = _merger.flush()
+                    _emit_units(units, _seg_last_proc[0])
+                    continue
+                for audio, forced, pause_s in _seg.poll():
+                    if float(np.sqrt(np.mean(audio ** 2))) < 0.001:
+                        continue
+                    if _seg_q.qsize() >= _SEG_Q_MAX:
+                        try:
+                            _PCG_CPU_GUARD.end(_seg_q.get_nowait()[3])
+                        except _queue.Empty:
+                            pass
+                        if not _seg_drop_warned[0]:
+                            _seg_drop_warned[0] = True
+                            with print_lock:
+                                print(f"  {C_WARN}[提示] 電腦太忙，辨識跟不上，略過最舊的一段{RESET}", flush=True)
+                    # 從排進來開始算等待時間：電腦太忙、排隊排太久時 _PCG_CPU_GUARD 會暫時調回標準優先順序
+                    _seg_q.put((audio, forced, pause_s, _PCG_CPU_GUARD.begin()))
+                with _merge_lock:
+                    units = _merger.due(time.monotonic())
+                _emit_units(units, _seg_last_proc[0])
+        except KeyboardInterrupt:
+            signal_handler(signal.SIGINT, None)
+        clear_status_bar()
+        restore_terminal()
+        _cleanup_local()
+        return
+
+    # ── 主迴圈：滑動視窗（舊做法，PCG_LIVE_SEGMENT=window 或 VAD 不能用時）──
     step_sec = step_ms / 1000.0
     length_samples = ring_size
     next_transcribe_time = time.monotonic() + (length_ms / 1000.0)

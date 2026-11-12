@@ -202,6 +202,49 @@ def translations(quick):
     return "\n       " + "\n       ".join(out)
 
 
+def live_segment():
+    """r21 依停頓切句：Windows 語音合成念兩句（中間停 1.5 秒）→ 真的 Silero VAD 切段 → small 辨識 → 句子合併。
+    切成兩段以上、而且辨識得出內容，才算過（這是即時字幕預設的做法，壞掉時字幕會整個出不來）"""
+    import subprocess
+    import tempfile
+    import wave
+    import numpy as np
+    sys.argv = [sys.argv[0]]
+    import translate_meeting as t
+    from faster_whisper import WhisperModel
+    wav = os.path.join(tempfile.gettempdir(), "pcg_selftest_seg.wav")
+    ps = ("Add-Type -AssemblyName System.Speech; $s = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
+          f"$s.SetOutputToWaveFile('{wav}'); "
+          "$b = New-Object System.Speech.Synthesis.PromptBuilder; "
+          "$b.AppendText('We will check the inventory tomorrow morning.'); "
+          "$b.AppendBreak([TimeSpan]::FromMilliseconds(1500)); "
+          "$b.AppendText('Please send the report to the factory before Friday.'); "
+          "$b.AppendBreak([TimeSpan]::FromMilliseconds(1500)); $s.Speak($b); $s.Dispose()")
+    subprocess.run(["powershell", "-NoProfile", "-Command", ps], check=True, timeout=120,
+                   creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    with wave.open(wav, "rb") as w:
+        sr, ch, raw = w.getframerate(), w.getnchannels(), w.readframes(w.getnframes())
+    os.unlink(wav)
+    audio = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
+    if ch > 1:
+        audio = audio.reshape(-1, ch).mean(axis=1)
+    audio = t._pcg_to_16k(audio, sr)
+    seg, merger = t._PcgSegmenter(), t._PcgSentenceMerger()
+    model = WhisperModel("small", device="cpu", compute_type="int8", cpu_threads=t._pcg_cpu_threads()[0])
+    texts, n = [], 0
+    for i in range(0, len(audio), 1600):                  # 跟即時一樣每 0.1 秒送一小塊
+        seg.push(audio[i:i + 1600])
+        for a, forced, pause in seg.poll():
+            n += 1
+            segs, _ = model.transcribe(a, language="en", beam_size=5, vad_filter=False)
+            texts += [u[0] for u in merger.add(" ".join(x.text.strip() for x in segs), "en", i / 16000, forced, pause)]
+    texts += [u[0] for u in merger.flush()]
+    joined = " ".join(texts).lower()
+    if n < 2 or "inventory" not in joined or "report" not in joined:
+        raise RuntimeError(f"切了 {n} 段，辨識結果：{texts}")
+    return f"{n} 段 → {texts}"
+
+
 def main():
     for stream in (sys.stdout, sys.stderr):          # 非中文版 Windows 的命令列印中文會當掉
         try:
@@ -221,6 +264,7 @@ def main():
         check("CPU 用量限制", cpu_budget)
         check("回報問題的診斷檔", report)
         check("多語字幕（同時翻成四種語言）", multilang)
+        check("即時字幕依停頓切句（VAD）", live_segment)
     print("結果：" + ("全部通過" if ok else "有項目沒通過"))
     sys.exit(0 if ok else 1)
 
