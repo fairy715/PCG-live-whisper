@@ -21,6 +21,16 @@
 - 如果問題出在原作者的程式（集團版沒改過的部分），IT 會再**私下**通報原作者（原專案的 GitHub「Report a vulnerability」或 service@jason.tools），不在公開的地方討論。
 - 原作者已發布的安全公告：https://github.com/jasoncheng7115/jt-live-whisper/security/advisories （每週一的「檢查原作者更新」會把原作者的新修正開成 issue，IT 評估後合併）。
 
+原作者已發布的安全公告與修正版本（集團版都已合併這些修正）：
+
+| Advisory | Component | Fixed in |
+|---|---|---|
+| [GHSA-7m57-qfrp-hxfp](https://github.com/jasoncheng7115/jt-live-whisper/security/advisories/GHSA-7m57-qfrp-hxfp) | WebUI file upload | 2.22.2 |
+| [GHSA-3gqv-3c48-2q4w](https://github.com/jasoncheng7115/jt-live-whisper/security/advisories/GHSA-3gqv-3c48-2q4w) | WebUI transcripts and live connection | 2.22.2 |
+| [GHSA-ggpf-p5mq-8xxw](https://github.com/jasoncheng7115/jt-live-whisper/security/advisories/GHSA-ggpf-p5mq-8xxw) | WebUI behind a reverse proxy | 2.31.1 |
+| [GHSA-j4wj-9r27-mv74](https://github.com/jasoncheng7115/jt-live-whisper/security/advisories/GHSA-j4wj-9r27-mv74) | WebUI LLM connection test | 2.21.3 |
+
+
 ---
 
 # Security policy (PCG Meeting Translator, group edition)
