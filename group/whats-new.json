@@ -1,29 +1,34 @@
 {
  "_說明": "下一版發布時同仁頁面「有新版本」視窗顯示的新功能（每種語言 2～5 點，一點一句）。release 要等於這一次發布的 rN，發布流程才會附上；每次發布前更新這個檔",
- "release": "r20",
+ "release": "r21",
  "zh": [
-  "開著 Teams 開會時字幕不再停住：電腦太忙、字幕跟不上時，會自動多分一點 CPU 給字幕，追上了再讓回去",
-  "雙核心的筆電辨識比較快（多用一個執行緒）",
-  "IT 開啟「讓手機連進來看字幕」後不用再去關程式：按「立即重新啟動程式」約 10 秒就生效，會議室字幕機按開始時也會自動先重開"
+  "字幕改成講話停頓時才切句、每段只辨識一次：比較省 CPU，字幕和翻譯都是整句",
+  "Whisper 卡住一直重複同一句時會自動重新辨識，重複的只留一份",
+  "IT 設定頁的即時字幕模型可選「自動」，依這台電腦的規格選最合適的模型",
+  "修正部分電腦第一次安裝時出現「An object at the specified path … does not exist」而失敗"
  ],
  "en": [
-  "Subtitles no longer stop during Teams meetings: when the computer is too busy and subtitles fall behind, they get more CPU until they catch up",
-  "Faster recognition on 2-core laptops (one more thread)",
-  "After IT allows phones to view subtitles, nobody needs to close the program: press “Restart the program now” (about 10 seconds); the meeting room subtitle computer also restarts by itself when you press Start"
+  "Subtitles are now cut when the speaker pauses and each piece is recognized once: less CPU, and subtitles and translations come as whole sentences",
+  "When Whisper gets stuck repeating the same sentence, it is recognized again and repeats are shown only once",
+  "IT settings: the live subtitle model can be set to “Automatic”, which picks the best model for this computer",
+  "Fixed first-time installation failing on some computers with “An object at the specified path … does not exist”"
  ],
  "id": [
-  "Subtitle tidak berhenti lagi saat rapat Teams: jika komputer terlalu sibuk dan subtitle tertinggal, subtitle mendapat CPU lebih banyak sampai menyusul",
-  "Pengenalan suara lebih cepat di laptop 2 inti (satu utas tambahan)",
-  "Setelah IT mengizinkan ponsel menonton subtitle, program tidak perlu ditutup: tekan “Mulai ulang program sekarang” (sekitar 10 detik); komputer subtitle ruang rapat juga memulai ulang sendiri saat menekan Mulai"
+  "Subtitle kini dipotong saat pembicara berhenti dan setiap potongan dikenali sekali: CPU lebih ringan, subtitle dan terjemahan berupa kalimat utuh",
+  "Jika Whisper terjebak mengulang kalimat yang sama, potongan itu dikenali ulang dan pengulangan hanya ditampilkan sekali",
+  "Pengaturan IT: model subtitle langsung bisa diatur “Otomatis”, memilih model yang paling cocok untuk komputer ini",
+  "Memperbaiki instalasi pertama yang gagal di sebagian komputer dengan pesan “An object at the specified path … does not exist”"
  ],
  "vi": [
-  "Phụ đề không còn bị dừng khi họp Teams: khi máy quá bận và phụ đề bị chậm, phụ đề được dùng thêm CPU cho đến khi theo kịp",
-  "Nhận dạng nhanh hơn trên laptop 2 nhân (thêm một luồng)",
-  "Sau khi IT cho phép điện thoại xem phụ đề, không cần đóng chương trình: bấm khởi động lại chương trình (khoảng 10 giây); máy phụ đề phòng họp cũng tự khởi động lại khi bấm Bắt đầu"
+  "Phụ đề nay được cắt khi người nói ngừng và mỗi đoạn chỉ nhận dạng một lần: tốn ít CPU hơn, phụ đề và bản dịch là câu trọn vẹn",
+  "Khi Whisper bị kẹt lặp lại cùng một câu, đoạn đó được nhận dạng lại và phần lặp chỉ hiện một lần",
+  "Cài đặt IT: mô hình phụ đề trực tiếp có thể chọn “Automatic”, tự chọn mô hình phù hợp nhất cho máy này",
+  "Sửa lỗi cài đặt lần đầu thất bại trên một số máy với thông báo “An object at the specified path … does not exist”"
  ],
  "hi": [
-  "Teams मीटिंग के दौरान सबटाइटल अब नहीं रुकेंगे: कंप्यूटर बहुत व्यस्त हो और सबटाइटल पीछे रह जाएँ, तो पकड़ने तक उन्हें ज़्यादा CPU मिलेगा",
-  "2-कोर लैपटॉप पर पहचान तेज़ (एक थ्रेड ज़्यादा)",
-  "IT के फ़ोन से सबटाइटल देखने की अनुमति देने के बाद प्रोग्राम बंद करने की ज़रूरत नहीं: “प्रोग्राम अभी दोबारा शुरू करें” दबाएँ (लगभग 10 सेकंड); मीटिंग रूम सबटाइटल कंप्यूटर शुरू करें दबाने पर अपने आप दोबारा शुरू होता है"
+  "सबटाइटल अब बोलने वाले के रुकने पर कटते हैं और हर हिस्सा एक बार पहचाना जाता है: CPU कम लगता है, सबटाइटल और अनुवाद पूरे वाक्य में आते हैं",
+  "Whisper एक ही वाक्य दोहराता रह जाए तो उसे दोबारा पहचाना जाता है और दोहराव एक बार ही दिखता है",
+  "IT सेटिंग: लाइव सबटाइटल मॉडल “स्वचालित” पर रखा जा सकता है, जो इस कंप्यूटर के लिए सबसे सही मॉडल चुनता है",
+  "कुछ कंप्यूटरों पर पहली बार इंस्टॉल “An object at the specified path … does not exist” से असफल होने की समस्या ठीक की गई"
  ]
 }
