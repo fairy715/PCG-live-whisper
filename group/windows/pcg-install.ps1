@@ -111,14 +111,19 @@ if (Test-Path $py) {
 }
 if ($haveVer -ne $wantVer) {
     Log "安裝 Python $wantVer ..."
-    $tmp = Join-Path $env:TEMP ("pcg-py-" + [guid]::NewGuid().ToString("N"))
+    # 解壓縮用的暫存資料夾放在安裝資料夾裡，不用 %TEMP%：
+    # 2026-11-13 同仁電腦的 %TEMP% 是短檔名（C:\Users\JO0A77~1.HUN\…，使用者資料夾名稱有「.」），
+    # Windows PowerShell 5.1 的 Remove-Item -Recurse 在這種路徑會丟出「An object at the specified path … does not exist」，
+    # 連 -ErrorAction SilentlyContinue 都擋不住，Python 已經裝好了卻整個安裝失敗
+    $tmp = Join-Path $logDir ("tmp-py-" + [guid]::NewGuid().ToString("N"))
     New-Item -ItemType Directory -Force -Path $tmp | Out-Null
     $zip = Join-Path $tmp "python.zip"
     Copy-Item $nupkg.FullName $zip
     Expand-Archive -Path $zip -DestinationPath $tmp -Force
     if (Test-Path $pyDir) { Remove-Item $pyDir -Recurse -Force }
     Copy-Tree (Join-Path $tmp "tools") $pyDir
-    Remove-Item $tmp -Recurse -Force -ErrorAction SilentlyContinue
+    # 清暫存：刪不掉也不影響安裝（只記一行）
+    try { [System.IO.Directory]::Delete($tmp, $true) } catch { Log "[注意] 暫存資料夾沒有刪掉（不影響使用）：$tmp" }
 } else {
     Log "Python $haveVer 已安裝"
 }
