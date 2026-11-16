@@ -273,6 +273,7 @@ The main installer only has the small model: it runs on ordinary laptops, but In
 3. Under "Local recognition models", choose large-v3-turbo for "Live subtitles" and click "Save".
 4. (Optional) Language packs (medium) for Indonesian, Vietnamese and Hindi: choose them in "Model for each language" and click "Apply model settings". They are used only for "I only read subtitles".
 5. Tick "Allow other computers and phones to view subtitles", set a "Staff password", save, then press "**Restart the program now**" that appears on the page (about 10 seconds, from r20; no need to end python.exe in Task Manager). If staff start the "meeting room subtitle computer" scene before the program has restarted, it restarts by itself first
+   - The original author added "Allow other computers to connect" under "Security settings" in the advanced WebUI (`/`) in 2.34.1: when the group edition is opened from the desktop shortcut, **the IT settings page option above decides**; ignore the advanced WebUI checkbox (r22)
 6. Allow incoming connections in Windows Firewall (needs an administrator: open PowerShell as administrator):
    ```powershell
    New-NetFirewallRule -DisplayName "PCG Meeting Translator" -Direction Inbound -Protocol TCP -LocalPort 19781 -RemoteAddress LocalSubnet -Action Allow -Profile Domain,Private

@@ -274,6 +274,7 @@ GPU 伺服器有填但當下連不上時，會自動改在同仁電腦上用小�
 3. 「本機辨識模型」的「即時字幕」選 large-v3-turbo，按「儲存」。
 4. （選用）印尼文、越南文、印地語的語言模型包（medium）：在「每種語言用哪個模型」指定，按「套用模型設定」。只用在「只看字幕」。
 5. 勾「允許其他電腦或手機連進來看字幕」，設定「同仁密碼」，存檔後按頁面上出現的「**立即重新啟動程式**」（約 10 秒，r20 起；不用去工作管理員關 python.exe）。同仁在「會議室字幕機」按開始時，如果程式還沒重開過，也會自動先重開
+   - 原作者 2.34.1 在進階 WebUI（`/`）的「安全設定」加了「允許別台電腦連線」：集團版用桌面捷徑開啟時，**以 IT 設定頁的這個選項為準**，進階 WebUI 那個勾選不用管（r22）
 6. Windows 防火牆開放連入（要系統管理員：用系統管理員身分開 PowerShell）：
    ```powershell
    New-NetFirewallRule -DisplayName "PCG Meeting Translator" -Direction Inbound -Protocol TCP -LocalPort 19781 -RemoteAddress LocalSubnet -Action Allow -Profile Domain,Private

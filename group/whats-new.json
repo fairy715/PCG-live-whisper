@@ -1,34 +1,24 @@
 {
  "_說明": "下一版發布時同仁頁面「有新版本」視窗顯示的新功能（每種語言 2～5 點，一點一句）。release 要等於這一次發布的 rN，發布流程才會附上；每次發布前更新這個檔",
- "release": "r21",
+ "release": "r22",
  "zh": [
-  "字幕改成講話停頓時才切句、每段只辨識一次：比較省 CPU，字幕和翻譯都是整句",
-  "Whisper 卡住一直重複同一句時會自動重新辨識，重複的只留一份",
-  "IT 設定頁的即時字幕模型可選「自動」，依這台電腦的規格選最合適的模型",
-  "修正部分電腦第一次安裝時出現「An object at the specified path … does not exist」而失敗"
+  "跟上原作者 jt-live-whisper 2.34.1：資安說明與連線設定同步（能不能讓手機連進來，照舊由 IT 設定頁決定）",
+  "說明文件與截圖更新到這一版"
  ],
  "en": [
-  "Subtitles are now cut when the speaker pauses and each piece is recognized once: less CPU, and subtitles and translations come as whole sentences",
-  "When Whisper gets stuck repeating the same sentence, it is recognized again and repeats are shown only once",
-  "IT settings: the live subtitle model can be set to “Automatic”, which picks the best model for this computer",
-  "Fixed first-time installation failing on some computers with “An object at the specified path … does not exist”"
+  "Synced with the original jt-live-whisper 2.34.1: security notes and connection settings (whether phones can connect is still decided on the IT settings page)",
+  "Guides and screenshots updated to this version"
  ],
  "id": [
-  "Subtitle kini dipotong saat pembicara berhenti dan setiap potongan dikenali sekali: CPU lebih ringan, subtitle dan terjemahan berupa kalimat utuh",
-  "Jika Whisper terjebak mengulang kalimat yang sama, potongan itu dikenali ulang dan pengulangan hanya ditampilkan sekali",
-  "Pengaturan IT: model subtitle langsung bisa diatur “Otomatis”, memilih model yang paling cocok untuk komputer ini",
-  "Memperbaiki instalasi pertama yang gagal di sebagian komputer dengan pesan “An object at the specified path … does not exist”"
+  "Disamakan dengan jt-live-whisper asli 2.34.1: catatan keamanan dan pengaturan koneksi (apakah ponsel boleh terhubung tetap diatur di halaman Pengaturan IT)",
+  "Panduan dan tangkapan layar diperbarui ke versi ini"
  ],
  "vi": [
-  "Phụ đề nay được cắt khi người nói ngừng và mỗi đoạn chỉ nhận dạng một lần: tốn ít CPU hơn, phụ đề và bản dịch là câu trọn vẹn",
-  "Khi Whisper bị kẹt lặp lại cùng một câu, đoạn đó được nhận dạng lại và phần lặp chỉ hiện một lần",
-  "Cài đặt IT: mô hình phụ đề trực tiếp có thể chọn “Automatic”, tự chọn mô hình phù hợp nhất cho máy này",
-  "Sửa lỗi cài đặt lần đầu thất bại trên một số máy với thông báo “An object at the specified path … does not exist”"
+  "Đồng bộ với jt-live-whisper gốc 2.34.1: ghi chú bảo mật và cài đặt kết nối (cho phép điện thoại kết nối hay không vẫn do trang cài đặt IT quyết định)",
+  "Hướng dẫn và ảnh chụp màn hình đã cập nhật theo phiên bản này"
  ],
  "hi": [
-  "सबटाइटल अब बोलने वाले के रुकने पर कटते हैं और हर हिस्सा एक बार पहचाना जाता है: CPU कम लगता है, सबटाइटल और अनुवाद पूरे वाक्य में आते हैं",
-  "Whisper एक ही वाक्य दोहराता रह जाए तो उसे दोबारा पहचाना जाता है और दोहराव एक बार ही दिखता है",
-  "IT सेटिंग: लाइव सबटाइटल मॉडल “स्वचालित” पर रखा जा सकता है, जो इस कंप्यूटर के लिए सबसे सही मॉडल चुनता है",
-  "कुछ कंप्यूटरों पर पहली बार इंस्टॉल “An object at the specified path … does not exist” से असफल होने की समस्या ठीक की गई"
+  "मूल jt-live-whisper 2.34.1 के साथ मिलान: सुरक्षा नोट और कनेक्शन सेटिंग (फ़ोन कनेक्ट हो सकते हैं या नहीं, यह अब भी IT सेटिंग पेज तय करता है)",
+  "गाइड और स्क्रीनशॉट इस संस्करण के अनुसार अपडेट"
  ]
 }
