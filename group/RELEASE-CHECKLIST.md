@@ -17,7 +17,7 @@
 | 使用情境（4 種語言） | `group/使用情境.md`、`group/USE-CASES-en.md`、`-id.md`、`-vi.md`：同仁操作方式有變時 |
 | 安裝說明（4 種語言） | `group/安裝說明.md`、`group/INSTALL-GUIDE-*.md`：安裝或更新步驟有變時 |
 | `SECURITY.md` | 跟安全有關的變更、原作者新的安全公告 |
-| 廣告影片 | `group/docs/promo/`：同仁頁面的畫面有變時重拍 `ui-*.png` 並重新產生影片（先逐像素比對，沒變就不用） |
+| 廣告影片 | `group/docs/promo/`：同仁頁面的畫面有變時重拍 `ui-*.png` 並重新產生影片（先逐像素比對，沒變就不用）。這一版有同仁看得到的新功能、但不在廣告拍到的畫面裡時，問使用者要不要加一段（r24 的聲音測試就是這樣加的）；影片長度變了要一起改 README 的秒數與封面右下角的時間 |
 
 ## 3. 檢查
 - `python3 -m unittest discover -s group/tests`
