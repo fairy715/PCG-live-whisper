@@ -36,9 +36,11 @@ from pathlib import Path
 try:
     from group import model_packs
     from group import diagnostics
+    from group import glossary
 except ImportError:                     # 測試時直接 import simple_routes
     import model_packs
     import diagnostics
+    import glossary
 
 # 情境：同仁看到的是「錄音裡主要說什麼語言 → 拿到什麼」，背後對應主程式的模式代號
 DEFAULT_SCENARIOS = [
@@ -113,6 +115,14 @@ _OUTPUT_KINDS = [
     ("時間逐字稿", ".srt", "字幕檔 SRT", "", "srt"),
     ("時間逐字稿", ".vtt", "字幕檔 VTT", "", "vtt"),
 ]
+
+
+def glossary_sync(base_dir, s):
+    """詞庫（r23）：把 IT 設定頁填的＋公司共用資料夾的 glossary.txt 寫成主程式讀的檔。出錯不影響字幕與錄音"""
+    try:
+        return glossary.sync(base_dir, s)
+    except Exception:  # noqa: BLE001
+        return {"count": 0, "share_count": 0}
 
 
 def local_model_ok(base_dir, name):
@@ -293,6 +303,7 @@ class SimpleQueue:
 
     def _args(self, job):
         s = self.settings()
+        glossary_sync(self.base, s)                # 詞庫（r23）：主程式讀 group_data/glossary.txt
         pf = profile(s, self.has_gpu())
         args = [sys.executable, str(self.base / "translate_meeting.py"),
                 "--input", job["path"], "--mode", job["mode"], "-m",
@@ -848,6 +859,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         if mode == "en2zh" and not room and pf["local_asr"] and use_moonshine(s):
             # 對方說英文、在這台電腦辨識：用 Moonshine（英文專用，延遲低、CPU 輕很多）；雙向、教室模式照舊用 Whisper
             start.update(asr="moonshine", moonshine_model="medium")
+        import asyncio
+        await asyncio.to_thread(glossary_sync, base_dir, s)      # 詞庫（r23）
         try:
             await start_live(start)
         except Exception as e:
@@ -980,6 +993,16 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
     # 一律要 IT 密碼（同仁就坐在這台電腦前，「本機」不能當成 IT）。還沒設定時，只能在本機設定第一組密碼
     admin_html = Path(__file__).with_name("admin.html")
 
+    def _glossary_info(s):
+        """詞庫（r23）：這台填了幾個詞、共用資料夾上次讀到幾個（顯示用，不去連共用資料夾）"""
+        try:
+            cache = base_dir / "group_data" / "glossary-share.txt"
+            share = len(glossary.parse(cache.read_text(encoding="utf-8"))) if cache.is_file() and s.get("update_share") else 0
+            return {"local": len(glossary.parse(s.get("glossary") or "")), "share": share,
+                    "max_chars": glossary.MAX_TEXT, "max_entries": glossary.MAX_ENTRIES}
+        except Exception:  # noqa: BLE001
+            return {"local": 0, "share": 0, "max_chars": 20000, "max_entries": 500}
+
     def _live_auto():
         """IT 設定頁「自動」這台電腦會選哪一個（顯示用）"""
         try:
@@ -1031,6 +1054,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "update_who": "it" if s.get("update_who") == "it" else "staff",
                 "update_share": str(s.get("update_share") or ""),
                 "support_contact": str(s.get("support_contact") or ""),
+                "glossary": str(s.get("glossary") or ""), "glossary_info": _glossary_info(s),
                 "version": app_version(base_dir)}
 
     @app.get("/simple/admin", response_class=HTMLResponse)
@@ -1304,6 +1328,14 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 s["update_share"] = share
             else:
                 s.pop("update_share", None)
+        if "glossary" in body:
+            gl = str(body.get("glossary") or "").replace("\r\n", "\n").strip()
+            if len(gl) > 20000:
+                return JSONResponse({"ok": False, "code": "bad_glossary", "error": "詞庫太長（上限 20000 字）"}, status_code=400)
+            if gl:
+                s["glossary"] = gl
+            else:
+                s.pop("glossary", None)
         if "support_contact" in body:
             sc = str(body.get("support_contact") or "").strip()
             if len(sc) > 200 or any(c in sc for c in "\r\n\t<>"):
@@ -1354,6 +1386,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         write_config(cfg)
         if view_hash is not None and set_view_password:
             set_view_password(view_hash)
+        import asyncio
+        await asyncio.to_thread(glossary_sync, base_dir, s)      # 詞庫（r23）：存檔就寫好，下一場字幕生效
         return {"ok": True, "state": admin_state()}
 
     return queue

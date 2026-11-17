@@ -3190,6 +3190,78 @@ def _fw_is_cuda_error(e):
                                 "no kernel image", "invalid device function", "nvrtc", "compute capability"))
 
 
+# ── 詞庫（r23，group/glossary.py）：專有名詞的辨識提示、聽錯修正、指定譯法 ─────────────
+_PCG_GLOSS = [None]
+_PCG_GLOSS_HOTWORDS_OK = [True]      # 這一版 faster-whisper 認不認得 hotwords（舊版不認得就不帶）
+
+
+def _pcg_gloss():
+    """IT 設定的詞庫（group_data/glossary.txt，WebUI 在開始字幕、處理錄音前寫好）；沒有就是空的"""
+    if _PCG_GLOSS[0] is None:
+        try:
+            from group import glossary as _g
+            _PCG_GLOSS[0] = _g.load(os.path.join(SCRIPT_DIR, "group_data", "glossary.txt"))
+        except Exception:
+            _PCG_GLOSS[0] = ()
+    return _PCG_GLOSS[0]
+
+
+def _pcg_gloss_fix(text):
+    """辨識結果裡「常被聽錯的寫法」換回正確的詞"""
+    g = _pcg_gloss()
+    return g.fix(text) if g and text else text
+
+
+def _pcg_gloss_segments(segs):
+    """faster-whisper 的每一段：修正聽錯的寫法；整段只有詞庫的詞（提示詞被照抄）就丟掉"""
+    g = _pcg_gloss()
+    if not g:
+        yield from segs
+        return
+    import dataclasses
+    for seg in segs:
+        text = getattr(seg, "text", None)
+        if isinstance(text, str):
+            fixed = g.fix(text)
+            if g.only_terms(fixed):
+                continue
+            if fixed != text:
+                try:
+                    seg = dataclasses.replace(seg, text=fixed)
+                except TypeError:
+                    try:
+                        seg = seg._replace(text=fixed)
+                    except AttributeError:
+                        pass
+        yield seg
+
+
+def _pcg_gloss_tgt(direction):
+    """翻譯方向（en2zh、zh2id、nan2en…）→ 目標語言"""
+    d = str(direction or "")
+    return d.rsplit("2", 1)[-1] if "2" in d else "zh"
+
+
+def _pcg_gloss_prompt(text, direction):
+    """給大模型的詞庫提示（只列這句話裡出現的詞）；沒有就是空字串"""
+    g = _pcg_gloss()
+    if not g or not text:
+        return ""
+    pairs, keep = g.terms_for(text, _pcg_gloss_tgt(direction))
+    out = ""
+    if pairs:
+        out += "專有名詞對照（一定要照這樣翻，不要改寫）：" + "；".join(f"{a} → {b}" for a, b in pairs[:20]) + "\n"
+    if keep:
+        out += "下列名稱保留原樣，不要翻譯、不要改大小寫：" + "、".join(keep[:30]) + "\n"
+    return out + "\n" if out else ""
+
+
+def _pcg_gloss_sub(text, direction):
+    """本機翻譯（M2M100 不能下指令）：翻譯前先把詞換成指定的寫法"""
+    g = _pcg_gloss()
+    return g.substitute(text, _pcg_gloss_tgt(direction)) if g and text else text
+
+
 class _FwModel:
     """faster-whisper 的 WhisperModel，顯示卡出錯時自動改用 CPU（2026-10-05）。
 
@@ -3238,6 +3310,21 @@ class _FwModel:
             self._m = self._cls(self._path, **self._kw)
 
     def transcribe(self, *args, **kwargs):
+        """集團版詞庫（r23）：指定了語言的辨識帶上提示詞（hotwords），結果修正聽錯的寫法"""
+        g = _pcg_gloss()
+        if (g and _PCG_GLOSS_HOTWORDS_OK[0] and kwargs.get("language")
+                and "hotwords" not in kwargs and not kwargs.get("prefix")):
+            try:
+                segs, info = self._transcribe(*args, **dict(kwargs, hotwords=g.hotwords()))
+                return _pcg_gloss_segments(segs), info
+            except TypeError as e:
+                if "hotwords" not in str(e):
+                    raise
+                _PCG_GLOSS_HOTWORDS_OK[0] = False         # 舊版 faster-whisper：不帶提示詞，照常辨識
+        segs, info = self._transcribe(*args, **kwargs)
+        return (_pcg_gloss_segments(segs) if g and kwargs.get("language") else segs), info
+
+    def _transcribe(self, *args, **kwargs):
         if self._kw.get("device") != "cuda":
             return self._m.transcribe(*args, **kwargs)
         try:
@@ -5574,7 +5661,7 @@ class OllamaTranslator:
                      # 台語辨識結果本身就是漢字，翻英文與中翻英同一條路徑
                      "nan2en": self._build_prompt_zh2en}
         builder = _dispatch.get(self.direction) or self._xl_builder() or self._build_prompt_en2zh
-        return builder(text, context)
+        return _pcg_gloss_prompt(text, self.direction) + builder(text, context)   # 集團版詞庫（r23）
 
     def _build_prompt_en2zh(self, text, context):
         prompt = (
@@ -6251,6 +6338,7 @@ class NllbTranslator:
         if not text:
             return ""
         import re
+        text = _pcg_gloss_sub(text, self.direction)        # 集團版詞庫（r23）：先把專有名詞換成指定的寫法
         sentences = re.split(r'(?<=[.!?,;。！？，；])\s*', text)
         translated_parts = []
         max_chars = 80
@@ -6346,12 +6434,22 @@ class M2M100Translator(NllbTranslator):
         return {L: self.sp.Decode(r.hypotheses[0][1:]) for L, r in zip(tgts, results)}
 
     def translate_multi(self, text, tgts):
-        """text 翻成 tgts（語言代碼，例如 ["vi", "hi"]）→ {語言: 譯文}。斷句、重複偵測、簡轉繁同 translate()"""
-        import re
+        """text 翻成 tgts（語言代碼，例如 ["vi", "hi"]）→ {語言: 譯文}。斷句、重複偵測、簡轉繁同 translate()。
+        集團版詞庫（r23）：專有名詞先換成指定的寫法；翻成中文跟翻成其他語言換法不同時分開翻"""
         text = (text or "").strip()
         tgts = [L for L in tgts if L in self._LANG_MAP]
         if not text or not tgts:
             return {}
+        groups = {}
+        for L in tgts:
+            groups.setdefault(_pcg_gloss_sub(text, f"x2{L}"), []).append(L)
+        out = {}
+        for sub_text, ls in groups.items():
+            out.update(self._translate_multi_plain(sub_text, ls))
+        return out
+
+    def _translate_multi_plain(self, text, tgts):
+        import re
         chunks, buf = [], ""
         for sent in re.split(r'(?<=[.!?,;。！？，；])\s*', text):
             if buf and len(buf) + len(sent) > 80:
@@ -7653,7 +7751,10 @@ def _remote_whisper_transcribe_bytes(rw_cfg, wav_bytes, model, language, timeout
     if data.get("rejected"):
         raise _AudioRejected(data.get("language") or reject_lang)
     segments = data.get("segments", [])
-    full_text = data.get("text", "").strip()
+    full_text = _pcg_gloss_fix(data.get("text", "").strip())       # 集團版詞庫（r23）：修正聽錯的寫法
+    for _seg in segments:
+        if isinstance(_seg, dict) and isinstance(_seg.get("text"), str):
+            _seg["text"] = _pcg_gloss_fix(_seg["text"])
     proc_time = data.get("processing_time", 0)
     return segments, full_text, proc_time
 
@@ -9442,7 +9543,7 @@ def run_stream_moonshine(capture_id: int, translator, moonshine_model_name: str,
             if pause_event.is_set():
                 return  # 暫停中，不處理
             nonlocal last_translated
-            text = event.line.text.strip()
+            text = _pcg_gloss_fix(event.line.text.strip())       # 集團版詞庫（r23）：修正聽錯的寫法
             if not text or text == last_translated:
                 return
 

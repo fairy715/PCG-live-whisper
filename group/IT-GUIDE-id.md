@@ -176,6 +176,31 @@ Saat subtitle langsung dan rekaman diproses di CPU komputer karyawan (mode lokal
   - `PCG_CPU_THREADS=8`: jumlah total thread (misalnya PC desktop kuat yang ingin berjalan penuh)
   - `PCG_NORMAL_PRIORITY=1`: kembali ke prioritas normal
 
+### Glosarium (nama dan istilah, r23)
+
+Nama perusahaan, lokasi pabrik, nama sistem, dan nama orang sering salah dengar atau salah terjemah oleh model umum. Setelah "**Glosarium**" di halaman Pengaturan IT diisi:
+
+| Tahap | Yang dilakukan | Berlaku di mana |
+|---|---|---|
+| Pengenalan suara | Istilah glosarium diberikan ke Whisper sebagai petunjuk, sehingga bunyi yang mirip lebih memilih istilah ini | Bahasa Mandarin, Indonesia, Vietnam, dll. yang dikenali di komputer staf (Whisper). Subtitle bahasa Inggris (Moonshine) dan pengenalan di server GPU tidak memakai petunjuk |
+| Setelah pengenalan | Ejaan yang didaftarkan sebagai "sering salah dengar" dikembalikan ke istilah yang benar | Semua (termasuk subtitle bahasa Inggris dan server GPU) |
+| Terjemahan | Mode server: model besar diminta memakai terjemahan yang ditentukan dan membiarkan istilah tanpa terjemahan apa adanya. Mode lokal (M2M100): istilah diganti dengan terjemahan yang ditentukan sebelum diterjemahkan | Paling andal di mode server; di mode lokal biasanya berhasil, tidak dijamin |
+
+Format: satu istilah per baris. Setelah "`=`" terjemahan yang diwajibkan (opsional), setelah "`|`" ejaan yang sering salah dengar; menempel dari Excel juga bisa (tiga kolom: istilah, terjemahan, ejaan salah dengar).
+
+```
+寶成 | 寶城 | 保成 = Pou Chen
+MES
+Sukabumi | Suka Bumi
+# baris yang diawali # adalah komentar
+```
+
+- Berlaku mulai subtitle atau rekaman **berikutnya** setelah disimpan; maksimal 500 istilah dan 20000 karakter. Hanya 60 istilah pertama yang diberikan ke Whisper sebagai petunjuk (lebih banyak justru memperburuk), jadi **taruh istilah penting di depan**
+- **Dipakai semua komputer**: taruh `glossary.txt` (UTF-8) dengan format yang sama di folder bersama perusahaan yang diatur di "Pembaruan"; setiap komputer membacanya saat subtitle atau rekaman dimulai, dan memakai salinan terakhir jika folder tidak terjangkau. Untuk istilah yang sama, isian di komputer ini didahulukan
+- Istilah bahasa Inggris 3 huruf atau kurang (misalnya ME) harus sama persis huruf besar/kecilnya, agar "me" biasa tidak dianggap istilah
+- Petunjuk hanya menaikkan peluang, bukan jaminan: untuk istilah yang masih salah dengar, menambahkan ejaan salahnya setelah "`|`" adalah cara paling pasti
+- Glosarium disimpan di `config.json` komputer ini (`pcg_simple.glossary`) dan ikut dalam file diagnostik "Laporkan masalah"
+
 ### Manajemen model (paket model, mulai r15)
 
 Penginstal utama hanya berisi yang dasar (Whisper small, M2M100, Moonshine untuk bahasa Inggris); model lain dibuat sebagai **paket model**, dipasang di "Model" pada halaman pengaturan IT:

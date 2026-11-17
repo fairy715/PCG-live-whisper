@@ -178,6 +178,31 @@ Khi phụ đề trực tiếp và bản ghi âm chạy trên CPU của máy nhâ
   - `PCG_CPU_THREADS=8`: tổng số luồng (ví dụ máy bàn mạnh muốn chạy hết tốc độ)
   - `PCG_NORMAL_PRIORITY=1`: trở về mức ưu tiên bình thường
 
+### Bảng thuật ngữ (tên riêng và thuật ngữ, r23)
+
+Tên công ty, nhà máy, tên hệ thống và tên người thường bị các mô hình chung nghe sai hoặc dịch sai. Sau khi điền "**Glossary**" trong trang cài đặt IT:
+
+| Giai đoạn | Việc được làm | Có hiệu lực ở đâu |
+|---|---|---|
+| Nhận dạng | Các thuật ngữ được đưa cho Whisper làm gợi ý, âm gần giống sẽ ưu tiên chọn các từ này | Tiếng Trung, Indonesia, Việt… nhận dạng trên máy nhân viên (Whisper). Phụ đề tiếng Anh (Moonshine) và nhận dạng trên máy chủ GPU không dùng gợi ý |
+| Sau nhận dạng | Các cách viết ghi là "hay bị nghe sai" được đổi lại thành từ đúng | Tất cả (kể cả phụ đề tiếng Anh và máy chủ GPU) |
+| Dịch | Chế độ máy chủ: yêu cầu mô hình lớn dùng bản dịch đã chỉ định và giữ nguyên các từ không có bản dịch. Chế độ cục bộ (M2M100): thay thuật ngữ bằng bản dịch đã chỉ định trước khi dịch | Đáng tin cậy nhất ở chế độ máy chủ; ở chế độ cục bộ thường có hiệu lực, không bảo đảm |
+
+Định dạng: mỗi dòng một thuật ngữ. Sau "`=`" là bản dịch bắt buộc (tùy chọn), sau "`|`" là các cách viết hay bị nghe sai; dán từ Excel cũng được (ba cột: thuật ngữ, bản dịch, cách viết nghe sai).
+
+```
+寶成 | 寶城 | 保成 = Pou Chen
+MES
+Sukabumi | Suka Bumi
+# dòng bắt đầu bằng # là ghi chú
+```
+
+- Có hiệu lực từ phụ đề hoặc bản ghi **kế tiếp** sau khi lưu; tối đa 500 thuật ngữ và 20000 ký tự. Chỉ 60 thuật ngữ đầu được đưa cho Whisper làm gợi ý (nhiều hơn sẽ kém đi), nên **đặt thuật ngữ quan trọng lên trước**
+- **Dùng chung cho mọi máy**: đặt tệp `glossary.txt` (UTF-8) cùng định dạng vào thư mục dùng chung của công ty đã cài ở phần "Updates"; mỗi máy đọc khi bắt đầu phụ đề hoặc xử lý bản ghi, không kết nối được thì dùng bản đọc lần trước. Cùng một thuật ngữ thì mục điền trên máy này được ưu tiên
+- Thuật ngữ tiếng Anh từ 3 chữ cái trở xuống (ví dụ ME) phải khớp đúng chữ hoa/thường, để chữ "me" thông thường không bị coi là thuật ngữ
+- Gợi ý chỉ tăng khả năng, không bảo đảm: với từ vẫn bị nghe sai, thêm cách viết sai sau "`|`" là cách chắc chắn nhất
+- Bảng thuật ngữ được lưu trong `config.json` của máy này (`pcg_simple.glossary`) và có trong tệp chẩn đoán "Report a problem"
+
 ### Quản lý mô hình (gói mô hình, từ r15)
 
 Bộ cài chính chỉ có phần cơ bản (Whisper small, M2M100, Moonshine cho tiếng Anh); các mô hình khác là **gói mô hình**, cài ở "Models" trên trang cài đặt IT:

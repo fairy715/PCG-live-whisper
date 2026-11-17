@@ -176,6 +176,31 @@ When live subtitles and recordings run on the staff computer's CPU (local mode, 
   - `PCG_CPU_THREADS=8`: total number of threads (e.g. a powerful desktop that should run at full speed)
   - `PCG_NORMAL_PRIORITY=1`: back to normal priority
 
+### Glossary (names and terms, r23)
+
+Company names, sites, system names and people are often misheard or mistranslated by general models. After you fill in "**Glossary**" on the IT settings page:
+
+| Stage | What happens | Where it works |
+|---|---|---|
+| Recognition | Glossary terms are given to Whisper as hints, so similar sounds prefer these terms | Chinese, Indonesian, Vietnamese etc. recognized on the staff computer (Whisper). English subtitles (Moonshine) and GPU-server recognition do not take hints |
+| After recognition | Spellings listed as "often misheard" are changed back to the correct term | Everywhere (including English subtitles and the GPU server) |
+| Translation | Server mode: the large model is told to use the required translation and to keep terms without one unchanged. Local mode (M2M100): terms are replaced with the required translation before translating | Most reliable in server mode; usually works in local mode, not guaranteed |
+
+Format: one term per line. After "`=`" the required translation (optional), after "`|`" spellings it is often misheard as; pasting from Excel also works (three columns: term, translation, misheard spellings).
+
+```
+寶成 | 寶城 | 保成 = Pou Chen
+MES
+Sukabumi | Suka Bumi
+# lines starting with # are comments
+```
+
+- Applies from the **next** subtitles or recording after saving; at most 500 terms and 20000 characters. Only the first 60 terms are given to Whisper as hints (more makes it worse), so **put important terms first**
+- **Shared by all computers**: put a `glossary.txt` (UTF-8) in the same format in the company shared folder set under "Updates"; each computer reads it when subtitles or a recording start, and uses the last copy if the folder cannot be reached. For the same term, the entry on this computer wins
+- English terms of 3 letters or fewer (for example ME) must match upper/lower case exactly, so an ordinary "me" is not treated as a term
+- Hints raise the chance, they do not guarantee: for a term that is still misheard, adding the misheard spelling after "`|`" is the surest fix
+- The glossary is stored in this computer's `config.json` (`pcg_simple.glossary`) and is included in the "Report a problem" diagnostic file
+
 ### Model management (model packs, from r15)
 
 The main installer only contains the basics (Whisper small, M2M100, Moonshine for English); other models come as **model packs**, installed under "Models" on the IT settings page:

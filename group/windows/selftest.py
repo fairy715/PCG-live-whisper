@@ -245,6 +245,68 @@ def live_segment():
     return f"{n} 段 → {texts}"
 
 
+def _speak_16k(text):
+    """Windows 語音合成念一句英文 → 16 kHz 單聲道 float32"""
+    import subprocess
+    import tempfile
+    import wave
+    import numpy as np
+    sys.argv = [sys.argv[0]]
+    import translate_meeting as t
+    wav = os.path.join(tempfile.gettempdir(), "pcg_selftest_say.wav")
+    ps = ("Add-Type -AssemblyName System.Speech; $s = New-Object System.Speech.Synthesis.SpeechSynthesizer; "
+          f"$s.SetOutputToWaveFile('{wav}'); $s.Speak('{text}'); $s.Dispose()")
+    subprocess.run(["powershell", "-NoProfile", "-Command", ps], check=True, timeout=120,
+                   creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+    with wave.open(wav, "rb") as w:
+        sr, ch, raw = w.getframerate(), w.getnchannels(), w.readframes(w.getnframes())
+    os.unlink(wav)
+    audio = np.frombuffer(raw, dtype=np.int16).astype(np.float32) / 32768.0
+    if ch > 1:
+        audio = audio.reshape(-1, ch).mean(axis=1)
+    return t._pcg_to_16k(audio, sr)
+
+
+def glossary_check():
+    """r23 詞庫：真的用 small 模型辨識一句有專有名詞的話，比較有沒有帶提示詞；一般的句子不可以被塞進詞庫的詞；
+    聽錯的寫法會換回來；本機翻譯（M2M100）翻譯前換成指定譯法。詞是測試用的假詞，不是公司的詞庫"""
+    sys.argv = [sys.argv[0]]
+    import translate_meeting as t
+    from group import glossary as g
+    terms = ["Sukabumi", "Serang", "IPQC", "MES", "Kanban"]
+    gl = g.Glossary(g.parse("\n".join(terms) + "\n寶成 | 寶城 = Pou Chen\n"))
+    saved = t._PCG_GLOSS[0]
+    model = t._FwModel("small", device="cpu", compute_type="int8", cpu_threads=t._pcg_cpu_threads()[0])
+
+    def run(audio):
+        segs, _ = model.transcribe(audio, language="en", beam_size=5)
+        return " ".join(x.text.strip() for x in segs)
+
+    def hits(text):
+        return sum(1 for w in terms if w.lower() in text.lower())
+    try:
+        a = _speak_16k("The I P Q C and M E S reports from Sukabumi and Serang are on the Kanban board.")
+        b = _speak_16k("We will check the inventory tomorrow morning.")
+        t._PCG_GLOSS[0] = ()
+        plain = run(a)
+        t._PCG_GLOSS[0] = gl
+        hinted, other = run(a), run(b)
+        if not t._PCG_GLOSS_HOTWORDS_OK[0]:
+            raise RuntimeError("這一版 faster-whisper 不認得 hotwords，提示詞沒有用到")
+        if hits(hinted) < hits(plain):
+            raise RuntimeError(f"帶了提示詞反而比較差：沒帶「{plain}」，有帶「{hinted}」")
+        if hits(other) or "inventory" not in other.lower():
+            raise RuntimeError(f"一般的句子被提示詞影響：「{other}」")
+        if t._pcg_gloss_fix("我們在寶城開會") != "我們在寶成開會":
+            raise RuntimeError("聽錯的寫法沒有換回來")
+        m2m = t.M2M100Translator("zh2id").translate("寶成的 MES 系統明天上線。")
+        note = "" if ("Pou Chen" in m2m and "MES" in m2m) else "（[注意] 本機翻譯沒有照詞庫）"
+        return (f"提示詞 {hits(plain)}→{hits(hinted)}/{len(terms)} 個詞｜沒帶：{plain}｜有帶：{hinted}｜"
+                f"本機翻譯：{m2m}{note}")
+    finally:
+        t._PCG_GLOSS[0] = saved
+
+
 def main():
     for stream in (sys.stdout, sys.stderr):          # 非中文版 Windows 的命令列印中文會當掉
         try:
@@ -265,6 +327,7 @@ def main():
         check("回報問題的診斷檔", report)
         check("多語字幕（同時翻成四種語言）", multilang)
         check("即時字幕依停頓切句（VAD）", live_segment)
+        check("詞庫（提示詞、聽錯修正、指定譯法）", glossary_check)
     print("結果：" + ("全部通過" if ok else "有項目沒通過"))
     sys.exit(0 if ok else 1)
 

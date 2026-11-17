@@ -19,7 +19,7 @@ header{display:flex;justify-content:space-between;align-items:flex-start;gap:12p
 h1{font-size:22px;margin:0}
 .sub{color:var(--dim);font-size:14px}
 .ver{color:var(--dim);font-size:12px;cursor:copy;user-select:all}
-select,input[type=text],input[type=password],input[type=number]{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
+select,input[type=text],input[type=password],input[type=number],textarea{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;width:100%}
 header select{width:auto;background:var(--card);padding:6px 8px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:16px}
 .card h2{font-size:17px;margin:0 0 12px}
@@ -140,6 +140,14 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
     </div>
 
     <div class="card">
+      <h2 data-t="gl_title"></h2>
+      <p class="note" data-t="gl_note"></p>
+      <label class="f"><span data-t="gl_label"></span>
+        <textarea id="glossary" rows="8" spellcheck="false" maxlength="20000" data-t-ph="gl_ph" style="font-family:ui-monospace,Consolas,monospace;font-size:14px;line-height:1.5;resize:vertical"></textarea></label>
+      <p class="note" id="glInfo"></p>
+    </div>
+
+    <div class="card">
       <h2 data-t="upd_title"></h2>
       <label class="check"><input type="checkbox" id="updCheck"><span data-t="upd_check"></span></label>
       <label class="f"><span data-t="upd_who"></span>
@@ -186,6 +194,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
 <script>
 const I18N={
 zh:{multi_lang:"多語字幕：看字幕的人可以選自己的語言",multi_lang_note:"分享出去的字幕（QR Code）或這台的字幕畫面選了中文、印尼文、越南文、印地語、英文，而這一句沒有那種語言時，這台會另外翻一份。語音辨識不會增加，只多翻譯：本機模式在這台的 CPU（有 NVIDIA 加速包就用顯示卡），伺服器模式在大模型伺服器。沒人選的語言不翻；電腦較弱時可以關掉。改了之後，下一場字幕開始生效。",
+  gl_title:"詞庫（專有名詞）",gl_note:"公司名、廠區、系統名稱、人名這些詞，辨識時會當提示、翻譯時照指定的寫法。一行一個詞；「=」後面是指定譯法（選填），「|」後面是常被聽錯的寫法（會自動換回來）。存檔後下一場字幕或錄音生效。",gl_label:"詞庫（一行一個詞）",gl_ph:"寶成 | 寶城 | 保成 = Pou Chen\nMES\nSukabumi | Suka Bumi",gl_info:"這台 {n} 個詞",gl_info_share:"，公司共用資料夾的 glossary.txt {m} 個詞（所有電腦共用；上次讀到的）",gl_info_tip:"。要讓所有電腦共用：把同樣格式的 glossary.txt 放在「更新」的公司共用資料夾。",bad_glossary:"詞庫太長（上限 20000 字）",
   sup_title:"問題回報",sup_contact:"同仁回報問題時寄給誰（信箱或 Teams 群組，選填）",sup_contact_ph:"例如 it-helpdesk@pcg.com.tw",sup_note:"同仁頁面下方有「回報問題」：寫下發生什麼事、按一下就下載診斷檔（版本、電腦規格、遮掉金鑰與密碼的設定、最近的程式記錄；不含錄音、逐字稿和會議紀錄）。這裡填的聯絡方式會顯示給同仁；填信箱時會多一個「寫信給 IT」按鈕。",sup_make:"產生這台電腦的診斷檔",sup_making:"正在產生…",sup_done:"已下載 {n}",sup_failed:"沒有產生診斷檔：{e}",bad_contact:"聯絡方式格式不正確",
   title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式、設定伺服器位址。存檔後立即生效，同仁電腦不用重裝。',
   it_password:'IT 密碼',it_password_again:'再輸入一次',login:'登入',set_pw_title:'設定 IT 密碼',set_pw_note:'第一次使用，請設定 IT 密碼（至少 6 個字）。之後進入這一頁都要輸入。同仁不需要知道這組密碼。',
@@ -234,6 +243,7 @@ zh:{multi_lang:"多語字幕：看字幕的人可以選自己的語言",multi_la
   bad_share:'共用資料夾路徑格式不正確',
   need_llm:'伺服器模式要填大模型的網址',bad_host:'位址格式不正確',bad_key:'API 金鑰格式不正確',error:'發生錯誤'},
 en:{multi_lang:"Multi-language subtitles: viewers can choose their own language",multi_lang_note:"When someone viewing shared subtitles (QR code) or this computer's subtitle screen chooses Chinese, Indonesian, Vietnamese, Hindi or English and a sentence is not in that language, this computer translates one more copy. Speech recognition does not increase, only translation: on this computer's CPU in local mode (the graphics card with the NVIDIA pack), or on the LLM server in server mode. Languages nobody chose are not translated; turn it off on slow computers. Takes effect from the next subtitle session.",
+  gl_title:"Glossary (names and terms)",gl_note:"Company names, sites, system names and people: used as hints during recognition and translated the way you specify. One term per line; after “=” the required translation (optional), after “|” spellings it is often misheard as (changed back automatically). Applies from the next subtitles or recording after saving.",gl_label:"Glossary (one term per line)",gl_ph:"寶成 | 寶城 | 保成 = Pou Chen\nMES\nSukabumi | Suka Bumi",gl_info:"{n} terms on this computer",gl_info_share:", {m} terms from glossary.txt in the company shared folder (shared by all computers; as last read)",gl_info_tip:". To share with all computers: put a glossary.txt in the same format in the shared folder under “Updates”.",bad_glossary:"The glossary is too long (20000 characters at most)",
   sup_title:"Problem reports",sup_contact:"Where staff send problem reports (email or Teams group, optional)",sup_contact_ph:"e.g. it-helpdesk@example.com",sup_note:"The staff page has “Report a problem” at the bottom: staff describe what happened and download a diagnostic file with one click (version, computer specs, settings with keys and passwords removed, recent program logs; no recordings, transcripts or minutes). The contact entered here is shown to staff; an email address also adds an “Email IT” button.",sup_make:"Create a diagnostic file for this computer",sup_making:"Creating…",sup_done:"Downloaded {n}",sup_failed:"The diagnostic file was not created: {e}",bad_contact:"The contact is not valid",
   title:'PCG Meeting Translator: IT settings',tagline:'Switch between local and server mode and set server addresses. Changes take effect immediately; no reinstall needed.',
   it_password:'IT password',it_password_again:'Enter it again',login:'Sign in',set_pw_title:'Set the IT password',set_pw_note:'First use: set an IT password (at least 6 characters). It will be required to open this page. Staff do not need it.',
@@ -282,6 +292,7 @@ en:{multi_lang:"Multi-language subtitles: viewers can choose their own language"
   bad_share:'Invalid shared folder path',
   need_llm:'Server mode needs the LLM URL',bad_host:'Invalid address',bad_key:'Invalid API key',error:'Something went wrong'},
 id:{multi_lang:"Subtitle multibahasa: penonton bisa memilih bahasanya sendiri",multi_lang_note:"Jika seseorang yang menonton subtitle yang dibagikan (kode QR) atau layar subtitle di komputer ini memilih Mandarin, Indonesia, Vietnam, Hindi, atau Inggris dan sebuah kalimat tidak dalam bahasa itu, komputer ini menerjemahkan satu salinan lagi. Pengenalan suara tidak bertambah, hanya terjemahan: di CPU komputer ini pada mode lokal (kartu grafis jika ada paket NVIDIA), atau di server LLM pada mode server. Bahasa yang tidak dipilih siapa pun tidak diterjemahkan; matikan di komputer yang lambat. Berlaku mulai sesi subtitle berikutnya.",
+  gl_title:"Glosarium (nama dan istilah)",gl_note:"Nama perusahaan, lokasi pabrik, nama sistem, dan nama orang: dipakai sebagai petunjuk saat pengenalan suara dan diterjemahkan sesuai yang Anda tentukan. Satu istilah per baris; setelah “=” terjemahan yang diwajibkan (opsional), setelah “|” ejaan yang sering salah dengar (otomatis dikembalikan). Berlaku mulai subtitle atau rekaman berikutnya setelah disimpan.",gl_label:"Glosarium (satu istilah per baris)",gl_ph:"寶成 | 寶城 | 保成 = Pou Chen\nMES\nSukabumi | Suka Bumi",gl_info:"{n} istilah di komputer ini",gl_info_share:", {m} istilah dari glossary.txt di folder bersama perusahaan (dipakai semua komputer; hasil baca terakhir)",gl_info_tip:". Agar dipakai semua komputer: taruh glossary.txt dengan format yang sama di folder bersama pada bagian “Pembaruan”.",bad_glossary:"Glosarium terlalu panjang (maksimal 20000 karakter)",
   sup_title:"Laporan masalah",sup_contact:"Ke mana karyawan mengirim laporan masalah (email atau grup Teams, opsional)",sup_contact_ph:"mis. it-helpdesk@contoh.com",sup_note:"Halaman karyawan punya “Laporkan masalah” di bagian bawah: karyawan menulis apa yang terjadi dan mengunduh file diagnostik dengan satu klik (versi, spesifikasi komputer, pengaturan tanpa kunci dan kata sandi, log program terbaru; tanpa rekaman, transkrip, atau notulen). Kontak yang diisi di sini ditampilkan ke karyawan; alamat email juga menambahkan tombol “Email IT”.",sup_make:"Buat file diagnostik komputer ini",sup_making:"Sedang membuat…",sup_done:"{n} sudah diunduh",sup_failed:"File diagnostik tidak dibuat: {e}",bad_contact:"Kontak tidak valid",
   title:'Penerjemah Rapat PCG: Pengaturan IT',tagline:'Beralih antara mode lokal dan mode server serta atur alamat server. Perubahan langsung berlaku; tidak perlu memasang ulang.',
   it_password:'Kata sandi IT',it_password_again:'Masukkan sekali lagi',login:'Masuk',set_pw_title:'Buat kata sandi IT',set_pw_note:'Pertama kali: buat kata sandi IT (minimal 6 karakter). Kata sandi ini diperlukan untuk membuka halaman ini. Karyawan tidak memerlukannya.',
@@ -341,6 +352,7 @@ function applyLang(){
   $('loginTitle').textContent=t(firstTime?'set_pw_title':'login_title');$('loginNote').textContent=t(firstTime?'set_pw_note':'login_note');
   $('loginBtn').textContent=t(firstTime?'set_pw_btn':'login');
   $('staffPwLabel').textContent=t(state&&state.staff_password_set?'staff_pw_set':'staff_pw');
+  if(state)glInfo();
   styleVis();
 }
 $('langSel').value=lang;$('langSel').onchange=()=>{lang=$('langSel').value;applyLang();if(typeof renderModels==='function')renderModels();if(state&&!$('rsBtn').disabled)rsShow()};
@@ -405,6 +417,7 @@ function showMain(){
   $('llmModel').value=state.llm_model||'';$('sumModel').value=state.summary_model||'';
   $('asrModel').value=state.asr_model||'large-v3-turbo';
   fillLocalModels();
+  $('glossary').value=state.glossary||'';
   $('updCheck').checked=state.update_check!==false;$('updWho').value=state.update_who||'staff';$('updShare').value=state.update_share||'';$('supContact').value=state.support_contact||'';
   $('diarize').checked=!!state.diarize;$('remoteView').checked=!!state.allow_remote_view;$('multiLang').checked=state.multi_lang!==false;$('clearStaffWrap').hidden=!state.staff_password_set;
   modeVis();applyLang();loadModels();
@@ -421,6 +434,10 @@ function fillLocalModels(){
     $(id).innerHTML=opts.map(([v,n])=>`<option value="${escH(v)}">${escH(n)}</option>`).join('');$(id).value=cur;
   }
   liveAutoNote();
+}
+function glInfo(){
+  const gi=state.glossary_info||{};
+  $('glInfo').textContent=t('gl_info',{n:gi.local||0})+(gi.share?t('gl_info_share',{m:gi.share}):'')+t('gl_info_tip');
 }
 function liveAutoNote(){
   const packs=((models&&models.installed)||[]).filter(p=>p.type==='asr'&&p.multilingual);
@@ -475,7 +492,7 @@ $('pMain').onsubmit=async e=>{
     llm_model:$('llmModel').value,summary_model:$('sumModel').value,asr_model:$('asrModel').value,
     local_live_model:$('liveModel').value,local_file_model:$('fileModel').value,diarize:$('diarize').checked,allow_remote_view:$('remoteView').checked,multi_lang:$('multiLang').checked,
     staff_password:$('staffPw').value,clear_staff_password:$('clearStaff').checked,
-    update_check:$('updCheck').checked,update_who:$('updWho').value,update_share:$('updShare').value,support_contact:$('supContact').value});
+    glossary:$('glossary').value,update_check:$('updCheck').checked,update_who:$('updWho').value,update_share:$('updShare').value,support_contact:$('supContact').value});
   const r=$('saveRes');r.hidden=false;r.className='res '+(j.ok?'ok':'err');r.textContent=j.ok?t('saved'):errMsg(j);
   if(j.ok){state=j.state;rsShow();$('staffPw').value='';$('clearStaff').checked=false;$('clearStaffWrap').hidden=!state.staff_password_set;
     $('llmKey').value='';$('clearKey').checked=false;$('clearKeyWrap').hidden=!state.llm_api_key_set;applyLang()}
