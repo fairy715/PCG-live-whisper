@@ -1,29 +1,29 @@
 {
  "_說明": "下一版發布時同仁頁面「有新版本」視窗顯示的新功能（每種語言 2～5 點，一點一句）。release 要等於這一次發布的 rN，發布流程才會附上；每次發布前更新這個檔",
- "release": "r23",
+ "release": "r24",
  "zh": [
-  "新功能「詞庫」：IT 填好公司名、廠區、系統名稱、人名，辨識比較不會聽錯，翻譯照指定的寫法",
-  "常被聽錯的寫法會自動換回正確的詞（例如把「寶城」換回「寶成」）",
-  "詞庫可以放在公司共用資料夾，所有電腦共用"
+  "新功能「聲音與麥克風」：開始字幕前可以先測試電腦的聲音和麥克風有沒有收到，也可以選要用哪一支麥克風",
+  "沒有字幕時先按「開始測試」，畫面會告訴你是喇叭還是麥克風的問題",
+  "IT 可以把語音辨識交給 API（OpenAI 或公司內部的辨識服務），辨識更準；連不上時自動改回這台電腦辨識"
  ],
  "en": [
-  "New: glossary. IT lists company names, sites, system names and people, so they are recognized more reliably and translated the way IT specifies",
-  "Spellings that are often misheard are changed back to the correct term automatically",
-  "The glossary can be kept in the company shared folder and used by all computers"
+  "New: “Sound and microphone”. Before starting subtitles you can test whether the computer's sound and the microphone are being received, and choose which microphone to use",
+  "No subtitles? Press “Start test” and the page tells you whether the speaker or the microphone is the problem",
+  "IT can send speech recognition to an API (OpenAI or a service inside the company) for better accuracy; if it cannot be reached, this computer recognizes instead"
  ],
  "id": [
-  "Baru: glosarium. IT mengisi nama perusahaan, lokasi pabrik, nama sistem, dan nama orang, sehingga lebih jarang salah dengar dan diterjemahkan sesuai yang ditentukan IT",
-  "Ejaan yang sering salah dengar otomatis dikembalikan ke istilah yang benar",
-  "Glosarium bisa ditaruh di folder bersama perusahaan dan dipakai semua komputer"
+  "Baru: “Suara dan mikrofon”. Sebelum memulai subtitle Anda bisa menguji apakah suara komputer dan mikrofon diterima, dan memilih mikrofon yang dipakai",
+  "Subtitle tidak muncul? Tekan “Mulai uji” dan halaman memberi tahu apakah masalahnya di speaker atau mikrofon",
+  "IT bisa menyerahkan pengenalan suara ke API (OpenAI atau layanan di dalam perusahaan) agar lebih akurat; jika tidak terjangkau, komputer ini yang mengenali"
  ],
  "vi": [
-  "Mới: bảng thuật ngữ. IT điền tên công ty, nhà máy, tên hệ thống và tên người để nhận dạng ít sai hơn và dịch đúng theo cách IT chỉ định",
-  "Các cách viết hay bị nghe sai được tự động đổi lại thành từ đúng",
-  "Bảng thuật ngữ có thể đặt trong thư mục dùng chung của công ty để mọi máy cùng dùng"
+  "Mới: “Âm thanh và micro”. Trước khi bắt đầu phụ đề, bạn có thể kiểm tra xem âm thanh của máy và micro có được nhận hay không, và chọn micro muốn dùng",
+  "Không có phụ đề? Bấm “Bắt đầu kiểm tra”, trang sẽ cho biết vấn đề nằm ở loa hay micro",
+  "IT có thể chuyển việc nhận dạng giọng nói cho API (OpenAI hoặc dịch vụ trong công ty) để chính xác hơn; khi không kết nối được, máy này sẽ tự nhận dạng"
  ],
  "hi": [
-  "नया: शब्दकोश। IT कंपनी, फ़ैक्टरी, सिस्टम और लोगों के नाम भरता है, जिससे पहचान में गलती कम होती है और अनुवाद IT के बताए अनुसार होता है",
-  "अक्सर गलत सुने जाने वाले रूप अपने आप सही शब्द में बदल जाते हैं",
-  "शब्दकोश कंपनी के साझा फ़ोल्डर में रखा जा सकता है और सभी कंप्यूटर उसे इस्तेमाल करते हैं"
+  "नया: “आवाज़ और माइक्रोफ़ोन”। सबटाइटल शुरू करने से पहले जाँच सकते हैं कि कंप्यूटर की आवाज़ और माइक्रोफ़ोन मिल रहे हैं या नहीं, और कौन-सा माइक्रोफ़ोन इस्तेमाल करना है यह चुन सकते हैं",
+  "सबटाइटल नहीं आ रहे? “जाँच शुरू करें” दबाएँ, पेज बताएगा कि समस्या स्पीकर में है या माइक्रोफ़ोन में",
+  "IT आवाज़ की पहचान API (OpenAI या कंपनी के अंदर की सेवा) को दे सकता है ताकि पहचान बेहतर हो; संपर्क न हो तो यही कंप्यूटर पहचान करता है"
  ]
 }
