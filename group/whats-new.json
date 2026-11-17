@@ -1,24 +1,29 @@
 {
  "_說明": "下一版發布時同仁頁面「有新版本」視窗顯示的新功能（每種語言 2～5 點，一點一句）。release 要等於這一次發布的 rN，發布流程才會附上；每次發布前更新這個檔",
- "release": "r22",
+ "release": "r23",
  "zh": [
-  "跟上原作者 jt-live-whisper 2.34.1：資安說明與連線設定同步（能不能讓手機連進來，照舊由 IT 設定頁決定）",
-  "說明文件與截圖更新到這一版"
+  "新功能「詞庫」：IT 填好公司名、廠區、系統名稱、人名，辨識比較不會聽錯，翻譯照指定的寫法",
+  "常被聽錯的寫法會自動換回正確的詞（例如把「寶城」換回「寶成」）",
+  "詞庫可以放在公司共用資料夾，所有電腦共用"
  ],
  "en": [
-  "Synced with the original jt-live-whisper 2.34.1: security notes and connection settings (whether phones can connect is still decided on the IT settings page)",
-  "Guides and screenshots updated to this version"
+  "New: glossary. IT lists company names, sites, system names and people, so they are recognized more reliably and translated the way IT specifies",
+  "Spellings that are often misheard are changed back to the correct term automatically",
+  "The glossary can be kept in the company shared folder and used by all computers"
  ],
  "id": [
-  "Disamakan dengan jt-live-whisper asli 2.34.1: catatan keamanan dan pengaturan koneksi (apakah ponsel boleh terhubung tetap diatur di halaman Pengaturan IT)",
-  "Panduan dan tangkapan layar diperbarui ke versi ini"
+  "Baru: glosarium. IT mengisi nama perusahaan, lokasi pabrik, nama sistem, dan nama orang, sehingga lebih jarang salah dengar dan diterjemahkan sesuai yang ditentukan IT",
+  "Ejaan yang sering salah dengar otomatis dikembalikan ke istilah yang benar",
+  "Glosarium bisa ditaruh di folder bersama perusahaan dan dipakai semua komputer"
  ],
  "vi": [
-  "Đồng bộ với jt-live-whisper gốc 2.34.1: ghi chú bảo mật và cài đặt kết nối (cho phép điện thoại kết nối hay không vẫn do trang cài đặt IT quyết định)",
-  "Hướng dẫn và ảnh chụp màn hình đã cập nhật theo phiên bản này"
+  "Mới: bảng thuật ngữ. IT điền tên công ty, nhà máy, tên hệ thống và tên người để nhận dạng ít sai hơn và dịch đúng theo cách IT chỉ định",
+  "Các cách viết hay bị nghe sai được tự động đổi lại thành từ đúng",
+  "Bảng thuật ngữ có thể đặt trong thư mục dùng chung của công ty để mọi máy cùng dùng"
  ],
  "hi": [
-  "मूल jt-live-whisper 2.34.1 के साथ मिलान: सुरक्षा नोट और कनेक्शन सेटिंग (फ़ोन कनेक्ट हो सकते हैं या नहीं, यह अब भी IT सेटिंग पेज तय करता है)",
-  "गाइड और स्क्रीनशॉट इस संस्करण के अनुसार अपडेट"
+  "नया: शब्दकोश। IT कंपनी, फ़ैक्टरी, सिस्टम और लोगों के नाम भरता है, जिससे पहचान में गलती कम होती है और अनुवाद IT के बताए अनुसार होता है",
+  "अक्सर गलत सुने जाने वाले रूप अपने आप सही शब्द में बदल जाते हैं",
+  "शब्दकोश कंपनी के साझा फ़ोल्डर में रखा जा सकता है और सभी कंप्यूटर उसे इस्तेमाल करते हैं"
  ]
 }
