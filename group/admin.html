@@ -140,6 +140,26 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
     </div>
 
     <div class="card">
+      <h2 data-t="asr_title"></h2>
+      <p class="note" data-t="asr_note"></p>
+      <label class="check"><input type="checkbox" id="asrOn"><span data-t="asr_on"></span></label>
+      <div id="asrBox">
+        <div class="chips"><button type="button" class="chip" data-asr="https://api.openai.com/v1">OpenAI</button></div>
+        <label class="f"><span data-t="asr_url"></span><input type="text" id="asrUrl" maxlength="300" placeholder="https://api.openai.com/v1"></label>
+        <div class="row" style="grid-template-columns:1fr 1fr">
+          <label class="f"><span data-t="asr_model"></span><input type="text" id="asrApiModel" maxlength="80" list="asrModels" placeholder="gpt-4o-transcribe"></label>
+          <label class="f"><span id="asrKeyLabel"></span><input type="password" id="asrKey" autocomplete="off" placeholder="sk-…"></label>
+        </div>
+        <datalist id="asrModels"><option value="gpt-4o-transcribe"><option value="gpt-4o-mini-transcribe"><option value="whisper-1"></datalist>
+        <label class="check" id="asrClearWrap" hidden><input type="checkbox" id="asrClear"><span data-t="asr_clear_key"></span></label>
+        <label class="check"><input type="checkbox" id="asrInternal"><span data-t="asr_internal"></span></label>
+        <div id="asrWarn" class="res warn" hidden data-t="asr_ext_warn"></div>
+        <div class="actions"><button class="btn ghost" id="asrTest" type="button" data-t="asr_test"></button></div>
+        <div id="asrRes" class="res" hidden></div>
+      </div>
+    </div>
+
+    <div class="card">
       <h2 data-t="gl_title"></h2>
       <p class="note" data-t="gl_note"></p>
       <label class="f"><span data-t="gl_label"></span>
@@ -194,6 +214,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
 <script>
 const I18N={
 zh:{multi_lang:"多語字幕：看字幕的人可以選自己的語言",multi_lang_note:"分享出去的字幕（QR Code）或這台的字幕畫面選了中文、印尼文、越南文、印地語、英文，而這一句沒有那種語言時，這台會另外翻一份。語音辨識不會增加，只多翻譯：本機模式在這台的 CPU（有 NVIDIA 加速包就用顯示卡），伺服器模式在大模型伺服器。沒人選的語言不翻；電腦較弱時可以關掉。改了之後，下一場字幕開始生效。",
+  asr_title:"語音辨識 API（選填）",asr_note:"把語音辨識交給 API（OpenAI 相容的 /audio/transcriptions）：OpenAI，或公司內部的辨識服務（例如 RTX Spark）。通常比這台電腦的小模型準，筆電也不用跑辨識。API 連不上或金鑰不對時，那一段會自動改回這台電腦辨識，字幕不會斷。開啟後優先於 GPU 伺服器。",asr_on:"語音辨識交給 API",asr_url:"API 網址（到 /v1 為止）",asr_model:"模型",asr_key:"金鑰（API key）",asr_key_set:"金鑰：已設定（要換才填）",asr_clear_key:"刪除已存的金鑰",asr_internal:"這是公司內部的服務（聲音不會送出公司）",asr_ext_warn:"注意：開啟後，會議的聲音會送到公司外部的服務，並依用量計費（每台開字幕的電腦各算一份）。請先確認符合公司資料規範；機密會議請關閉，或改用公司內部的服務。",asr_test:"測試連線",asr_testing:"測試中…",asr_ok:"連線成功：網址、金鑰、模型都可以用。",asr_fail:"連線失敗：{m}",asr_fail_401:"金鑰不對或沒有權限（{m}）",asr_fail_404:"網址或模型名稱不對（{m}）",bad_asr_url:"語音辨識 API 的網址格式不正確（例如 https://api.openai.com/v1）",asr_url_https:"外部的語音辨識服務要用 https 網址",bad_asr_model:"模型名稱格式不正確",bad_asr_key:"金鑰格式不正確",asr_key_required:"外部的語音辨識服務要填金鑰",
   gl_title:"詞庫（專有名詞）",gl_note:"公司名、廠區、系統名稱、人名這些詞，辨識時會當提示、翻譯時照指定的寫法。一行一個詞；「=」後面是指定譯法（選填），「|」後面是常被聽錯的寫法（會自動換回來）。存檔後下一場字幕或錄音生效。",gl_label:"詞庫（一行一個詞）",gl_ph:"寶成 | 寶城 | 保成 = Pou Chen\nMES\nSukabumi | Suka Bumi",gl_info:"這台 {n} 個詞",gl_info_share:"，公司共用資料夾的 glossary.txt {m} 個詞（所有電腦共用；上次讀到的）",gl_info_tip:"。要讓所有電腦共用：把同樣格式的 glossary.txt 放在「更新」的公司共用資料夾。",bad_glossary:"詞庫太長（上限 20000 字）",
   sup_title:"問題回報",sup_contact:"同仁回報問題時寄給誰（信箱或 Teams 群組，選填）",sup_contact_ph:"例如 it-helpdesk@pcg.com.tw",sup_note:"同仁頁面下方有「回報問題」：寫下發生什麼事、按一下就下載診斷檔（版本、電腦規格、遮掉金鑰與密碼的設定、最近的程式記錄；不含錄音、逐字稿和會議紀錄）。這裡填的聯絡方式會顯示給同仁；填信箱時會多一個「寫信給 IT」按鈕。",sup_make:"產生這台電腦的診斷檔",sup_making:"正在產生…",sup_done:"已下載 {n}",sup_failed:"沒有產生診斷檔：{e}",bad_contact:"聯絡方式格式不正確",
   title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式、設定伺服器位址。存檔後立即生效，同仁電腦不用重裝。',
@@ -243,6 +264,7 @@ zh:{multi_lang:"多語字幕：看字幕的人可以選自己的語言",multi_la
   bad_share:'共用資料夾路徑格式不正確',
   need_llm:'伺服器模式要填大模型的網址',bad_host:'位址格式不正確',bad_key:'API 金鑰格式不正確',error:'發生錯誤'},
 en:{multi_lang:"Multi-language subtitles: viewers can choose their own language",multi_lang_note:"When someone viewing shared subtitles (QR code) or this computer's subtitle screen chooses Chinese, Indonesian, Vietnamese, Hindi or English and a sentence is not in that language, this computer translates one more copy. Speech recognition does not increase, only translation: on this computer's CPU in local mode (the graphics card with the NVIDIA pack), or on the LLM server in server mode. Languages nobody chose are not translated; turn it off on slow computers. Takes effect from the next subtitle session.",
+  asr_title:"Speech recognition API (optional)",asr_note:"Send speech recognition to an API (OpenAI-compatible /audio/transcriptions): OpenAI, or a recognition service inside the company (for example RTX Spark). Usually more accurate than the small model on this computer, and the laptop no longer runs recognition. If the API cannot be reached or the key is wrong, that piece is recognized on this computer instead, so subtitles do not stop. When on, it takes priority over the GPU server.",asr_on:"Use an API for speech recognition",asr_url:"API address (up to /v1)",asr_model:"Model",asr_key:"API key",asr_key_set:"API key: set (fill in only to replace)",asr_clear_key:"Delete the saved key",asr_internal:"This is a service inside the company (audio does not leave the company)",asr_ext_warn:"Note: when on, meeting audio is sent to a service outside the company and billed by usage (each computer showing subtitles counts separately). Check that this meets company data rules; turn it off for confidential meetings or use an internal service.",asr_test:"Test connection",asr_testing:"Testing…",asr_ok:"Connected: the address, key and model work.",asr_fail:"Connection failed: {m}",asr_fail_401:"The key is wrong or has no permission ({m})",asr_fail_404:"The address or model name is wrong ({m})",bad_asr_url:"The speech API address is not valid (for example https://api.openai.com/v1)",asr_url_https:"An external speech service must use an https address",bad_asr_model:"The model name is not valid",bad_asr_key:"The key is not valid",asr_key_required:"An external speech service needs a key",
   gl_title:"Glossary (names and terms)",gl_note:"Company names, sites, system names and people: used as hints during recognition and translated the way you specify. One term per line; after “=” the required translation (optional), after “|” spellings it is often misheard as (changed back automatically). Applies from the next subtitles or recording after saving.",gl_label:"Glossary (one term per line)",gl_ph:"寶成 | 寶城 | 保成 = Pou Chen\nMES\nSukabumi | Suka Bumi",gl_info:"{n} terms on this computer",gl_info_share:", {m} terms from glossary.txt in the company shared folder (shared by all computers; as last read)",gl_info_tip:". To share with all computers: put a glossary.txt in the same format in the shared folder under “Updates”.",bad_glossary:"The glossary is too long (20000 characters at most)",
   sup_title:"Problem reports",sup_contact:"Where staff send problem reports (email or Teams group, optional)",sup_contact_ph:"e.g. it-helpdesk@example.com",sup_note:"The staff page has “Report a problem” at the bottom: staff describe what happened and download a diagnostic file with one click (version, computer specs, settings with keys and passwords removed, recent program logs; no recordings, transcripts or minutes). The contact entered here is shown to staff; an email address also adds an “Email IT” button.",sup_make:"Create a diagnostic file for this computer",sup_making:"Creating…",sup_done:"Downloaded {n}",sup_failed:"The diagnostic file was not created: {e}",bad_contact:"The contact is not valid",
   title:'PCG Meeting Translator: IT settings',tagline:'Switch between local and server mode and set server addresses. Changes take effect immediately; no reinstall needed.',
@@ -292,6 +314,7 @@ en:{multi_lang:"Multi-language subtitles: viewers can choose their own language"
   bad_share:'Invalid shared folder path',
   need_llm:'Server mode needs the LLM URL',bad_host:'Invalid address',bad_key:'Invalid API key',error:'Something went wrong'},
 id:{multi_lang:"Subtitle multibahasa: penonton bisa memilih bahasanya sendiri",multi_lang_note:"Jika seseorang yang menonton subtitle yang dibagikan (kode QR) atau layar subtitle di komputer ini memilih Mandarin, Indonesia, Vietnam, Hindi, atau Inggris dan sebuah kalimat tidak dalam bahasa itu, komputer ini menerjemahkan satu salinan lagi. Pengenalan suara tidak bertambah, hanya terjemahan: di CPU komputer ini pada mode lokal (kartu grafis jika ada paket NVIDIA), atau di server LLM pada mode server. Bahasa yang tidak dipilih siapa pun tidak diterjemahkan; matikan di komputer yang lambat. Berlaku mulai sesi subtitle berikutnya.",
+  asr_title:"API pengenalan suara (opsional)",asr_note:"Serahkan pengenalan suara ke API (/audio/transcriptions yang kompatibel dengan OpenAI): OpenAI, atau layanan pengenalan di dalam perusahaan (misalnya RTX Spark). Biasanya lebih akurat daripada model kecil di komputer ini, dan laptop tidak perlu menjalankan pengenalan. Jika API tidak terjangkau atau kuncinya salah, potongan itu dikenali di komputer ini, sehingga subtitle tidak berhenti. Jika aktif, didahulukan daripada server GPU.",asr_on:"Gunakan API untuk pengenalan suara",asr_url:"Alamat API (sampai /v1)",asr_model:"Model",asr_key:"Kunci API",asr_key_set:"Kunci API: sudah diatur (isi hanya untuk mengganti)",asr_clear_key:"Hapus kunci yang tersimpan",asr_internal:"Ini layanan di dalam perusahaan (suara tidak keluar dari perusahaan)",asr_ext_warn:"Perhatian: jika aktif, suara rapat dikirim ke layanan di luar perusahaan dan ditagih sesuai pemakaian (setiap komputer yang menampilkan subtitle dihitung sendiri). Pastikan sesuai aturan data perusahaan; matikan untuk rapat rahasia atau gunakan layanan internal.",asr_test:"Uji koneksi",asr_testing:"Menguji…",asr_ok:"Terhubung: alamat, kunci, dan model dapat dipakai.",asr_fail:"Koneksi gagal: {m}",asr_fail_401:"Kunci salah atau tidak punya izin ({m})",asr_fail_404:"Alamat atau nama model salah ({m})",bad_asr_url:"Alamat API pengenalan suara tidak valid (misalnya https://api.openai.com/v1)",asr_url_https:"Layanan pengenalan suara eksternal harus memakai alamat https",bad_asr_model:"Nama model tidak valid",bad_asr_key:"Kunci tidak valid",asr_key_required:"Layanan pengenalan suara eksternal memerlukan kunci",
   gl_title:"Glosarium (nama dan istilah)",gl_note:"Nama perusahaan, lokasi pabrik, nama sistem, dan nama orang: dipakai sebagai petunjuk saat pengenalan suara dan diterjemahkan sesuai yang Anda tentukan. Satu istilah per baris; setelah “=” terjemahan yang diwajibkan (opsional), setelah “|” ejaan yang sering salah dengar (otomatis dikembalikan). Berlaku mulai subtitle atau rekaman berikutnya setelah disimpan.",gl_label:"Glosarium (satu istilah per baris)",gl_ph:"寶成 | 寶城 | 保成 = Pou Chen\nMES\nSukabumi | Suka Bumi",gl_info:"{n} istilah di komputer ini",gl_info_share:", {m} istilah dari glossary.txt di folder bersama perusahaan (dipakai semua komputer; hasil baca terakhir)",gl_info_tip:". Agar dipakai semua komputer: taruh glossary.txt dengan format yang sama di folder bersama pada bagian “Pembaruan”.",bad_glossary:"Glosarium terlalu panjang (maksimal 20000 karakter)",
   sup_title:"Laporan masalah",sup_contact:"Ke mana karyawan mengirim laporan masalah (email atau grup Teams, opsional)",sup_contact_ph:"mis. it-helpdesk@contoh.com",sup_note:"Halaman karyawan punya “Laporkan masalah” di bagian bawah: karyawan menulis apa yang terjadi dan mengunduh file diagnostik dengan satu klik (versi, spesifikasi komputer, pengaturan tanpa kunci dan kata sandi, log program terbaru; tanpa rekaman, transkrip, atau notulen). Kontak yang diisi di sini ditampilkan ke karyawan; alamat email juga menambahkan tombol “Email IT”.",sup_make:"Buat file diagnostik komputer ini",sup_making:"Sedang membuat…",sup_done:"{n} sudah diunduh",sup_failed:"File diagnostik tidak dibuat: {e}",bad_contact:"Kontak tidak valid",
   title:'Penerjemah Rapat PCG: Pengaturan IT',tagline:'Beralih antara mode lokal dan mode server serta atur alamat server. Perubahan langsung berlaku; tidak perlu memasang ulang.',
@@ -352,7 +375,7 @@ function applyLang(){
   $('loginTitle').textContent=t(firstTime?'set_pw_title':'login_title');$('loginNote').textContent=t(firstTime?'set_pw_note':'login_note');
   $('loginBtn').textContent=t(firstTime?'set_pw_btn':'login');
   $('staffPwLabel').textContent=t(state&&state.staff_password_set?'staff_pw_set':'staff_pw');
-  if(state)glInfo();
+  if(state){glInfo();asrVis()}
   styleVis();
 }
 $('langSel').value=lang;$('langSel').onchange=()=>{lang=$('langSel').value;applyLang();if(typeof renderModels==='function')renderModels();if(state&&!$('rsBtn').disabled)rsShow()};
@@ -418,6 +441,8 @@ function showMain(){
   $('asrModel').value=state.asr_model||'large-v3-turbo';
   fillLocalModels();
   $('glossary').value=state.glossary||'';
+  const aa=state.asr_api||{};$('asrOn').checked=!!aa.enabled;$('asrUrl').value=aa.url||'';$('asrApiModel').value=aa.model||'';
+  $('asrInternal').checked=!!aa.internal;$('asrKey').value='';$('asrClear').checked=false;asrVis();
   $('updCheck').checked=state.update_check!==false;$('updWho').value=state.update_who||'staff';$('updShare').value=state.update_share||'';$('supContact').value=state.support_contact||'';
   $('diarize').checked=!!state.diarize;$('remoteView').checked=!!state.allow_remote_view;$('multiLang').checked=state.multi_lang!==false;$('clearStaffWrap').hidden=!state.staff_password_set;
   modeVis();applyLang();loadModels();
@@ -435,6 +460,26 @@ function fillLocalModels(){
   }
   liveAutoNote();
 }
+/* 語音辨識 API（r24） */
+function asrExternal(){
+  if($('asrInternal').checked)return false;
+  let h='';try{h=new URL($('asrUrl').value.trim()||'https://api.openai.com/v1').hostname}catch(e){return true}
+  return !(h==='localhost'||h.endsWith('.local')||!h.includes('.')||/^(10\.|127\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.)/.test(h));
+}
+function asrVis(){
+  const on=$('asrOn').checked,set=!!(state&&state.asr_api&&state.asr_api.key_set);
+  $('asrBox').hidden=!on;$('asrWarn').hidden=!(on&&asrExternal());
+  $('asrKeyLabel').textContent=t(set?'asr_key_set':'asr_key');$('asrClearWrap').hidden=!set;
+}
+['asrOn','asrInternal'].forEach(id=>$(id).addEventListener('change',asrVis));$('asrUrl').addEventListener('input',asrVis);
+document.querySelectorAll('[data-asr]').forEach(b=>b.onclick=()=>{$('asrUrl').value=b.dataset.asr;if(!$('asrApiModel').value)$('asrApiModel').value='gpt-4o-transcribe';$('asrInternal').checked=false;asrVis()});
+const asrBody=()=>({asr_api_enabled:$('asrOn').checked,asr_api_url:$('asrUrl').value,asr_api_model:$('asrApiModel').value,asr_api_key:$('asrKey').value,clear_asr_api_key:$('asrClear').checked,asr_api_internal:$('asrInternal').checked});
+$('asrTest').onclick=async()=>{
+  const b=$('asrTest'),r=$('asrRes');b.disabled=true;b.textContent=t('asr_testing');r.hidden=true;
+  const j=await api('/api/simple/admin/asr-test',asrBody());
+  b.disabled=false;b.textContent=t('asr_test');r.hidden=false;r.className='res '+(j.ok?'ok':'err');
+  r.textContent=j.ok?t('asr_ok'):(j.code&&I18N.zh[j.code]?t(j.code):t(j.status===401||j.status===403?'asr_fail_401':j.status===404?'asr_fail_404':'asr_fail',{m:(j.status?'HTTP '+j.status+' ':'')+(j.message||'')}));
+};
 function glInfo(){
   const gi=state.glossary_info||{};
   $('glInfo').textContent=t('gl_info',{n:gi.local||0})+(gi.share?t('gl_info_share',{m:gi.share}):'')+t('gl_info_tip');
@@ -492,7 +537,7 @@ $('pMain').onsubmit=async e=>{
     llm_model:$('llmModel').value,summary_model:$('sumModel').value,asr_model:$('asrModel').value,
     local_live_model:$('liveModel').value,local_file_model:$('fileModel').value,diarize:$('diarize').checked,allow_remote_view:$('remoteView').checked,multi_lang:$('multiLang').checked,
     staff_password:$('staffPw').value,clear_staff_password:$('clearStaff').checked,
-    glossary:$('glossary').value,update_check:$('updCheck').checked,update_who:$('updWho').value,update_share:$('updShare').value,support_contact:$('supContact').value});
+    glossary:$('glossary').value,...asrBody(),update_check:$('updCheck').checked,update_who:$('updWho').value,update_share:$('updShare').value,support_contact:$('supContact').value});
   const r=$('saveRes');r.hidden=false;r.className='res '+(j.ok?'ok':'err');r.textContent=j.ok?t('saved'):errMsg(j);
   if(j.ok){state=j.state;rsShow();$('staffPw').value='';$('clearStaff').checked=false;$('clearStaffWrap').hidden=!state.staff_password_set;
     $('llmKey').value='';$('clearKey').checked=false;$('clearKeyWrap').hidden=!state.llm_api_key_set;applyLang()}

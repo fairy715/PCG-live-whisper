@@ -3232,7 +3232,10 @@ def _pcg_gloss_segments(segs):
                     try:
                         seg = seg._replace(text=fixed)
                     except AttributeError:
-                        pass
+                        try:
+                            seg.text = fixed              # 語音辨識 API 的段落（SimpleNamespace）
+                        except Exception:
+                            pass
         yield seg
 
 
@@ -3260,6 +3263,75 @@ def _pcg_gloss_sub(text, direction):
     """本機翻譯（M2M100 不能下指令）：翻譯前先把詞換成指定的寫法"""
     g = _pcg_gloss()
     return g.substitute(text, _pcg_gloss_tgt(direction)) if g and text else text
+
+
+# ── 語音辨識 API（r24，group/asr_api.py）：OpenAI 相容的 /audio/transcriptions ──────────
+# IT 設定頁開了「語音辨識 API」之後，每一段聲音送去 API 辨識（OpenAI，或公司內部的辨識服務）。
+# 這台電腦的模型照樣載入當備援：API 連不上、金鑰不對時那一段改在本機辨識，字幕不會斷；教室模式的語言判斷也在本機做。
+# 環境變數 PCG_ASR_API=off 可以暫時關掉。
+_PCG_ASR_API = {"loaded": False, "cfg": None, "fails": 0, "pause_until": 0.0, "json_only": False,
+                "said": False, "lock": threading.Lock()}
+
+
+def _pcg_asr_api_cfg():
+    """{"url", "model", "key"} 或 None（沒開、設定不完整）"""
+    st = _PCG_ASR_API
+    if not st["loaded"]:
+        st["loaded"] = True
+        try:
+            if os.environ.get("PCG_ASR_API", "").strip().lower() != "off":
+                with open(CONFIG_PATH, encoding="utf-8") as f:
+                    ps = json.load(f).get("pcg_simple") or {}
+                a = ps.get("asr_api") or {}
+                if isinstance(a, dict) and a.get("enabled") and str(a.get("url") or "").strip():
+                    st["cfg"] = {"url": str(a["url"]).strip(), "model": str(a.get("model") or "").strip(),
+                                 "key": str(ps.get("asr_api_key") or "").strip()}
+        except (OSError, ValueError, AttributeError):
+            st["cfg"] = None
+    return st["cfg"]
+
+
+def _pcg_asr_api_ready():
+    cfg = _pcg_asr_api_cfg()
+    return cfg if cfg and time.monotonic() >= _PCG_ASR_API["pause_until"] else None
+
+
+def _pcg_asr_api_result(err=None):
+    """記一次成功或失敗：連續失敗 3 次暫停 2 分鐘；金鑰、模型不對暫停 10 分鐘（這段時間用本機辨識）"""
+    st = _PCG_ASR_API
+    with st["lock"]:
+        if err is None:
+            if not st["said"]:
+                st["said"] = True
+                print(f"  {C_OK}語音辨識：API（{(st['cfg'] or {}).get('model') or '預設模型'}）{RESET}", flush=True)
+            st["fails"] = 0
+            return
+        st["fails"] += 1
+        fatal = bool(getattr(err, "fatal", False))
+        if fatal or st["fails"] >= 3:
+            wait = 600 if fatal else 120
+            st["pause_until"], st["fails"], st["said"] = time.monotonic() + wait, 0, False
+            why = "金鑰、權限或模型名稱不對" if fatal else "連不上或回應太慢"
+            print(f"  {C_WARN}[提示] 語音辨識 API {why}（{str(err)[:160]}）：先改用這台電腦辨識，"
+                  f"{wait // 60} 分鐘後再試{RESET}", flush=True)
+
+
+def _pcg_asr_api_chunk(cfg, audio, language, prompt, offset_s, end_s):
+    """一塊聲音（16 kHz）送 API → [(開始秒, 結束秒, 文字)]。出錯丟 asr_api.ApiError"""
+    from group import asr_api
+    st = _PCG_ASR_API
+    wav = asr_api.wav_bytes(audio)
+    timeout = 20 if len(audio) <= 15 * _SEG_SR else 60
+    fmt = "verbose_json" if asr_api.wants_segments(cfg.get("model")) and not st["json_only"] else "json"
+    try:
+        data = asr_api.post(cfg, wav, language, prompt, timeout, fmt)
+    except asr_api.ApiError as e:
+        if fmt == "verbose_json" and e.status == 400:     # 這個伺服器不給每一句的時間：以後只要文字
+            st["json_only"] = True
+            data = asr_api.post(cfg, wav, language, prompt, timeout, "json")
+        else:
+            raise
+    return asr_api.pieces(data, offset_s, end_s)
 
 
 class _FwModel:
@@ -3310,19 +3382,86 @@ class _FwModel:
             self._m = self._cls(self._path, **self._kw)
 
     def transcribe(self, *args, **kwargs):
-        """集團版詞庫（r23）：指定了語言的辨識帶上提示詞（hotwords），結果修正聽錯的寫法"""
+        """集團版：語音辨識 API（r24）開著而且指定了語言 → 送 API（失敗的那一塊改用這個模型）；
+        詞庫（r23）：帶上提示詞，結果修正聽錯的寫法"""
+        g = _pcg_gloss()
+        if kwargs.get("language") and _pcg_asr_api_ready():
+            audio = self._api_audio(args[0] if args else kwargs.get("audio"))
+            if audio is not None:
+                segs, info = self._api_transcribe(audio, kwargs)
+                return (_pcg_gloss_segments(segs) if g else segs), info
+        segs, info = self._local(args, kwargs)
+        return (_pcg_gloss_segments(segs) if g and kwargs.get("language") else segs), info
+
+    def _local(self, args, kwargs):
+        """這台電腦的模型辨識（有詞庫就帶提示詞）"""
         g = _pcg_gloss()
         if (g and _PCG_GLOSS_HOTWORDS_OK[0] and kwargs.get("language")
                 and "hotwords" not in kwargs and not kwargs.get("prefix")):
             try:
-                segs, info = self._transcribe(*args, **dict(kwargs, hotwords=g.hotwords()))
-                return _pcg_gloss_segments(segs), info
+                return self._transcribe(*args, **dict(kwargs, hotwords=g.hotwords()))
             except TypeError as e:
                 if "hotwords" not in str(e):
                     raise
                 _PCG_GLOSS_HOTWORDS_OK[0] = False         # 舊版 faster-whisper：不帶提示詞，照常辨識
-        segs, info = self._transcribe(*args, **kwargs)
-        return (_pcg_gloss_segments(segs) if g and kwargs.get("language") else segs), info
+        return self._transcribe(*args, **kwargs)
+
+    @staticmethod
+    def _api_audio(src):
+        """要辨識的聲音 → 16 kHz float32；讀不了回 None（改用本機）"""
+        import numpy as np
+        if isinstance(src, np.ndarray):
+            return src.astype(np.float32, copy=False).reshape(-1)
+        try:
+            from faster_whisper.audio import decode_audio
+            return decode_audio(src, sampling_rate=_SEG_SR)
+        except Exception:
+            return None
+
+    def _api_transcribe(self, audio, kwargs):
+        """送語音辨識 API。短的（即時字幕切好的一句）一次送；長的（錄音檔）用 VAD 在停頓的地方切成一塊一塊送。
+        回傳（一段一段產生的 segments, info）；某一塊 API 失敗就那一塊用本機模型"""
+        import types as _types
+        from group import asr_api
+        lang = kwargs.get("language")
+        total = len(audio)
+        g = _pcg_gloss()
+        prompt = g.hotwords() if g else None
+        if total > 28 * _SEG_SR or kwargs.get("vad_filter"):
+            spans = _pcg_silero_spans(audio)
+            if total <= 28 * _SEG_SR:
+                parts = ([(max(0, spans[0][0] - 3200), min(total, spans[-1][1] + 3200))] if spans else [])
+            else:
+                parts = asr_api.chunks(spans, total)
+        else:
+            parts = [(0, total)]
+        local_kw = {k: v for k, v in kwargs.items() if k != "vad_filter"}
+
+        def _gen():
+            n = 0
+            for s, e in parts:
+                if e - s < _SEG_SR // 10:
+                    continue
+                piece, off, end = audio[s:e], s / _SEG_SR, e / _SEG_SR
+                cfg = _pcg_asr_api_ready()
+                items = None
+                if cfg:
+                    try:
+                        items = _pcg_asr_api_chunk(cfg, piece, lang, prompt, off, end)
+                        _pcg_asr_api_result()
+                    except asr_api.ApiError as err:
+                        _pcg_asr_api_result(err)
+                if items is None:                         # API 不能用：這一塊在這台電腦辨識
+                    segs, _ = self._local((piece,), dict(local_kw, vad_filter=False))
+                    items = [(off + x.start, off + x.end, x.text) for x in segs]
+                for a, b, text in items:
+                    n += 1
+                    yield _types.SimpleNamespace(id=n, seek=0, start=a, end=b, text=text, tokens=[], words=None,
+                                                 avg_logprob=0.0, compression_ratio=1.0, no_speech_prob=0.0,
+                                                 temperature=0.0)
+        info = _types.SimpleNamespace(language=lang, language_probability=1.0, duration=total / _SEG_SR,
+                                      duration_after_vad=total / _SEG_SR, all_language_probs=None)
+        return _gen(), info
 
     def _transcribe(self, *args, **kwargs):
         if self._kw.get("device") != "cuda":

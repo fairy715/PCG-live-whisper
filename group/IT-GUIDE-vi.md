@@ -178,6 +178,25 @@ Khi phụ đề trực tiếp và bản ghi âm chạy trên CPU của máy nhâ
   - `PCG_CPU_THREADS=8`: tổng số luồng (ví dụ máy bàn mạnh muốn chạy hết tốc độ)
   - `PCG_NORMAL_PRIORITY=1`: trở về mức ưu tiên bình thường
 
+### API nhận dạng giọng nói (r24, tùy chọn)
+
+Mục "**Speech recognition API**" trong trang cài đặt IT chuyển việc nhận dạng giọng nói cho một API tương thích OpenAI (`/audio/transcriptions`). Thường chính xác hơn mô hình nhỏ trên máy nhân viên, và laptop không phải chạy nhận dạng nữa.
+
+| Nơi kết nối | Địa chỉ | Âm thanh đi đâu | Chi phí |
+|---|---|---|---|
+| OpenAI | `https://api.openai.com/v1`, mô hình ví dụ `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`, `whisper-1` | **Ra khỏi công ty** | Tính theo thời lượng âm thanh theo giá OpenAI công bố; mỗi máy đang hiện phụ đề được tính riêng |
+| Dịch vụ nhận dạng trong công ty (RTX Spark, hoặc máy chủ tương thích OpenAI của nhóm khác) | Ví dụ `http://10.x.x.x:8000/v1` | Ở lại trong công ty | Không tốn thêm |
+
+- Điền địa chỉ, mô hình và khóa (dịch vụ nội bộ có thể không cần khóa) rồi bấm "**Test connection**": gửi 1 giây im lặng để kiểm tra địa chỉ, khóa và mô hình
+- **Dịch vụ bên ngoài phải dùng https và có khóa**; địa chỉ là IP nội bộ hoặc tên máy đơn giản được coi là nội bộ, còn dịch vụ nội bộ có tên miền thì đánh dấu "This is a service inside the company"
+- Khi bật: mỗi câu phụ đề trực tiếp (đoạn cắt ở chỗ ngừng nói) gửi một lần; bản ghi được cắt ở chỗ ngừng thành các đoạn tối đa 25 giây. **Được ưu tiên hơn máy chủ GPU**, và tiếng Anh cũng gửi qua API (không dùng Moonshine)
+- **Khi API không kết nối được, quá chậm hoặc sai khóa**: đoạn đó được nhận dạng trên máy này, phụ đề không bị ngắt; sau 3 lần lỗi liên tiếp API tạm dừng 2 phút, và 10 phút nếu sai khóa hoặc sai mô hình
+- Các thuật ngữ trong bảng thuật ngữ được gửi làm gợi ý (`prompt`), các cách viết nghe sai vẫn được đổi lại
+- Khi âm thanh ra khỏi công ty, thông báo màu cam hiện ở trang cài đặt IT và đầu trang của nhân viên. Hãy tắt khi họp mật hoặc dùng dịch vụ nội bộ
+- Khóa được lưu trong `config.json` của máy này (`pcg_simple.asr_api_key`) và được che trong tệp chẩn đoán; biến môi trường hệ thống Windows `PCG_ASR_API=off` tạm tắt API
+- Chế độ "Tôi cũng nói" (hai chiều) vẫn gửi âm thanh chồng lấn mỗi 3 giây, lượng dùng khoảng 1,7 lần so với một chiều
+- Đã thử ngày 2026-11-18 với máy chủ API giả lập; chưa thử với khóa OpenAI thật, nên hãy bấm "Test connection" khi cài lần đầu
+
 ### Bảng thuật ngữ (tên riêng và thuật ngữ, r23)
 
 Tên công ty, nhà máy, tên hệ thống và tên người thường bị các mô hình chung nghe sai hoặc dịch sai. Sau khi điền "**Glossary**" trong trang cài đặt IT:

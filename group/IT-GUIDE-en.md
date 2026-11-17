@@ -176,6 +176,25 @@ When live subtitles and recordings run on the staff computer's CPU (local mode, 
   - `PCG_CPU_THREADS=8`: total number of threads (e.g. a powerful desktop that should run at full speed)
   - `PCG_NORMAL_PRIORITY=1`: back to normal priority
 
+### Speech recognition API (r24, optional)
+
+"**Speech recognition API**" on the IT settings page sends speech recognition to an OpenAI-compatible API (`/audio/transcriptions`). It is usually more accurate than the small model on staff computers, and the laptop no longer runs recognition.
+
+| Target | Address | Where audio goes | Cost |
+|---|---|---|---|
+| OpenAI | `https://api.openai.com/v1`, models such as `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`, `whisper-1` | **Leaves the company** | Billed by audio length at OpenAI's published price; each computer showing subtitles counts separately |
+| A recognition service inside the company (RTX Spark, or an OpenAI-compatible server run by another team) | For example `http://10.x.x.x:8000/v1` | Stays in the company | No extra cost |
+
+- Fill in the address, model and key (an internal service may need no key) and press "**Test connection**": one second of silence is sent to check the address, key and model
+- **An external service must use https and a key**; an address with an internal IP or a plain host name counts as internal, and for an internal service with a domain name tick "This is a service inside the company"
+- When on: each live sentence (a piece cut at a pause) is sent once; recordings are cut at pauses into pieces of at most 25 seconds. It **takes priority over the GPU server**, and English also goes to the API (Moonshine is not used)
+- **If the API cannot be reached, times out, or the key is wrong**: that piece is recognized on this computer instead, so subtitles do not stop; after 3 failures in a row the API is paused for 2 minutes, and for 10 minutes when the key or model is wrong
+- Glossary terms are sent as hints (`prompt`), and misheard spellings are still changed back
+- When audio leaves the company, an orange notice is shown on the IT settings page and at the top of the staff page. Turn it off for confidential meetings or use an internal service
+- The key is stored in this computer's `config.json` (`pcg_simple.asr_api_key`) and is masked in diagnostic files; the Windows system environment variable `PCG_ASR_API=off` turns the API off temporarily
+- "I also speak" (two-way) mode still sends overlapping audio every 3 seconds, about 1.7 times the usage of one-way
+- Tested on 2026-11-18 against a simulated API server; not yet tested with a real OpenAI key, so press "Test connection" when you first set it up
+
 ### Glossary (names and terms, r23)
 
 Company names, sites, system names and people are often misheard or mistranslated by general models. After you fill in "**Glossary**" on the IT settings page:

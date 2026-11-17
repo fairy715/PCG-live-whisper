@@ -37,10 +37,12 @@ try:
     from group import model_packs
     from group import diagnostics
     from group import glossary
+    from group import asr_api
 except ImportError:                     # 測試時直接 import simple_routes
     import model_packs
     import diagnostics
     import glossary
+    import asr_api
 
 # 情境：同仁看到的是「錄音裡主要說什麼語言 → 拿到什麼」，背後對應主程式的模式代號
 DEFAULT_SCENARIOS = [
@@ -115,6 +117,20 @@ _OUTPUT_KINDS = [
     ("時間逐字稿", ".srt", "字幕檔 SRT", "", "srt"),
     ("時間逐字稿", ".vtt", "字幕檔 VTT", "", "vtt"),
 ]
+
+
+def asr_api_on(s):
+    """語音辨識 API（r24）：IT 開了而且填了網址"""
+    a = (s or {}).get("asr_api")
+    return bool(isinstance(a, dict) and a.get("enabled") and str(a.get("url") or "").strip())
+
+
+def asr_api_scope(s):
+    """語音辨識 API 把聲音送到哪裡："" （沒開）／"internal"／"external" """
+    if not asr_api_on(s):
+        return ""
+    a = s["asr_api"]
+    return asr_api.scope(a.get("url"), bool(a.get("internal")))
 
 
 def glossary_sync(base_dir, s):
@@ -508,6 +524,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             c = json.loads(config_file.read_text(encoding="utf-8")) if config_file.exists() else {}
         except (OSError, ValueError):
             c = {}
+        if asr_api_on(c.get("pcg_simple")):
+            return False                # 語音辨識 API（r24）優先：主程式走「這台電腦辨識」的流程，每一段送 API、失敗才真的在本機辨識
         rw = c.get("remote_whisper")
         if not (isinstance(rw, dict) and rw.get("host")):
             return False
@@ -592,6 +610,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                                           for s in scenarios()],
                 "max_upload_mb": _MAX_UPLOAD_MB, "backend": pf["backend"], "minutes": pf["summarize"],
                 "version": app_version(base_dir), "data_scope": data_scope(pf),
+                "asr_scope": asr_api_scope(settings()),
                 "support": str(settings().get("support_contact") or "")}
 
     def data_scope(pf):
@@ -789,6 +808,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
 
     def use_moonshine(s):
         """英文即時字幕要不要用 Moonshine：模型在（離線資源包附）、IT 沒有關掉（english_asr = "whisper"）"""
+        if asr_api_on(s):
+            return False                # 語音辨識 API（r24）：英文也送 API
         return s.get("english_asr") != "whisper" and (Path(base_dir) / "models" / "moonshine").is_dir()
 
     @app.post("/api/simple/live/stop")
@@ -1055,6 +1076,12 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "update_share": str(s.get("update_share") or ""),
                 "support_contact": str(s.get("support_contact") or ""),
                 "glossary": str(s.get("glossary") or ""), "glossary_info": _glossary_info(s),
+                "asr_api": {"enabled": asr_api_on(s),
+                            "url": str((s.get("asr_api") or {}).get("url") or asr_api.DEFAULT_URL),
+                            "model": str((s.get("asr_api") or {}).get("model") or asr_api.DEFAULT_MODEL),
+                            "internal": bool((s.get("asr_api") or {}).get("internal")),
+                            "key_set": bool(str(s.get("asr_api_key") or "").strip()),
+                            "scope": asr_api_scope(s)},
                 "version": app_version(base_dir)}
 
     @app.get("/simple/admin", response_class=HTMLResponse)
@@ -1094,6 +1121,23 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         import urllib.request
         with urllib.request.urlopen(urllib.request.Request(url, headers=headers or {}), timeout=timeout) as r:
             return json.loads(r.read().decode("utf-8", "replace") or "{}")
+
+    @app.post("/api/simple/admin/asr-test")
+    async def admin_asr_test(request: Request, body: dict = {}):
+        """語音辨識 API（r24）的「測試連線」：送 1 秒的靜音，確認網址、金鑰、模型。金鑰沒填就用已經存的"""
+        err = admin_auth(request)
+        if err:
+            return err
+        internal = bool(body.get("asr_api_internal"))
+        url, bad = asr_api.check_url(body.get("asr_api_url") or asr_api.DEFAULT_URL, internal)
+        if bad:
+            return {"ok": False, "code": bad, "status": 0, "message": ""}
+        key = str(body.get("asr_api_key") or "").strip() or str(settings().get("asr_api_key") or "").strip()
+        cfg = {"url": url, "model": str(body.get("asr_api_model") or "").strip() or asr_api.DEFAULT_MODEL, "key": key}
+        import asyncio
+        res = await asyncio.to_thread((update_hooks or {}).get("asr_test") or asr_api.test, cfg)
+        return {"ok": bool(res.get("ok")), "status": res.get("status") or 0, "message": str(res.get("message") or "")[:300],
+                "scope": asr_api.scope(url, internal)}
 
     @app.post("/api/simple/admin/test")
     async def admin_test(request: Request, body: dict = {}):
@@ -1328,6 +1372,29 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 s["update_share"] = share
             else:
                 s.pop("update_share", None)
+        if "asr_api_enabled" in body:
+            # 語音辨識 API（r24）：OpenAI 相容的 /audio/transcriptions；金鑰留空＝不變
+            on = bool(body.get("asr_api_enabled"))
+            internal = bool(body.get("asr_api_internal"))
+            url, bad = asr_api.check_url(body.get("asr_api_url") or asr_api.DEFAULT_URL, internal)
+            if on and bad:
+                msg = "外部的語音辨識服務要用 https 網址" if bad == "asr_url_https" else "語音辨識 API 的網址格式不正確"
+                return JSONResponse({"ok": False, "code": bad, "error": msg}, status_code=400)
+            model = str(body.get("asr_api_model") or "").strip()[:80]
+            if any(c in model for c in "\r\n\t\"<>"):
+                return JSONResponse({"ok": False, "code": "bad_asr_model", "error": "模型名稱格式不正確"}, status_code=400)
+            key = str(body.get("asr_api_key") or "").strip()
+            if len(key) > 400 or any(c in key for c in "\r\n\t "):
+                return JSONResponse({"ok": False, "code": "bad_asr_key", "error": "金鑰格式不正確"}, status_code=400)
+            if key:
+                s["asr_api_key"] = key
+            elif body.get("clear_asr_api_key"):
+                s.pop("asr_api_key", None)
+            if on and asr_api.scope(url, internal) == "external" and not str(s.get("asr_api_key") or "").strip():
+                return JSONResponse({"ok": False, "code": "asr_key_required", "error": "外部的語音辨識服務要填金鑰"},
+                                    status_code=400)
+            s["asr_api"] = {"enabled": on, "url": url if not bad else asr_api.DEFAULT_URL,
+                            "model": model or asr_api.DEFAULT_MODEL, "internal": internal}
         if "glossary" in body:
             gl = str(body.get("glossary") or "").replace("\r\n", "\n").strip()
             if len(gl) > 20000:

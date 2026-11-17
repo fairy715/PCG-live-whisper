@@ -176,6 +176,25 @@ Saat subtitle langsung dan rekaman diproses di CPU komputer karyawan (mode lokal
   - `PCG_CPU_THREADS=8`: jumlah total thread (misalnya PC desktop kuat yang ingin berjalan penuh)
   - `PCG_NORMAL_PRIORITY=1`: kembali ke prioritas normal
 
+### API pengenalan suara (r24, opsional)
+
+"**API pengenalan suara**" di halaman Pengaturan IT menyerahkan pengenalan suara ke API yang kompatibel dengan OpenAI (`/audio/transcriptions`). Biasanya lebih akurat daripada model kecil di komputer staf, dan laptop tidak perlu menjalankan pengenalan.
+
+| Tujuan | Alamat | Ke mana suara dikirim | Biaya |
+|---|---|---|---|
+| OpenAI | `https://api.openai.com/v1`, model misalnya `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`, `whisper-1` | **Keluar dari perusahaan** | Ditagih menurut durasi suara sesuai harga resmi OpenAI; setiap komputer yang menampilkan subtitle dihitung sendiri |
+| Layanan pengenalan di dalam perusahaan (RTX Spark, atau server kompatibel OpenAI milik tim lain) | Misalnya `http://10.x.x.x:8000/v1` | Tetap di dalam perusahaan | Tanpa biaya tambahan |
+
+- Isi alamat, model, dan kunci (layanan internal boleh tanpa kunci), lalu tekan "**Uji koneksi**": satu detik senyap dikirim untuk memeriksa alamat, kunci, dan model
+- **Layanan eksternal harus memakai https dan kunci**; alamat dengan IP internal atau nama host biasa dianggap internal, dan untuk layanan internal dengan nama domain centang "Ini layanan di dalam perusahaan"
+- Jika aktif: setiap kalimat subtitle langsung (potongan yang dipotong saat jeda) dikirim sekali; rekaman dipotong saat jeda menjadi potongan paling lama 25 detik. **Didahulukan daripada server GPU**, dan bahasa Inggris juga dikirim ke API (Moonshine tidak dipakai)
+- **Jika API tidak terjangkau, terlalu lama, atau kuncinya salah**: potongan itu dikenali di komputer ini, sehingga subtitle tidak berhenti; setelah 3 kali gagal berturut-turut API dijeda 2 menit, dan 10 menit jika kunci atau model salah
+- Istilah glosarium dikirim sebagai petunjuk (`prompt`), dan ejaan salah dengar tetap dikembalikan
+- Jika suara keluar dari perusahaan, pemberitahuan oranye tampil di halaman Pengaturan IT dan di bagian atas halaman staf. Matikan untuk rapat rahasia atau gunakan layanan internal
+- Kunci disimpan di `config.json` komputer ini (`pcg_simple.asr_api_key`) dan disamarkan di file diagnostik; variabel lingkungan sistem Windows `PCG_ASR_API=off` mematikan API untuk sementara
+- Mode "Saya juga berbicara" (dua arah) tetap mengirim suara yang tumpang-tindih setiap 3 detik, sekitar 1,7 kali pemakaian satu arah
+- Diuji pada 2026-11-18 dengan server API tiruan; belum diuji dengan kunci OpenAI asli, jadi tekan "Uji koneksi" saat pertama kali mengatur
+
 ### Glosarium (nama dan istilah, r23)
 
 Nama perusahaan, lokasi pabrik, nama sistem, dan nama orang sering salah dengar atau salah terjemah oleh model umum. Setelah "**Glosarium**" di halaman Pengaturan IT diisi:
