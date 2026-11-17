@@ -122,6 +122,18 @@ Misalnya atasan dari Taiwan memimpin rapat dalam bahasa Mandarin, dihadiri karya
 
 ---
 
+## Subtitle tidak muncul? Uji suara dulu (r24)
+
+Di halaman subtitle langsung, buka "**🔊 Suara dan mikrofon: uji dan pilih perangkat**":
+
+1. Tekan "**Mulai uji**": komputer memutar nada pendek; ucapkan juga beberapa kata ke mikrofon.
+2. Perhatikan dua batang:
+   - **Suara yang diputar komputer ini** bergerak = ucapan lawan bicara tertangkap. Jika tidak: speaker dibisukan, volume 0, atau Teams bersuara lewat headset lain (pilih di "Lanjutan").
+   - **Mikrofon** bergerak = ucapan Anda tertangkap. Jika tidak: mikrofon dibisukan, atau pilih mikrofon lain di daftar bawah (misalnya mikrofon konferensi USB).
+3. Mikrofon dan speaker yang dipilih diingat dan berlaku mulai subtitle berikutnya. "Otomatis" cocok untuk kebanyakan orang; mengikuti perangkat bawaan Windows.
+
+Mikrofon tidak dipakai jika Anda hanya membaca subtitle; dipakai pada "Saya juga berbicara", "satu ruang kelas", dan "komputer subtitle ruang rapat". Uji tidak bisa dilakukan saat subtitle berjalan; tekan Berhenti dulu.
+
 ## Tips
 
 - Bicara jelas, satu per satu, mikrofon dekat pembicara. Isi topik rapat jika banyak istilah teknis.

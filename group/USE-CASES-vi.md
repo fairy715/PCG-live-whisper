@@ -122,6 +122,18 @@ Ví dụ quản lý người Đài Loan chủ trì bằng tiếng Trung, có nh�
 
 ---
 
+## Không có phụ đề? Hãy kiểm tra âm thanh trước (r24)
+
+Trên trang phụ đề trực tiếp, mở "**🔊 Âm thanh và micro: kiểm tra và chọn thiết bị**":
+
+1. Bấm "**Bắt đầu kiểm tra**": máy sẽ phát một âm báo ngắn; hãy nói vài câu vào micro.
+2. Xem hai thanh mức âm:
+   - **Âm thanh máy này phát ra** chuyển động = đã thu được lời người kia nói. Nếu không: loa bị tắt tiếng, âm lượng bằng 0, hoặc Teams phát qua tai nghe khác (chọn trong "Nâng cao").
+   - **Micro** chuyển động = đã thu được lời bạn nói. Nếu không: micro bị tắt tiếng, hoặc chọn micro khác trong danh sách bên dưới (ví dụ micro hội nghị USB).
+3. Micro và loa đã chọn được ghi nhớ và có hiệu lực từ lần phụ đề sau. Thông thường để "Tự động" là được; chương trình dùng thiết bị mặc định của Windows.
+
+Khi chỉ xem phụ đề thì không dùng micro; micro được dùng ở "Tôi cũng nói", "cùng một lớp học" và "máy phụ đề phòng họp". Không kiểm tra được khi phụ đề đang chạy; hãy bấm Dừng trước.
+
 ## Mẹo
 
 - Nói rõ ràng, từng người một, micro gần người nói. Điền chủ đề cuộc họp nếu có nhiều thuật ngữ.

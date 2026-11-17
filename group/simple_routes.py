@@ -38,11 +38,13 @@ try:
     from group import diagnostics
     from group import glossary
     from group import asr_api
+    from group import audio_test
 except ImportError:                     # 測試時直接 import simple_routes
     import model_packs
     import diagnostics
     import glossary
     import asr_api
+    import audio_test
 
 # 情境：同仁看到的是「錄音裡主要說什麼語言 → 拿到什麼」，背後對應主程式的模式代號
 DEFAULT_SCENARIOS = [
@@ -806,6 +808,62 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                               | {"can_bidi": bool(s["bidi"]), "can_room": s["id"] in ROOM_SCENARIOS}
                               for s in LIVE_SCENARIOS]}
 
+    # ─── 聲音與麥克風（r24）：列出裝置、指定麥克風／喇叭、聲音測試（只能在這台電腦上） ───
+    _meter = audio_test.Meter(backend=(update_hooks or {}).get("audio_backend"))
+
+    def _audio_state():
+        s = settings()
+        d = _meter.devices()
+        return {"ok": True, **d, "mic": str(s.get("mic_name") or ""), "speaker": str(s.get("speaker_name") or ""),
+                "live": bool(live_running and live_running())}
+
+    @app.get("/api/simple/audio")
+    async def simple_audio(request: Request):
+        if not is_local(request):
+            return JSONResponse({"ok": False, "code": "audio_remote", "error": "只能在這台電腦上設定"}, status_code=403)
+        import asyncio
+        return await asyncio.to_thread(_audio_state)
+
+    @app.post("/api/simple/audio")
+    async def simple_audio_save(request: Request, body: dict = {}):
+        """同仁指定麥克風與喇叭（空字串＝自動，跟著 Windows 的預設裝置）。下一場字幕生效"""
+        if not is_local(request):
+            return JSONResponse({"ok": False, "code": "audio_remote", "error": "只能在這台電腦上設定"}, status_code=403)
+        cfg = read_cfg()
+        s = cfg.setdefault("pcg_simple", {})
+        for key, field in (("mic", "mic_name"), ("speaker", "speaker_name")):
+            if key in body:
+                raw = str(body.get(key) or "")
+                name = audio_test.clean_name(raw)
+                if raw.strip() and not name:
+                    return JSONResponse({"ok": False, "code": "bad_device", "error": "裝置名稱格式不正確"}, status_code=400)
+                if name:
+                    s[field] = name
+                else:
+                    s.pop(field, None)
+        write_config(cfg)
+        return {"ok": True, "mic": str(s.get("mic_name") or ""), "speaker": str(s.get("speaker_name") or "")}
+
+    @app.post("/api/simple/audio/test")
+    async def simple_audio_test(request: Request, body: dict = {}):
+        """聲音測試：action=start 開始量（mic／speaker 是畫面上現在選的，還沒存也可以測）、stop 停止"""
+        if not is_local(request):
+            return JSONResponse({"ok": False, "code": "audio_remote", "error": "只能在這台電腦上測試"}, status_code=403)
+        import asyncio
+        if body.get("action") == "stop":
+            return {"ok": True, **(await asyncio.to_thread(_meter.stop))}
+        if live_running and live_running():
+            return JSONResponse({"ok": False, "code": "audio_live", "error": "字幕進行中，停止後再測試"}, status_code=409)
+        res = await asyncio.to_thread(_meter.start, body.get("mic") or "", body.get("speaker") or "",
+                                      body.get("seconds") or 12)
+        return {"ok": True, **res}
+
+    @app.get("/api/simple/audio/level")
+    async def simple_audio_level(request: Request):
+        if not is_local(request):
+            return JSONResponse({"ok": False, "code": "audio_remote"}, status_code=403)
+        return {"ok": True, **_meter.levels()}
+
     def use_moonshine(s):
         """英文即時字幕要不要用 Moonshine：模型在（離線資源包附）、IT 沒有關掉（english_asr = "whisper"）"""
         if asr_api_on(s):
@@ -882,6 +940,12 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             start.update(asr="moonshine", moonshine_model="medium")
         import asyncio
         await asyncio.to_thread(glossary_sync, base_dir, s)      # 詞庫（r23）
+        # 聲音與麥克風（r24）：同仁指定的麥克風（存的是名稱）換成編號交給主程式；找不到（拔掉了）就用預設
+        if room or "_" in mode:
+            await asyncio.to_thread(_meter.stop)
+            mi = await asyncio.to_thread(_meter.mic_index, s.get("mic_name"))
+            if mi is not None:
+                start["device" if room else "mic_device"] = mi
         try:
             await start_live(start)
         except Exception as e:

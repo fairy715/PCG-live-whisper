@@ -1211,6 +1211,35 @@ def _is_loopback_device(name):
 _wasapi_loopback_cache = None  # 快取結果避免重複初始化
 
 
+_PCG_SPEAKER = [None]
+
+
+def _pcg_speaker_name():
+    """同仁在「聲音與麥克風」指定的喇叭（r24，config.json 的 pcg_simple.speaker_name）；沒指定是空字串＝Windows 預設喇叭"""
+    if _PCG_SPEAKER[0] is None:
+        try:
+            with open(os.path.join(SCRIPT_DIR, "config.json"), encoding="utf-8") as f:
+                _PCG_SPEAKER[0] = str((json.load(f).get("pcg_simple") or {}).get("speaker_name") or "").strip()
+        except (OSError, ValueError, AttributeError):
+            _PCG_SPEAKER[0] = ""
+    return _PCG_SPEAKER[0]
+
+
+def _pcg_pick_loopback(p, want=None):
+    """要錄哪一個喇叭播放的聲音（pyaudiowpatch 的裝置資訊）：有指定而且找得到就用它，不然用 Windows 預設喇叭。
+    沒指定時跟以前完全一樣（只呼叫 get_default_wasapi_loopback）"""
+    want = _pcg_speaker_name() if want is None else want
+    if want:
+        try:
+            for d in p.get_loopback_device_info_generator():
+                if want.lower() in str(d.get("name") or "").lower():
+                    return d
+            print(f"  {C_DIM}[提示] 找不到指定的喇叭「{want}」，改用 Windows 預設喇叭{RESET}", flush=True)
+        except Exception as e:
+            print(f"  {C_DIM}[提示] 指定的喇叭不能用（{str(e)[:100]}），改用 Windows 預設喇叭{RESET}", flush=True)
+    return p.get_default_wasapi_loopback()
+
+
 def _find_wasapi_loopback():
     """找出 Windows 預設喇叭的 WASAPI Loopback 裝置。
     回傳 pyaudiowpatch device info dict 或 None。結果會快取。"""
@@ -1222,7 +1251,7 @@ def _find_wasapi_loopback():
     try:
         p = _pyaudio.PyAudio()
         try:
-            info = p.get_default_wasapi_loopback()
+            info = _pcg_pick_loopback(p)
             _wasapi_loopback_cache = info
             return info
         except Exception:
@@ -1416,7 +1445,7 @@ class _WasapiLoopbackStream:
         self._blocksize = blocksize
         self._np = np
         self._p = _pyaudio.PyAudio()
-        wb_info = self._p.get_default_wasapi_loopback()
+        wb_info = _pcg_pick_loopback(self._p)
         self._stream = self._p.open(
             format=_pyaudio.paFloat32,
             channels=channels,

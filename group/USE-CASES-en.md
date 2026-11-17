@@ -128,6 +128,18 @@ For example, a Taiwanese manager chairs the meeting in Chinese, with Indonesian,
 
 ---
 
+## No subtitles? Test the sound first (r24)
+
+On the live subtitles page, open "**🔊 Sound and microphone: test and choose devices**":
+
+1. Press "**Start test**": the computer plays a short tone; please also say a few words into the microphone.
+2. Watch the two bars:
+   - **Sound played by this computer** moves = what the other side says is being captured. If not: the speaker is muted, the volume is 0, or Teams plays through another headset (choose it under "Advanced").
+   - **Microphone** moves = what you say is being captured. If not: the microphone is muted, or choose another one in the list below (for example a USB conference microphone).
+3. The chosen microphone and speaker are remembered and apply from the next subtitles. "Automatic" is right for most people; it follows the Windows default devices.
+
+The microphone is not used when you only read subtitles; it is used for "I also speak", "same classroom" and "meeting room subtitle computer". You cannot test while subtitles are running; press Stop first.
+
 ## Tips
 
 - Speak clearly, one person at a time, microphone close to the speaker. Fill in the meeting topic for meetings with many technical terms.
