@@ -169,5 +169,130 @@ class GpuHintRoutes(unittest.TestCase):
         self.assertEqual(self.asked, [])
 
 
+CAT = {pid: {"id": pid, "name": pid.upper(), "size_mb": mb} for pid, mb in (
+    ("breeze-asr-25", 1500), ("whisper-large-v3-turbo", 800), ("whisper-base", 80),
+    ("phowhisper-small", 240), ("phowhisper-medium", 740), ("whisper-id-small", 240))}
+GPU, CPU4, CPU2 = {"gpu": True, "physical": 4, "logical": 8}, {"gpu": False, "physical": 4, "logical": 8}, \
+    {"gpu": False, "physical": 2, "logical": 4}
+
+
+class ModelHint(unittest.TestCase):
+    """r25：開啟程式時推薦更適合的語音模型包"""
+
+    def hint(self, hw, src="", settings=None, installed=(), now=1000.0, cat=CAT, free_mb=None):
+        return hwtier.model_hint(settings or {}, now, hw, cat, list(installed), src, free_mb)
+
+    def test_language_first_then_hardware(self):
+        self.assertEqual(self.hint(GPU, "zh")["id"], "breeze-asr-25")               # 有顯示卡＋常用中文
+        self.assertEqual(self.hint(GPU, "vi")["id"], "phowhisper-medium")           # 有顯示卡：語言包用 medium
+        h = self.hint(CPU4, "vi")
+        self.assertEqual((h["id"], h["why"], h["lang"], h["size_mb"]), ("phowhisper-small", "lang", "vi", 240))
+        self.assertEqual(self.hint(GPU, "en")["id"], "whisper-large-v3-turbo")      # 沒有語言專用的：硬體建議
+        self.assertEqual(self.hint(CPU2, "")["id"], "whisper-base")
+        self.assertFalse(self.hint(CPU4, "zh")["show"])                             # 一般筆電說中文：內建的就好
+        self.assertFalse(self.hint(CPU4, "")["show"])
+
+    def test_skips_installed_and_moves_to_next(self):
+        vi = [{"id": "phowhisper-small", "type": "asr", "languages": ["vi"]}]
+        self.assertEqual(self.hint(GPU, "vi", installed=vi)["id"], "whisper-large-v3-turbo")     # 越南文已經有：推薦下一個
+        turbo = [{"id": "whisper-large-v3-turbo", "type": "asr", "languages": ["zh", "en"], "multilingual": True}]
+        self.assertFalse(self.hint(GPU, "en", installed=turbo)["show"])
+        self.assertEqual(self.hint(GPU, "zh", installed=turbo)["id"], "breeze-asr-25")           # 多語的大模型不算中文專用
+        base = [{"id": "whisper-base", "type": "asr", "languages": ["zh"], "multilingual": True}]
+        self.assertFalse(self.hint(CPU2, "", installed=base)["show"])
+
+    def test_respects_later_never_it_choice_catalog_and_disk(self):
+        self.assertFalse(self.hint(CPU2, "", {"model_hint": {"off": True}})["show"])
+        self.assertFalse(self.hint(CPU2, "", {"model_hint": {"until": {"whisper-base": 2000}}})["show"])
+        self.assertTrue(self.hint(CPU2, "", {"model_hint": {"until": {"whisper-base": 500}}})["show"])
+        # 「下次再說」只擋那一個：越南文的照樣推薦
+        self.assertEqual(self.hint(CPU2, "vi", {"model_hint": {"until": {"phowhisper-small": 2000}}})["id"], "whisper-base")
+        self.assertFalse(self.hint(CPU2, "", {"local_live_model": "small"})["show"])              # IT 指定了模型：不推薦硬體的
+        self.assertEqual(self.hint(CPU2, "vi", {"local_live_model": "small"})["id"], "phowhisper-small")
+        self.assertFalse(self.hint(CPU2, "", cat={})["show"])                                     # 清單裡沒有（連不上）：不推薦
+        self.assertFalse(self.hint(GPU, "zh", free_mb=2000, cat={"breeze-asr-25": CAT["breeze-asr-25"]})["show"])   # 磁碟不夠
+
+
+class ModelHintRoutes(unittest.TestCase):
+    """用共用資料夾放一個假的模型包，實際跑：推薦 → 安裝 → 自動指定給那個語言"""
+
+    def setUp(self):
+        import hashlib
+        import io
+        import zipfile
+        from fastapi import FastAPI
+        from fastapi.testclient import TestClient
+        self.base = Path(tempfile.mkdtemp())
+        (self.base / "translate_meeting.py").write_text('APP_VERSION = "2.99"\n', encoding="utf-8")
+        (self.base / "group_data").mkdir()
+        share = self.base / "share"
+        (share / "models").mkdir(parents=True)
+        meta = {"id": "phowhisper-small", "name": "PhoWhisper small", "type": "asr", "engine": "faster-whisper",
+                "languages": ["vi"], "purpose": ["live", "file"], "version": "1", "license": "BSD-3-Clause", "size_mb": 1}
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as z:
+            z.writestr("phowhisper-small/pack.json", json.dumps(meta))
+            z.writestr("phowhisper-small/model.bin", b"x" * 3000)
+        raw = buf.getvalue()
+        (share / "models" / "phowhisper-small.zip").write_bytes(raw)
+        (share / "models" / "catalog.json").write_text(json.dumps({"format": 1, "packs": [dict(meta, parts=[
+            {"name": "phowhisper-small.zip", "size": len(raw), "sha256": hashlib.sha256(raw).hexdigest()}])]}), encoding="utf-8")
+        self.cfg = self.base / "config.json"
+        self.cfg.write_text(json.dumps({"pcg_simple": {"it_password_hash": "h:itpass1", "update_share": str(share)}}),
+                            encoding="utf-8")
+        self.local = True
+        app = FastAPI()
+        simple_routes.register(
+            app, self.base, lambda r: self.local, lambda raw: "h:" + raw, lambda raw, h: h == "h:" + (raw or ""),
+            self.cfg, lambda c: self.cfg.write_text(json.dumps(c), encoding="utf-8"), gpu_alive=lambda h, p: False,
+            update_hooks={"github_fetch": self._off, "models_fetch": self._off, "hw": CPU4, "gpus": lambda: []})
+        self.c = TestClient(app)
+
+    def tearDown(self):
+        shutil.rmtree(self.base, ignore_errors=True)
+        simple_routes.model_packs.JOBS.clear()
+
+    @staticmethod
+    def _off(u):
+        raise OSError("offline")
+
+    def ps(self):
+        return json.loads(self.cfg.read_text(encoding="utf-8"))["pcg_simple"]
+
+    def test_recommend_install_and_assign(self):
+        import time as _t
+        j = self.c.get("/api/simple/model-hint?src=vi").json()
+        self.assertEqual((j["show"], j["id"], j["why"], j["who"]), (True, "phowhisper-small", "lang", "staff"))
+        self.assertFalse(self.c.get("/api/simple/model-hint?src=en").json()["show"])
+        r = self.c.post("/api/simple/model-hint", json={"action": "install", "id": "whisper-base", "src": "vi"})
+        self.assertEqual(r.status_code, 409)                                   # 只能裝這次推薦的那一個
+        self.assertTrue(self.c.post("/api/simple/model-hint", json={"action": "install", "id": "phowhisper-small", "src": "vi"}).json()["ok"])
+        for _ in range(100):
+            st = self.c.get("/api/simple/model-hint?src=vi").json()
+            if (st["jobs"].get("phowhisper-small") or {}).get("state") in ("done", "failed"):
+                break
+            _t.sleep(0.05)
+        self.assertEqual(st["jobs"]["phowhisper-small"]["state"], "done", st)
+        st = self.c.get("/api/simple/model-hint?src=vi").json()
+        self.assertFalse(st["show"])                                           # 裝好了：不再推薦
+        self.assertEqual(self.ps()["asr_packs"], {"vi": {"live": "phowhisper-small", "file": "phowhisper-small"}})
+
+    def test_later_never_it_only_and_remote(self):
+        self.assertTrue(self.c.post("/api/simple/model-hint", json={"action": "later", "id": "phowhisper-small", "src": "vi"}).json()["ok"])
+        self.assertFalse(self.c.get("/api/simple/model-hint?src=vi").json()["show"])
+        c = json.loads(self.cfg.read_text(encoding="utf-8"))
+        c["pcg_simple"].pop("model_hint")
+        c["pcg_simple"]["update_who"] = "it"
+        self.cfg.write_text(json.dumps(c), encoding="utf-8")
+        self.assertEqual(self.c.get("/api/simple/model-hint?src=vi").json()["who"], "it")
+        r = self.c.post("/api/simple/model-hint", json={"action": "install", "id": "phowhisper-small", "src": "vi"})
+        self.assertEqual((r.status_code, r.json()["code"]), (403, "it_only"))  # 只有 IT 能裝的電腦：同仁不能裝
+        self.c.post("/api/simple/model-hint", json={"action": "never"})
+        self.assertFalse(self.c.get("/api/simple/model-hint?src=vi").json()["show"])
+        self.local = False
+        self.assertFalse(self.c.get("/api/simple/model-hint?src=vi").json()["show"])
+        self.assertEqual(self.c.post("/api/simple/model-hint", json={"action": "never"}).status_code, 403)
+
+
 if __name__ == "__main__":
     unittest.main()

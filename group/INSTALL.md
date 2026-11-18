@@ -231,8 +231,11 @@ Sukabumi | Suka Bumi
 | Whisper small 印尼文（maleo-ai） | 印尼文語音辨識 | 約 240 MB | Apache-2.0 |
 | Whisper medium 印尼文（cahya） | 印尼文語音辨識 | 約 740 MB | Apache-2.0 |
 | Whisper small／medium 印地語（vasista22） | 印地語語音辨識 | 約 240／740 MB | Apache-2.0 |
+| Breeze ASR 25（聯發科，r25） | 台灣華語與中英夾雜的語音辨識；large-v2 大小，要 NVIDIA 顯示卡才跑得動即時字幕 | 約 1.5 GB | Apache-2.0 |
 | Whisper base／medium／large-v3-turbo（多語，OpenAI） | 所有語言（含中文）的「本機辨識模型」，也用在雙向、教室模式 | 約 80／740 MB／800 MB | Apache-2.0（base、medium）／MIT（large-v3-turbo） |
 | MADLAD-400 3B | 本機翻譯（較慢；試翻有加料的情況，先實測再換） | 約 2.8 GB | Apache-2.0 |
+
+**開啟時自動推薦**（r25）：同仁打開頁面時，程式會依這台電腦和同仁上次選的「對方說的語言」推薦一個還沒裝的模型包，一次只推薦一個：有顯示卡加速＋常用中文 → Breeze ASR 25；常用越南文／印尼文／印地語 → 那個語言的模型包（有顯示卡加速用 medium，沒有用 small）；有顯示卡加速、沒有大的多語模型 → large-v3-turbo；雙核心的電腦 → base。同仁可以直接按「安裝」（裝好自動指定給那個語言用）、「下次再說」（7 天後再提醒這一個）或「不要再提醒」。「誰可以按更新」是只有 IT 時，視窗只請同仁找 IT。IT 在設定頁指定了「本機即時字幕模型」時不推薦硬體相關的。清單讀不到（不能上網、共用資料夾也沒有 `catalog.json`）或磁碟空間不夠時不推薦。
 
 印尼文 small 用 maleo-ai/whisper-small-id（Apache-2.0）；cahya/whisper-small-id 的授權只寫「cc」、無法確認能商用，打包時自動略過。
 

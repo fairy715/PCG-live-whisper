@@ -149,3 +149,53 @@ def gpu_hint(base_dir, settings, now, gpus):
         out["show"] = True
     return out
 
+
+# ─── 開啟程式時推薦更適合的語音模型包（r25） ───────────────────────────────────────────
+# 規則（一次只推薦一個，先語言、再硬體）：
+#   1. 有顯示卡加速、常用「對方說中文」→ Breeze ASR 25（聯發科，台灣華語與中英夾雜，Apache-2.0；large-v2 大小，CPU 太慢）
+#   2. 常用的對方語言是越南文／印尼文／印地語、還沒裝那個語言的模型包 → 那個語言的 small（有顯示卡加速就 medium）
+#   3. 有顯示卡加速、沒有大的多語模型 → large-v3-turbo
+#   4. 雙核心的電腦、沒有 base → base
+# 3、4 只在「本機即時字幕模型」是自動時推薦（IT 指定了模型就照 IT 的）。
+LANG_PACKS = {"vi": ("phowhisper-small", "phowhisper-medium"), "id": ("whisper-id-small", "whisper-id-medium"),
+              "hi": ("whisper-hi-small", "whisper-hi-medium")}
+ZH_GPU_PACK = "breeze-asr-25"
+
+
+def model_hint(settings, now, hw, catalog, installed, src="", free_mb=None):
+    """要推薦哪個模型包 → {"show", "id", "why", "lang", "name", "size_mb"}。
+    catalog：{id: 清單項目}（裝得到的）；installed：[已裝的 pack.json]；src：同仁上次選的「對方說的語言」"""
+    s = settings or {}
+    st = s.get("model_hint") or {}
+    out = {"show": False, "id": "", "why": "", "lang": "", "name": "", "size_mb": 0}
+    if st.get("off"):
+        return out
+    have = {m.get("id") for m in installed or []}
+    have_langs = {L for m in installed or [] if m.get("type") == "asr" and not m.get("multilingual")
+                  and len(m.get("languages") or []) == 1 for L in m["languages"]}
+    gpu, auto = bool((hw or {}).get("gpu")), (s.get("local_live_model") or "auto") == "auto"
+    cands = []
+    if gpu and src == "zh" and "zh" not in have_langs:
+        cands.append((ZH_GPU_PACK, "gpu_zh", "zh"))
+    if src in LANG_PACKS and src not in have_langs:
+        cands.append((LANG_PACKS[src][1 if gpu else 0], "lang", src))
+    if auto and gpu and not any(p in have for p in GPU_ORDER):
+        cands.append((GPU_ORDER[0], "gpu", ""))
+    if auto and not gpu and weak(hw or {}) and WEAK_PACK not in have:
+        cands.append((WEAK_PACK, "weak", ""))
+    until = st.get("until") if isinstance(st.get("until"), dict) else {}
+    for pid, why, lang in cands:
+        p = (catalog or {}).get(pid)
+        if not p or pid in have:
+            continue
+        try:
+            if float(until.get(pid) or 0) > now:
+                continue
+        except (TypeError, ValueError):
+            pass
+        size = int(p.get("size_mb") or 0)
+        if free_mb is not None and size and free_mb < size * 2.2 + 500:      # 下載＋解壓縮都要空間
+            continue
+        return {"show": True, "id": pid, "why": why, "lang": lang, "name": str(p.get("name") or pid), "size_mb": size}
+    return out
+

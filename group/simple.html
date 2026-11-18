@@ -264,6 +264,19 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
   </div>
 </dialog>
 
+<!-- 推薦更適合的語音模型包（r25） -->
+<dialog id="mhDlg" style="width:min(460px,94vw)">
+  <h3 style="margin-top:0" data-t="mh_title"></h3>
+  <p class="note" style="margin-top:0" id="mhLead"></p>
+  <p class="note" id="mhIt" hidden data-t="mh_it"></p>
+  <p class="note" id="mhProg" hidden></p>
+  <div class="b" style="display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:16px;flex-wrap:wrap">
+    <button class="linkbtn" type="button" id="mhNever" style="padding:0;margin-right:auto" data-t="gpu_never"></button>
+    <button class="btn ghost" type="button" id="mhLater" style="width:auto" data-t="gpu_later"></button>
+    <button class="btn" type="button" id="mhGet" style="width:auto" data-t="mh_install"></button>
+  </div>
+</dialog>
+
 <!-- 聲音與麥克風（r24）：選麥克風／喇叭、聲音測試 -->
 <dialog id="audDlg">
   <h3 style="margin-top:0" data-t="aud_title"></h3>
@@ -296,6 +309,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 const LANGS=[['zh','繁體中文','zh-TW'],['en','English','en-US'],['id','Bahasa Indonesia','id-ID'],['vi','Tiếng Việt','vi-VN'],['hi','हिन्दी','hi-IN']];
 const I18N={
 zh:{
+  mh_title:'建議安裝更準的語音模型',mh_gpu_zh:'這台電腦有顯示卡加速。安裝「{n}」（約 {m} MB）之後，中文和中英夾雜的辨識會更準。',mh_lang:'你常用的語言有專用的模型「{n}」（約 {m} MB），辨識會比內建的準。',mh_gpu:'這台電腦有顯示卡加速，可以用更大的模型「{n}」（約 {m} MB），各種語言都更準。',mh_weak:'這台電腦比較慢。安裝「{n}」（約 {m} MB）之後字幕比較跟得上，但錯字會多一點。',mh_it:'請找 IT 在設定頁的「模型管理」安裝。',mh_install:'安裝',mh_down:'下載中… {d} / {t} MB',mh_inst:'安裝中…',mh_done:'裝好了，下一場字幕就會使用。',mh_fail:'安裝沒有成功：{e}',mh_close:'關閉',
   gpu_title:'這台電腦有 NVIDIA 顯示卡',gpu_lead:'偵測到 {n}（{g} GB）。安裝「GPU 加速包」之後，語音辨識改用顯示卡：字幕更快，電腦也比較不卡。',gpu_s1:'下載加速包（約 {m} MB）',gpu_s2:'點兩下安裝：會自動關掉這個程式，不需要系統管理員',gpu_s3:'裝好會自動檢查並告訴你結果，再重新打開程式就會使用顯示卡',gpu_it:'請找 IT 協助安裝 GPU 加速包。',gpu_get:'下載加速包',gpu_later:'下次再說',gpu_never:'不要再提醒',
   aud_btn:'🔊 聲音與麥克風：測試、選擇裝置',aud_title:'聲音與麥克風',aud_hint:'開始字幕前可以先測試：按「開始測試」會播一小段提示音，並請對著麥克風說幾句話。音量條有動就是有收到聲音。',aud_sys:'電腦播放的聲音（對方說的話）',aud_mic:'麥克風（我說的話）',aud_spk_pick:'進階：指定要收哪一個喇叭或耳機的聲音',aud_spk_note:'一般用「自動」就好。Teams 的聲音如果是從別的耳機或喇叭出來，才需要在這裡指定。',aud_auto_spk:'自動：Windows 預設的喇叭（{n}）',aud_auto_mic:'自動：Windows 預設的麥克風（{n}）',aud_auto_none:'沒有偵測到',aud_missing:'{n}（現在沒有接上）',aud_test:'開始測試',aud_testing:'測試中… {s} 秒',aud_close:'關閉',aud_wait:'還沒測試',aud_sys_ok:'✓ 有收到電腦播放的聲音',aud_sys_no:'✗ 沒有收到電腦播放的聲音：請確認喇叭沒有靜音、音量不是 0；Teams 用別的耳機出聲時，在「進階」選那個耳機',aud_sys_unsupported:'這台電腦不支援這項測試',aud_mic_ok:'✓ 麥克風有聲音',aud_mic_no:'✗ 沒有收到麥克風的聲音：請對著麥克風說話；確認麥克風沒有被靜音，或在下面選另一支麥克風',aud_err:'✗ 打不開這個裝置（{m}）',aud_live:'字幕正在進行中，停止後才能測試；裝置的變更下一場字幕生效。',aud_saved:'已儲存，下一場字幕生效。只看字幕的場合不會用到麥克風。',aud_remote:'只能在安裝這個程式的電腦上設定。',
   ud_title:"有新版本 v{v}",ud_lead:"這一版新增：",ud_none:"這一版有改進與修正。",ud_now:"立即更新（約 1 分鐘）",ud_later:"下次再說",ud_ok:"知道了",
@@ -348,6 +362,7 @@ zh:{
   fs_sub_zh:'中文逐字稿',fs_sub:'翻成中文',fs_sub_hi2zh:'印度・翻成中文'
 },
 en:{
+  mh_title:'A more accurate speech model is recommended',mh_gpu_zh:'This computer has GPU acceleration. With “{n}” (about {m} MB) installed, Chinese and mixed Chinese-English speech is recognized more accurately.',mh_lang:'There is a dedicated model for the language you use often: “{n}” (about {m} MB). It is more accurate than the built-in one.',mh_gpu:'This computer has GPU acceleration and can run the larger model “{n}” (about {m} MB), which is more accurate for all languages.',mh_weak:'This computer is rather slow. With “{n}” (about {m} MB) installed, subtitles keep up better, with a few more mistakes.',mh_it:'Please ask IT to install it under “Models” on the settings page.',mh_install:'Install',mh_down:'Downloading… {d} / {t} MB',mh_inst:'Installing…',mh_done:'Installed. It will be used from the next subtitles.',mh_fail:'The installation did not finish: {e}',mh_close:'Close',
   gpu_title:'This computer has an NVIDIA graphics card',gpu_lead:'Found {n} ({g} GB). With the “GPU pack” installed, speech recognition runs on the graphics card: faster subtitles and a less busy computer.',gpu_s1:'Download the pack (about {m} MB)',gpu_s2:'Double-click to install: it closes this program by itself and needs no administrator',gpu_s3:'When it finishes it checks and tells you the result; open the program again to use the graphics card',gpu_it:'Please ask IT to install the GPU pack.',gpu_get:'Download the pack',gpu_later:'Later',gpu_never:'Do not remind me again',
   aud_btn:'🔊 Sound and microphone: test and choose devices',aud_title:'Sound and microphone',aud_hint:'You can test before starting subtitles: “Start test” plays a short tone; please also say a few words into the microphone. If the bar moves, sound is being received.',aud_sys:'Sound played by this computer (what the other side says)',aud_mic:'Microphone (what I say)',aud_spk_pick:'Advanced: choose which speaker or headset to capture',aud_spk_note:'“Automatic” is right for most people. Choose here only when Teams plays through a different headset or speaker.',aud_auto_spk:'Automatic: the Windows default speaker ({n})',aud_auto_mic:'Automatic: the Windows default microphone ({n})',aud_auto_none:'none found',aud_missing:'{n} (not connected now)',aud_test:'Start test',aud_testing:'Testing… {s} s',aud_close:'Close',aud_wait:'Not tested yet',aud_sys_ok:'✓ Sound from this computer is being received',aud_sys_no:'✗ No sound from this computer: check that the speaker is not muted and the volume is not 0; if Teams plays through another headset, choose it under “Advanced”',aud_sys_unsupported:'This computer does not support this test',aud_mic_ok:'✓ The microphone is working',aud_mic_no:'✗ No sound from the microphone: speak into it; check that it is not muted, or choose another microphone below',aud_err:'✗ This device could not be opened ({m})',aud_live:'Subtitles are running; stop them to test. Device changes apply from the next subtitles.',aud_saved:'Saved; applies from the next subtitles. The microphone is not used when you only read subtitles.',aud_remote:'This can only be set on the computer where the program is installed.',
   ud_title:"New version v{v}",ud_lead:"What is new:",ud_none:"This version has improvements and fixes.",ud_now:"Update now (about 1 minute)",ud_later:"Later",ud_ok:"OK",
@@ -400,6 +415,7 @@ en:{
   fs_sub_zh:'Chinese transcript',fs_sub:'Translated to Chinese',fs_sub_hi2zh:'India · to Chinese'
 },
 id:{
+  mh_title:'Disarankan memasang model suara yang lebih akurat',mh_gpu_zh:'Komputer ini punya akselerasi GPU. Setelah “{n}” (sekitar {m} MB) dipasang, bahasa Mandarin dan campuran Mandarin-Inggris dikenali lebih akurat.',mh_lang:'Ada model khusus untuk bahasa yang sering Anda pakai: “{n}” (sekitar {m} MB). Lebih akurat daripada model bawaan.',mh_gpu:'Komputer ini punya akselerasi GPU dan bisa menjalankan model yang lebih besar “{n}” (sekitar {m} MB), lebih akurat untuk semua bahasa.',mh_weak:'Komputer ini agak lambat. Setelah “{n}” (sekitar {m} MB) dipasang, subtitle lebih bisa mengikuti, dengan sedikit lebih banyak salah ketik.',mh_it:'Minta IT memasangnya di “Model” pada halaman pengaturan.',mh_install:'Pasang',mh_down:'Mengunduh… {d} / {t} MB',mh_inst:'Memasang…',mh_done:'Terpasang. Dipakai mulai subtitle berikutnya.',mh_fail:'Pemasangan tidak selesai: {e}',mh_close:'Tutup',
   gpu_title:'Komputer ini punya kartu grafis NVIDIA',gpu_lead:'Terdeteksi {n} ({g} GB). Setelah “paket GPU” dipasang, pengenalan suara memakai kartu grafis: subtitle lebih cepat dan komputer lebih ringan.',gpu_s1:'Unduh paket (sekitar {m} MB)',gpu_s2:'Klik dua kali untuk memasang: program ini ditutup otomatis dan tidak perlu hak administrator',gpu_s3:'Setelah selesai, paket memeriksa dan memberi tahu hasilnya; buka lagi program untuk memakai kartu grafis',gpu_it:'Minta IT memasang paket GPU.',gpu_get:'Unduh paket',gpu_later:'Nanti saja',gpu_never:'Jangan ingatkan lagi',
   aud_btn:'🔊 Suara dan mikrofon: uji dan pilih perangkat',aud_title:'Suara dan mikrofon',aud_hint:'Anda bisa menguji sebelum memulai subtitle: “Mulai uji” memutar nada pendek; ucapkan juga beberapa kata ke mikrofon. Jika batangnya bergerak, suara diterima.',aud_sys:'Suara yang diputar komputer ini (ucapan lawan bicara)',aud_mic:'Mikrofon (ucapan saya)',aud_spk_pick:'Lanjutan: pilih speaker atau headset yang ditangkap',aud_spk_note:'“Otomatis” cocok untuk kebanyakan orang. Pilih di sini hanya jika Teams bersuara lewat headset atau speaker lain.',aud_auto_spk:'Otomatis: speaker bawaan Windows ({n})',aud_auto_mic:'Otomatis: mikrofon bawaan Windows ({n})',aud_auto_none:'tidak ditemukan',aud_missing:'{n} (sedang tidak terpasang)',aud_test:'Mulai uji',aud_testing:'Menguji… {s} dtk',aud_close:'Tutup',aud_wait:'Belum diuji',aud_sys_ok:'✓ Suara dari komputer ini diterima',aud_sys_no:'✗ Tidak ada suara dari komputer ini: pastikan speaker tidak dibisukan dan volume tidak 0; jika Teams bersuara lewat headset lain, pilih di “Lanjutan”',aud_sys_unsupported:'Komputer ini tidak mendukung uji ini',aud_mic_ok:'✓ Mikrofon berfungsi',aud_mic_no:'✗ Tidak ada suara dari mikrofon: bicaralah ke mikrofon; pastikan tidak dibisukan, atau pilih mikrofon lain di bawah',aud_err:'✗ Perangkat ini tidak bisa dibuka ({m})',aud_live:'Subtitle sedang berjalan; hentikan dulu untuk menguji. Perubahan perangkat berlaku mulai subtitle berikutnya.',aud_saved:'Tersimpan; berlaku mulai subtitle berikutnya. Mikrofon tidak dipakai jika Anda hanya membaca subtitle.',aud_remote:'Hanya bisa diatur di komputer tempat program ini terpasang.',
   ud_title:"Versi baru v{v}",ud_lead:"Yang baru:",ud_none:"Versi ini berisi perbaikan dan penyempurnaan.",ud_now:"Perbarui sekarang (sekitar 1 menit)",ud_later:"Nanti saja",ud_ok:"Mengerti",
@@ -452,6 +468,7 @@ id:{
   fs_sub_zh:'Transkrip Mandarin',fs_sub:'Ke bahasa Mandarin',fs_sub_hi2zh:'India · ke Mandarin'
 },
 vi:{
+  mh_title:'Nên cài mô hình giọng nói chính xác hơn',mh_gpu_zh:'Máy này có tăng tốc GPU. Sau khi cài “{n}” (khoảng {m} MB), tiếng Trung và tiếng Trung pha tiếng Anh được nhận dạng chính xác hơn.',mh_lang:'Có mô hình riêng cho ngôn ngữ bạn hay dùng: “{n}” (khoảng {m} MB). Chính xác hơn mô hình có sẵn.',mh_gpu:'Máy này có tăng tốc GPU và chạy được mô hình lớn hơn “{n}” (khoảng {m} MB), chính xác hơn cho mọi ngôn ngữ.',mh_weak:'Máy này hơi chậm. Sau khi cài “{n}” (khoảng {m} MB), phụ đề theo kịp hơn, nhưng sai chữ nhiều hơn một chút.',mh_it:'Hãy nhờ IT cài trong mục “Models” ở trang cài đặt.',mh_install:'Cài đặt',mh_down:'Đang tải… {d} / {t} MB',mh_inst:'Đang cài…',mh_done:'Đã cài xong. Sẽ dùng từ lần phụ đề sau.',mh_fail:'Cài đặt chưa hoàn tất: {e}',mh_close:'Đóng',
   gpu_title:'Máy này có card đồ họa NVIDIA',gpu_lead:'Đã phát hiện {n} ({g} GB). Sau khi cài “gói GPU”, việc nhận dạng giọng nói dùng card đồ họa: phụ đề nhanh hơn và máy đỡ nặng.',gpu_s1:'Tải gói về (khoảng {m} MB)',gpu_s2:'Bấm đúp để cài: chương trình này tự đóng và không cần quyền quản trị',gpu_s3:'Cài xong gói sẽ tự kiểm tra và báo kết quả; mở lại chương trình để dùng card đồ họa',gpu_it:'Hãy nhờ IT cài gói GPU.',gpu_get:'Tải gói',gpu_later:'Để sau',gpu_never:'Không nhắc lại',
   aud_btn:'🔊 Âm thanh và micro: kiểm tra và chọn thiết bị',aud_title:'Âm thanh và micro',aud_hint:'Bạn có thể kiểm tra trước khi bắt đầu phụ đề: “Bắt đầu kiểm tra” sẽ phát một âm báo ngắn; hãy nói vài câu vào micro. Thanh mức âm chuyển động là đã nhận được âm thanh.',aud_sys:'Âm thanh máy này phát ra (lời người kia nói)',aud_mic:'Micro (lời tôi nói)',aud_spk_pick:'Nâng cao: chọn loa hoặc tai nghe cần thu',aud_spk_note:'Thông thường để “Tự động” là được. Chỉ chọn ở đây khi Teams phát qua tai nghe hoặc loa khác.',aud_auto_spk:'Tự động: loa mặc định của Windows ({n})',aud_auto_mic:'Tự động: micro mặc định của Windows ({n})',aud_auto_none:'không tìm thấy',aud_missing:'{n} (hiện không kết nối)',aud_test:'Bắt đầu kiểm tra',aud_testing:'Đang kiểm tra… {s} giây',aud_close:'Đóng',aud_wait:'Chưa kiểm tra',aud_sys_ok:'✓ Đã nhận được âm thanh máy phát ra',aud_sys_no:'✗ Không nhận được âm thanh máy phát ra: hãy kiểm tra loa không bị tắt tiếng và âm lượng không bằng 0; nếu Teams phát qua tai nghe khác, hãy chọn nó trong “Nâng cao”',aud_sys_unsupported:'Máy này không hỗ trợ phép kiểm tra này',aud_mic_ok:'✓ Micro hoạt động',aud_mic_no:'✗ Không nhận được âm thanh từ micro: hãy nói vào micro; kiểm tra micro không bị tắt tiếng, hoặc chọn micro khác bên dưới',aud_err:'✗ Không mở được thiết bị này ({m})',aud_live:'Phụ đề đang chạy; hãy dừng rồi mới kiểm tra. Thay đổi thiết bị có hiệu lực từ lần phụ đề sau.',aud_saved:'Đã lưu; có hiệu lực từ lần phụ đề sau. Khi chỉ xem phụ đề thì không dùng micro.',aud_remote:'Chỉ cài đặt được trên máy đã cài chương trình này.',
   ud_title:"Có phiên bản mới v{v}",ud_lead:"Có gì mới:",ud_none:"Phiên bản này có cải tiến và sửa lỗi.",ud_now:"Cập nhật ngay (khoảng 1 phút)",ud_later:"Để sau",ud_ok:"Đã hiểu",
@@ -504,6 +521,7 @@ vi:{
   fs_sub_zh:'Bản ghi tiếng Trung',fs_sub:'Dịch sang tiếng Trung',fs_sub_hi2zh:'Ấn Độ · sang tiếng Trung'
 },
 hi:{
+  mh_title:'ज़्यादा सटीक आवाज़ मॉडल इंस्टॉल करने का सुझाव',mh_gpu_zh:'इस कंप्यूटर में GPU एक्सेलेरेशन है। “{n}” (लगभग {m} MB) इंस्टॉल करने पर चीनी और चीनी-अंग्रेज़ी मिली-जुली बोली ज़्यादा सटीक पहचानी जाती है।',mh_lang:'आपकी अक्सर इस्तेमाल होने वाली भाषा के लिए अलग मॉडल है: “{n}” (लगभग {m} MB)। यह बिल्ट-इन मॉडल से ज़्यादा सटीक है।',mh_gpu:'इस कंप्यूटर में GPU एक्सेलेरेशन है और यह बड़ा मॉडल “{n}” (लगभग {m} MB) चला सकता है, जो सभी भाषाओं में ज़्यादा सटीक है।',mh_weak:'यह कंप्यूटर थोड़ा धीमा है। “{n}” (लगभग {m} MB) इंस्टॉल करने पर सबटाइटल बेहतर साथ चलते हैं, पर गलतियाँ थोड़ी ज़्यादा होंगी।',mh_it:'इसे सेटिंग पेज के “Models” में इंस्टॉल करवाने के लिए IT से कहें।',mh_install:'इंस्टॉल करें',mh_down:'डाउनलोड हो रहा है… {d} / {t} MB',mh_inst:'इंस्टॉल हो रहा है…',mh_done:'इंस्टॉल हो गया। अगले सबटाइटल से इस्तेमाल होगा।',mh_fail:'इंस्टॉल पूरा नहीं हुआ: {e}',mh_close:'बंद करें',
   gpu_title:'इस कंप्यूटर में NVIDIA ग्राफ़िक्स कार्ड है',gpu_lead:'{n} ({g} GB) मिला। “GPU पैक” इंस्टॉल करने पर आवाज़ की पहचान ग्राफ़िक्स कार्ड पर चलती है: सबटाइटल तेज़ आते हैं और कंप्यूटर हल्का रहता है।',gpu_s1:'पैक डाउनलोड करें (लगभग {m} MB)',gpu_s2:'इंस्टॉल करने के लिए डबल-क्लिक करें: यह प्रोग्राम अपने आप बंद हो जाता है और एडमिन अधिकार नहीं चाहिए',gpu_s3:'पूरा होने पर पैक जाँच करके नतीजा बताता है; ग्राफ़िक्स कार्ड इस्तेमाल करने के लिए प्रोग्राम फिर खोलें',gpu_it:'GPU पैक इंस्टॉल करवाने के लिए IT से कहें।',gpu_get:'पैक डाउनलोड करें',gpu_later:'बाद में',gpu_never:'दोबारा याद न दिलाएँ',
   aud_btn:'🔊 आवाज़ और माइक्रोफ़ोन: जाँचें और डिवाइस चुनें',aud_title:'आवाज़ और माइक्रोफ़ोन',aud_hint:'सबटाइटल शुरू करने से पहले जाँच सकते हैं: “जाँच शुरू करें” एक छोटी टोन बजाता है; माइक्रोफ़ोन में कुछ शब्द भी बोलें। पट्टी हिले तो आवाज़ मिल रही है।',aud_sys:'इस कंप्यूटर से बजने वाली आवाज़ (सामने वाले की बात)',aud_mic:'माइक्रोफ़ोन (मेरी बात)',aud_spk_pick:'उन्नत: कौन-सा स्पीकर या हेडसेट पकड़ना है, चुनें',aud_spk_note:'ज़्यादातर लोगों के लिए “स्वचालित” ठीक है। यहाँ तभी चुनें जब Teams किसी दूसरे हेडसेट या स्पीकर से बजता हो।',aud_auto_spk:'स्वचालित: Windows का डिफ़ॉल्ट स्पीकर ({n})',aud_auto_mic:'स्वचालित: Windows का डिफ़ॉल्ट माइक्रोफ़ोन ({n})',aud_auto_none:'नहीं मिला',aud_missing:'{n} (अभी जुड़ा नहीं है)',aud_test:'जाँच शुरू करें',aud_testing:'जाँच हो रही है… {s} सेकंड',aud_close:'बंद करें',aud_wait:'अभी जाँच नहीं हुई',aud_sys_ok:'✓ कंप्यूटर की आवाज़ मिल रही है',aud_sys_no:'✗ कंप्यूटर की आवाज़ नहीं मिली: देखें कि स्पीकर म्यूट नहीं है और वॉल्यूम 0 नहीं है; Teams दूसरे हेडसेट से बजता हो तो “उन्नत” में उसे चुनें',aud_sys_unsupported:'यह कंप्यूटर इस जाँच को सपोर्ट नहीं करता',aud_mic_ok:'✓ माइक्रोफ़ोन काम कर रहा है',aud_mic_no:'✗ माइक्रोफ़ोन से आवाज़ नहीं मिली: माइक्रोफ़ोन में बोलें; देखें कि वह म्यूट नहीं है, या नीचे दूसरा माइक्रोफ़ोन चुनें',aud_err:'✗ यह डिवाइस नहीं खुला ({m})',aud_live:'सबटाइटल चल रहे हैं; जाँचने के लिए पहले रोकें। डिवाइस का बदलाव अगले सबटाइटल से लागू होगा।',aud_saved:'सेव हो गया; अगले सबटाइटल से लागू होगा। सिर्फ़ सबटाइटल पढ़ते समय माइक्रोफ़ोन इस्तेमाल नहीं होता।',aud_remote:'यह सिर्फ़ उसी कंप्यूटर पर सेट किया जा सकता है जहाँ प्रोग्राम इंस्टॉल है।',
   ud_title:"नया संस्करण v{v}",ud_lead:"इस संस्करण में नया:",ud_none:"इस संस्करण में सुधार और फ़िक्स हैं।",ud_now:"अभी अपडेट करें (लगभग 1 मिनट)",ud_later:"बाद में",ud_ok:"ठीक है",
@@ -796,6 +814,39 @@ $('gpuLater').onclick=()=>{gpuSave('later');$('gpuDlg').close()};
 $('gpuNever').onclick=()=>{gpuSave('never');$('gpuDlg').close()};
 $('gpuGet').onclick=()=>{gpuSave('later');setTimeout(()=>$('gpuDlg').close(),300)};
 
+/* ── 推薦更適合的語音模型包（r25）：一次推薦一個，可以直接安裝 ─── */
+let mhInfo=null,mhTimer=null;
+function mhSrc(){const v=store.get('pcg_live')||'';return v.startsWith('zh')?'zh':(['id','vi','hi','en','ja','ko'].includes(v)?v:'')}
+async function modelHint(){
+  if($('updDlg').open||$('gpuDlg').open||$('pwDlg').open)return;
+  try{if(sessionStorage.getItem('pcg_mh_pop'))return}catch(e){}
+  let j;try{j=await api('/api/simple/model-hint?src='+mhSrc())}catch(e){return}
+  if(!j||!j.ok||!j.show)return;
+  try{sessionStorage.setItem('pcg_mh_pop','1')}catch(e){}
+  mhInfo=j;const it=j.who==='it';
+  $('mhLead').textContent=t('mh_'+j.why,{n:j.name,m:j.size_mb});
+  $('mhIt').hidden=!it;$('mhGet').hidden=it;$('mhProg').hidden=true;$('mhGet').disabled=false;$('mhGet').textContent=t('mh_install');
+  $('mhLater').hidden=false;$('mhNever').hidden=false;$('mhLater').textContent=t('gpu_later');
+  $('mhDlg').showModal();
+}
+const mhPost=a=>api('/api/simple/model-hint',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:a,id:mhInfo&&mhInfo.id,src:mhSrc()})});
+$('mhLater').onclick=()=>{if(!mhTimer&&!$('mhNever').hidden)mhPost('later');$('mhDlg').close()};
+$('mhNever').onclick=()=>{mhPost('never');$('mhDlg').close()};
+$('mhGet').onclick=async()=>{
+  const b=$('mhGet'),pr=$('mhProg');b.disabled=true;
+  const r=await mhPost('install');
+  if(!r.ok){pr.hidden=false;pr.textContent=t('mh_fail',{e:r.error||r.code||''});b.disabled=false;return}
+  $('mhNever').hidden=true;$('mhLater').textContent=t('mh_close');pr.hidden=false;pr.textContent=t('mh_down',{d:0,t:mhInfo.size_mb});
+  mhTimer=setInterval(async()=>{
+    const s=await api('/api/simple/model-hint?src='+mhSrc());const jb=(s.jobs||{})[mhInfo.id]||{};
+    if(jb.state==='downloading')pr.textContent=t('mh_down',{d:jb.done_mb||0,t:jb.total_mb||mhInfo.size_mb});
+    else if(jb.state==='installing')pr.textContent=t('mh_inst');
+    else if(jb.state==='done'||jb.state==='failed'){clearInterval(mhTimer);mhTimer=null;
+      pr.textContent=jb.state==='done'?t('mh_done'):t('mh_fail',{e:jb.error||''});b.hidden=jb.state==='done';b.disabled=false}
+  },1500);
+};
+$('mhDlg').addEventListener('close',()=>{if(mhTimer){clearInterval(mhTimer);mhTimer=null}});
+
 /* ── 聲音與麥克風（r24）：選裝置、聲音測試 ─────────────── */
 let audState=null,audTimer=null,audCtx=null;
 function audFill(sel,list,saved,autoKey,def){
@@ -1035,7 +1086,7 @@ function showVer(v){const e=document.getElementById('ver');if(!e||!v)return;
     e.hidden=false;e.classList.toggle('ext',cfg.data_scope==='external'||cfg.asr_scope==='external');applyLang()}
   if(cfg.minutes===false){$('langNote').dataset.tHtml='lang_note_local';$('fileNote').dataset.t='file_note_local';applyLang()}
   const live=await initLive();isLocal=!!live.local;
-  if(isLocal){updCheck().then(()=>setTimeout(gpuHint,600));$('updNowW').hidden=false;$('repW').hidden=false;$('updNow').onclick=e=>{e.preventDefault();updCheck(true)}}
+  if(isLocal){updCheck().then(()=>setTimeout(()=>gpuHint().then(()=>modelHint()),600));$('updNowW').hidden=false;$('repW').hidden=false;$('updNow').onclick=e=>{e.preventDefault();updCheck(true)}}
   showTab(store.get('pcg_tab')||(live.local?'pLive':'pFile'));
   if(!store.get('pcg_tour_done'))setTimeout(tourStart,400);
   loadJobs();setInterval(()=>{if(!$('pFile').hidden&&!document.hidden)loadJobs()},4000);

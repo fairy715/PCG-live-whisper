@@ -44,6 +44,11 @@ PACKS = [
     {"id": "whisper-hi-medium", "repo": "vasista22/whisper-hindi-medium", "base": "openai/whisper-medium",
      "name": "Whisper medium 印地語（vasista22）", "languages": ["hi"],
      "note": "比 small 準、慢約 2～3 倍：建議錄音檔用；有 NVIDIA 顯示卡時即時字幕也可以用"},
+    # Breeze ASR 25（聯發科 MediaTek Research，Apache-2.0）：Whisper large-v2 用台灣華語與中英夾雜的資料加強訓練。
+    # large-v2 的解碼層是 large-v3-turbo 的 8 倍，CPU 上即時字幕跑不動：給有 NVIDIA 顯示卡（GPU 加速包）的電腦，或錄音檔
+    {"id": "breeze-asr-25", "repo": "MediaTek-Research/Breeze-ASR-25", "base": "openai/whisper-large-v2",
+     "name": "Breeze ASR 25（台灣華語、中英夾雜）", "languages": ["zh"],
+     "note": "聯發科針對台灣華語與中英夾雜訓練的模型；要 NVIDIA 顯示卡（GPU 加速包）才跑得動即時字幕，CPU 上只適合錄音檔（很慢）"},
     # 多語 Whisper（OpenAI，MIT）：中文等所有語言、雙向、教室模式都用得到；離線安裝檔只附 small
     {"id": "whisper-base", "repo": "openai/whisper-base", "base": "openai/whisper-base", "multilingual": True,
      "name": "Whisper base（多語）", "languages": ALL_LANGS, "say": "id",
@@ -59,7 +64,9 @@ PACKS = [
      "note": "400 多種語言的翻譯模型，印尼文、越南文、印地語比內建的 M2M100 好；約 3 GB，CPU 上一句要幾秒：適合錄音檔、效能好的電腦"},
 ]
 # 試辨識用的句子（espeak-ng 合成，聲音很機械，只確認模型載得起來、輸出是那個語言）
-SAY = {"vi": "Xin chào mọi người, hôm nay chúng ta kiểm tra máy móc mới.",
+ESPEAK_VOICE = {"zh": "cmn"}        # espeak-ng 的語音代號跟語言代號不一樣的
+SAY = {"zh": "大家好，今天我們要檢查新的機器。",
+       "vi": "Xin chào mọi người, hôm nay chúng ta kiểm tra máy móc mới.",
        "id": "Selamat pagi semua, hari ini kita memeriksa mesin baru.",
        "hi": "सभी को नमस्ते, आज हम नई मशीनों की जांच करेंगे।"}
 TRY_MT = [("zh", "id", "設備要先關電源，再做安全檢查。"), ("id", "zh", "Apakah sarung tangan juga wajib?"),
@@ -119,7 +126,7 @@ def build_asr(spec, work, out):
     lang = spec.get("say") or spec["languages"][0]
     wav = work / "say.wav"
     try:
-        subprocess.run(["espeak-ng", "-v", lang, "-w", str(wav), SAY[lang]], check=True, capture_output=True)
+        subprocess.run(["espeak-ng", "-v", ESPEAK_VOICE.get(lang, lang), "-w", str(wav), SAY[lang]], check=True, capture_output=True)
         m = WhisperModel(str(dest), device="cpu", compute_type="int8")
         segs, _ = m.transcribe(read_wav16k(wav), language=lang, beam_size=1)
         text = " ".join(s.text.strip() for s in segs)

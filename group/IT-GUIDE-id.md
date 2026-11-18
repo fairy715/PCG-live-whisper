@@ -230,8 +230,11 @@ Penginstal utama hanya berisi yang dasar (Whisper small, M2M100, Moonshine untuk
 | Whisper small bahasa Indonesia (maleo-ai) | Pengenalan suara bahasa Indonesia | sekitar 240 MB | Apache-2.0 |
 | Whisper medium bahasa Indonesia (cahya) | Pengenalan suara bahasa Indonesia | sekitar 740 MB | Apache-2.0 |
 | Whisper small / medium bahasa Hindi (vasista22) | Pengenalan suara bahasa Hindi | sekitar 240 / 740 MB | Apache-2.0 |
+| Breeze ASR 25 (MediaTek Research, r25) | Pengenalan suara Mandarin Taiwan dan campuran Mandarin-Inggris; ukuran large-v2, perlu kartu NVIDIA untuk subtitle langsung | sekitar 1,5 GB | Apache-2.0 |
 | Whisper base / medium / large-v3-turbo (multibahasa, OpenAI) | "Model pengenalan lokal" untuk semua bahasa (termasuk Mandarin), juga dipakai untuk dua arah dan mode kelas | sekitar 80 / 740 / 800 MB | Apache-2.0 (base, medium) / MIT (large-v3-turbo) |
 | MADLAD-400 3B | Terjemahan lokal (lebih lambat; dalam uji terjemahan ada tambahan isi, bandingkan dulu sebelum mengganti) | sekitar 2,8 GB | Apache-2.0 |
+
+**Rekomendasi otomatis saat halaman dibuka** (r25): berdasarkan komputer ini dan "bahasa lawan bicara" yang terakhir dipilih staf, program merekomendasikan satu paket model yang belum terpasang, satu per satu: akselerasi GPU + Mandarin → Breeze ASR 25; Vietnam / Indonesia / Hindi → paket untuk bahasa itu (medium jika ada akselerasi GPU, small jika tidak); ada akselerasi GPU dan belum ada model multibahasa besar → large-v3-turbo; komputer 2 inti → base. Staf bisa menekan "Pasang" (paket langsung ditetapkan untuk bahasa itu), "Nanti saja" (paket ini diingatkan lagi setelah 7 hari), atau "Jangan ingatkan lagi". Jika "siapa yang boleh memperbarui" hanya IT, jendela hanya meminta staf menghubungi IT. Rekomendasi terkait perangkat keras tidak ditampilkan jika IT sudah menetapkan "model subtitle langsung lokal". Tidak ada rekomendasi jika daftar tidak terbaca (tanpa internet dan tidak ada `catalog.json` di folder bersama) atau ruang disk kurang.
 
 Bahasa Indonesia small memakai maleo-ai/whisper-small-id (Apache-2.0); cahya/whisper-small-id hanya bertanda "cc", sehingga pemakaian komersial tidak bisa dipastikan dan otomatis dilewati saat pembuatan paket.
 

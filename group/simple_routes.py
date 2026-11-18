@@ -333,7 +333,10 @@ class SimpleQueue:
         if pf["local_asr"]:
             args.append("--local-asr")
             # IT 指定的語言模型包（例如越南文用 PhoWhisper）：只用在「對方的語言」錄音（id2zh、vi2zh、hi2zh 與轉錄）
-            lang = job["mode"][:2] if job["mode"] in ("id", "vi", "hi", "id2zh", "vi2zh", "hi2zh") else ""
+            # r25：中文也可以指定（Breeze ASR 25）；雙向的模式（有底線）兩種語言都有，照舊用多語模型
+            _m = job["mode"]
+            lang = (_m.split("2")[0] if "2" in _m else _m) if "_" not in _m else ""
+            lang = lang if lang in ("id", "vi", "hi", "zh") else ""
             pack = lang and model_packs.asr_model_for(self.base, s, lang, "file")
             if pack:
                 args[args.index("-m") + 1] = pack
@@ -902,6 +905,78 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         write_config(cfg)
         return {"ok": True}
 
+    # ─── 開啟程式時推薦更適合的語音模型包（r25，只在這台電腦上） ───
+    _mh = {"assign": {}}
+
+    def _model_hint_state(src=""):
+        from group import hwtier
+        s = settings()
+        now = time.time()
+        if not _cat_cache.get("at") or now - _cat_cache["at"] > 600:
+            cat, errs = model_packs.catalog(share=str(s.get("update_share") or ""),
+                                            fetch=(update_hooks or {}).get("models_fetch"))
+            _cat_cache.update(at=now, cat=cat, errs=errs)
+        inst = model_packs.installed(base_dir)
+        # 推薦安裝的語言模型包裝好了：指定給那個語言用（IT 還沒指定的才設）
+        for pid, lang in list(_mh["assign"].items()):
+            if (model_packs.JOBS.get(pid) or {}).get("state") == "done" and any(m["id"] == pid for m in inst):
+                cfg = read_cfg()
+                ps = cfg.setdefault("pcg_simple", {})
+                cur = ps.setdefault("asr_packs", {}).setdefault(lang, {})
+                for purpose in ("live", "file"):
+                    cur.setdefault(purpose, pid)
+                write_config(cfg)
+                _mh["assign"].pop(pid, None)
+        try:
+            free_mb = shutil.disk_usage(base_dir).free // 1048576
+        except OSError:
+            free_mb = None
+        src = src if src in model_packs.LANGS else ""
+        hw = (update_hooks or {}).get("hw") or hwtier.probe(base_dir)
+        h = hwtier.model_hint(settings(), now, hw, _cat_cache.get("cat") or {}, inst, src, free_mb)
+        jobs = {k: dict(v) for k, v in model_packs.JOBS.items()}
+        return {"ok": True, **h, "who": "it" if s.get("update_who") == "it" else "staff", "jobs": jobs}
+
+    @app.get("/api/simple/model-hint")
+    async def simple_model_hint(request: Request):
+        if not is_local(request):
+            return {"ok": True, "show": False}
+        import asyncio
+        return await asyncio.to_thread(_model_hint_state, str(request.query_params.get("src") or ""))
+
+    @app.post("/api/simple/model-hint")
+    async def simple_model_hint_act(request: Request, body: dict = {}):
+        """同仁對推薦的回應：install（只能裝這次推薦的那一個）、later（7 天後再提醒這一個）、never（不再推薦）"""
+        if not is_local(request):
+            return JSONResponse({"ok": False, "code": "local_only"}, status_code=403)
+        from group import hwtier
+        import asyncio
+        act, pid = body.get("action"), str(body.get("id") or "")
+        if act == "never":
+            cfg = read_cfg()
+            cfg.setdefault("pcg_simple", {})["model_hint"] = {"off": True}
+            write_config(cfg)
+            return {"ok": True}
+        st = await asyncio.to_thread(_model_hint_state, str(body.get("src") or ""))
+        if not st.get("show") or st.get("id") != pid:
+            return JSONResponse({"ok": False, "code": "no_pack", "error": "這個模型包現在沒有推薦"}, status_code=409)
+        if act == "later":
+            cfg = read_cfg()
+            mh = cfg.setdefault("pcg_simple", {}).setdefault("model_hint", {})
+            mh.setdefault("until", {})[pid] = int(time.time()) + hwtier.HINT_LATER_DAYS * 86400
+            write_config(cfg)
+            return {"ok": True}
+        if act != "install":
+            return JSONResponse({"ok": False, "code": "bad_action"}, status_code=400)
+        if st["who"] == "it":
+            return JSONResponse({"ok": False, "code": "it_only", "error": "請找 IT 安裝"}, status_code=403)
+        p = (_cat_cache.get("cat") or {}).get(pid)
+        if not p or not model_packs.install_async(base_dir, p, opener=(update_hooks or {}).get("models_opener")):
+            return JSONResponse({"ok": False, "code": "busy", "error": "這個模型包正在安裝"}, status_code=409)
+        if st.get("lang"):
+            _mh["assign"][pid] = st["lang"]
+        return {"ok": True}
+
     def use_moonshine(s):
         """英文即時字幕要不要用 Moonshine：模型在（離線資源包附）、IT 沒有關掉（english_asr = "whisper"）"""
         if asr_api_on(s):
@@ -966,8 +1041,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             "denoise": True,
             "subtitle_overlay": bool(body.get("overlay")),
         }
-        src = mode.split("2")[0] if "2" in mode else ""
-        if src in ("id", "vi", "hi") and not room and pf["local_asr"]:
+        src = mode.split("2")[0] if "2" in mode else (mode if mode in model_packs.LANGS else "")
+        if src in ("id", "vi", "hi", "zh") and not room and pf["local_asr"]:
             # 單向「對方說印尼文／越南文／印地語」（翻成中文或其他語言）：IT 指定的語言模型包
             # （雙向、教室模式的麥克風那邊是另一種語言，照舊用多語 Whisper）
             pack = model_packs.asr_model_for(base_dir, s, src, "live")

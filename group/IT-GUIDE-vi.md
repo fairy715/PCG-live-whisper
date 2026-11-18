@@ -232,8 +232,11 @@ Bộ cài chính chỉ có phần cơ bản (Whisper small, M2M100, Moonshine ch
 | Whisper small tiếng Indonesia (maleo-ai) | Nhận dạng giọng nói tiếng Indonesia | khoảng 240 MB | Apache-2.0 |
 | Whisper medium tiếng Indonesia (cahya) | Nhận dạng giọng nói tiếng Indonesia | khoảng 740 MB | Apache-2.0 |
 | Whisper small / medium tiếng Hindi (vasista22) | Nhận dạng giọng nói tiếng Hindi | khoảng 240 / 740 MB | Apache-2.0 |
+| Breeze ASR 25 (MediaTek Research, r25) | Nhận dạng tiếng Trung Đài Loan và tiếng Trung pha tiếng Anh; cỡ large-v2, cần card NVIDIA để chạy phụ đề trực tiếp | khoảng 1,5 GB | Apache-2.0 |
 | Whisper base / medium / large-v3-turbo (đa ngôn ngữ, OpenAI) | "Mô hình nhận dạng cục bộ" cho mọi ngôn ngữ (kể cả tiếng Trung), cũng dùng cho hai chiều và chế độ lớp học | khoảng 80 / 740 / 800 MB | Apache-2.0 (base, medium) / MIT (large-v3-turbo) |
 | MADLAD-400 3B | Dịch cục bộ (chậm hơn; khi dịch thử có thêm nội dung không có trong câu gốc, hãy so sánh trước khi đổi) | khoảng 2,8 GB | Apache-2.0 |
+
+**Tự động gợi ý khi mở trang** (r25): dựa trên máy này và "ngôn ngữ của người kia" mà nhân viên chọn lần trước, chương trình gợi ý một gói mô hình chưa cài, mỗi lần một gói: có tăng tốc GPU + tiếng Trung → Breeze ASR 25; tiếng Việt / Indonesia / Hindi → gói của ngôn ngữ đó (medium nếu có tăng tốc GPU, small nếu không); có tăng tốc GPU và chưa có mô hình đa ngôn ngữ lớn → large-v3-turbo; máy 2 nhân → base. Nhân viên có thể bấm "Cài đặt" (gói được tự gán cho ngôn ngữ đó), "Để sau" (nhắc lại gói này sau 7 ngày) hoặc "Không nhắc lại". Khi mục "ai được cập nhật" là chỉ IT, cửa sổ chỉ đề nghị nhân viên liên hệ IT. Không gợi ý theo phần cứng khi IT đã chọn cố định "mô hình phụ đề trực tiếp cục bộ". Không gợi ý khi không đọc được danh sách (không có internet và thư mục dùng chung không có `catalog.json`) hoặc thiếu dung lượng đĩa.
 
 Tiếng Indonesia small dùng maleo-ai/whisper-small-id (Apache-2.0); cahya/whisper-small-id chỉ ghi "cc" nên không xác nhận được việc dùng thương mại, khi đóng gói tự động bỏ qua.
 

@@ -230,8 +230,11 @@ The main installer only contains the basics (Whisper small, M2M100, Moonshine fo
 | Whisper small Indonesian (maleo-ai) | Indonesian speech recognition | about 240 MB | Apache-2.0 |
 | Whisper medium Indonesian (cahya) | Indonesian speech recognition | about 740 MB | Apache-2.0 |
 | Whisper small / medium Hindi (vasista22) | Hindi speech recognition | about 240 / 740 MB | Apache-2.0 |
+| Breeze ASR 25 (MediaTek Research, r25) | Taiwanese Mandarin and mixed Chinese-English speech recognition; large-v2 size, needs an NVIDIA card for live subtitles | about 1.5 GB | Apache-2.0 |
 | Whisper base / medium / large-v3-turbo (multilingual, OpenAI) | The "local recognition model" for all languages (including Chinese), also used for two-way and classroom mode | about 80 / 740 / 800 MB | Apache-2.0 (base, medium) / MIT (large-v3-turbo) |
 | MADLAD-400 3B | Local translation (slower; added content in test translations, compare before switching) | about 2.8 GB | Apache-2.0 |
+
+**Automatic recommendation when the page opens** (r25): based on this computer and the "other side's language" the staff member chose last time, the program recommends one model pack that is not installed yet, one at a time: GPU acceleration + Chinese → Breeze ASR 25; Vietnamese / Indonesian / Hindi → the pack for that language (medium with GPU acceleration, small without); GPU acceleration and no large multilingual model → large-v3-turbo; 2-core computers → base. Staff can press "Install" (the pack is then assigned to that language automatically), "Later" (reminds about this pack again after 7 days) or "Do not remind me again". When "who can update" is IT only, the window only asks staff to contact IT. Hardware-related recommendations are not shown when IT has chosen a fixed "local live subtitle model". Nothing is recommended when the catalog cannot be read (no internet and no `catalog.json` in the shared folder) or disk space is short.
 
 Indonesian small uses maleo-ai/whisper-small-id (Apache-2.0); cahya/whisper-small-id is tagged only "cc", so commercial use cannot be confirmed and the build skips it automatically.
 

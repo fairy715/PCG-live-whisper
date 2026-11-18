@@ -1,5 +1,5 @@
 # PCG 集團版：製作並發布「模型包」（手動執行）
-# 語音辨識：PhoWhisper（越南文）、印尼文 Whisper、印地語 Whisper（各 small、medium），轉成 CTranslate2 int8
+# 語音辨識：PhoWhisper（越南文）、印尼文 Whisper、印地語 Whisper（各 small、medium）、Breeze ASR 25（台灣華語），轉成 CTranslate2 int8
 # 翻譯：MADLAD-400 3B（CTranslate2 int8）
 # 發布在固定的「model-packs」發布頁（不是最新版，不影響一鍵更新），附 catalog.json 給 IT 設定頁的「模型管理」讀。
 # 只做某幾個：在 packs 填代號（逗號分隔）；其他模型包沿用發布頁上原本的。
@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       packs:
-        description: "要做的模型包代號（逗號分隔，空白＝全部）：whisper-base,whisper-medium,whisper-large-v3-turbo,phowhisper-small,phowhisper-medium,whisper-id-small,whisper-id-medium,whisper-hi-small,whisper-hi-medium,madlad400-3b"
+        description: "要做的模型包代號（逗號分隔，空白＝全部）：whisper-base,whisper-medium,whisper-large-v3-turbo,phowhisper-small,phowhisper-medium,whisper-id-small,whisper-id-medium,whisper-hi-small,whisper-hi-medium,madlad400-3b,breeze-asr-25"
         default: ""
         required: false
       notes_only:
