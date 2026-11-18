@@ -5,7 +5,7 @@
 Phụ đề trực tiếp phân biệt ngôn ngữ **theo nguồn âm thanh**:
 
 - **Âm thanh máy tính phát ra** (người bên kia trên Teams/Zoom, video) = ngôn ngữ của bên kia
-- **Micro** (khi chọn "tôi cũng nói") = ngôn ngữ của bạn
+- **Micro** (khi chọn "Tôi cũng nói") = ngôn ngữ của bạn
 
 Vì vậy chỉ **máy tính chủ trì cuộc họp hoặc lớp học** cần cài ứng dụng. Bên kia không cần cài gì.
 
@@ -15,10 +15,10 @@ Vì vậy chỉ **máy tính chủ trì cuộc họp hoặc lớp học** cần 
 
 1. **Bạn nói tiếng gì?** Nhân viên Đài Loan chọn "中文"; nhân viên Indonesia, Việt Nam, Ấn Độ chọn ngôn ngữ của mình.
 2. **Loại cuộc họp nào?**
-   - Họp hoặc lớp online, tôi chỉ đọc phụ đề
-   - Họp hoặc lớp online, tôi cũng nói (đeo tai nghe)
-   - Cùng một phòng học, một micro
-   - Máy phụ đề phòng họp, mọi người xem trên điện thoại (từ r19; mã QR hiện ngay sau khi bấm Bắt đầu và mỗi người tự chọn ngôn ngữ)
+   - Chỉ đọc phụ đề
+   - Tôi cũng nói
+   - Cùng một phòng học
+   - Máy phụ đề phòng họp (từ r19; mã QR hiện ngay sau khi bấm Bắt đầu và mỗi người tự chọn ngôn ngữ)
 3. **Người kia nói tiếng gì?** Nếu bạn chọn tiếng Việt, bạn sẽ thấy "Tiếng Trung → Tiếng Việt" và các ngoại ngữ khác (từ r17; ví dụ "Tiếng Indonesia, sang tiếng Việt").
 
 Lựa chọn lần trước sẽ được ghi nhớ. Nếu không thấy lựa chọn cần dùng, bấm "Hiện tất cả lựa chọn".
@@ -32,7 +32,7 @@ Lựa chọn lần trước sẽ được ghi nhớ. Nếu không thấy lựa c
 | Tiếng Indonesia, sang tiếng Việt (r17) | Tiếng Indonesia | Tiếng Việt | Nhân viên Việt Nam họp với nhân viên Indonesia | Tôi cũng sẽ nói (hai chiều), chế độ lớp học |
 
 Ví dụ: giảng viên Lin dạy Minh ở Việt Nam qua Teams.
-- Máy giảng viên Lin: tôi nói "中文" → "tôi cũng nói" → "Tiếng Việt".
+- Máy giảng viên Lin: tôi nói "中文" → "Tôi cũng nói" → "Tiếng Việt".
 - Máy của Minh: tôi nói "Tiếng Việt" → "Tiếng Trung → Tiếng Việt" được chọn sẵn.
 
 Cách nhớ: tên lựa chọn là ngôn ngữ **người kia** nói; phụ đề hiện bằng ngôn ngữ **của bạn**. Indonesia, Hindi và tiếng Anh cũng vậy.
@@ -44,7 +44,7 @@ Cách nhớ: tên lựa chọn là ngôn ngữ **người kia** nói; phụ đ�
 **Ai cần cài**: chỉ máy của giảng viên. Học viên vào Teams/Zoom như bình thường.
 
 1. Trên máy giảng viên: "Phiên dịch cuộc họp PCG" → "Phụ đề trực tiếp".
-2. Tôi nói "**中文**" → loại cuộc họp "**Họp hoặc lớp online, tôi cũng nói (đeo tai nghe)**" → "**Tiếng Việt**", bấm Bắt đầu.
+2. Tôi nói "**中文**" → loại cuộc họp "**Tôi cũng nói**" → "**Tiếng Việt**", bấm Bắt đầu.
 3. **Đeo tai nghe**, để giọng học viên từ loa không lọt vào micro và bị coi là tiếng Trung.
 
 Phụ đề: tiếng Trung của giảng viên → tiếng Trung + bản dịch tiếng Việt; tiếng Việt của học viên → tiếng Việt + bản dịch tiếng Trung.
@@ -57,14 +57,14 @@ Phụ đề: tiếng Trung của giảng viên → tiếng Trung + bản dịch 
 
 ## 2. Chỉ cần hiểu bên kia nói gì
 
-Tôi nói "中文" → loại cuộc họp "**Họp hoặc lớp online, tôi chỉ đọc phụ đề**" → ngôn ngữ của bên kia, bấm Bắt đầu. Không cần tai nghe.
+Tôi nói "中文" → loại cuộc họp "**Chỉ đọc phụ đề**" → ngôn ngữ của bên kia, bấm Bắt đầu. Không cần tai nghe.
 
 ## 3. Cùng một phòng họp hoặc lớp học, một micro (chế độ lớp học)
 
 > Ví dụ: giảng viên và học viên Việt Nam nói chuyện trong cùng lớp học. (từ v2026.11.5.r9)
 
 1. Kết nối một micro thu được âm thanh cả phòng (micro hội nghị hoặc micro để bàn).
-2. "Phụ đề trực tiếp" → tôi nói "中文" → loại cuộc họp "**Cùng một phòng học, một micro**" → "**Tiếng Việt**" → Bắt đầu. (Indonesia, Hindi và tiếng Anh cũng được.)
+2. "Phụ đề trực tiếp" → tôi nói "中文" → loại cuộc họp "**Cùng một phòng học**" → "**Tiếng Việt**" → Bắt đầu. (Indonesia, Hindi và tiếng Anh cũng được.)
 3. Chiếu phụ đề lên máy chiếu, hoặc học viên quét mã QR từ "Chia sẻ".
 
 Mỗi câu được tự nhận biết là tiếng Trung hay tiếng Việt: tiếng Trung → tiếng Trung + bản dịch tiếng Việt; tiếng Việt → tiếng Việt + bản dịch tiếng Trung.
@@ -96,13 +96,13 @@ Dịch trực tiếp, không qua tiếng Trung. Hai ngôn ngữ bất kỳ trong
 **Họp online (mỗi người trên máy của mình)**
 - Nhân viên Việt Nam: tôi nói "Tiếng Việt" → loại cuộc họp → "Bahasa Indonesia" (phụ đề bằng tiếng Việt).
 - Nhân viên Indonesia: tôi nói "Bahasa Indonesia" → loại cuộc họp → "Tiếng Việt" (phụ đề bằng tiếng Indonesia).
-- Chọn "tôi chỉ đọc phụ đề", hoặc "tôi cũng nói (đeo tai nghe)" để hiện cả bản dịch lời bạn nói.
+- Chọn "Chỉ đọc phụ đề", hoặc "Tôi cũng nói (đeo tai nghe)" để hiện cả bản dịch lời bạn nói.
 
-**Cùng phòng họp, một micro**: trên một máy chọn ngôn ngữ của bạn → "Cùng một phòng học, một micro" → ngôn ngữ của bên kia. Mỗi câu được tự nhận biết rồi dịch sang ngôn ngữ còn lại; dùng "Chia sẻ" để người khác xem trên điện thoại bằng ngôn ngữ họ chọn.
+**Cùng phòng họp, một micro**: trên một máy chọn ngôn ngữ của bạn → "Cùng một phòng học" → ngôn ngữ của bên kia. Mỗi câu được tự nhận biết rồi dịch sang ngôn ngữ còn lại; dùng "Chia sẻ" để người khác xem trên điện thoại bằng ngôn ngữ họ chọn.
 
 **Chất lượng**
 - Mặc định chỉ dùng mô hình cơ bản: Whisper small để nhận dạng và M2M100 trên máy để dịch. Nhận dạng tiếng Indonesia và tiếng Việt có thể sai, bản dịch cũng sai theo.
-- Muốn chính xác hơn, IT có thể cài gói mô hình ngôn ngữ (có ích khi "tôi chỉ đọc phụ đề") hoặc chuyển sang chế độ máy chủ trên trang cài đặt IT để dịch bằng mô hình ngôn ngữ lớn.
+- Muốn chính xác hơn, IT có thể cài gói mô hình ngôn ngữ (có ích khi "Chỉ đọc phụ đề") hoặc chuyển sang chế độ máy chủ trên trang cài đặt IT để dịch bằng mô hình ngôn ngữ lớn.
 - Biên bản từ bản ghi âm vẫn được viết bằng tiếng Trung.
 
 ---
@@ -112,11 +112,11 @@ Dịch trực tiếp, không qua tiếng Trung. Hai ngôn ngữ bất kỳ trong
 Ví dụ quản lý người Đài Loan chủ trì bằng tiếng Trung, có nhân viên Indonesia, Việt Nam, Ấn Độ tham dự, và ai cũng muốn phụ đề bằng ngôn ngữ của mình.
 
 **Họp trực tuyến (Teams): mỗi người mở phụ đề trên máy của mình (dùng được ngay)**
-- **Nhân viên nước ngoài**: trên máy của mình chọn tôi nói "ngôn ngữ của bạn" → "tôi chỉ đọc phụ đề" → "Tiếng Trung". Tiếng Trung trong Teams được dịch sang ngôn ngữ của bạn; mỗi người đọc ngôn ngữ của mình, không ảnh hưởng nhau.
+- **Nhân viên nước ngoài**: trên máy của mình chọn tôi nói "ngôn ngữ của bạn" → "Chỉ đọc phụ đề" → "Tiếng Trung". Tiếng Trung trong Teams được dịch sang ngôn ngữ của bạn; mỗi người đọc ngôn ngữ của mình, không ảnh hưởng nhau.
 - **Nhân viên Đài Loan muốn hiểu lời nhân viên nước ngoài**: chọn "Tiếng Việt" v.v. Mỗi lần chỉ một ngoại ngữ; khi người khác nói ngôn ngữ khác, chọn ngôn ngữ đó rồi bấm Bắt đầu (phiên trước tự được thay).
 
 **Cùng một phòng họp**
-- Dùng "máy phụ đề" của phòng họp (một máy có card đồ họa; cài đặt trong hướng dẫn IT): chọn "**Máy phụ đề phòng họp, mọi người xem trên điện thoại**" và ngôn ngữ mà nhiều người kia nói nhất (ví dụ tiếng Indonesia), bấm Bắt đầu; mã QR hiện ngay, hãy chiếu lên.
+- Dùng "máy phụ đề" của phòng họp (một máy có card đồ họa; cài đặt trong hướng dẫn IT): chọn "**Máy phụ đề phòng họp**" và ngôn ngữ mà nhiều người kia nói nhất (ví dụ tiếng Indonesia), bấm Bắt đầu; mã QR hiện ngay, hãy chiếu lên.
 - Mọi người quét mã QR và tự chọn ngôn ngữ ở góc trên bên phải (phụ đề đa ngôn ngữ, từ r19): người xem tiếng Trung và tiếng Indonesia đọc phụ đề bình thường; với người chọn tiếng Việt, Hindi hoặc Anh, máy phụ đề dịch thêm một bản.
 - Micro chỉ phân biệt tiếng Trung và một ngoại ngữ đã chọn. Nhân viên nói ngôn ngữ khác nên dùng tiếng Anh hoặc nhờ người khác chuyển lời.
 - Nếu trong phòng chỉ có nhân viên Đài Loan nói, hãy chọn "**Mọi người đều nói tiếng Trung**": từ r28 lựa chọn này dùng micro, và nhân viên nước ngoài xem ngôn ngữ của mình qua phụ đề đa ngôn ngữ. (Đến r26 lựa chọn này chỉ nghe âm thanh máy tính phát ra; hãy cập nhật trước.)
@@ -135,12 +135,12 @@ Máy phụ đề có card đồ họa NVIDIA (IT cài sẵn gói GPU và mô hì
 - **Giảng viên**: dạy qua Teams như bình thường, không cần cài gì.
 - **Người vận hành máy phụ đề** (trợ giảng hoặc IT):
   1. Cho máy phụ đề tham gia lớp Teams, tắt micro, loa hoặc tai nghe **không được tắt tiếng** (chương trình nghe âm thanh máy tính phát ra).
-  2. Mở PCG Meeting Translator → tôi nói "中文" → "**Họp hoặc lớp online, tôi chỉ đọc phụ đề**" → "**Mọi người đều nói tiếng Trung**" → Bắt đầu.
+  2. Mở PCG Meeting Translator → tôi nói "中文" → "**Chỉ đọc phụ đề**" → "**Mọi người đều nói tiếng Trung**" → Bắt đầu.
   3. Ở màn hình phụ đề bấm "**Chia sẻ**", rồi dán địa chỉ và mật khẩu nhân viên vào khung chat Teams.
 
 **Máy của giảng viên có card đồ họa: dùng luôn làm máy phụ đề (từ r28)**
 
-Giảng viên dạy trên máy của mình (qua Teams hoặc trong phòng học), không cần máy thứ hai: tôi nói "中文" → "**Cùng một phòng học, một micro**" (hoặc "Máy phụ đề phòng họp, mọi người xem trên điện thoại") → "**Mọi người đều nói tiếng Trung**" → Bắt đầu. Chương trình nghe giảng viên qua **micro** và vẫn nhận dạng bằng Breeze; bấm "Chia sẻ" rồi gửi địa chỉ cho nhân viên ở nước ngoài. Lời học viên nói trong Teams không hiện trên phụ đề (chỉ nghe micro).
+Giảng viên dạy trên máy của mình (qua Teams hoặc trong phòng học), không cần máy thứ hai: tôi nói "中文" → "**Cùng một phòng học**" (hoặc "Máy phụ đề phòng họp") → "**Mọi người đều nói tiếng Trung**" → Bắt đầu. Chương trình nghe giảng viên qua **micro** và vẫn nhận dạng bằng Breeze; bấm "Chia sẻ" rồi gửi địa chỉ cho nhân viên ở nước ngoài. Lời học viên nói trong Teams không hiện trên phụ đề (chỉ nghe micro).
 
 **Vì sao chính xác hơn**
 
@@ -150,15 +150,27 @@ Giảng viên dạy trên máy của mình (qua Teams hoặc trong phòng học)
 
 **Cách khác: mở phụ đề trên máy của bạn**
 
-Tôi nói "Tiếng Việt" → "tôi chỉ đọc phụ đề" → "Tiếng Trung → Tiếng Việt". Việc nhận dạng chạy trên máy của bạn: nếu có card đồ họa NVIDIA, trang sẽ gợi ý cài Breeze ASR 25 và kết quả giống máy phụ đề; laptop thông thường chỉ dùng được mô hình nhỏ có sẵn, nên độ chính xác tiếng Trung không tăng.
+Tôi nói "Tiếng Việt" → "Chỉ đọc phụ đề" → "Tiếng Trung → Tiếng Việt". Việc nhận dạng chạy trên máy của bạn: nếu có card đồ họa NVIDIA, trang sẽ gợi ý cài Breeze ASR 25 và kết quả giống máy phụ đề; laptop thông thường chỉ dùng được mô hình nhỏ có sẵn, nên độ chính xác tiếng Trung không tăng.
 
 **Hạn chế**
 
-- "Mọi người đều nói tiếng Trung" nghe nguồn nào là tùy loại cuộc họp (từ r28; trang sẽ ghi rõ sau khi chọn): "tôi chỉ đọc phụ đề" nghe **âm thanh máy tính phát ra** (máy phụ đề tham gia Teams và nghe giảng viên); "Cùng một phòng học" và "Máy phụ đề phòng họp" nghe **micro** (giảng viên nói vào máy này hoặc micro của phòng). Đến r26 luôn là âm thanh máy tính phát ra.
+- "Mọi người đều nói tiếng Trung" nghe nguồn nào là tùy loại cuộc họp (từ r28; trang sẽ ghi rõ sau khi chọn): "Chỉ đọc phụ đề" nghe **âm thanh máy tính phát ra** (máy phụ đề tham gia Teams và nghe giảng viên); "Cùng một phòng học" và "Máy phụ đề phòng họp" nghe **micro** (giảng viên nói vào máy này hoặc micro của phòng). Đến r26 luôn là âm thanh máy tính phát ra.
 - Mỗi phiên chỉ nghe một nguồn: khi nghe micro thì không nghe được người khác trong Teams, khi nghe âm thanh máy tính thì không nghe được micro của máy này.
 - Nhà máy nước ngoài phải kết nối được tới máy phụ đề qua mạng công ty (cổng 19781). Hãy hỏi IT hoặc nhóm mạng trước xem truy cập giữa các nhà máy có được không.
 - Chất lượng bản dịch phụ thuộc vào cài đặt của IT: chế độ cục bộ (M2M100) ở mức trung bình với tiếng Indonesia và tiếng Việt; chế độ máy chủ (mô hình lớn) tốt hơn nhiều.
 - Cách này kết hợp các tính năng sẵn có. Độ trễ của Breeze với phụ đề trực tiếp, việc thu âm bằng micro, truy cập giữa các nhà máy và nhiều người xem cùng lúc chưa được thử trên máy thật, nên hãy thử trước với một buổi học.
+
+---
+
+## Những trợ giúp trên màn hình (r29)
+
+- **Câu xác nhận trước khi bắt đầu**: phía trên nút có dòng “Bạn sẽ nghe: tiếng Trung → phụ đề: tiếng Việt”. Nếu không đúng ý bạn thì bước 3 đang bị ngược; hãy đổi lại rồi mới bắt đầu.
+- **Giống lần trước**: sau lần dùng đầu tiên, trang chỉ hiện lựa chọn lần trước và nút “Bắt đầu”. Bấm “Thay đổi” bên cạnh để chọn ngôn ngữ hoặc loại cuộc họp khác.
+- **Nhân viên nói ngoại ngữ**: khi đã chọn ngôn ngữ của mình, “Tiếng Trung → ngôn ngữ của bạn” đã được chọn sẵn; chỉ đổi khi cần ngôn ngữ khác.
+- **Nút màu xám**: còn bước chưa chọn; bấm vào, trang sẽ cho biết còn thiếu bước nào.
+- **Biểu tượng micro ở góc trên bên trái màn hình phụ đề**: chuyển động khi chương trình đang nghe mà chưa ai nói, đứng yên khi phụ đề đang hiện. Biểu tượng kết nối màu cam nghĩa là mất kết nối và đang kết nối lại.
+- **Máy phụ đề phòng họp**: mở ra là chế độ phụ đề chữ lớn; dùng A−/A+ ở góc trên bên phải để đổi từng cỡ chữ.
+- **Lần đầu mở trang** chỉ có phần hướng dẫn; gợi ý cập nhật và cài đặt sẽ chờ lần sau, và không bao giờ hiện khi phụ đề đang chạy.
 
 ---
 

@@ -22,6 +22,7 @@
 ## 3. 檢查
 - `python3 -m unittest discover -s group/tests`
 - `node group/tests/check_i18n.js`
+- 介面文字有改時：用最長的語言（印尼文、越南文）截圖看一次，按鈕和卡片不要被撐成很多行（r29 紅隊審查的建議）
 - `python3 group/windows/whats_new_prep.py <版本> <輸出>`：確認新功能說明會被附上
 
 ## 4. 打包與驗證

@@ -1,29 +1,39 @@
 {
  "_說明": "下一版發布時同仁頁面「有新版本」視窗顯示的新功能（每種語言 2～5 點，一點一句）。release 要等於這一次發布的 rN，發布流程才會附上；每次發布前更新這個檔",
- "release": "r28",
+ "release": "r29",
  "zh": [
-  "「同一間教室」和「會議室字幕機」選「大家都說中文」時，改用麥克風收音：老師用自己的電腦或教室的麥克風講課，其他人按「分享」連進來看自己語言的字幕",
-  "選「大家都說中文」後，畫面會寫清楚這一場收的是麥克風，還是電腦播放的聲音",
-  "IT 可以指定中文用更準的模型（Breeze ASR 25，需要 NVIDIA 顯示卡）"
+  "畫面更清楚：場合改成圖示加短標題；開始前會顯示「你會聽到什麼語言 → 字幕是什麼語言」，選反了一眼就看得出來",
+  "開過字幕之後，下次打開只要按「開始」；要換語言或場合再按「修改」",
+  "外語同仁：已經幫你選好「對方說中文 → 翻成你的語言」",
+  "字幕畫面會顯示正在聽、重新連線中；會議室字幕機一開就是大字，A−／A+ 一次跳一檔",
+  "手機看字幕時，密碼改在畫面上的視窗輸入，不會顯示出來"
  ],
  "en": [
-  "“Same classroom” and “Meeting room subtitle computer” with “Everyone speaks Chinese” now use the microphone: the teacher speaks into this computer or the room microphone, and others join through “Share” to read their own language",
-  "After you choose “Everyone speaks Chinese”, the page says whether this session listens to the microphone or to what the computer plays",
-  "IT can assign a more accurate model to Chinese (Breeze ASR 25, needs an NVIDIA graphics card)"
+  "Clearer screen: scenes now have icons and short names; before starting, the page shows “You will hear … → subtitles in …”, so a wrong choice is obvious",
+  "After your first session, just press “Start” next time; press “Change” to pick another language or scene",
+  "Foreign-language staff: “Chinese → your language” is already selected for you",
+  "The subtitle screen shows when it is listening or reconnecting; the room subtitle computer opens in large text, and A−/A+ jump one size at a time",
+  "On phones, the password is typed in a window on the page and is hidden"
  ],
  "id": [
-  "“Satu ruang kelas” dan “Komputer subtitle ruang rapat” dengan “Semua berbahasa Mandarin” kini memakai mikrofon: pengajar berbicara ke komputer ini atau mikrofon ruangan, orang lain tersambung lewat “Bagikan” dan membaca bahasanya sendiri",
-  "Setelah memilih “Semua berbahasa Mandarin”, halaman menuliskan apakah sesi ini mendengarkan mikrofon atau suara yang diputar komputer",
-  "IT bisa menetapkan model yang lebih akurat untuk bahasa Mandarin (Breeze ASR 25, perlu kartu grafis NVIDIA)"
+  "Layar lebih jelas: jenis rapat kini memakai ikon dan nama pendek; sebelum mulai, halaman menampilkan “Anda mendengar … → subtitle …”, jadi pilihan yang salah langsung terlihat",
+  "Setelah sesi pertama, lain kali cukup tekan “Mulai”; tekan “Ubah” untuk memilih bahasa atau jenis rapat lain",
+  "Staf berbahasa asing: “Mandarin → bahasa Anda” sudah dipilihkan",
+  "Layar subtitle menunjukkan saat sedang mendengarkan atau menyambung ulang; komputer subtitle ruangan langsung memakai huruf besar, dan A−/A+ berpindah satu ukuran",
+  "Di ponsel, kata sandi diketik di jendela pada halaman dan disembunyikan"
  ],
  "vi": [
-  "“Cùng một phòng học” và “Máy phụ đề phòng họp” khi chọn “Mọi người đều nói tiếng Trung” nay dùng micro: giảng viên nói vào máy này hoặc micro của phòng, người khác kết nối qua “Chia sẻ” để xem ngôn ngữ của mình",
-  "Sau khi chọn “Mọi người đều nói tiếng Trung”, trang ghi rõ phiên này nghe micro hay âm thanh máy tính phát ra",
-  "IT có thể chỉ định mô hình chính xác hơn cho tiếng Trung (Breeze ASR 25, cần card đồ họa NVIDIA)"
+  "Màn hình rõ hơn: loại cuộc họp có biểu tượng và tên ngắn; trước khi bắt đầu, trang hiện “Bạn sẽ nghe … → phụ đề …”, chọn sai sẽ thấy ngay",
+  "Sau lần dùng đầu tiên, lần sau chỉ cần bấm “Bắt đầu”; bấm “Thay đổi” để chọn ngôn ngữ hoặc loại cuộc họp khác",
+  "Nhân viên nói ngoại ngữ: đã chọn sẵn “Tiếng Trung → ngôn ngữ của bạn”",
+  "Màn hình phụ đề cho biết đang nghe hay đang kết nối lại; máy phụ đề phòng họp mở ra là chữ lớn, A−/A+ đổi từng cỡ",
+  "Trên điện thoại, mật khẩu được nhập trong cửa sổ trên trang và được ẩn đi"
  ],
  "hi": [
-  "“एक ही क्लासरूम” और “मीटिंग रूम सबटाइटल कंप्यूटर” में “सभी चीनी बोलते हैं” चुनने पर अब माइक्रोफ़ोन इस्तेमाल होता है: शिक्षक इसी कंप्यूटर या कमरे के माइक्रोफ़ोन में बोलें, बाकी लोग “शेयर करें” से जुड़कर अपनी भाषा पढ़ें",
-  "“सभी चीनी बोलते हैं” चुनने के बाद पेज बताता है कि यह सत्र माइक्रोफ़ोन सुन रहा है या कंप्यूटर पर चल रही आवाज़",
-  "IT चीनी के लिए ज़्यादा सटीक मॉडल तय कर सकता है (Breeze ASR 25, NVIDIA ग्राफ़िक्स कार्ड ज़रूरी)"
+  "स्क्रीन ज़्यादा साफ़: मीटिंग के प्रकार अब आइकन और छोटे नाम के साथ हैं; शुरू करने से पहले पेज दिखाता है “आप सुनेंगे … → सबटाइटल …”, गलत चुनाव तुरंत दिख जाता है",
+  "पहली बार के बाद, अगली बार बस “शुरू करें” दबाएँ; भाषा या मीटिंग का प्रकार बदलने के लिए “बदलें” दबाएँ",
+  "विदेशी भाषा वाले सहकर्मी: “चीनी → आपकी भाषा” पहले से चुना हुआ है",
+  "सबटाइटल स्क्रीन बताती है कि सुन रही है या दोबारा जुड़ रही है; मीटिंग रूम का सबटाइटल कंप्यूटर बड़े अक्षरों में खुलता है, A−/A+ एक-एक आकार बदलते हैं",
+  "फ़ोन पर पासवर्ड पेज की विंडो में डाला जाता है और छिपा रहता है"
  ]
 }

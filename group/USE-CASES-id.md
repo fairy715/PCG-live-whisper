@@ -5,7 +5,7 @@
 Subtitle langsung membedakan bahasa **dari sumber suara**:
 
 - **Suara yang diputar komputer** (lawan bicara di Teams/Zoom, video) = bahasa lawan bicara
-- **Mikrofon** (jika memilih "saya juga berbicara") = bahasa Anda sendiri
+- **Mikrofon** (jika memilih "Saya juga berbicara") = bahasa Anda sendiri
 
 Jadi hanya **komputer yang menjalankan rapat atau kelas** yang perlu memasang aplikasi. Pihak lain tidak perlu memasang apa pun.
 
@@ -15,10 +15,10 @@ Jadi hanya **komputer yang menjalankan rapat atau kelas** yang perlu memasang ap
 
 1. **Anda berbicara bahasa apa?** Karyawan Taiwan memilih "中文"; karyawan Indonesia, Vietnam, dan India memilih bahasanya sendiri.
 2. **Jenis rapat apa?**
-   - Rapat atau kelas online, saya hanya membaca subtitle
-   - Rapat atau kelas online, saya juga berbicara (pakai headset)
-   - Satu ruang kelas, satu mikrofon
-   - Komputer subtitle ruang rapat, semua membaca di ponsel (mulai r19; kode QR langsung tampil setelah Mulai dan setiap orang memilih bahasanya sendiri)
+   - Hanya baca subtitle
+   - Saya juga berbicara
+   - Satu ruang kelas
+   - Komputer subtitle (mulai r19; kode QR langsung tampil setelah Mulai dan setiap orang memilih bahasanya sendiri)
 3. **Lawan bicara berbahasa apa?** Jika Anda memilih bahasa Indonesia, Anda melihat "Mandarin → Indonesia" dan bahasa asing lain (mulai r17; mis. "Bahasa Vietnam, ke Indonesia").
 
 Pilihan terakhir Anda akan diingat. Jika opsi yang dicari tidak muncul, klik "Tampilkan semua pilihan".
@@ -32,7 +32,7 @@ Pilihan terakhir Anda akan diingat. Jika opsi yang dicari tidak muncul, klik "Ta
 | Bahasa Vietnam, ke Indonesia (r17) | Bahasa Vietnam | Bahasa Indonesia | Karyawan Indonesia yang rapat dengan karyawan Vietnam | Saya juga berbicara (dua arah), mode kelas |
 
 Contoh: Guru Lin mengajar Budi di Indonesia lewat Teams.
-- Komputer Guru Lin: saya berbicara "中文" → "saya juga berbicara" → "Bahasa Indonesia".
+- Komputer Guru Lin: saya berbicara "中文" → "Saya juga berbicara" → "Bahasa Indonesia".
 - Komputer Budi: saya berbicara "Bahasa Indonesia" → "Mandarin → Indonesia" langsung terpilih.
 
 Cara mengingat: nama opsi adalah bahasa **lawan bicara**; subtitle muncul dalam bahasa **Anda**. Vietnam, Hindi, dan Inggris juga sama.
@@ -44,7 +44,7 @@ Cara mengingat: nama opsi adalah bahasa **lawan bicara**; subtitle muncul dalam 
 **Siapa yang memasang**: hanya komputer pengajar. Siswa ikut Teams/Zoom seperti biasa.
 
 1. Di komputer pengajar: "Penerjemah Rapat PCG" → "Subtitle langsung".
-2. Saya berbicara "**中文**" → jenis rapat "**Rapat atau kelas online, saya juga berbicara (pakai headset)**" → "**Bahasa Indonesia**", klik Mulai.
+2. Saya berbicara "**中文**" → jenis rapat "**Saya juga berbicara**" → "**Bahasa Indonesia**", klik Mulai.
 3. **Pakai headphone**, agar suara siswa dari speaker tidak masuk ke mikrofon dan dianggap bahasa Mandarin.
 
 Subtitle: bahasa Mandarin pengajar → Mandarin + terjemahan Indonesia; bahasa Indonesia siswa → Indonesia + terjemahan Mandarin.
@@ -57,14 +57,14 @@ Subtitle: bahasa Mandarin pengajar → Mandarin + terjemahan Indonesia; bahasa I
 
 ## 2. Hanya ingin memahami lawan bicara
 
-Saya berbicara "中文" → jenis rapat "**Rapat atau kelas online, saya hanya membaca subtitle**" → bahasa lawan bicara, klik Mulai. Tidak perlu headphone.
+Saya berbicara "中文" → jenis rapat "**Hanya baca subtitle**" → bahasa lawan bicara, klik Mulai. Tidak perlu headphone.
 
 ## 3. Satu ruang rapat atau kelas, satu mikrofon (mode kelas)
 
 > Contoh: pengajar dan siswa Indonesia berbicara di kelas yang sama. (mulai v2026.11.5.r9)
 
 1. Pasang mikrofon yang bisa menangkap suara seluruh ruangan (mikrofon rapat atau mikrofon meja).
-2. "Subtitle langsung" → saya berbicara "中文" → jenis rapat "**Satu ruang kelas, satu mikrofon**" → "**Bahasa Indonesia**" → Mulai. (Vietnam, Hindi, dan Inggris juga bisa.)
+2. "Subtitle langsung" → saya berbicara "中文" → jenis rapat "**Satu ruang kelas**" → "**Bahasa Indonesia**" → Mulai. (Vietnam, Hindi, dan Inggris juga bisa.)
 3. Tampilkan subtitle di proyektor, atau siswa memindai kode QR dari "Bagikan".
 
 Setiap kalimat dikenali otomatis sebagai Mandarin atau Indonesia: Mandarin → Mandarin + terjemahan Indonesia; Indonesia → Indonesia + terjemahan Mandarin.
@@ -96,13 +96,13 @@ Diterjemahkan langsung, tidak lewat bahasa Mandarin. Dua bahasa mana pun dari In
 **Rapat online (masing-masing di komputernya sendiri)**
 - Karyawan Indonesia: saya berbicara "Bahasa Indonesia" → jenis rapat → "Bahasa Vietnam" (subtitle dalam bahasa Indonesia).
 - Karyawan Vietnam: saya berbicara "Tiếng Việt" → jenis rapat → "Bahasa Indonesia" (subtitle dalam bahasa Vietnam).
-- Pilih "saya hanya membaca subtitle", atau "saya juga berbicara (pakai headset)" agar terjemahan ucapan Anda juga tampil.
+- Pilih "Hanya baca subtitle", atau "Saya juga berbicara (pakai headset)" agar terjemahan ucapan Anda juga tampil.
 
-**Satu ruang rapat, satu mikrofon**: di satu komputer pilih bahasa Anda → "Satu ruang kelas, satu mikrofon" → bahasa lawan bicara. Setiap kalimat dikenali lalu diterjemahkan ke bahasa lainnya; gunakan "Bagikan" agar orang lain bisa mengikuti di ponsel dalam bahasa pilihannya.
+**Satu ruang rapat, satu mikrofon**: di satu komputer pilih bahasa Anda → "Satu ruang kelas" → bahasa lawan bicara. Setiap kalimat dikenali lalu diterjemahkan ke bahasa lainnya; gunakan "Bagikan" agar orang lain bisa mengikuti di ponsel dalam bahasa pilihannya.
 
 **Kualitas**
 - Secara bawaan hanya model dasar yang dipakai: Whisper small untuk pengenalan suara dan M2M100 di komputer untuk terjemahan. Pengenalan bahasa Indonesia dan Vietnam bisa salah, dan terjemahan ikut salah.
-- Agar lebih akurat, IT dapat memasang paket model bahasa (membantu untuk "saya hanya membaca subtitle") atau beralih ke mode server di halaman pengaturan IT agar diterjemahkan oleh model bahasa besar.
+- Agar lebih akurat, IT dapat memasang paket model bahasa (membantu untuk "Hanya baca subtitle") atau beralih ke mode server di halaman pengaturan IT agar diterjemahkan oleh model bahasa besar.
 - Notulen dari rekaman masih ditulis dalam bahasa Mandarin.
 
 ---
@@ -112,11 +112,11 @@ Diterjemahkan langsung, tidak lewat bahasa Mandarin. Dua bahasa mana pun dari In
 Misalnya atasan dari Taiwan memimpin rapat dalam bahasa Mandarin, dihadiri karyawan Indonesia, Vietnam, dan India, dan setiap orang ingin subtitle dalam bahasanya sendiri.
 
 **Rapat online (Teams): setiap orang membuka subtitle di komputernya sendiri (sudah bisa)**
-- **Karyawan asing**: di komputer sendiri pilih saya berbicara "bahasa Anda" → "saya hanya membaca subtitle" → "Mandarin". Bahasa Mandarin di Teams diterjemahkan ke bahasa Anda; setiap orang membaca bahasanya sendiri.
+- **Karyawan asing**: di komputer sendiri pilih saya berbicara "bahasa Anda" → "Hanya baca subtitle" → "Mandarin". Bahasa Mandarin di Teams diterjemahkan ke bahasa Anda; setiap orang membaca bahasanya sendiri.
 - **Karyawan Taiwan yang ingin memahami ucapan karyawan asing**: pilih "Bahasa Indonesia" dan seterusnya. Hanya satu bahasa asing sekaligus; saat orang lain berbicara bahasa lain, pilih bahasa itu lalu klik Mulai (sesi sebelumnya otomatis diganti).
 
 **Satu ruang rapat**
-- Gunakan "komputer subtitle" ruang rapat (satu komputer dengan kartu grafis; pengaturan di panduan IT): pilih "**Komputer subtitle ruang rapat, semua membaca di ponsel**" dan bahasa yang paling banyak dipakai peserta lain (mis. Indonesia), klik Mulai; kode QR langsung tampil, tampilkan di proyektor.
+- Gunakan "komputer subtitle" ruang rapat (satu komputer dengan kartu grafis; pengaturan di panduan IT): pilih "**Komputer subtitle**" dan bahasa yang paling banyak dipakai peserta lain (mis. Indonesia), klik Mulai; kode QR langsung tampil, tampilkan di proyektor.
 - Semua orang memindai kode QR dan memilih bahasanya sendiri di kanan atas (subtitle multibahasa, mulai r19): penonton Mandarin dan Indonesia membaca subtitle biasa; untuk penonton Vietnam, Hindi, atau Inggris, komputer subtitle menerjemahkan satu salinan lagi.
 - Mikrofon hanya membedakan Mandarin dan satu bahasa asing yang dipilih. Karyawan yang berbicara bahasa lain sebaiknya memakai bahasa Inggris atau dibantu orang lain.
 - Jika hanya karyawan Taiwan yang berbicara di ruangan, pilih "**Semua berbahasa Mandarin**": mulai r28 pilihan ini memakai mikrofon, dan karyawan asing membaca bahasanya sendiri lewat subtitle multibahasa. (Sampai r26 pilihan ini hanya mendengarkan suara yang diputar komputer; perbarui dulu.)
@@ -135,12 +135,12 @@ Komputer subtitle punya kartu grafis NVIDIA (IT memasang paket GPU dan model Man
 - **Pengajar**: mengajar lewat Teams seperti biasa, tidak perlu memasang apa pun.
 - **Yang menjalankan komputer subtitle** (asisten atau IT):
   1. Komputer subtitle bergabung ke kelas Teams, mikrofon dimatikan, speaker atau headset **jangan dibisukan** (program mendengarkan suara yang diputar komputer).
-  2. Buka PCG Meeting Translator → saya berbicara "中文" → "**Rapat atau kelas online, saya hanya membaca subtitle**" → "**Semua berbahasa Mandarin**" → Mulai.
+  2. Buka PCG Meeting Translator → saya berbicara "中文" → "**Hanya baca subtitle**" → "**Semua berbahasa Mandarin**" → Mulai.
   3. Di layar subtitle tekan "**Bagikan**", lalu tempel alamat dan kata sandi staf ke chat Teams.
 
 **Komputer pengajar punya kartu grafis: langsung jadi komputer subtitle (mulai r28)**
 
-Pengajar mengajar di komputernya sendiri (lewat Teams atau di ruang kelas), tanpa komputer kedua: saya berbicara "中文" → "**Satu ruang kelas, satu mikrofon**" (atau "Komputer subtitle ruang rapat, semua membaca di ponsel") → "**Semua berbahasa Mandarin**" → Mulai. Program mendengarkan pengajar lewat **mikrofon** dan tetap mengenali dengan Breeze; tekan "Bagikan" lalu berikan alamatnya ke karyawan di luar negeri. Ucapan peserta di Teams tidak muncul di subtitle (hanya mikrofon).
+Pengajar mengajar di komputernya sendiri (lewat Teams atau di ruang kelas), tanpa komputer kedua: saya berbicara "中文" → "**Satu ruang kelas**" (atau "Komputer subtitle") → "**Semua berbahasa Mandarin**" → Mulai. Program mendengarkan pengajar lewat **mikrofon** dan tetap mengenali dengan Breeze; tekan "Bagikan" lalu berikan alamatnya ke karyawan di luar negeri. Ucapan peserta di Teams tidak muncul di subtitle (hanya mikrofon).
 
 **Mengapa lebih akurat**
 
@@ -150,15 +150,27 @@ Pengajar mengajar di komputernya sendiri (lewat Teams atau di ruang kelas), tanp
 
 **Cara lain: membuka subtitle di komputer Anda sendiri**
 
-Saya berbicara "Bahasa Indonesia" → "saya hanya membaca subtitle" → "Mandarin → Indonesia". Pengenalan berjalan di komputer Anda: jika ada kartu grafis NVIDIA, halaman menyarankan memasang Breeze ASR 25 dan hasilnya sama dengan komputer subtitle; laptop biasa hanya bisa memakai model kecil bawaan, jadi akurasi bahasa Mandarin tidak meningkat.
+Saya berbicara "Bahasa Indonesia" → "Hanya baca subtitle" → "Mandarin → Indonesia". Pengenalan berjalan di komputer Anda: jika ada kartu grafis NVIDIA, halaman menyarankan memasang Breeze ASR 25 dan hasilnya sama dengan komputer subtitle; laptop biasa hanya bisa memakai model kecil bawaan, jadi akurasi bahasa Mandarin tidak meningkat.
 
 **Batasan**
 
-- Suara yang didengarkan "Semua berbahasa Mandarin" bergantung pada jenis rapat (mulai r28; halaman menuliskannya setelah dipilih): "saya hanya membaca subtitle" mendengarkan **suara yang diputar komputer** (komputer subtitle yang ikut Teams dan mendengar pengajar); "Satu ruang kelas" dan "Komputer subtitle ruang rapat" mendengarkan **mikrofon** (pengajar berbicara ke komputer ini atau mikrofon ruangan). Sampai r26 selalu suara yang diputar komputer.
+- Suara yang didengarkan "Semua berbahasa Mandarin" bergantung pada jenis rapat (mulai r28; halaman menuliskannya setelah dipilih): "Hanya baca subtitle" mendengarkan **suara yang diputar komputer** (komputer subtitle yang ikut Teams dan mendengar pengajar); "Satu ruang kelas" dan "Komputer subtitle" mendengarkan **mikrofon** (pengajar berbicara ke komputer ini atau mikrofon ruangan). Sampai r26 selalu suara yang diputar komputer.
 - Satu sesi mendengarkan satu sumber: dengan mikrofon, ucapan orang lain di Teams tidak terdengar; dengan suara komputer, mikrofon komputer ini tidak terdengar.
 - Pabrik luar negeri harus bisa menjangkau komputer subtitle lewat jaringan perusahaan (port 19781). Tanyakan dulu ke IT atau tim jaringan apakah akses antar lokasi bisa.
 - Kualitas terjemahan bergantung pada pengaturan IT: mode lokal (M2M100) biasa saja untuk bahasa Indonesia dan Vietnam; mode server (model besar) jauh lebih baik.
 - Cara ini menggabungkan fitur yang sudah ada. Jeda Breeze pada subtitle langsung, penangkapan suara lewat mikrofon, akses antar lokasi, dan banyak penonton sekaligus belum diuji di komputer nyata, jadi coba dulu pada satu kelas.
+
+---
+
+## Bantuan di layar (r29)
+
+- **Kalimat konfirmasi sebelum mulai**: di atas tombol tertulis “Anda mendengar: Mandarin → subtitle: Indonesia”. Jika tidak sesuai harapan, langkah 3 terbalik; ubah dulu sebelum mulai.
+- **Sama seperti terakhir kali**: setelah sesi pertama, halaman hanya menampilkan pilihan terakhir dan “Mulai”. Tekan “Ubah” di sampingnya untuk memilih bahasa atau jenis rapat lain.
+- **Staf berbahasa asing**: setelah memilih bahasa Anda, “Mandarin → bahasa Anda” sudah dipilihkan; ubah hanya jika perlu bahasa lain.
+- **Tombol berwarna abu-abu**: masih ada yang belum dipilih; tekan tombol itu dan halaman memberi tahu langkah mana yang kurang.
+- **Ikon mikrofon di kiri atas layar subtitle**: bergerak saat program mendengarkan dan belum ada yang berbicara, diam saat subtitle sedang muncul. Ikon sambungan berwarna oranye berarti koneksi terputus dan sedang disambung ulang.
+- **Komputer subtitle**: langsung terbuka dalam mode subtitle huruf besar; pakai A−/A+ di kanan atas untuk mengubah ukuran satu tingkat.
+- **Saat pertama kali membuka halaman** hanya panduan yang muncul; saran pembaruan dan pemasangan menunggu sampai lain kali, dan tidak pernah muncul saat subtitle berjalan.
 
 ---
 

@@ -198,7 +198,7 @@ Mục "**Speech recognition API**" trong trang cài đặt IT chuyển việc nh
 - Chế độ "Tôi cũng nói" (hai chiều) vẫn gửi âm thanh chồng lấn mỗi 3 giây, lượng dùng khoảng 1,7 lần so với một chiều
 - **Groq (r26)**: bấm "Groq (free tier)" trong trang cài đặt để điền sẵn địa chỉ và mô hình, dán khóa rồi bấm "Test connection". Nhận dạng dùng Whisper large-v3, chính xác hơn mô hình small có sẵn; chương trình vẫn gửi cho API trước và quay về máy này khi API không dùng được
   - **Hạn mức miễn phí có giới hạn, dùng chung cho cả tài khoản.** Số liệu do các trang bên thứ ba tổng hợp (Groq có thể thay đổi bất cứ lúc nào; hãy xem [trang giới hạn trong bảng điều khiển Groq](https://console.groq.com/settings/limits)): khoảng 20 yêu cầu mỗi phút, khoảng 2.000 yêu cầu mỗi ngày, khoảng 7.200 giây âm thanh mỗi giờ và khoảng 28.800 giây (8 giờ) mỗi ngày
-  - Thực tế: một máy ở chế độ "Tôi chỉ xem phụ đề" (mỗi câu một yêu cầu) gửi khoảng 8–15 yêu cầu mỗi phút, tức khoảng 2–4 giờ mỗi ngày; nhiều máy dùng chung một khóa cùng lúc, hoặc "Tôi cũng nói" (3 giây một yêu cầu, đúng 20 yêu cầu mỗi phút), sẽ nhanh chạm giới hạn
+  - Thực tế: một máy ở chế độ "Chỉ đọc phụ đề" (mỗi câu một yêu cầu) gửi khoảng 8–15 yêu cầu mỗi phút, tức khoảng 2–4 giờ mỗi ngày; nhiều máy dùng chung một khóa cùng lúc, hoặc "Tôi cũng nói" (3 giây một yêu cầu, đúng 20 yêu cầu mỗi phút), sẽ nhanh chạm giới hạn
   - **Khi chạm giới hạn (HTTP 429)**: đoạn đó được nhận dạng ngay trên máy này, và API tạm dừng theo thời gian Groq yêu cầu (ít nhất 15 giây, nhiều nhất 10 phút, 60 giây nếu không nêu), sau đó tự động dùng lại; phụ đề không bị ngắt, chỉ là độ chính xác trở về mô hình cục bộ trong thời gian đó. "Test connection" sẽ báo đã kết nối nhưng chạm giới hạn sử dụng
   - Không thể đặt sẵn khóa trong bộ cài (bộ cài là công khai), nên IT nhập một lần trên mỗi máy; nếu dùng nhiều, hãy trả phí hoặc dùng dịch vụ nhận dạng trong công ty
   - Đã thử ngày 2026-11-18 với máy chủ mô phỏng (gồm cả 429); chưa thử với khóa Groq thật
@@ -300,7 +300,7 @@ Nhiều máy: IT đặt trước `catalog.json` và các tệp `*.zip` cần dù
 ### Phụ đề trực tiếp tiếng Anh (Moonshine)
 
 - Khi "người kia nói tiếng Anh" được nhận dạng trên máy nhân viên, dùng **Moonshine medium** (chỉ tiếng Anh, giấy phép MIT, khoảng 250 MB, có sẵn trong bộ cài ngoại tuyến): độ trễ khoảng 0,3 giây, nhẹ CPU hơn Whisper nhiều
-- Hai chiều ("tôi cũng nói"), chế độ lớp học và các ngôn ngữ khác vẫn dùng Whisper (Moonshine chỉ hiểu tiếng Anh)
+- Hai chiều ("Tôi cũng nói"), chế độ lớp học và các ngôn ngữ khác vẫn dùng Whisper (Moonshine chỉ hiểu tiếng Anh)
 - Khi có máy chủ GPU (nhận dạng trên máy chủ) thì vẫn dùng Whisper trên máy chủ
 - Quay lại Whisper: thêm `"english_asr": "whisper"` dưới `pcg_simple` trong `config.json`
 - Các mô hình Moonshine cho ngôn ngữ khác tiếng Anh có giấy phép phi thương mại và phiên bản tập đoàn không dùng
@@ -329,7 +329,7 @@ Bộ cài chính chỉ có mô hình small: chạy được trên laptop thườ
 1. Cài bộ cài đầy đủ, rồi cài gói tăng tốc GPU NVIDIA (sau khi cài sẽ tự kiểm tra card đồ họa).
 2. Trang cài đặt IT → "**Models (model packs)**" → cài "Whisper large-v3-turbo (multilingual)".
 3. Ở "**Local recognition models**", chọn large-v3-turbo cho "**Live subtitles**", rồi bấm "**Save**".
-4. (Tùy chọn) Gói ngôn ngữ (medium) cho tiếng Indonesia, Việt, Hindi: chọn ở "**Model for each language**", rồi bấm "**Apply model settings**". Chỉ dùng cho "tôi chỉ đọc phụ đề".
+4. (Tùy chọn) Gói ngôn ngữ (medium) cho tiếng Indonesia, Việt, Hindi: chọn ở "**Model for each language**", rồi bấm "**Apply model settings**". Chỉ dùng cho "Chỉ đọc phụ đề".
 5. Đánh dấu "**Allow other computers and phones to view subtitles**", đặt "**Staff password**", lưu, rồi bấm "**Restart the program now**" xuất hiện trên trang (khoảng 10 giây, từ r20; không cần kết thúc python.exe trong Task Manager). Nếu nhân viên bấm bắt đầu cảnh "máy phụ đề phòng họp" khi chương trình chưa khởi động lại, chương trình sẽ tự khởi động lại trước
    - Tác giả gốc đã thêm "Allow other computers to connect" trong "Security settings" của WebUI nâng cao (`/`) ở bản 2.34.1: khi mở bản dùng cho tập đoàn từ lối tắt trên màn hình, **tùy chọn ở trang cài đặt IT phía trên là tùy chọn quyết định**; không cần để ý ô đánh dấu trong WebUI nâng cao (r22)
 6. Cho phép kết nối đến trong Windows Firewall (cần quyền quản trị: mở PowerShell bằng quyền quản trị):
@@ -341,7 +341,7 @@ Bộ cài chính chỉ có mô hình small: chạy được trên laptop thườ
 
 **Khi họp**
 
-1. Máy phụ đề tham gia cuộc họp Teams (trực tuyến), hoặc dùng micro của phòng họp (họp tại chỗ: chọn "**Máy phụ đề phòng họp, mọi người xem trên điện thoại**", từ r19).
+1. Máy phụ đề tham gia cuộc họp Teams (trực tuyến), hoặc dùng micro của phòng họp (họp tại chỗ: chọn "**Máy phụ đề phòng họp**", từ r19).
 2. Chọn ngôn ngữ rồi bấm Bắt đầu: với lựa chọn phòng họp, mã QR hiện ngay (các lựa chọn khác thì bấm "Chia sẻ" trên màn hình phụ đề); chiếu mã QR lên.
 3. Mọi người quét mã QR (hoặc mở `http://<IP máy phụ đề>:19781/simple/live`), nhập mật khẩu nhân viên và chọn ngôn ngữ hiển thị chữ lớn bằng menu ngôn ngữ ở góc trên bên phải. Điện thoại chỉ xem được, không dừng được phụ đề.
 
@@ -368,16 +368,31 @@ Các bước cho nhân viên nằm ở tình huống 8 trong tài liệu tình h
 
 **Chương trình thực tế hoạt động thế nào**
 
-- Gói mô hình tiếng Trung được dùng cho phụ đề một chiều nghe tiếng Trung: nhân viên nói tiếng Trung chọn "Mọi người đều nói tiếng Trung", và nhân viên nói ngoại ngữ chọn "Tiếng Trung → ngôn ngữ của bạn". Chế độ lớp học (một micro, hai ngôn ngữ) và "tôi cũng nói" dùng mô hình đa ngôn ngữ, không dùng Breeze.
+- Gói mô hình tiếng Trung được dùng cho phụ đề một chiều nghe tiếng Trung: nhân viên nói tiếng Trung chọn "Mọi người đều nói tiếng Trung", và nhân viên nói ngoại ngữ chọn "Tiếng Trung → ngôn ngữ của bạn". Chế độ lớp học (một micro, hai ngôn ngữ) và "Tôi cũng nói" dùng mô hình đa ngôn ngữ, không dùng Breeze.
 - "Mọi người đều nói tiếng Trung" nghe nguồn nào là tùy loại cuộc họp (**từ r28**):
-  - "Họp hoặc lớp online, tôi chỉ đọc phụ đề": **âm thanh máy tính phát ra** (máy phụ đề tham gia Teams và nghe giảng viên). Đừng tắt tiếng loa hoặc tai nghe.
-  - "Cùng một phòng học, một micro" và "Máy phụ đề phòng họp, mọi người xem trên điện thoại": **micro** (giảng viên nói vào máy này hoặc micro của phòng). Dùng micro đã chọn trong "Âm thanh và micro", chưa chọn thì dùng micro mặc định của Windows; nếu hoàn toàn không có micro thì phiên không bắt đầu và trang báo không tìm thấy micro.
+  - "Chỉ đọc phụ đề": **âm thanh máy tính phát ra** (máy phụ đề tham gia Teams và nghe giảng viên). Đừng tắt tiếng loa hoặc tai nghe.
+  - "Cùng một phòng học" và "Máy phụ đề phòng họp": **micro** (giảng viên nói vào máy này hoặc micro của phòng). Dùng micro đã chọn trong "Âm thanh và micro", chưa chọn thì dùng micro mặc định của Windows; nếu hoàn toàn không có micro thì phiên không bắt đầu và trang báo không tìm thấy micro.
   - Cả hai đều dùng gói mô hình tiếng Trung (Breeze). Mỗi phiên chỉ nghe một nguồn; bắt đầu lại "Mọi người đều nói tiếng Trung" ở loại cuộc họp khác sẽ thay phiên đang chạy.
   - Đến r26 loại cuộc họp không ảnh hưởng: luôn nghe âm thanh máy tính phát ra (nên "Máy phụ đề phòng họp" với "Mọi người đều nói tiếng Trung" không nghe được micro của phòng).
 - Một ngôn ngữ chỉ được dịch khi có người xem chọn nó. Chỉ có chữ phụ đề được gửi đi nên lưu lượng rất nhỏ.
 - Khi bật "Speech recognition API", âm thanh được gửi cho API trước và Breeze chỉ là dự phòng. Muốn âm thanh ở lại trong công ty, đừng bật API bên ngoài.
 
 **Chưa thử trên máy thật**: độ trễ của Breeze với phụ đề trực tiếp (tùy card đồ họa), việc thu micro cho "Mọi người đều nói tiếng Trung" (đám mây không có thiết bị âm thanh nên mới chỉ kiểm tra việc chuyển số hiệu micro cho chương trình chính), truy cập giữa các nhà máy, và nhiều người xem cùng lúc. Ngày 2026-11-18 mới chỉ xác nhận trên đám mây việc tải mô hình với một câu tiếng Trung và cách hoạt động nêu trên (kiểm thử tự động). Hãy thử trước với một buổi học.
+
+### Thay đổi ở trang cài đặt IT (r29)
+
+- **“Where data goes” ở đầu trang**: dựa trên các giá trị đang hiện trên trang, luôn cho biết “Audio” và “Text” được gửi đi đâu (chỉ máy này, máy chủ GPU của công ty, dịch vụ nội bộ, nền tảng AI của tập đoàn, hoặc ra ngoài công ty). Chỉ cần một mục ra khỏi công ty là cả thanh chuyển màu cam. Thanh này cũng theo các thay đổi chưa lưu, nên có thể kiểm tra trước khi lưu.
+- **Nơi nhận dữ liệu của LLM nay dựa theo địa chỉ**: nếu loại máy chủ là “Internal server” nhưng địa chỉ là tên miền hoặc IP công cộng bên ngoài công ty, trang nhân viên sẽ hiện “dịch vụ AI bên ngoài công ty” (đến r28 chỉ xét loại máy chủ nên địa chỉ bên ngoài vẫn hiện là nội bộ). Khi máy chủ nội bộ dùng tên miền (không phải địa chỉ 10.x, 192.168.x và không phải tên máy không có dấu chấm), dưới ô địa chỉ sẽ có ô “This is a server inside the company”; hãy đánh dấu sau khi xác nhận. **Sau khi nâng cấp, hãy mở trang cài đặt một lần và xem thanh trên cùng**: máy chủ nội bộ dùng tên miền sẽ bị coi là bên ngoài cho đến khi đánh dấu ô đó.
+- **Các mục ít thay đổi được thu gọn sẵn**: bảng thuật ngữ, cập nhật, báo lỗi, mô hình. Giá trị hiện tại hiện ở bên phải tiêu đề (số thuật ngữ, có tự kiểm tra hay không, người nhận, số gói mô hình); bấm tiêu đề để mở.
+- **Thanh lưu luôn ở cuối cửa sổ**: hiện “Unsaved changes” và kết quả lưu. “Apply model settings” vẫn là nút riêng trong mục Models.
+- **Chế độ cục bộ ẩn phần cài đặt máy chủ.**
+- **Bật xem từ xa mà chưa đặt mật khẩu nhân viên**: có cảnh báo màu cam dưới ô đánh dấu.
+- Tiêu đề trang trước đây ghi thay đổi có hiệu lực ngay; thực tế là từ lần phụ đề hoặc bản ghi tiếp theo. Câu chữ đã được sửa.
+
+### Biểu tượng dùng trong giao diện (r29)
+
+- Biểu tượng loại cuộc họp là SVG một màu vẽ ngay trong trang, không còn dùng emoji (emoji trên Windows 10 và 11 trông khác nhau).
+- Các trạng thái “đang nghe, đang chuẩn bị, đang xử lý, đang kết nối lại, đang kiểm tra” dùng biểu tượng động lấy từ [Ultra Lab Motion Icons](https://github.com/ppcvote/ultralab-anim-icons) v0.3.1 (giấy phép MIT). Chỉ 8 biểu tượng đang dùng được nhúng vào trang; không tải gì từ internet. Biểu tượng không chuyển động khi Windows tắt hiệu ứng động (Settings → Accessibility → Visual effects → Animation effects).
 
 ## ③ Máy nhân viên cần phụ đề trực tiếp
 

@@ -15,10 +15,10 @@ So only **the computer running the meeting or class** needs the app. The other s
 
 1. **What language do you speak?** Taiwanese staff choose "中文"; Indonesian, Vietnamese and Indian staff choose their own language.
 2. **What kind of meeting?**
-   - Online meeting or class, I only read subtitles
-   - Online meeting or class, I will speak too (headset)
-   - Same classroom, one microphone
-   - Meeting room subtitle computer, everyone reads on their phones (from r19; the QR code is shown right after Start and everyone chooses their own language)
+   - Only read subtitles
+   - I will speak too
+   - Same classroom
+   - Room subtitle computer (from r19; the QR code is shown right after Start and everyone chooses their own language)
 3. **What language do the others speak?** If you chose another language, you see "Chinese → your language" and the other foreign languages (from r17; e.g. Vietnamese staff see "Indonesian, to Vietnamese").
 
 Your last choice is remembered. If the option you want is not shown, click "Show all options".
@@ -44,7 +44,7 @@ Rule of thumb: the option names the language **the others** speak; subtitles com
 **Who installs it**: only the trainer's computer. Students join Teams/Zoom as usual.
 
 1. On the trainer's computer: "PCG Meeting Translator" → "Live subtitles".
-2. I speak "**中文**" → setting "**Online meeting or class, I will speak too (headset)**" → "**Indonesian**", click Start.
+2. I speak "**中文**" → setting "**I will speak too**" → "**Indonesian**", click Start.
 3. **Wear headphones**, otherwise the students' voices come out of the speakers into the microphone and are treated as Chinese.
 
 Subtitles: the trainer's Chinese → Chinese + Indonesian translation; the students' Indonesian → Indonesian + Chinese translation.
@@ -59,14 +59,14 @@ Subtitles: the trainer's Chinese → Chinese + Indonesian translation; the stude
 
 > Example: a presentation from the Indonesian factory, a Vietnamese training video.
 
-I speak "中文" → setting "**Online meeting or class, I only read subtitles**" → the others' language, click Start. No headphones needed.
+I speak "中文" → setting "**Only read subtitles**" → the others' language, click Start. No headphones needed.
 
 ## 3. Same meeting room or classroom, one microphone (classroom mode)
 
 > Example: the trainer and Indonesian students talk in the same classroom. (from v2026.11.5.r9)
 
 1. Connect a microphone that picks up the whole room (conference or desk microphone).
-2. "Live subtitles" → I speak "中文" → setting "**Same classroom, one microphone**" → "**Indonesian**" → Start. (Vietnamese, Hindi and English also work.)
+2. "Live subtitles" → I speak "中文" → setting "**Same classroom**" → "**Indonesian**" → Start. (Vietnamese, Hindi and English also work.)
 3. Project the subtitles, or let students scan the "Share" QR code.
 
 Each sentence is detected as Chinese or Indonesian automatically: Chinese → Chinese + Indonesian; Indonesian → Indonesian + Chinese.
@@ -102,13 +102,13 @@ Translated directly, not through Chinese. Any two of Indonesian, Vietnamese, Hin
 **Online meeting (each on their own computer)**
 - Vietnamese staff: I speak "Tiếng Việt" → kind of meeting → "Bahasa Indonesia" (subtitles in Vietnamese).
 - Indonesian staff: I speak "Bahasa Indonesia" → kind of meeting → "Tiếng Việt" (subtitles in Indonesian).
-- Choose "I only read subtitles", or "I will speak too (headset)" to also show the translation of what you say.
+- Choose "Only read subtitles", or "I will speak too (headset)" to also show the translation of what you say.
 
-**Same meeting room, one microphone**: on one computer choose your language → "Same classroom, one microphone" → the other language. Each sentence is detected and translated into the other language; use "Share" so others can follow on their phones in the language they choose.
+**Same meeting room, one microphone**: on one computer choose your language → "Same classroom" → the other language. Each sentence is detected and translated into the other language; use "Share" so others can follow on their phones in the language they choose.
 
 **Quality**
 - By default only the basic models are used: Whisper small for recognition and M2M100 on the computer for translation. Indonesian and Vietnamese recognition makes mistakes, and the translation follows them.
-- For better results, IT can install language model packs (they help for "I only read subtitles") or switch to server mode on the IT settings page to translate with a large language model.
+- For better results, IT can install language model packs (they help for "Only read subtitles") or switch to server mode on the IT settings page to translate with a large language model.
 - Minutes from recordings are still written in Chinese.
 
 ---
@@ -118,11 +118,11 @@ Translated directly, not through Chinese. Any two of Indonesian, Vietnamese, Hin
 For example, a Taiwanese manager chairs the meeting in Chinese, with Indonesian, Vietnamese and Indian staff attending, and everyone wants subtitles in their own language.
 
 **Online meeting (Teams): everyone opens subtitles on their own computer (works now)**
-- **Foreign staff**: on your own computer choose I speak "your language" → "I only read subtitles" → "Chinese". The Chinese in Teams is translated into your language; everyone reads their own language independently.
+- **Foreign staff**: on your own computer choose I speak "your language" → "Only read subtitles" → "Chinese". The Chinese in Teams is translated into your language; everyone reads their own language independently.
 - **Taiwanese staff following what foreign staff say**: choose "Indonesian" and so on. Only one foreign language at a time; when someone speaks another language, choose that language and click Start (the previous session is replaced).
 
 **Same meeting room**
-- Use the room's "subtitle computer" (one computer with a graphics card; setup in the IT guide): choose "**Meeting room subtitle computer, everyone reads on their phones**" and the language most of the others speak (e.g. Indonesian), click Start; the QR code is shown right away, project it.
+- Use the room's "subtitle computer" (one computer with a graphics card; setup in the IT guide): choose "**Room subtitle computer**" and the language most of the others speak (e.g. Indonesian), click Start; the QR code is shown right away, project it.
 - Everyone scans the QR code and chooses their own language at the top right (multi-language subtitles, from r19): Chinese and Indonesian viewers read the normal subtitles; for Vietnamese, Hindi or English viewers the subtitle computer translates one more copy.
 - The microphone only tells apart Chinese and the one foreign language you chose. Staff speaking other languages should use English or have someone relay.
 - If only Taiwanese staff speak in the room, choose "**Everyone speaks Chinese**": from r28 this scene uses the microphone, and foreign staff read their own language through multi-language subtitles. (Up to r26 this option only listened to what the computer plays; update first.)
@@ -140,13 +140,13 @@ The subtitle computer has an NVIDIA graphics card (IT installs the GPU pack and 
 - **Teacher**: teach over Teams as usual. Nothing to install.
 - **Whoever runs the subtitle computer** (an assistant or IT):
   1. Join the Teams class on the subtitle computer, microphone off, speakers or headset **not muted** (the program listens to what the computer plays).
-  2. Open PCG Meeting Translator → I speak "中文" → "**Online meeting or class, I only read subtitles**" → "**Everyone speaks Chinese**" → Start.
+  2. Open PCG Meeting Translator → I speak "中文" → "**Only read subtitles**" → "**Everyone speaks Chinese**" → Start.
   3. On the subtitle screen press "**Share**" and paste the address (`http://<subtitle computer IP>:19781/simple/live`) and the staff password into the Teams chat.
 - **Overseas staff**: open that address in a browser on a computer or phone, enter the password and choose your language at the top right (Indonesian, Vietnamese, Hindi, English). **Nothing to install.**
 
 **The teacher's own computer has a graphics card: use it as the subtitle computer (from r28)**
 
-The teacher teaches on their own computer (over Teams or in a classroom) and no second computer is needed: I speak "中文" → "**Same classroom, one microphone**" (or "Meeting room subtitle computer, everyone reads on their phones") → "**Everyone speaks Chinese**" → Start. The program then listens to the teacher through the **microphone** and still recognizes with Breeze; press "Share" and give the address to overseas staff. What students say in Teams does not appear in the subtitles (microphone only).
+The teacher teaches on their own computer (over Teams or in a classroom) and no second computer is needed: I speak "中文" → "**Same classroom**" (or "Room subtitle computer") → "**Everyone speaks Chinese**" → Start. The program then listens to the teacher through the **microphone** and still recognizes with Breeze; press "Share" and give the address to overseas staff. What students say in Teams does not appear in the subtitles (microphone only).
 
 **Why this is more accurate**
 
@@ -156,15 +156,27 @@ The teacher teaches on their own computer (over Teams or in a classroom) and no 
 
 **Alternative: each overseas staff member opens subtitles on their own computer**
 
-I speak "your language" → "I only read subtitles" → "Chinese". Recognition runs on that computer: with an NVIDIA graphics card the page suggests installing Breeze ASR 25 and the result matches the subtitle computer; an ordinary laptop can only use the small built-in model, so Chinese accuracy does not improve.
+I speak "your language" → "Only read subtitles" → "Chinese". Recognition runs on that computer: with an NVIDIA graphics card the page suggests installing Breeze ASR 25 and the result matches the subtitle computer; an ordinary laptop can only use the small built-in model, so Chinese accuracy does not improve.
 
 **Limits**
 
-- What "Everyone speaks Chinese" listens to depends on the scene (from r28; the page says which after you choose it): "I only read subtitles" listens to **what the computer plays** (a subtitle computer that joined Teams and hears the teacher); "Same classroom" and "Meeting room subtitle computer" listen to the **microphone** (the teacher speaks into this computer or the room microphone). Up to r26 it always listened to what the computer plays.
+- What "Everyone speaks Chinese" listens to depends on the scene (from r28; the page says which after you choose it): "Only read subtitles" listens to **what the computer plays** (a subtitle computer that joined Teams and hears the teacher); "Same classroom" and "Room subtitle computer" listen to the **microphone** (the teacher speaks into this computer or the room microphone). Up to r26 it always listened to what the computer plays.
 - One session listens to one source: with the microphone it does not hear other people in Teams, and with the computer's sound it does not hear this computer's microphone.
 - Overseas sites must be able to reach the subtitle computer over the company network (port 19781). Ask IT or the network team first whether cross-site access works.
 - Translation quality depends on IT's settings: local mode (M2M100) is average for Indonesian and Vietnamese; server mode (a large model) is much better.
 - This setup combines existing features. Breeze's delay in live subtitles, microphone capture, cross-site access and many viewers at once have not been tested on real machines yet, so try it with one class first.
+
+---
+
+## Helpers on the screen (r29)
+
+- **Confirmation line before you start**: above the button the page says “You will hear: Indonesian → subtitles in: Chinese”. If that is not what you expect, step 3 is the wrong way round; change it before starting.
+- **Same as last time**: after your first session, the page only shows your last choice and “Start”. Press “Change” next to it to pick another language or scene.
+- **Foreign-language staff**: once you choose your own language, “Chinese → your language” is already selected; change it only when you need another language.
+- **Grey button**: something is not chosen yet; press it and the page tells you which step is missing.
+- **Microphone icon at the top left of the subtitle screen**: it moves while the program is listening and nobody is speaking, and stays still while subtitles are appearing. An orange connection icon means the connection dropped and is being restored.
+- **Room subtitle computer**: opens in large yellow-on-black subtitle mode; use A−/A+ at the top right to change the size one step at a time.
+- **First time you open the page** only the tour appears; the update and install suggestions wait until next time, and they never appear while subtitles are running.
 
 ---
 
@@ -178,7 +190,7 @@ On the live subtitles page, open "**🔊 Sound and microphone: test and choose d
    - **Microphone** moves = what you say is being captured. If not: the microphone is muted, or choose another one in the list below (for example a USB conference microphone).
 3. The chosen microphone and speaker are remembered and apply from the next subtitles. "Automatic" is right for most people; it follows the Windows default devices.
 
-The microphone is not used when you only read subtitles; it is used for "I also speak", "same classroom" and "meeting room subtitle computer". You cannot test while subtitles are running; press Stop first.
+The microphone is not used when you only read subtitles; it is used for "I will speak too", "same classroom" and "meeting room subtitle computer". You cannot test while subtitles are running; press Stop first.
 
 ## Suggestions when the page opens (r25)
 

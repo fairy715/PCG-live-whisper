@@ -196,7 +196,7 @@ Saat subtitle langsung dan rekaman diproses di CPU komputer karyawan (mode lokal
 - Mode "Saya juga berbicara" (dua arah) tetap mengirim suara yang tumpang-tindih setiap 3 detik, sekitar 1,7 kali pemakaian satu arah
 - **Groq (r26)**: tekan "Groq (kuota gratis)" di halaman pengaturan untuk mengisi alamat dan model, tempel kunci, lalu tekan "Uji koneksi". Pengenalan memakai Whisper large-v3, lebih akurat daripada model small bawaan; program tetap mengirim ke API lebih dulu dan kembali ke komputer ini bila API tidak bisa dipakai
   - **Kuota gratis punya batas, dipakai bersama oleh satu akun.** Angka dari situs pihak ketiga (Groq bisa mengubahnya kapan saja; periksa [halaman batas di konsol Groq](https://console.groq.com/settings/limits)): sekitar 20 permintaan per menit, sekitar 2.000 permintaan per hari, sekitar 7.200 detik suara per jam, dan sekitar 28.800 detik (8 jam) per hari
-  - Dalam praktik: satu komputer pada "Saya hanya membaca subtitle" (satu permintaan per kalimat) membuat sekitar 8–15 permintaan per menit, jadi kira-kira 2–4 jam per hari; beberapa komputer dengan satu kunci pada waktu yang sama, atau "Saya juga berbicara" (satu permintaan tiap 3 detik, tepat 20 per menit), cepat mencapai batas
+  - Dalam praktik: satu komputer pada "Hanya baca subtitle" (satu permintaan per kalimat) membuat sekitar 8–15 permintaan per menit, jadi kira-kira 2–4 jam per hari; beberapa komputer dengan satu kunci pada waktu yang sama, atau "Saya juga berbicara" (satu permintaan tiap 3 detik, tepat 20 per menit), cepat mencapai batas
   - **Saat batas tercapai (HTTP 429)**: potongan itu langsung dikenali di komputer ini, dan API dijeda selama waktu yang diminta Groq (minimal 15 detik, maksimal 10 menit, 60 detik jika tidak disebutkan), lalu dipakai lagi secara otomatis; subtitle tidak berhenti, hanya akurasinya kembali ke model lokal selama itu. "Uji koneksi" menampilkan "Tersambung, tetapi batas pemakaian tercapai"
   - Kunci tidak bisa disertakan di dalam penginstal (penginstal bersifat publik), jadi IT mengisinya sekali di tiap komputer; untuk pemakaian besar, gunakan layanan berbayar atau layanan pengenalan di dalam perusahaan
   - Diuji pada 2026-11-18 dengan server simulasi (termasuk 429); belum diuji dengan kunci Groq asli
@@ -300,7 +300,7 @@ Catatan: halaman pengaturan IT tersedia dalam bahasa Indonesia: pilih **Bahasa I
 ### Subtitle langsung bahasa Inggris (Moonshine)
 
 - Saat "lawan bicara berbahasa Inggris" dikenali di komputer karyawan, dipakai **Moonshine medium** (khusus bahasa Inggris, lisensi MIT, sekitar 250 MB, termasuk dalam penginstal offline): latensi sekitar 0,3 detik dan jauh lebih ringan di CPU daripada Whisper
-- Dua arah ("saya juga berbicara"), mode kelas, dan bahasa lain tetap memakai Whisper (Moonshine hanya mengerti bahasa Inggris)
+- Dua arah ("Saya juga berbicara"), mode kelas, dan bahasa lain tetap memakai Whisper (Moonshine hanya mengerti bahasa Inggris)
 - Jika ada server GPU (pengenalan suara di server), tetap memakai Whisper di server
 - Kembali ke Whisper: tambahkan `"english_asr": "whisper"` di bawah `pcg_simple` dalam `config.json`
 - Model Moonshine untuk bahasa selain Inggris berlisensi non-komersial dan tidak dipakai edisi grup
@@ -316,7 +316,7 @@ Catatan: halaman pengaturan IT tersedia dalam bahasa Indonesia: pilih **Bahasa I
 - Format komputasi dipilih otomatis: seri GTX 10 / MX (compute capability 6.x) memakai int8, seri RTX 20 ke atas memakai float16
 - Pembuatan di cloud tidak memiliki kartu grafis untuk diuji: coba dulu di komputer dengan kartu NVIDIA sebelum disebarkan
 
-### Komputer subtitle ruang rapat (satu komputer dengan kartu grafis, semua orang terhubung ke sana)
+### Komputer subtitle (satu komputer dengan kartu grafis, semua orang terhubung ke sana)
 
 Penginstal utama hanya berisi model small: berjalan di laptop biasa, tetapi bahasa Indonesia dan Vietnam lebih banyak salah kenal. Untuk subtitle yang lebih akurat, jadikan **satu komputer dengan kartu grafis NVIDIA sebagai "komputer subtitle"**: komputer ini menangkap suara, mengenali, dan menerjemahkan, sementara yang lain membaca subtitle di browser ponsel atau laptop. Komputer karyawan tidak perlu diubah.
 
@@ -329,7 +329,7 @@ Penginstal utama hanya berisi model small: berjalan di laptop biasa, tetapi baha
 1. Pasang penginstal lengkap, lalu paket GPU NVIDIA (setelah terpasang, kartu grafis diperiksa otomatis).
 2. Halaman pengaturan IT → "Model (paket model)" → pasang "Whisper large-v3-turbo (multibahasa)".
 3. Di "Model pengenalan lokal", pilih large-v3-turbo untuk "Subtitle langsung", lalu klik "Simpan".
-4. (Opsional) Paket bahasa (medium) untuk Indonesia, Vietnam, dan Hindi: pilih di "Model untuk setiap bahasa", lalu klik "Terapkan pengaturan model". Hanya dipakai untuk "saya hanya membaca subtitle".
+4. (Opsional) Paket bahasa (medium) untuk Indonesia, Vietnam, dan Hindi: pilih di "Model untuk setiap bahasa", lalu klik "Terapkan pengaturan model". Hanya dipakai untuk "Hanya baca subtitle".
 5. Centang "Izinkan komputer dan ponsel lain menonton subtitle", isi "Kata sandi karyawan", simpan, lalu tekan "**Mulai ulang program sekarang**" yang muncul di halaman (sekitar 10 detik, mulai r20; tidak perlu mengakhiri python.exe di Task Manager). Jika staf memulai skenario "komputer subtitle ruang rapat" sebelum program dimulai ulang, program akan memulai ulang sendiri dulu
    - Penulis asli menambahkan "Allow other computers to connect" di "Security settings" WebUI lanjutan (`/`) pada 2.34.1: saat edisi grup dibuka dari pintasan desktop, **yang menentukan adalah opsi di halaman Pengaturan IT di atas**; abaikan kotak centang di WebUI lanjutan (r22)
 6. Izinkan koneksi masuk di Windows Firewall (perlu administrator: buka PowerShell sebagai administrator):
@@ -341,7 +341,7 @@ Penginstal utama hanya berisi model small: berjalan di laptop biasa, tetapi baha
 
 **Saat rapat**
 
-1. Komputer subtitle bergabung ke rapat Teams (online), atau memakai mikrofon ruang rapat (di ruangan: pilih "**Komputer subtitle ruang rapat, semua membaca di ponsel**", mulai r19).
+1. Komputer subtitle bergabung ke rapat Teams (online), atau memakai mikrofon ruang rapat (di ruangan: pilih "**Komputer subtitle**", mulai r19).
 2. Pilih bahasa lalu klik Mulai: pada pilihan ruang rapat kode QR langsung tampil (selain itu klik "Bagikan" di layar subtitle); tampilkan kode QR di proyektor.
 3. Semua orang memindai kode QR (atau membuka `http://<IP komputer subtitle>:19781/simple/live`), memasukkan kata sandi karyawan, dan memilih bahasa yang ditampilkan besar lewat menu bahasa di kanan atas. Ponsel hanya bisa melihat, tidak bisa menghentikan subtitle.
 
@@ -368,16 +368,31 @@ Langkah untuk karyawan ada di skenario 8 pada contoh penggunaan. Satu komputer s
 
 **Cara kerja program yang sebenarnya**
 
-- Paket model Mandarin dipakai untuk subtitle satu arah yang mendengarkan bahasa Mandarin: staf berbahasa Mandarin yang memilih "Semua berbahasa Mandarin", dan staf berbahasa asing yang memilih "Mandarin → bahasa Anda". Mode kelas (satu mikrofon, dua bahasa) dan "saya juga berbicara" memakai model multibahasa, bukan Breeze.
+- Paket model Mandarin dipakai untuk subtitle satu arah yang mendengarkan bahasa Mandarin: staf berbahasa Mandarin yang memilih "Semua berbahasa Mandarin", dan staf berbahasa asing yang memilih "Mandarin → bahasa Anda". Mode kelas (satu mikrofon, dua bahasa) dan "Saya juga berbicara" memakai model multibahasa, bukan Breeze.
 - Suara yang didengarkan "Semua berbahasa Mandarin" bergantung pada jenis rapat (**mulai r28**):
-  - "Rapat atau kelas online, saya hanya membaca subtitle": **suara yang diputar komputer** (komputer subtitle yang ikut Teams dan mendengar pengajar). Speaker atau headset jangan dibisukan.
-  - "Satu ruang kelas, satu mikrofon" dan "Komputer subtitle ruang rapat, semua membaca di ponsel": **mikrofon** (pengajar berbicara ke komputer ini atau mikrofon ruangan). Dipakai mikrofon yang dipilih di "Suara dan mikrofon", atau mikrofon bawaan Windows jika belum dipilih; jika tidak ada mikrofon sama sekali, sesi tidak dimulai dan halaman menyatakan mikrofon tidak ditemukan.
+  - "Hanya baca subtitle": **suara yang diputar komputer** (komputer subtitle yang ikut Teams dan mendengar pengajar). Speaker atau headset jangan dibisukan.
+  - "Satu ruang kelas" dan "Komputer subtitle": **mikrofon** (pengajar berbicara ke komputer ini atau mikrofon ruangan). Dipakai mikrofon yang dipilih di "Suara dan mikrofon", atau mikrofon bawaan Windows jika belum dipilih; jika tidak ada mikrofon sama sekali, sesi tidak dimulai dan halaman menyatakan mikrofon tidak ditemukan.
   - Keduanya memakai paket model Mandarin (Breeze). Satu sesi mendengarkan satu sumber; memulai lagi "Semua berbahasa Mandarin" pada jenis rapat lain menggantikan sesi yang sedang berjalan.
-  - Sampai r26 jenis rapat tidak berpengaruh: selalu suara yang diputar komputer (jadi "Komputer subtitle ruang rapat" dengan "Semua berbahasa Mandarin" tidak mendengar mikrofon ruangan).
+  - Sampai r26 jenis rapat tidak berpengaruh: selalu suara yang diputar komputer (jadi "Komputer subtitle" dengan "Semua berbahasa Mandarin" tidak mendengar mikrofon ruangan).
 - Sebuah bahasa baru diterjemahkan jika ada penonton yang memilihnya. Yang dikirim keluar hanya teks subtitle, jadi lalu lintas data kecil.
 - Jika "API pengenalan suara" aktif, suara dikirim ke API lebih dulu dan Breeze hanya cadangan. Agar suara tetap di dalam perusahaan, jangan aktifkan API eksternal.
 
 **Belum diuji di komputer nyata**: jeda Breeze pada subtitle langsung (bergantung kartu grafis), penangkapan mikrofon untuk "Semua berbahasa Mandarin" (cloud tidak punya perangkat audio, jadi yang diuji hanya penerusan nomor mikrofon ke program utama), akses antar lokasi, dan banyak penonton sekaligus. Pada 2026-11-18 hanya pemuatan model dengan satu kalimat Mandarin dan cara kerja di atas (uji otomatis) yang dipastikan di cloud. Coba dulu pada satu kelas.
+
+### Perubahan pada halaman Pengaturan IT (r29)
+
+- **“Ke mana data dikirim” di bagian atas**: berdasarkan nilai yang sedang tampil di halaman, selalu ditunjukkan ke mana “Suara” dan “Teks” dikirim (hanya komputer ini, server GPU perusahaan, layanan internal, platform AI grup, atau ke luar perusahaan). Jika salah satunya keluar dari perusahaan, seluruh baris menjadi oranye. Baris ini juga mengikuti perubahan yang belum disimpan, jadi bisa diperiksa sebelum menyimpan.
+- **Tujuan data LLM kini mengikuti alamat**: jika jenis server “Server internal” tetapi alamatnya domain atau IP publik di luar perusahaan, halaman staf menampilkan “layanan AI di luar perusahaan” (sampai r28 hanya jenisnya yang dilihat, sehingga alamat eksternal tetap tampil sebagai internal). Jika server internal memakai nama domain (bukan alamat 10.x atau 192.168.x dan bukan nama host tanpa titik), di bawah alamat muncul kotak “Ini server di dalam perusahaan”; centang setelah dipastikan. **Setelah memperbarui, buka halaman pengaturan sekali dan baca baris atas**: server internal yang dialamatkan dengan nama domain dianggap eksternal sampai kotak itu dicentang.
+- **Bagian yang jarang diubah awalnya tertutup**: glosarium, pembaruan, laporan masalah, model. Nilai saat ini tampil di kanan judul (jumlah istilah, periksa otomatis atau tidak, kontak, jumlah paket model); klik judul untuk membuka.
+- **Baris simpan tetap di bawah jendela**: menampilkan “Ada perubahan yang belum disimpan” dan hasil penyimpanan. “Terapkan pengaturan model” tetap tombol terpisah di dalam Model.
+- **Mode lokal menyembunyikan pengaturan server.**
+- **Menonton jarak jauh aktif tanpa kata sandi staf**: muncul peringatan oranye di bawah kotak centang.
+- Judul halaman sebelumnya menulis perubahan langsung berlaku; sebenarnya berlaku mulai subtitle atau rekaman berikutnya. Teksnya sudah diperbaiki.
+
+### Ikon yang dipakai di antarmuka (r29)
+
+- Ikon jenis rapat adalah SVG satu warna yang digambar di halaman, bukan emoji lagi (emoji tampil berbeda di Windows 10 dan 11).
+- Status “mendengarkan, menyiapkan, memproses, menyambung ulang, menguji” memakai ikon bergerak dari [Ultra Lab Motion Icons](https://github.com/ppcvote/ultralab-anim-icons) v0.3.1 (Lisensi MIT). Hanya 8 ikon yang dipakai yang disematkan di halaman; tidak ada yang dimuat dari internet. Ikon tidak bergerak jika efek animasi Windows dimatikan (Settings → Accessibility → Visual effects → Animation effects).
 
 ## ③ Komputer karyawan yang perlu subtitle langsung
 

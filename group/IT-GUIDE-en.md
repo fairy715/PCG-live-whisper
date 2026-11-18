@@ -193,10 +193,10 @@ When live subtitles and recordings run on the staff computer's CPU (local mode, 
 - Glossary terms are sent as hints (`prompt`), and misheard spellings are still changed back
 - When audio leaves the company, an orange notice is shown on the IT settings page and at the top of the staff page. Turn it off for confidential meetings or use an internal service
 - The key is stored in this computer's `config.json` (`pcg_simple.asr_api_key`) and is masked in diagnostic files; the Windows system environment variable `PCG_ASR_API=off` turns the API off temporarily
-- "I also speak" (two-way) mode still sends overlapping audio every 3 seconds, about 1.7 times the usage of one-way
+- "I will speak too" (two-way) mode still sends overlapping audio every 3 seconds, about 1.7 times the usage of one-way
 - **Groq (r26)**: press "Groq (free tier)" on the settings page to fill in the address and model, paste the key and press "Test connection". Recognition uses Whisper large-v3, more accurate than the built-in small model; the program still sends to the API first and falls back to this computer when the API cannot be used
   - **The free tier has limits, shared by the whole account.** Figures collected by third-party sites (Groq may change them at any time; check the [limits page in the Groq console](https://console.groq.com/settings/limits)): about 20 requests per minute, about 2,000 requests per day, about 7,200 seconds of audio per hour and about 28,800 seconds (8 hours) per day
-  - In practice: one computer in "I only read subtitles" (one request per sentence) makes about 8–15 requests per minute, so roughly 2–4 hours per day; several computers sharing one key at the same time, or "I also speak" (one request every 3 seconds, exactly 20 per minute), reach the limit quickly
+  - In practice: one computer in "Only read subtitles" (one request per sentence) makes about 8–15 requests per minute, so roughly 2–4 hours per day; several computers sharing one key at the same time, or "I will speak too" (one request every 3 seconds, exactly 20 per minute), reach the limit quickly
   - **When the limit is reached (HTTP 429)**: that piece is recognized on this computer at once, and the API is paused for the time Groq asks for (at least 15 seconds, at most 10 minutes, 60 seconds if not stated), then used again automatically; subtitles do not stop, accuracy just returns to the local model for that time. "Test connection" shows "Connected, but the usage limit is reached"
   - A key cannot be shipped inside the installer (the installer is public), so IT enters it once per computer; for heavy use, pay for the service or use a recognition service inside the company
   - Tested on 2026-11-18 against a simulated server (including 429); not yet tested with a real Groq key
@@ -314,7 +314,7 @@ Many computers: IT first puts `catalog.json` and the `*.zip` files you need from
 - Compute type is chosen automatically: GTX 10 / MX series (compute capability 6.x) use int8, RTX 20 series and newer use float16
 - The cloud build has no graphics card to test with: try it on a computer with an NVIDIA card before rolling it out
 
-### Meeting room subtitle computer (one computer with a graphics card, everyone connects to it)
+### Room subtitle computer (one computer with a graphics card, everyone connects to it)
 
 The main installer only has the small model: it runs on ordinary laptops, but Indonesian and Vietnamese have more recognition mistakes. For better subtitles, let **one computer with an NVIDIA graphics card be the "subtitle computer"**: it listens, recognizes and translates, and everyone else reads the subtitles in the browser on their phone or laptop. Staff computers need no changes.
 
@@ -327,7 +327,7 @@ The main installer only has the small model: it runs on ordinary laptops, but In
 1. Install the full installer, then the NVIDIA GPU pack (it checks the graphics card automatically when installed).
 2. IT settings page → "Models (model packs)" → install "Whisper large-v3-turbo (multilingual)".
 3. Under "Local recognition models", choose large-v3-turbo for "Live subtitles" and click "Save".
-4. (Optional) Language packs (medium) for Indonesian, Vietnamese and Hindi: choose them in "Model for each language" and click "Apply model settings". They are used only for "I only read subtitles".
+4. (Optional) Language packs (medium) for Indonesian, Vietnamese and Hindi: choose them in "Model for each language" and click "Apply model settings". They are used only for "Only read subtitles".
 5. Tick "Allow other computers and phones to view subtitles", set a "Staff password", save, then press "**Restart the program now**" that appears on the page (about 10 seconds, from r20; no need to end python.exe in Task Manager). If staff start the "meeting room subtitle computer" scene before the program has restarted, it restarts by itself first
    - The original author added "Allow other computers to connect" under "Security settings" in the advanced WebUI (`/`) in 2.34.1: when the group edition is opened from the desktop shortcut, **the IT settings page option above decides**; ignore the advanced WebUI checkbox (r22)
 6. Allow incoming connections in Windows Firewall (needs an administrator: open PowerShell as administrator):
@@ -339,7 +339,7 @@ The main installer only has the small model: it runs on ordinary laptops, but In
 
 **During the meeting**
 
-1. The subtitle computer joins the Teams meeting (online), or uses the room microphone (in the room: choose "**Meeting room subtitle computer, everyone reads on their phones**", from r19).
+1. The subtitle computer joins the Teams meeting (online), or uses the room microphone (in the room: choose "**Room subtitle computer**", from r19).
 2. Choose the languages and click Start: in the room scene the QR code is shown right away (otherwise click "Share" on the subtitle screen); project the QR code.
 3. Everyone scans the QR code (or opens `http://<subtitle computer IP>:19781/simple/live`), enters the staff password and picks the language to show in large text with the language menu at the top right. Phones can only view; they cannot stop the subtitles.
 
@@ -368,14 +368,29 @@ The staff steps are in scenario 9 of the use cases. One subtitle computer joins 
 
 - A Chinese model pack is used for one-way subtitles that listen to Chinese: Chinese-speaking staff choosing "Everyone speaks Chinese", and foreign-language staff choosing "Chinese → your language". Classroom mode (one microphone, two languages) and "I will speak too" use the multilingual model, not Breeze.
 - What "Everyone speaks Chinese" listens to depends on the scene (**from r28**):
-  - "Online meeting or class, I only read subtitles": **what the computer plays** (a subtitle computer that joined Teams and hears the teacher). Do not mute its speakers or headset.
-  - "Same classroom, one microphone" and "Meeting room subtitle computer, everyone reads on their phones": the **microphone** (the teacher speaks into this computer or the room microphone). It uses the microphone chosen under "Sound and microphone", or the Windows default if none was chosen; with no microphone at all the session does not start and the page says no microphone was found.
+  - "Only read subtitles": **what the computer plays** (a subtitle computer that joined Teams and hears the teacher). Do not mute its speakers or headset.
+  - "Same classroom" and "Room subtitle computer": the **microphone** (the teacher speaks into this computer or the room microphone). It uses the microphone chosen under "Sound and microphone", or the Windows default if none was chosen; with no microphone at all the session does not start and the page says no microphone was found.
   - Both use the Chinese model pack (Breeze). One session listens to one source; starting "Everyone speaks Chinese" again in another scene replaces the running session.
-  - Up to r26 the scene made no difference: it always listened to what the computer plays (so "Meeting room subtitle computer" with "Everyone speaks Chinese" did not hear the room microphone).
+  - Up to r26 the scene made no difference: it always listened to what the computer plays (so "Room subtitle computer" with "Everyone speaks Chinese" did not hear the room microphone).
 - A language is translated only when a viewer chooses it. Only subtitle text is sent out, so traffic is small.
 - With "Speech recognition API" on, audio goes to the API first and Breeze is only the fallback. To keep audio inside the company, do not turn on an external API.
 
 **Not yet tested on real machines**: Breeze's delay in live subtitles (depends on the graphics card), microphone capture for "Everyone speaks Chinese" (the cloud has no audio devices, so only passing the microphone number to the main program was tested), cross-site access, and many viewers at once. On 2026-11-18 only model loading with one Chinese sentence and the behaviour above (automated tests) were confirmed in the cloud. Try it with one class first.
+
+### Changes to the IT settings page (r29)
+
+- **“Where data goes” at the top**: from the values currently on the page, it always shows where “Audio” and “Text” go (this computer only, the company GPU server, an internal service, the group AI platform, or outside the company). If either leaves the company the whole bar turns orange. It follows unsaved changes too, so you can check before saving.
+- **The LLM data destination now follows the address**: if the server type is “Internal server” but the address is a domain or public IP outside the company, the staff page shows “AI service outside the company” (up to r28 only the type was used, so an external address still showed as internal). When an internal server uses a domain name (not a 10.x or 192.168.x address and not a host name without a dot), a box “This is a server inside the company” appears under the address; tick it after confirming. **After upgrading, open the settings page once and read the top bar**: an internal server addressed by domain name counts as external until the box is ticked.
+- **Rarely changed sections start collapsed**: glossary, updates, problem reports, models. The current value is shown at the right of the title (number of terms, automatic check on or off, contact, number of model packs); click the title to open.
+- **The save bar stays at the bottom of the window**: it shows “Unsaved changes” and the save result. “Apply model settings” is still a separate button inside Models.
+- **Local mode hides the server settings.**
+- **Remote viewing on without a staff password**: an orange warning appears under the checkbox.
+- The header used to say changes take effect immediately; in fact they apply from the next subtitles or recording. The text has been corrected.
+
+### Icons used in the interface (r29)
+
+- Scene icons are single-colour SVG drawn in the page, no longer emoji (emoji look different on Windows 10 and 11).
+- The states “listening, preparing, processing, reconnecting, testing” use moving icons from [Ultra Lab Motion Icons](https://github.com/ppcvote/ultralab-anim-icons) v0.3.1 (MIT License). Only the 8 icons in use are embedded in the pages; nothing is loaded from the internet. They do not move when Windows has animation effects turned off (Settings → Accessibility → Visual effects → Animation effects).
 
 ## ③ Staff computers that need live subtitles
 
