@@ -116,9 +116,45 @@ Ví dụ quản lý người Đài Loan chủ trì bằng tiếng Trung, có nh�
 - **Nhân viên Đài Loan muốn hiểu lời nhân viên nước ngoài**: chọn "Tiếng Việt" v.v. Mỗi lần chỉ một ngoại ngữ; khi người khác nói ngôn ngữ khác, chọn ngôn ngữ đó rồi bấm Bắt đầu (phiên trước tự được thay).
 
 **Cùng một phòng họp**
-- Dùng "máy phụ đề" của phòng họp (một máy có card đồ họa; cài đặt trong hướng dẫn IT): chọn "**Máy phụ đề phòng họp, mọi người xem trên điện thoại**" và ngôn ngữ mà nhiều người kia nói nhất (ví dụ tiếng Indonesia; nếu chỉ nhân viên Đài Loan nói, chọn chỉ tiếng Trung), bấm Bắt đầu; mã QR hiện ngay, hãy chiếu lên.
+- Dùng "máy phụ đề" của phòng họp (một máy có card đồ họa; cài đặt trong hướng dẫn IT): chọn "**Máy phụ đề phòng họp, mọi người xem trên điện thoại**" và ngôn ngữ mà nhiều người kia nói nhất (ví dụ tiếng Indonesia), bấm Bắt đầu; mã QR hiện ngay, hãy chiếu lên.
 - Mọi người quét mã QR và tự chọn ngôn ngữ ở góc trên bên phải (phụ đề đa ngôn ngữ, từ r19): người xem tiếng Trung và tiếng Indonesia đọc phụ đề bình thường; với người chọn tiếng Việt, Hindi hoặc Anh, máy phụ đề dịch thêm một bản.
 - Micro chỉ phân biệt tiếng Trung và một ngoại ngữ đã chọn. Nhân viên nói ngôn ngữ khác nên dùng tiếng Anh hoặc nhờ người khác chuyển lời.
+- "Mọi người đều nói tiếng Trung" nghe **âm thanh máy tính phát ra** (lời người khác trong cuộc họp trực tuyến), không nghe micro của phòng. Trong phòng họp, hãy chọn một ngoại ngữ dù chỉ nhân viên Đài Loan nói, để micro được dùng.
+
+---
+
+## 8. Giảng viên ở Đài Loan dạy bằng tiếng Trung, bạn xem phụ đề bằng ngôn ngữ của mình (r26)
+
+Ví dụ giảng viên ở Đài Loan dạy cho các nhà máy Indonesia, Việt Nam, Ấn Độ qua Teams, nói tiếng Trung suốt buổi. Bạn muốn xem phụ đề bằng ngôn ngữ của mình, và **âm thanh không được ra khỏi công ty**.
+
+**Cách nên dùng: một "máy phụ đề" có card đồ họa tham gia lớp học, tiếng Trung chỉ nhận dạng một lần**
+
+Máy phụ đề có card đồ họa NVIDIA (IT cài sẵn gói GPU và mô hình tiếng Trung Breeze ASR 25; xem hướng dẫn IT). Máy này tham gia lớp Teams như một học viên, nghe giảng viên, nhận dạng tiếng Trung rồi dịch; bạn chỉ cần trình duyệt.
+
+- **Bạn (nhân viên ở nhà máy nước ngoài)**: mở địa chỉ được gửi trong khung chat Teams (`http://<IP máy phụ đề>:19781/simple/live`) bằng trình duyệt trên máy tính hoặc điện thoại, nhập mật khẩu nhân viên, rồi chọn ngôn ngữ ở góc trên bên phải (Indonesia, Việt, Hindi, Anh). **Không cần cài chương trình.**
+- **Giảng viên**: dạy qua Teams như bình thường, không cần cài gì.
+- **Người vận hành máy phụ đề** (trợ giảng hoặc IT):
+  1. Cho máy phụ đề tham gia lớp Teams, tắt micro, loa hoặc tai nghe **không được tắt tiếng** (chương trình nghe âm thanh máy tính phát ra).
+  2. Mở PCG Meeting Translator → tôi nói "中文" → "**Họp hoặc lớp online, tôi chỉ đọc phụ đề**" → "**Mọi người đều nói tiếng Trung**" → Bắt đầu.
+  3. Ở màn hình phụ đề bấm "**Chia sẻ**", rồi dán địa chỉ và mật khẩu nhân viên vào khung chat Teams.
+
+**Vì sao chính xác hơn**
+
+- Tiếng Trung được nhận dạng bằng card đồ họa của máy phụ đề với Breeze ASR 25 (huấn luyện cho tiếng Trung Đài Loan và tiếng Trung pha tiếng Anh), chính xác hơn mô hình nhỏ có sẵn trên laptop thông thường.
+- Mọi người xem cùng một kết quả nhận dạng; hãy nhờ IT nhập trước các thuật ngữ của khóa học vào bảng thuật ngữ.
+- Âm thanh chỉ được xử lý trên máy phụ đề, không gửi ra ngoài công ty.
+
+**Cách khác: mở phụ đề trên máy của bạn**
+
+Tôi nói "Tiếng Việt" → "tôi chỉ đọc phụ đề" → "Tiếng Trung → Tiếng Việt". Việc nhận dạng chạy trên máy của bạn: nếu có card đồ họa NVIDIA, trang sẽ gợi ý cài Breeze ASR 25 và kết quả giống máy phụ đề; laptop thông thường chỉ dùng được mô hình nhỏ có sẵn, nên độ chính xác tiếng Trung không tăng.
+
+**Hạn chế**
+
+- "Mọi người đều nói tiếng Trung" chỉ nghe **âm thanh máy tính phát ra**, không nghe micro. Vì vậy máy phụ đề phải là một máy khác tham gia lớp học, không phải máy giảng viên đang nói.
+- Giảng viên dạy trong phòng học bằng micro (không qua Teams): chọn "Máy phụ đề phòng họp, mọi người xem trên điện thoại" cùng ngôn ngữ mà nhiều học viên nói nhất; micro được dùng, và khi đó tiếng Trung do mô hình đa ngôn ngữ nhận dạng, không phải Breeze.
+- Nhà máy nước ngoài phải kết nối được tới máy phụ đề qua mạng công ty (cổng 19781). Hãy hỏi IT hoặc nhóm mạng trước xem truy cập giữa các nhà máy có được không.
+- Chất lượng bản dịch phụ thuộc vào cài đặt của IT: chế độ cục bộ (M2M100) ở mức trung bình với tiếng Indonesia và tiếng Việt; chế độ máy chủ (mô hình lớn) tốt hơn nhiều.
+- Cách này kết hợp các tính năng sẵn có. Độ trễ của Breeze với phụ đề trực tiếp, truy cập giữa các nhà máy và nhiều người xem cùng lúc chưa được thử trên máy thật, nên hãy thử trước với một buổi học.
 
 ---
 

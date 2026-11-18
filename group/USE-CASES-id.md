@@ -116,9 +116,45 @@ Misalnya atasan dari Taiwan memimpin rapat dalam bahasa Mandarin, dihadiri karya
 - **Karyawan Taiwan yang ingin memahami ucapan karyawan asing**: pilih "Bahasa Indonesia" dan seterusnya. Hanya satu bahasa asing sekaligus; saat orang lain berbicara bahasa lain, pilih bahasa itu lalu klik Mulai (sesi sebelumnya otomatis diganti).
 
 **Satu ruang rapat**
-- Gunakan "komputer subtitle" ruang rapat (satu komputer dengan kartu grafis; pengaturan di panduan IT): pilih "**Komputer subtitle ruang rapat, semua membaca di ponsel**" dan bahasa yang paling banyak dipakai peserta lain (mis. Indonesia; jika hanya karyawan Taiwan yang berbicara, pilih bahasa Mandarin saja), klik Mulai; kode QR langsung tampil, tampilkan di proyektor.
+- Gunakan "komputer subtitle" ruang rapat (satu komputer dengan kartu grafis; pengaturan di panduan IT): pilih "**Komputer subtitle ruang rapat, semua membaca di ponsel**" dan bahasa yang paling banyak dipakai peserta lain (mis. Indonesia), klik Mulai; kode QR langsung tampil, tampilkan di proyektor.
 - Semua orang memindai kode QR dan memilih bahasanya sendiri di kanan atas (subtitle multibahasa, mulai r19): penonton Mandarin dan Indonesia membaca subtitle biasa; untuk penonton Vietnam, Hindi, atau Inggris, komputer subtitle menerjemahkan satu salinan lagi.
 - Mikrofon hanya membedakan Mandarin dan satu bahasa asing yang dipilih. Karyawan yang berbicara bahasa lain sebaiknya memakai bahasa Inggris atau dibantu orang lain.
+- "Semua berbahasa Mandarin" mendengarkan **suara yang diputar komputer** (ucapan orang lain di rapat online), bukan mikrofon ruangan. Di ruang rapat, pilih satu bahasa asing walaupun hanya karyawan Taiwan yang berbicara, agar mikrofon dipakai.
+
+---
+
+## 8. Pengajar di Taiwan mengajar dalam bahasa Mandarin, Anda membaca subtitle dalam bahasa Anda (r26)
+
+Misalnya pengajar di Taiwan mengajar pabrik Indonesia, Vietnam, dan India lewat Teams, sepenuhnya dalam bahasa Mandarin. Anda ingin subtitle dalam bahasa Anda, dan **suara tidak boleh keluar dari perusahaan**.
+
+**Cara yang disarankan: satu "komputer subtitle" dengan kartu grafis ikut kelas, bahasa Mandarin dikenali satu kali**
+
+Komputer subtitle punya kartu grafis NVIDIA (IT memasang paket GPU dan model Mandarin Breeze ASR 25 lebih dulu; lihat panduan IT). Komputer itu ikut kelas Teams seperti peserta, mendengarkan pengajar, mengenali bahasa Mandarin, lalu menerjemahkannya; Anda cukup memakai browser.
+
+- **Anda (karyawan di pabrik luar negeri)**: buka alamat yang dibagikan di chat Teams (`http://<IP komputer subtitle>:19781/simple/live`) di browser komputer atau ponsel, masukkan kata sandi staf, lalu pilih bahasa Anda di kanan atas (Indonesia, Vietnam, Hindi, Inggris). **Tidak perlu memasang program.**
+- **Pengajar**: mengajar lewat Teams seperti biasa, tidak perlu memasang apa pun.
+- **Yang menjalankan komputer subtitle** (asisten atau IT):
+  1. Komputer subtitle bergabung ke kelas Teams, mikrofon dimatikan, speaker atau headset **jangan dibisukan** (program mendengarkan suara yang diputar komputer).
+  2. Buka PCG Meeting Translator → saya berbicara "中文" → "**Rapat atau kelas online, saya hanya membaca subtitle**" → "**Semua berbahasa Mandarin**" → Mulai.
+  3. Di layar subtitle tekan "**Bagikan**", lalu tempel alamat dan kata sandi staf ke chat Teams.
+
+**Mengapa lebih akurat**
+
+- Bahasa Mandarin dikenali kartu grafis komputer subtitle dengan Breeze ASR 25 (dilatih untuk Mandarin Taiwan dan campuran Mandarin-Inggris), lebih akurat daripada model kecil bawaan di laptop biasa.
+- Semua orang membaca hasil pengenalan yang sama; minta IT mengisi istilah pelajaran ke glosarium lebih dulu.
+- Suara hanya diproses di komputer subtitle dan tidak dikirim ke luar perusahaan.
+
+**Cara lain: membuka subtitle di komputer Anda sendiri**
+
+Saya berbicara "Bahasa Indonesia" → "saya hanya membaca subtitle" → "Mandarin → Indonesia". Pengenalan berjalan di komputer Anda: jika ada kartu grafis NVIDIA, halaman menyarankan memasang Breeze ASR 25 dan hasilnya sama dengan komputer subtitle; laptop biasa hanya bisa memakai model kecil bawaan, jadi akurasi bahasa Mandarin tidak meningkat.
+
+**Batasan**
+
+- "Semua berbahasa Mandarin" hanya mendengarkan **suara yang diputar komputer**, bukan mikrofon. Jadi komputer subtitle harus komputer lain yang ikut kelas, bukan komputer yang dipakai pengajar berbicara.
+- Pengajar di ruang kelas dengan mikrofon (tanpa Teams): pilih "Komputer subtitle ruang rapat, semua membaca di ponsel" ditambah bahasa yang paling banyak dipakai peserta; mikrofon dipakai, dan bahasa Mandarin dikenali model multibahasa, bukan Breeze.
+- Pabrik luar negeri harus bisa menjangkau komputer subtitle lewat jaringan perusahaan (port 19781). Tanyakan dulu ke IT atau tim jaringan apakah akses antar lokasi bisa.
+- Kualitas terjemahan bergantung pada pengaturan IT: mode lokal (M2M100) biasa saja untuk bahasa Indonesia dan Vietnam; mode server (model besar) jauh lebih baik.
+- Cara ini menggabungkan fitur yang sudah ada. Jeda Breeze pada subtitle langsung, akses antar lokasi, dan banyak penonton sekaligus belum diuji di komputer nyata, jadi coba dulu pada satu kelas.
 
 ---
 

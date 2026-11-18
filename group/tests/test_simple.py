@@ -5,6 +5,7 @@
     python3 -m unittest group/tests/test_simple.py -v
 """
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -302,6 +303,38 @@ class SimpleFlow(unittest.TestCase):
         self.assertNotEqual(self.started[-1]["model"], "pack:phowhisper-small")
         self.c.post("/api/simple/live", json={"scenario": "vi"})
         self.assertEqual(self.started[-1]["model"], "pack:phowhisper-small")
+
+    def test_chinese_pack_is_used_when_listening_to_chinese(self):
+        """中文模型包（Breeze ASR 25）：聽中文的單向字幕都用它——字幕機「大家都說中文」、外語同仁「對方說中文」；
+        教室模式不用。這時收的是電腦播放的聲音，不帶麥克風（文件「情境九」照這個寫）"""
+        pack = self.base / "models" / "packs" / "breeze-asr-25"
+        pack.mkdir(parents=True)
+        (pack / "pack.json").write_text(json.dumps({
+            "id": "breeze-asr-25", "name": "Breeze ASR 25", "type": "asr", "engine": "faster-whisper",
+            "languages": ["zh"], "purpose": ["live", "file"], "version": "1", "license": "apache-2.0"}),
+            encoding="utf-8")
+        self.cfg.write_text(json.dumps({"pcg_simple": {"asr_packs": {"zh": {"live": "breeze-asr-25"}}}}),
+                            encoding="utf-8")
+        self.c.post("/api/simple/live", json={"scenario": "zh"})                       # 大家都說中文
+        st = self.started[-1]
+        self.assertEqual((st["mode"], st["model"], st["room"]), ("zh", "pack:breeze-asr-25", False))
+        self.assertNotIn("device", st)                                                 # 沒有指定麥克風：收電腦播放的聲音
+        self.assertNotIn("mic_device", st)
+        self.c.post("/api/simple/live", json={"scenario": "zh2id", "me": "id"})        # 印尼同仁聽中文
+        self.assertEqual(self.started[-1]["model"], "pack:breeze-asr-25")
+        self.c.post("/api/simple/live", json={"scenario": "zh2id", "me": "id", "room": True})
+        self.assertNotEqual(self.started[-1]["model"], "pack:breeze-asr-25")           # 教室模式：兩種語言，用多語模型
+        self.c.post("/api/simple/live", json={"scenario": "id"})                       # 台灣同仁聽印尼文：不是中文
+        self.assertNotEqual(self.started[-1]["model"], "pack:breeze-asr-25")
+
+    def test_it_page_can_assign_a_chinese_pack(self):
+        """IT 設定頁「每種語言用哪個模型」要有中文那一列（r27）：少了它 IT 沒辦法指定 Breeze，
+        按「套用模型設定」還會把推薦視窗設好的中文清掉"""
+        html = (ROOT / "group" / "admin.html").read_text(encoding="utf-8")
+        m = re.search(r"const LANGS3=\[([^\]]*)\]", html)
+        self.assertIsNotNone(m)
+        self.assertEqual([x.strip(" '\"") for x in m.group(1).split(",")], ["zh", "id", "vi", "hi"])
+        self.assertEqual(html.count("m_lang_zh:"), 3)                  # 三種介面語言都有「中文」這一列的名稱
 
     def test_english_live_uses_moonshine(self):
         """對方說英文、本機辨識：有 Moonshine 模型就用它；雙向、教室模式、沒有模型、IT 關掉時用 Whisper"""

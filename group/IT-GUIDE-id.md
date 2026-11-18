@@ -351,6 +351,31 @@ Penginstal utama hanya berisi model small: berjalan di laptop biasa, tetapi baha
 - Hanya komputer dan ponsel di jaringan perusahaan yang sama yang bisa terhubung.
 - Keamanan: mulai r18 hanya koneksi lewat alamat IP atau nama komputer yang diterima; gunakan kata sandi karyawan yang panjang (belum ada penguncian setelah salah berulang).
 
+### Pengajar di Taiwan mengajar dalam bahasa Mandarin, pabrik luar negeri membaca subtitle: Breeze untuk Mandarin, suara tetap di dalam perusahaan
+
+Langkah untuk karyawan ada di skenario 8 pada contoh penggunaan. Satu komputer subtitle ikut kelas Teams dan mengenali bahasa Mandarin pengajar dengan kartu grafis dan **Breeze ASR 25** (MediaTek Research, dilatih untuk Mandarin Taiwan dan campuran Mandarin-Inggris); karyawan di luar negeri tersambung lewat browser dan memilih bahasanya sendiri. Suara dikenali satu kali, dan hanya diproses di komputer subtitle.
+
+**IT melakukannya sekali di komputer subtitle**
+
+1. Ikuti langkah "komputer subtitle ruang rapat" di atas: penginstal lengkap, paket GPU, "Izinkan komputer dan ponsel lain menonton subtitle", kata sandi staf. Breeze berukuran large-v2: disarankan memori video 6 GB atau lebih; kartu 4 GB perlu diuji.
+2. Di "Model (paket model)", pasang "**Breeze ASR 25（台灣華語、中英夾雜）**" (sekitar 1,5 GB).
+3. Tetapkan Breeze untuk bahasa Mandarin:
+   - **Mulai r27**: di "Model untuk setiap bahasa", baris "Mandarin", pilih Breeze ASR 25 untuk "Subtitle langsung" lalu tekan "Terapkan pengaturan model".
+   - **r25 dan r26**: halaman pengaturan tidak punya baris "Mandarin". Satu-satunya cara adalah halaman staf di komputer subtitle: pilih "Semua berbahasa Mandarin", muat ulang, lalu tekan "Pasang" pada jendela "Disarankan memasang model suara yang lebih akurat" (setelah terpasang, model otomatis ditetapkan untuk Mandarin). Setelah itu **jangan tekan "Terapkan pengaturan model"**, karena menghapus penetapan Mandarin. Disarankan memperbarui ke r27.
+4. Firewall: aturan di atas hanya membuka subnet yang sama. Untuk pabrik luar negeri, ganti `-RemoteAddress` dengan subnet mereka (misalnya `10.10.0.0/16,10.20.0.0/16`) dan minta tim jaringan memastikan TCP 19781 dari tiap lokasi ke komputer subtitle terbuka.
+5. Isi istilah pelajaran (perusahaan, pabrik, sistem, nama) ke glosarium.
+6. Kualitas terjemahan: mode lokal memakai M2M100, biasa saja untuk bahasa Indonesia dan Vietnam; agar lebih baik, alihkan komputer subtitle ke mode server dan terjemahkan dengan platform AI grup atau model besar internal (pengenalan tetap di komputer subtitle).
+
+**Cara kerja program yang sebenarnya**
+
+- Paket model Mandarin dipakai untuk subtitle satu arah yang mendengarkan bahasa Mandarin: staf berbahasa Mandarin yang memilih "Semua berbahasa Mandarin", dan staf berbahasa asing yang memilih "Mandarin → bahasa Anda". Mode kelas (satu mikrofon, dua bahasa) dan "saya juga berbicara" memakai model multibahasa, bukan Breeze.
+- "Semua berbahasa Mandarin" mendengarkan **suara yang diputar komputer** (suara pengajar di Teams), **bukan mikrofon**. Komputer subtitle harus komputer lain yang ikut kelas, bukan komputer tempat pengajar berbicara; speaker atau headset-nya jangan dibisukan.
+- Pengajar di ruang kelas dengan mikrofon: pilih "Komputer subtitle ruang rapat, semua membaca di ponsel" ditambah satu bahasa asing; mikrofon dipakai dan bahasa Mandarin dikenali model multibahasa (large-v3-turbo).
+- Sebuah bahasa baru diterjemahkan jika ada penonton yang memilihnya. Yang dikirim keluar hanya teks subtitle, jadi lalu lintas data kecil.
+- Jika "API pengenalan suara" aktif, suara dikirim ke API lebih dulu dan Breeze hanya cadangan. Agar suara tetap di dalam perusahaan, jangan aktifkan API eksternal.
+
+**Belum diuji di komputer nyata**: jeda Breeze pada subtitle langsung (bergantung kartu grafis), akses antar lokasi, dan banyak penonton sekaligus. Pada 2026-11-18 hanya pemuatan model dengan satu kalimat Mandarin dan cara kerja di atas (uji otomatis) yang dipastikan di cloud. Coba dulu pada satu kelas.
+
 ## ③ Komputer karyawan yang perlu subtitle langsung
 
 ### Windows

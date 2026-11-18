@@ -122,9 +122,45 @@ For example, a Taiwanese manager chairs the meeting in Chinese, with Indonesian,
 - **Taiwanese staff following what foreign staff say**: choose "Indonesian" and so on. Only one foreign language at a time; when someone speaks another language, choose that language and click Start (the previous session is replaced).
 
 **Same meeting room**
-- Use the room's "subtitle computer" (one computer with a graphics card; setup in the IT guide): choose "**Meeting room subtitle computer, everyone reads on their phones**" and the language most of the others speak (e.g. Indonesian; if only Taiwanese staff speak, "Everyone speaks Chinese"), click Start; the QR code is shown right away, project it.
+- Use the room's "subtitle computer" (one computer with a graphics card; setup in the IT guide): choose "**Meeting room subtitle computer, everyone reads on their phones**" and the language most of the others speak (e.g. Indonesian), click Start; the QR code is shown right away, project it.
 - Everyone scans the QR code and chooses their own language at the top right (multi-language subtitles, from r19): Chinese and Indonesian viewers read the normal subtitles; for Vietnamese, Hindi or English viewers the subtitle computer translates one more copy.
 - The microphone only tells apart Chinese and the one foreign language you chose. Staff speaking other languages should use English or have someone relay.
+- "Everyone speaks Chinese" listens to **the sound the computer plays** (what others say in an online meeting), not the room microphone. In a room, choose a foreign language even if only Taiwanese staff speak, so that the microphone is used.
+
+---
+
+## 9. Teaching in Chinese from Taiwan, overseas staff read subtitles in their own language (r26)
+
+For example, a teacher in Taiwan teaches Indonesian, Vietnamese and Indian plants over Teams, speaking Chinese throughout. Overseas staff want subtitles in their own language, and **the audio must not leave the company**.
+
+**Recommended: one "subtitle computer" with a graphics card joins the class, and Chinese is recognized once**
+
+The subtitle computer has an NVIDIA graphics card (IT installs the GPU pack and the Chinese model Breeze ASR 25 first; see the IT guide). It joins the Teams class like a student, listens to the teacher, recognizes the Chinese and translates it; overseas staff only need a browser.
+
+- **Teacher**: teach over Teams as usual. Nothing to install.
+- **Whoever runs the subtitle computer** (an assistant or IT):
+  1. Join the Teams class on the subtitle computer, microphone off, speakers or headset **not muted** (the program listens to what the computer plays).
+  2. Open PCG Meeting Translator → I speak "中文" → "**Online meeting or class, I only read subtitles**" → "**Everyone speaks Chinese**" → Start.
+  3. On the subtitle screen press "**Share**" and paste the address (`http://<subtitle computer IP>:19781/simple/live`) and the staff password into the Teams chat.
+- **Overseas staff**: open that address in a browser on a computer or phone, enter the password and choose your language at the top right (Indonesian, Vietnamese, Hindi, English). **Nothing to install.**
+
+**Why this is more accurate**
+
+- Chinese is recognized on the subtitle computer's graphics card with Breeze ASR 25 (trained for Taiwanese Mandarin and mixed Chinese-English), which is more accurate than the small built-in model on an ordinary laptop.
+- Everyone reads the same recognition result; ask IT to put course terms into the glossary first.
+- Audio is processed only on the subtitle computer and is not sent outside the company.
+
+**Alternative: each overseas staff member opens subtitles on their own computer**
+
+I speak "your language" → "I only read subtitles" → "Chinese". Recognition runs on that computer: with an NVIDIA graphics card the page suggests installing Breeze ASR 25 and the result matches the subtitle computer; an ordinary laptop can only use the small built-in model, so Chinese accuracy does not improve.
+
+**Limits**
+
+- "Everyone speaks Chinese" listens only to **what the computer plays**, not the microphone. So the subtitle computer must be another computer that joined the class, not the one the teacher is speaking into.
+- Teacher in a classroom with a microphone (not through Teams): choose "Meeting room subtitle computer, everyone reads on their phones" plus the language most students speak; the microphone is used, and Chinese is then recognized by the multilingual model, not Breeze.
+- Overseas sites must be able to reach the subtitle computer over the company network (port 19781). Ask IT or the network team first whether cross-site access works.
+- Translation quality depends on IT's settings: local mode (M2M100) is average for Indonesian and Vietnamese; server mode (a large model) is much better.
+- This setup combines existing features. Breeze's delay in live subtitles, cross-site access and many viewers at once have not been tested on real machines yet, so try it with one class first.
 
 ---
 

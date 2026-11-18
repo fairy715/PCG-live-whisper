@@ -351,6 +351,31 @@ Bộ cài chính chỉ có mô hình small: chạy được trên laptop thườ
 - Chỉ máy tính và điện thoại trong cùng mạng nội bộ công ty mới kết nối được.
 - Bảo mật: từ r18 chỉ chấp nhận kết nối bằng địa chỉ IP hoặc tên máy; hãy đặt mật khẩu nhân viên dài (hiện chưa khóa sau nhiều lần nhập sai).
 
+### Giảng viên ở Đài Loan dạy bằng tiếng Trung, nhà máy nước ngoài xem phụ đề: Breeze cho tiếng Trung, âm thanh ở lại trong công ty
+
+Các bước cho nhân viên nằm ở tình huống 8 trong tài liệu tình huống sử dụng. Một máy phụ đề tham gia lớp Teams và nhận dạng tiếng Trung của giảng viên bằng card đồ họa với **Breeze ASR 25** (MediaTek Research, huấn luyện cho tiếng Trung Đài Loan và tiếng Trung pha tiếng Anh); nhân viên ở nước ngoài kết nối bằng trình duyệt và tự chọn ngôn ngữ. Giọng nói chỉ nhận dạng một lần và chỉ được xử lý trên máy phụ đề.
+
+**IT làm một lần trên máy phụ đề**
+
+1. Làm theo các bước "máy phụ đề phòng họp" ở trên: bộ cài đầy đủ, gói GPU, "Allow other computers and phones to view subtitles", mật khẩu nhân viên. Breeze có kích thước large-v2: nên có bộ nhớ đồ họa từ 6 GB; card 4 GB cần thử thực tế.
+2. Trong "Models (model packs)", cài "**Breeze ASR 25（台灣華語、中英夾雜）**" (khoảng 1,5 GB).
+3. Chỉ định Breeze cho tiếng Trung:
+   - **Từ r27**: ở mục "Model for each language", dòng "Chinese", chọn Breeze ASR 25 cho "Live subtitles" rồi bấm "Apply model settings".
+   - **r25 và r26**: trang cài đặt không có dòng "Chinese". Cách duy nhất là trang nhân viên trên máy phụ đề: chọn "Mọi người đều nói tiếng Trung", tải lại trang, rồi bấm "Cài đặt" trong cửa sổ "Nên cài mô hình giọng nói chính xác hơn" (cài xong mô hình tự được chỉ định cho tiếng Trung). Sau đó **đừng bấm "Apply model settings"**, vì sẽ xóa chỉ định cho tiếng Trung. Nên cập nhật lên r27.
+4. Tường lửa: quy tắc ở trên chỉ mở cùng mạng con. Với nhà máy nước ngoài, thay `-RemoteAddress` bằng các mạng con của họ (ví dụ `10.10.0.0/16,10.20.0.0/16`) và nhờ nhóm mạng xác nhận TCP 19781 từ từng nhà máy tới máy phụ đề thông suốt.
+5. Nhập thuật ngữ của khóa học (công ty, nhà máy, hệ thống, tên người) vào bảng thuật ngữ.
+6. Chất lượng bản dịch: chế độ cục bộ dùng M2M100, ở mức trung bình với tiếng Indonesia và tiếng Việt; muốn tốt hơn, chuyển máy phụ đề sang chế độ máy chủ và dịch bằng nền tảng AI của tập đoàn hoặc mô hình lớn nội bộ (nhận dạng vẫn chạy trên máy phụ đề).
+
+**Chương trình thực tế hoạt động thế nào**
+
+- Gói mô hình tiếng Trung được dùng cho phụ đề một chiều nghe tiếng Trung: nhân viên nói tiếng Trung chọn "Mọi người đều nói tiếng Trung", và nhân viên nói ngoại ngữ chọn "Tiếng Trung → ngôn ngữ của bạn". Chế độ lớp học (một micro, hai ngôn ngữ) và "tôi cũng nói" dùng mô hình đa ngôn ngữ, không dùng Breeze.
+- "Mọi người đều nói tiếng Trung" nghe **âm thanh máy tính phát ra** (giọng giảng viên trong Teams), **không nghe micro**. Máy phụ đề phải là một máy khác tham gia lớp học, không phải máy giảng viên đang nói; đừng tắt tiếng loa hoặc tai nghe của máy đó.
+- Giảng viên dạy trong phòng học bằng micro: chọn "Máy phụ đề phòng họp, mọi người xem trên điện thoại" cùng một ngoại ngữ; micro được dùng và tiếng Trung do mô hình đa ngôn ngữ (large-v3-turbo) nhận dạng.
+- Một ngôn ngữ chỉ được dịch khi có người xem chọn nó. Chỉ có chữ phụ đề được gửi đi nên lưu lượng rất nhỏ.
+- Khi bật "Speech recognition API", âm thanh được gửi cho API trước và Breeze chỉ là dự phòng. Muốn âm thanh ở lại trong công ty, đừng bật API bên ngoài.
+
+**Chưa thử trên máy thật**: độ trễ của Breeze với phụ đề trực tiếp (tùy card đồ họa), truy cập giữa các nhà máy, và nhiều người xem cùng lúc. Ngày 2026-11-18 mới chỉ xác nhận trên đám mây việc tải mô hình với một câu tiếng Trung và cách hoạt động nêu trên (kiểm thử tự động). Hãy thử trước với một buổi học.
+
 ## ③ Máy nhân viên cần phụ đề trực tiếp
 
 ### Windows

@@ -349,6 +349,31 @@ The main installer only has the small model: it runs on ordinary laptops, but In
 - Only computers and phones on the same company network can connect.
 - Security: from r18 only connections by IP address or computer name are accepted; use a long staff password (there is no lockout after wrong attempts yet).
 
+### Teaching in Chinese from Taiwan, overseas sites read subtitles: Breeze for Chinese, audio stays inside the company
+
+The staff steps are in scenario 9 of the use cases. One subtitle computer joins the Teams class and recognizes the teacher's Chinese on its graphics card with **Breeze ASR 25** (MediaTek Research, trained for Taiwanese Mandarin and mixed Chinese-English); overseas staff connect with a browser and choose their own language. Speech is recognized once, and audio is processed only on the subtitle computer.
+
+**IT does this once on the subtitle computer**
+
+1. Follow the "meeting room subtitle computer" steps above: full installer, GPU pack, "Allow other computers and phones to view subtitles", staff password. Breeze is a large-v2 size model: 6 GB of video memory or more is recommended, and a 4 GB card needs testing.
+2. Under "Models (model packs)", install "**Breeze ASR 25（台灣華語、中英夾雜）**" (about 1.5 GB).
+3. Assign Breeze to Chinese:
+   - **From r27**: under "Model for each language", row "Chinese", choose Breeze ASR 25 for "Live subtitles" and press "Apply model settings".
+   - **r25 and r26**: the settings page has no "Chinese" row. The only way is the staff page on the subtitle computer: choose "Everyone speaks Chinese", reload, and press "Install" in the "A more accurate speech model is recommended" window (it assigns the model to Chinese when installed). Afterwards **do not press "Apply model settings"**, which clears the Chinese assignment. Updating to r27 is recommended.
+4. Firewall: the rule above only opens the same subnet. For overseas sites, replace `-RemoteAddress` with their subnets (for example `10.10.0.0/16,10.20.0.0/16`) and ask the network team to confirm TCP 19781 from each site to the subtitle computer.
+5. Put course terms (company, plants, systems, names) into the glossary.
+6. Translation quality: local mode uses M2M100, which is average for Indonesian and Vietnamese; for better results switch the subtitle computer to server mode and translate with the group AI platform or an internal large model (recognition still runs on the subtitle computer).
+
+**How the program actually behaves**
+
+- A Chinese model pack is used for one-way subtitles that listen to Chinese: Chinese-speaking staff choosing "Everyone speaks Chinese", and foreign-language staff choosing "Chinese → your language". Classroom mode (one microphone, two languages) and "I will speak too" use the multilingual model, not Breeze.
+- "Everyone speaks Chinese" listens to **what the computer plays** (the teacher's voice in Teams), **not the microphone**. The subtitle computer must be another computer that joined the class, not the one the teacher speaks into; do not mute its speakers or headset.
+- Teacher in a classroom with a microphone: choose "Meeting room subtitle computer, everyone reads on their phones" plus one foreign language; the microphone is used and Chinese is recognized by the multilingual model (large-v3-turbo).
+- A language is translated only when a viewer chooses it. Only subtitle text is sent out, so traffic is small.
+- With "Speech recognition API" on, audio goes to the API first and Breeze is only the fallback. To keep audio inside the company, do not turn on an external API.
+
+**Not yet tested on real machines**: Breeze's delay in live subtitles (depends on the graphics card), cross-site access, and many viewers at once. On 2026-11-18 only model loading with one Chinese sentence and the behaviour above (automated tests) were confirmed in the cloud. Try it with one class first.
+
 ## ③ Staff computers that need live subtitles
 
 ### Windows
