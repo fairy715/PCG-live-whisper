@@ -827,7 +827,7 @@ async function modelHint(){
   $('mhLead').textContent=t('mh_'+j.why,{n:j.name,m:j.size_mb});
   $('mhIt').hidden=!it;$('mhGet').hidden=it;$('mhProg').hidden=true;$('mhGet').disabled=false;$('mhGet').textContent=t('mh_install');
   $('mhLater').hidden=false;$('mhNever').hidden=false;$('mhLater').textContent=t('gpu_later');
-  $('mhDlg').showModal();
+  $('mhDlg').showModal();(it?$('mhLater'):$('mhGet')).focus();
 }
 const mhPost=a=>api('/api/simple/model-hint',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:a,id:mhInfo&&mhInfo.id,src:mhSrc()})});
 $('mhLater').onclick=()=>{if(!mhTimer&&!$('mhNever').hidden)mhPost('later');$('mhDlg').close()};

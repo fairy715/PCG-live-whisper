@@ -140,6 +140,15 @@ On the live subtitles page, open "**🔊 Sound and microphone: test and choose d
 
 The microphone is not used when you only read subtitles; it is used for "I also speak", "same classroom" and "meeting room subtitle computer". You cannot test while subtitles are running; press Stop first.
 
+## Suggestions when the page opens (r25)
+
+When the page opens, the program looks at this computer and the language you chose last time. It shows a suggestion only when one applies, one at a time:
+
+- **“This computer has an NVIDIA graphics card”**: the computer has a graphics card but the GPU pack is not installed. Press “**Download the pack**”, double-click the downloaded file to install it (no administrator needed), then open the program again. Subtitles are faster and the computer is less busy.
+- **“A more accurate speech model is recommended”**: for example, if you often choose Vietnamese as the other side's language, the Vietnamese model is recommended; with a graphics card and Chinese, Breeze ASR 25 (Taiwanese Mandarin) is recommended. Press “**Install**” and it downloads by itself; it is used from the next subtitles.
+- Not now? Press “**Later**” (reminds you again after 7 days). Never? Press “**Do not remind me again**”.
+- If the window says “Please ask IT”, this computer is installed by IT: tell IT what the window says.
+
 ## Tips
 
 - Speak clearly, one person at a time, microphone close to the speaker. Fill in the meeting topic for meetings with many technical terms.

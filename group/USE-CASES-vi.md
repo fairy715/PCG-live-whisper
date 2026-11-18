@@ -134,6 +134,15 @@ Trên trang phụ đề trực tiếp, mở "**🔊 Âm thanh và micro: kiểm 
 
 Khi chỉ xem phụ đề thì không dùng micro; micro được dùng ở "Tôi cũng nói", "cùng một lớp học" và "máy phụ đề phòng họp". Không kiểm tra được khi phụ đề đang chạy; hãy bấm Dừng trước.
 
+## Gợi ý khi mở trang (r25)
+
+Khi mở trang, chương trình xem máy này và ngôn ngữ bạn chọn lần trước. Gợi ý chỉ hiện khi cần, mỗi lần một gợi ý:
+
+- **“Máy này có card đồ họa NVIDIA”**: máy có card đồ họa nhưng chưa cài gói GPU. Bấm “**Tải gói**”, bấm đúp vào tệp vừa tải để cài (không cần quyền quản trị), rồi mở lại chương trình. Phụ đề nhanh hơn và máy đỡ nặng.
+- **“Nên cài mô hình giọng nói chính xác hơn”**: ví dụ, nếu bạn hay chọn tiếng Việt là ngôn ngữ của bên kia, mô hình riêng cho tiếng Việt sẽ được gợi ý; máy có card đồ họa và chọn tiếng Trung thì gợi ý Breeze ASR 25 (tiếng Trung Đài Loan). Bấm “**Cài đặt**” là tự tải về; sẽ dùng từ lần phụ đề sau.
+- Chưa tiện? Bấm “**Để sau**” (7 ngày sau nhắc lại). Không muốn nữa? Bấm “**Không nhắc lại**”.
+- Nếu cửa sổ ghi “Hãy nhờ IT”, máy này do IT cài đặt: hãy báo cho IT nội dung cửa sổ.
+
 ## Mẹo
 
 - Nói rõ ràng, từng người một, micro gần người nói. Điền chủ đề cuộc họp nếu có nhiều thuật ngữ.

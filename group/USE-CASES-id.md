@@ -134,6 +134,15 @@ Di halaman subtitle langsung, buka "**🔊 Suara dan mikrofon: uji dan pilih per
 
 Mikrofon tidak dipakai jika Anda hanya membaca subtitle; dipakai pada "Saya juga berbicara", "satu ruang kelas", dan "komputer subtitle ruang rapat". Uji tidak bisa dilakukan saat subtitle berjalan; tekan Berhenti dulu.
 
+## Saran saat halaman dibuka (r25)
+
+Saat halaman dibuka, program melihat komputer ini dan bahasa yang terakhir Anda pilih. Saran hanya muncul bila perlu, satu per satu:
+
+- **“Komputer ini punya kartu grafis NVIDIA”**: komputer punya kartu grafis tetapi paket GPU belum dipasang. Tekan “**Unduh paket**”, klik dua kali berkas yang diunduh untuk memasangnya (tidak perlu hak administrator), lalu buka lagi program. Subtitle lebih cepat dan komputer lebih ringan.
+- **“Disarankan memasang model suara yang lebih akurat”**: misalnya, jika Anda sering memilih bahasa Vietnam sebagai bahasa lawan bicara, model khusus bahasa Vietnam disarankan; dengan kartu grafis dan bahasa Mandarin, disarankan Breeze ASR 25 (Mandarin Taiwan). Tekan “**Pasang**” dan model diunduh otomatis; dipakai mulai subtitle berikutnya.
+- Belum sempat? Tekan “**Nanti saja**” (diingatkan lagi setelah 7 hari). Tidak mau lagi? Tekan “**Jangan ingatkan lagi**”.
+- Jika jendela menulis “Minta IT”, komputer ini dipasang oleh IT: sampaikan isi jendela itu ke IT.
+
 ## Tips
 
 - Bicara jelas, satu per satu, mikrofon dekat pembicara. Isi topik rapat jika banyak istilah teknis.
