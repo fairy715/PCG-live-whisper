@@ -864,6 +864,44 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             return JSONResponse({"ok": False, "code": "audio_remote"}, status_code=403)
         return {"ok": True, **_meter.levels()}
 
+    # ─── 偵測到 NVIDIA 顯示卡、還沒裝 GPU 加速包：同仁頁面跳出建議（r25，只在這台電腦上） ───
+    _gpus = {"list": None}
+
+    def _gpu_hint_state():
+        from group import hwtier
+        if _gpus["list"] is None:
+            fn = (update_hooks or {}).get("gpus") or hwtier.nvidia_gpus
+            try:
+                _gpus["list"] = list(fn() or [])
+            except Exception:  # noqa: BLE001
+                _gpus["list"] = []
+        s = settings()
+        h = hwtier.gpu_hint(base_dir, s, time.time(), _gpus["list"])
+        return {"ok": True, **h, "url": hwtier.GPU_PACK_URL, "page": hwtier.GPU_PACK_PAGE, "mb": hwtier.GPU_PACK_MB,
+                "who": "it" if s.get("update_who") == "it" else "staff"}
+
+    @app.get("/api/simple/gpu-hint")
+    async def simple_gpu_hint(request: Request):
+        if not is_local(request):
+            return {"ok": True, "show": False, "why": "remote"}
+        import asyncio
+        return await asyncio.to_thread(_gpu_hint_state)
+
+    @app.post("/api/simple/gpu-hint")
+    async def simple_gpu_hint_save(request: Request, body: dict = {}):
+        """同仁按「下次再說」（7 天後再提醒）或「不要再提醒」"""
+        if not is_local(request):
+            return JSONResponse({"ok": False, "code": "local_only"}, status_code=403)
+        from group import hwtier
+        act = body.get("action")
+        if act not in ("later", "never"):
+            return JSONResponse({"ok": False, "code": "bad_action"}, status_code=400)
+        cfg = read_cfg()
+        s = cfg.setdefault("pcg_simple", {})
+        s["gpu_hint"] = {"off": True} if act == "never" else {"until": int(time.time()) + hwtier.HINT_LATER_DAYS * 86400}
+        write_config(cfg)
+        return {"ok": True}
+
     def use_moonshine(s):
         """英文即時字幕要不要用 Moonshine：模型在（離線資源包附）、IT 沒有關掉（english_asr = "whisper"）"""
         if asr_api_on(s):

@@ -80,3 +80,72 @@ def pick(base_dir, hw=None, has_pack=None):
             return {"model": f"pack:{WEAK_PACK}", "reason": "weak", "suggest": "", "hw": hw}
         return {"model": "small", "reason": "weak", "suggest": WEAK_PACK, "hw": hw}
     return {"model": "small", "reason": "normal", "suggest": "", "hw": hw}
+
+
+# ─── 偵測到 NVIDIA 顯示卡、還沒裝 GPU 加速包：建議安裝（r25） ───────────────────────────
+# 加速包只支援 NVIDIA（CUDA）；AMD、Intel 的獨立顯示卡用不到，不提醒。顯示記憶體太小（2 GB 的 MX 系列）多半跑不動，也不提醒。
+GPU_PACK_URL = "https://github.com/fairy715/PCG-live-whisper/releases/download/gpu-cuda12-v1/PCG-GPU-Pack-cuda12-v1.exe"
+GPU_PACK_PAGE = "https://github.com/fairy715/PCG-live-whisper/releases/tag/gpu-cuda12-v1"
+GPU_PACK_MB = 706
+MIN_VRAM_MB = 3500              # 4 GB 的顯示卡回報 4096 MiB
+HINT_LATER_DAYS = 7
+
+
+def nvidia_gpus(run=None):
+    """這台電腦的 NVIDIA 顯示卡 [{"name", "vram_mb"}]（問 nvidia-smi：有裝 NVIDIA 驅動才有）。沒有、問不到回 []"""
+    import subprocess
+    if run is None:
+        if sys.platform != "win32":
+            return []
+        run = subprocess.run
+    root = os.environ.get("SystemRoot", r"C:\Windows")
+    exes = ["nvidia-smi", os.path.join(root, "System32", "nvidia-smi.exe"),
+            os.path.join(os.environ.get("ProgramFiles", r"C:\Program Files"), "NVIDIA Corporation", "NVSMI", "nvidia-smi.exe")]
+    for exe in exes:
+        try:
+            r = run([exe, "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
+                    capture_output=True, text=True, timeout=8, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        except (OSError, subprocess.SubprocessError, ValueError):
+            continue
+        if getattr(r, "returncode", 1) != 0:
+            continue
+        out = []
+        for line in str(r.stdout or "").splitlines():
+            name, _, mem = line.rpartition(",")
+            try:
+                out.append({"name": name.strip()[:80], "vram_mb": int(float(mem.strip()))})
+            except ValueError:
+                continue
+        return [g for g in out if g["name"]]
+    return []
+
+
+def gpu_pack_installed(base_dir):
+    """GPU 加速包裝了沒（安裝資料夾的 gpu\\cuda*）；裝了但檢查沒過也算裝了，不再提醒"""
+    d = Path(base_dir) / "gpu"
+    try:
+        return d.is_dir() and any(x.is_dir() and x.name.startswith("cuda") for x in d.iterdir())
+    except OSError:
+        return False
+
+
+def gpu_hint(base_dir, settings, now, gpus):
+    """要不要建議安裝 GPU 加速包 → {"show", "why", "name", "vram_mb"}。
+    settings 是 config.json 的 pcg_simple；gpu_hint 記同仁選的「下次再說」（until）或「不要再提醒」（off）"""
+    h = (settings or {}).get("gpu_hint") or {}
+    best = max(gpus or [], key=lambda g: g.get("vram_mb") or 0, default=None)
+    out = {"show": False, "why": "", "name": (best or {}).get("name", ""), "vram_mb": (best or {}).get("vram_mb", 0)}
+    if not best:
+        out["why"] = "no_gpu"
+    elif gpu_pack_installed(base_dir):
+        out["why"] = "installed"
+    elif best["vram_mb"] < MIN_VRAM_MB:
+        out["why"] = "small"
+    elif h.get("off"):
+        out["why"] = "off"
+    elif float(h.get("until") or 0) > now:
+        out["why"] = "later"
+    else:
+        out["show"] = True
+    return out
+

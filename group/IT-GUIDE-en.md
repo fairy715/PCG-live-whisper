@@ -310,6 +310,8 @@ The main installer only has the small model: it runs on ordinary laptops, but In
 
 **Recommended**: NVIDIA graphics card with at least 4 GB of video memory (e.g. RTX 3050 or better). A 2 GB card such as the MX330 may be too slow; test it first.
 
+**Automatic suggestion** (r25): when staff open the page, the program asks `nvidia-smi` whether this computer has an NVIDIA graphics card. If it does, has at least 4 GB of video memory, and the pack is not installed yet, a window suggests installing it: "Download the pack" (the installer on the GitHub release page, about 706 MB), "Later" (reminds again after 7 days) or "Do not remind me again". When "who can update" is set to IT only, the window only asks staff to contact IT and shows no download. Discrete AMD and Intel cards cannot use the pack (it supports NVIDIA CUDA only), so there is no reminder; computers without the NVIDIA driver (no `nvidia-smi`) are not detected either. For computers without internet, IT should bring the pack installer to them.
+
 **Setup (IT, once, on the subtitle computer)**
 
 1. Install the full installer, then the NVIDIA GPU pack (it checks the graphics card automatically when installed).

@@ -312,6 +312,8 @@ Penginstal utama hanya berisi model small: berjalan di laptop biasa, tetapi baha
 
 **Disarankan**: kartu grafis NVIDIA dengan memori video minimal 4 GB (mis. RTX 3050 ke atas). Kartu 2 GB seperti MX330 mungkin terlalu lambat; uji dulu.
 
+**Saran otomatis** (r25): saat staf membuka halaman, program bertanya ke `nvidia-smi` apakah komputer ini punya kartu grafis NVIDIA. Jika ada, memori videonya minimal 4 GB, dan paket belum terpasang, muncul jendela yang menyarankan pemasangan: "Unduh paket" (penginstal di halaman rilis GitHub, sekitar 706 MB), "Nanti saja" (diingatkan lagi setelah 7 hari), atau "Jangan ingatkan lagi". Jika "siapa yang boleh memperbarui" diatur hanya IT, jendela hanya meminta staf menghubungi IT dan tidak menampilkan unduhan. Kartu grafis diskret AMD dan Intel tidak bisa memakai paket ini (hanya mendukung NVIDIA CUDA), jadi tidak ada pengingat; komputer tanpa driver NVIDIA (tanpa `nvidia-smi`) juga tidak terdeteksi. Untuk komputer tanpa internet, IT perlu membawakan penginstal paketnya.
+
 **Pengaturan (IT, sekali, di komputer subtitle)**
 
 1. Pasang penginstal lengkap, lalu paket GPU NVIDIA (setelah terpasang, kartu grafis diperiksa otomatis).

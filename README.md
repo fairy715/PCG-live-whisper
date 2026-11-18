@@ -63,7 +63,7 @@
 | **大模型三種接法** | 集團 Open WebUI（luna、deepseek）、內部伺服器（RTX Spark、Ollama、vLLM）、外部 AI 服務（OpenAI、DeepSeek、Gemini、OpenRouter），按「測試連線」列出模型 |
 | **IT 設定頁** | 網頁上改設定、存檔就生效，不用改設定檔、不用重裝（需要重開程式的設定會出現「立即重新啟動程式」按鈕）；IT 密碼保護 |
 | **更新** | 小更新包（約 30 MB，只換程式）；一鍵更新可從 GitHub 或**公司共用資料夾**取得（不能上網的電腦也能更新），安裝前比對檔案指紋（`.sha256`） |
-| **NVIDIA GPU 加速包** | 有 NVIDIA 顯示卡的電腦另外裝（約 670 MB，[發布頁](https://github.com/fairy715/PCG-live-whisper/releases/tag/gpu-cuda12-v1)），語音辨識改用顯示卡；裝完自動檢查能不能用，不能用時照常用 CPU |
+| **NVIDIA GPU 加速包** | 有 NVIDIA 顯示卡的電腦另外裝（約 670 MB，[發布頁](https://github.com/fairy715/PCG-live-whisper/releases/tag/gpu-cuda12-v1)），語音辨識改用顯示卡；裝完自動檢查能不能用，不能用時照常用 CPU；偵測到 NVIDIA 顯示卡（4 GB 以上）而且還沒裝時，同仁頁面會自動跳出建議安裝的視窗（r25） |
 | **CPU 用量** | 辨識＋翻譯不超過實體核心數、約 3/4 的核心，Windows 上用「低於標準」優先順序，字幕跟不上時自動調回標準（r20）；本機即時字幕模型「自動」依電腦規格選（雙核心用 base、有顯示卡用 turbo／medium，r21）；IT 可用環境變數調整 |
 | **版本號** | 每個畫面都顯示版本，回報問題時好對照 |
 | **問題回報** | IT 設定頁填「同仁回報問題時寄給誰」，同仁頁面就會顯示並多一個「寫信給 IT」；IT 也能在設定頁產生這台電腦的診斷檔 |

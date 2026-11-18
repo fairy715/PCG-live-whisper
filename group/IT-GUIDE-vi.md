@@ -312,6 +312,8 @@ Bộ cài chính chỉ có mô hình small: chạy được trên laptop thườ
 
 **Khuyến nghị**: card đồ họa NVIDIA có ít nhất 4 GB bộ nhớ video (ví dụ RTX 3050 trở lên). Card 2 GB như MX330 có thể quá chậm; hãy thử trước.
 
+**Tự động gợi ý** (r25): khi nhân viên mở trang, chương trình hỏi `nvidia-smi` xem máy này có card đồ họa NVIDIA không. Nếu có, bộ nhớ video từ 4 GB trở lên và chưa cài gói, một cửa sổ sẽ gợi ý cài đặt: "Tải gói" (bộ cài trên trang phát hành GitHub, khoảng 706 MB), "Để sau" (nhắc lại sau 7 ngày) hoặc "Không nhắc lại". Khi mục "ai được cập nhật" đặt là chỉ IT, cửa sổ chỉ đề nghị nhân viên liên hệ IT và không hiện nút tải. Card rời của AMD và Intel không dùng được gói này (chỉ hỗ trợ NVIDIA CUDA) nên không nhắc; máy chưa cài driver NVIDIA (không có `nvidia-smi`) cũng không phát hiện được. Với máy không có internet, IT cần mang bộ cài gói đến.
+
 **Cài đặt (IT, một lần, trên máy phụ đề)**
 
 1. Cài bộ cài đầy đủ, rồi cài gói tăng tốc GPU NVIDIA (sau khi cài sẽ tự kiểm tra card đồ họa).
