@@ -367,12 +367,15 @@ The staff steps are in scenario 9 of the use cases. One subtitle computer joins 
 **How the program actually behaves**
 
 - A Chinese model pack is used for one-way subtitles that listen to Chinese: Chinese-speaking staff choosing "Everyone speaks Chinese", and foreign-language staff choosing "Chinese → your language". Classroom mode (one microphone, two languages) and "I will speak too" use the multilingual model, not Breeze.
-- "Everyone speaks Chinese" listens to **what the computer plays** (the teacher's voice in Teams), **not the microphone**. The subtitle computer must be another computer that joined the class, not the one the teacher speaks into; do not mute its speakers or headset.
-- Teacher in a classroom with a microphone: choose "Meeting room subtitle computer, everyone reads on their phones" plus one foreign language; the microphone is used and Chinese is recognized by the multilingual model (large-v3-turbo).
+- What "Everyone speaks Chinese" listens to depends on the scene (**from r27**):
+  - "Online meeting or class, I only read subtitles": **what the computer plays** (a subtitle computer that joined Teams and hears the teacher). Do not mute its speakers or headset.
+  - "Same classroom, one microphone" and "Meeting room subtitle computer, everyone reads on their phones": the **microphone** (the teacher speaks into this computer or the room microphone). It uses the microphone chosen under "Sound and microphone", or the Windows default if none was chosen; with no microphone at all the session does not start and the page says no microphone was found.
+  - Both use the Chinese model pack (Breeze). One session listens to one source; starting "Everyone speaks Chinese" again in another scene replaces the running session.
+  - Up to r26 the scene made no difference: it always listened to what the computer plays (so "Meeting room subtitle computer" with "Everyone speaks Chinese" did not hear the room microphone).
 - A language is translated only when a viewer chooses it. Only subtitle text is sent out, so traffic is small.
 - With "Speech recognition API" on, audio goes to the API first and Breeze is only the fallback. To keep audio inside the company, do not turn on an external API.
 
-**Not yet tested on real machines**: Breeze's delay in live subtitles (depends on the graphics card), cross-site access, and many viewers at once. On 2026-11-18 only model loading with one Chinese sentence and the behaviour above (automated tests) were confirmed in the cloud. Try it with one class first.
+**Not yet tested on real machines**: Breeze's delay in live subtitles (depends on the graphics card), microphone capture for "Everyone speaks Chinese" (the cloud has no audio devices, so only passing the microphone number to the main program was tested), cross-site access, and many viewers at once. On 2026-11-18 only model loading with one Chinese sentence and the behaviour above (automated tests) were confirmed in the cloud. Try it with one class first.
 
 ## ③ Staff computers that need live subtitles
 

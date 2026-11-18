@@ -369,12 +369,15 @@ Langkah untuk karyawan ada di skenario 8 pada contoh penggunaan. Satu komputer s
 **Cara kerja program yang sebenarnya**
 
 - Paket model Mandarin dipakai untuk subtitle satu arah yang mendengarkan bahasa Mandarin: staf berbahasa Mandarin yang memilih "Semua berbahasa Mandarin", dan staf berbahasa asing yang memilih "Mandarin → bahasa Anda". Mode kelas (satu mikrofon, dua bahasa) dan "saya juga berbicara" memakai model multibahasa, bukan Breeze.
-- "Semua berbahasa Mandarin" mendengarkan **suara yang diputar komputer** (suara pengajar di Teams), **bukan mikrofon**. Komputer subtitle harus komputer lain yang ikut kelas, bukan komputer tempat pengajar berbicara; speaker atau headset-nya jangan dibisukan.
-- Pengajar di ruang kelas dengan mikrofon: pilih "Komputer subtitle ruang rapat, semua membaca di ponsel" ditambah satu bahasa asing; mikrofon dipakai dan bahasa Mandarin dikenali model multibahasa (large-v3-turbo).
+- Suara yang didengarkan "Semua berbahasa Mandarin" bergantung pada jenis rapat (**mulai r27**):
+  - "Rapat atau kelas online, saya hanya membaca subtitle": **suara yang diputar komputer** (komputer subtitle yang ikut Teams dan mendengar pengajar). Speaker atau headset jangan dibisukan.
+  - "Satu ruang kelas, satu mikrofon" dan "Komputer subtitle ruang rapat, semua membaca di ponsel": **mikrofon** (pengajar berbicara ke komputer ini atau mikrofon ruangan). Dipakai mikrofon yang dipilih di "Suara dan mikrofon", atau mikrofon bawaan Windows jika belum dipilih; jika tidak ada mikrofon sama sekali, sesi tidak dimulai dan halaman menyatakan mikrofon tidak ditemukan.
+  - Keduanya memakai paket model Mandarin (Breeze). Satu sesi mendengarkan satu sumber; memulai lagi "Semua berbahasa Mandarin" pada jenis rapat lain menggantikan sesi yang sedang berjalan.
+  - Sampai r26 jenis rapat tidak berpengaruh: selalu suara yang diputar komputer (jadi "Komputer subtitle ruang rapat" dengan "Semua berbahasa Mandarin" tidak mendengar mikrofon ruangan).
 - Sebuah bahasa baru diterjemahkan jika ada penonton yang memilihnya. Yang dikirim keluar hanya teks subtitle, jadi lalu lintas data kecil.
 - Jika "API pengenalan suara" aktif, suara dikirim ke API lebih dulu dan Breeze hanya cadangan. Agar suara tetap di dalam perusahaan, jangan aktifkan API eksternal.
 
-**Belum diuji di komputer nyata**: jeda Breeze pada subtitle langsung (bergantung kartu grafis), akses antar lokasi, dan banyak penonton sekaligus. Pada 2026-11-18 hanya pemuatan model dengan satu kalimat Mandarin dan cara kerja di atas (uji otomatis) yang dipastikan di cloud. Coba dulu pada satu kelas.
+**Belum diuji di komputer nyata**: jeda Breeze pada subtitle langsung (bergantung kartu grafis), penangkapan mikrofon untuk "Semua berbahasa Mandarin" (cloud tidak punya perangkat audio, jadi yang diuji hanya penerusan nomor mikrofon ke program utama), akses antar lokasi, dan banyak penonton sekaligus. Pada 2026-11-18 hanya pemuatan model dengan satu kalimat Mandarin dan cara kerja di atas (uji otomatis) yang dipastikan di cloud. Coba dulu pada satu kelas.
 
 ## ③ Komputer karyawan yang perlu subtitle langsung
 

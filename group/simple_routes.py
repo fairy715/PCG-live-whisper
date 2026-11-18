@@ -1011,6 +1011,9 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             return JSONResponse({"ok": False, "code": "pick_language", "error": "請選擇對方說的語言"}, status_code=400)
         s = settings()
         mode, room, shown = picked
+        # 「大家都說中文」用麥克風收音（r27）：場合是「同一間教室」或「會議室字幕機」時頁面會帶 mic。
+        # 其他場合收電腦播放的聲音（例如字幕機加入 Teams 聽老師的聲音）
+        zh_mic = mode == "zh" and bool(body.get("mic"))
         if live_running and live_running():
             # 上一場沒按「停止」還在跑：同一種語言就回到那一場；換了語言就換掉（start_live 會先停掉舊的），
             # 不然選「對方說英文」會回到還在跑的「中文 → 印尼文」
@@ -1019,7 +1022,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 return JSONResponse({"ok": False, "code": "live_busy_file",
                                      "error": "這台電腦正在處理錄音檔，處理完再開即時字幕"}, status_code=409)
             cur_mode = cur[cur.index("--mode") + 1] if "--mode" in cur[:-1] else None
-            if cur_mode is None or (cur_mode == mode and ("--room" in cur) == room):
+            same_src = mode != "zh" or ("-d" in cur) == zh_mic       # 中文：收電腦的聲音和收麥克風是兩回事
+            if cur_mode is None or (cur_mode == mode and ("--room" in cur) == room and same_src):
                 return {"ok": True, "already": True}
         pf = profile(s, has_gpu())
         if room:
@@ -1059,6 +1063,16 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             mi = await asyncio.to_thread(_meter.mic_index, s.get("mic_name"))
             if mi is not None:
                 start["device" if room else "mic_device"] = mi
+        elif zh_mic:
+            # 只說中文、用麥克風：主程式沒有指定裝置時收的是電腦播放的聲音，所以一定要給麥克風的編號
+            await asyncio.to_thread(_meter.stop)
+            mi = await asyncio.to_thread(_meter.mic_index, s.get("mic_name"))
+            if mi is None:
+                mi = await asyncio.to_thread(_meter.default_mic_index)
+            if mi is None:
+                return JSONResponse({"ok": False, "code": "no_mic",
+                                     "error": "找不到麥克風。請接上麥克風，或到「聲音與麥克風」選一支再試"}, status_code=409)
+            start["device"] = mi
         try:
             await start_live(start)
         except Exception as e:

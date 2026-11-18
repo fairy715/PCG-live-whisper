@@ -187,6 +187,23 @@ class Meter:
             pass
         return None
 
+    def default_mic_index(self):
+        """Windows 預設麥克風的 sounddevice 編號；沒有麥克風回 None（r27：「大家都說中文」用麥克風收音時要明確指定）"""
+        try:
+            name = clean_name(self.backend.default_mic())
+            mics = list(self.backend.mics())
+        except Exception:  # noqa: BLE001
+            return None
+        if not mics:
+            return None
+        for m in mics:
+            if name and m["name"] == name:
+                return m["id"]
+        for m in mics:                                  # 預設裝置的名稱可能被截短（非 WASAPI 的名稱最多 31 個字）
+            if name and (m["name"].startswith(name) or name.startswith(m["name"])):
+                return m["id"]
+        return mics[0]["id"]
+
     def running(self):
         return bool(self._closers) and self.clock() < self._until
 

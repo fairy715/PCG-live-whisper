@@ -119,7 +119,7 @@ Ví dụ quản lý người Đài Loan chủ trì bằng tiếng Trung, có nh�
 - Dùng "máy phụ đề" của phòng họp (một máy có card đồ họa; cài đặt trong hướng dẫn IT): chọn "**Máy phụ đề phòng họp, mọi người xem trên điện thoại**" và ngôn ngữ mà nhiều người kia nói nhất (ví dụ tiếng Indonesia), bấm Bắt đầu; mã QR hiện ngay, hãy chiếu lên.
 - Mọi người quét mã QR và tự chọn ngôn ngữ ở góc trên bên phải (phụ đề đa ngôn ngữ, từ r19): người xem tiếng Trung và tiếng Indonesia đọc phụ đề bình thường; với người chọn tiếng Việt, Hindi hoặc Anh, máy phụ đề dịch thêm một bản.
 - Micro chỉ phân biệt tiếng Trung và một ngoại ngữ đã chọn. Nhân viên nói ngôn ngữ khác nên dùng tiếng Anh hoặc nhờ người khác chuyển lời.
-- "Mọi người đều nói tiếng Trung" nghe **âm thanh máy tính phát ra** (lời người khác trong cuộc họp trực tuyến), không nghe micro của phòng. Trong phòng họp, hãy chọn một ngoại ngữ dù chỉ nhân viên Đài Loan nói, để micro được dùng.
+- Nếu trong phòng chỉ có nhân viên Đài Loan nói, hãy chọn "**Mọi người đều nói tiếng Trung**": từ r27 lựa chọn này dùng micro, và nhân viên nước ngoài xem ngôn ngữ của mình qua phụ đề đa ngôn ngữ. (Đến r26 lựa chọn này chỉ nghe âm thanh máy tính phát ra; hãy cập nhật trước.)
 
 ---
 
@@ -138,6 +138,10 @@ Máy phụ đề có card đồ họa NVIDIA (IT cài sẵn gói GPU và mô hì
   2. Mở PCG Meeting Translator → tôi nói "中文" → "**Họp hoặc lớp online, tôi chỉ đọc phụ đề**" → "**Mọi người đều nói tiếng Trung**" → Bắt đầu.
   3. Ở màn hình phụ đề bấm "**Chia sẻ**", rồi dán địa chỉ và mật khẩu nhân viên vào khung chat Teams.
 
+**Máy của giảng viên có card đồ họa: dùng luôn làm máy phụ đề (từ r27)**
+
+Giảng viên dạy trên máy của mình (qua Teams hoặc trong phòng học), không cần máy thứ hai: tôi nói "中文" → "**Cùng một phòng học, một micro**" (hoặc "Máy phụ đề phòng họp, mọi người xem trên điện thoại") → "**Mọi người đều nói tiếng Trung**" → Bắt đầu. Chương trình nghe giảng viên qua **micro** và vẫn nhận dạng bằng Breeze; bấm "Chia sẻ" rồi gửi địa chỉ cho nhân viên ở nước ngoài. Lời học viên nói trong Teams không hiện trên phụ đề (chỉ nghe micro).
+
 **Vì sao chính xác hơn**
 
 - Tiếng Trung được nhận dạng bằng card đồ họa của máy phụ đề với Breeze ASR 25 (huấn luyện cho tiếng Trung Đài Loan và tiếng Trung pha tiếng Anh), chính xác hơn mô hình nhỏ có sẵn trên laptop thông thường.
@@ -150,11 +154,11 @@ Tôi nói "Tiếng Việt" → "tôi chỉ đọc phụ đề" → "Tiếng Trun
 
 **Hạn chế**
 
-- "Mọi người đều nói tiếng Trung" chỉ nghe **âm thanh máy tính phát ra**, không nghe micro. Vì vậy máy phụ đề phải là một máy khác tham gia lớp học, không phải máy giảng viên đang nói.
-- Giảng viên dạy trong phòng học bằng micro (không qua Teams): chọn "Máy phụ đề phòng họp, mọi người xem trên điện thoại" cùng ngôn ngữ mà nhiều học viên nói nhất; micro được dùng, và khi đó tiếng Trung do mô hình đa ngôn ngữ nhận dạng, không phải Breeze.
+- "Mọi người đều nói tiếng Trung" nghe nguồn nào là tùy loại cuộc họp (từ r27; trang sẽ ghi rõ sau khi chọn): "tôi chỉ đọc phụ đề" nghe **âm thanh máy tính phát ra** (máy phụ đề tham gia Teams và nghe giảng viên); "Cùng một phòng học" và "Máy phụ đề phòng họp" nghe **micro** (giảng viên nói vào máy này hoặc micro của phòng). Đến r26 luôn là âm thanh máy tính phát ra.
+- Mỗi phiên chỉ nghe một nguồn: khi nghe micro thì không nghe được người khác trong Teams, khi nghe âm thanh máy tính thì không nghe được micro của máy này.
 - Nhà máy nước ngoài phải kết nối được tới máy phụ đề qua mạng công ty (cổng 19781). Hãy hỏi IT hoặc nhóm mạng trước xem truy cập giữa các nhà máy có được không.
 - Chất lượng bản dịch phụ thuộc vào cài đặt của IT: chế độ cục bộ (M2M100) ở mức trung bình với tiếng Indonesia và tiếng Việt; chế độ máy chủ (mô hình lớn) tốt hơn nhiều.
-- Cách này kết hợp các tính năng sẵn có. Độ trễ của Breeze với phụ đề trực tiếp, truy cập giữa các nhà máy và nhiều người xem cùng lúc chưa được thử trên máy thật, nên hãy thử trước với một buổi học.
+- Cách này kết hợp các tính năng sẵn có. Độ trễ của Breeze với phụ đề trực tiếp, việc thu âm bằng micro, truy cập giữa các nhà máy và nhiều người xem cùng lúc chưa được thử trên máy thật, nên hãy thử trước với một buổi học.
 
 ---
 

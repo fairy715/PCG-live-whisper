@@ -125,7 +125,7 @@ For example, a Taiwanese manager chairs the meeting in Chinese, with Indonesian,
 - Use the room's "subtitle computer" (one computer with a graphics card; setup in the IT guide): choose "**Meeting room subtitle computer, everyone reads on their phones**" and the language most of the others speak (e.g. Indonesian), click Start; the QR code is shown right away, project it.
 - Everyone scans the QR code and chooses their own language at the top right (multi-language subtitles, from r19): Chinese and Indonesian viewers read the normal subtitles; for Vietnamese, Hindi or English viewers the subtitle computer translates one more copy.
 - The microphone only tells apart Chinese and the one foreign language you chose. Staff speaking other languages should use English or have someone relay.
-- "Everyone speaks Chinese" listens to **the sound the computer plays** (what others say in an online meeting), not the room microphone. In a room, choose a foreign language even if only Taiwanese staff speak, so that the microphone is used.
+- If only Taiwanese staff speak in the room, choose "**Everyone speaks Chinese**": from r27 this scene uses the microphone, and foreign staff read their own language through multi-language subtitles. (Up to r26 this option only listened to what the computer plays; update first.)
 
 ---
 
@@ -144,6 +144,10 @@ The subtitle computer has an NVIDIA graphics card (IT installs the GPU pack and 
   3. On the subtitle screen press "**Share**" and paste the address (`http://<subtitle computer IP>:19781/simple/live`) and the staff password into the Teams chat.
 - **Overseas staff**: open that address in a browser on a computer or phone, enter the password and choose your language at the top right (Indonesian, Vietnamese, Hindi, English). **Nothing to install.**
 
+**The teacher's own computer has a graphics card: use it as the subtitle computer (from r27)**
+
+The teacher teaches on their own computer (over Teams or in a classroom) and no second computer is needed: I speak "中文" → "**Same classroom, one microphone**" (or "Meeting room subtitle computer, everyone reads on their phones") → "**Everyone speaks Chinese**" → Start. The program then listens to the teacher through the **microphone** and still recognizes with Breeze; press "Share" and give the address to overseas staff. What students say in Teams does not appear in the subtitles (microphone only).
+
 **Why this is more accurate**
 
 - Chinese is recognized on the subtitle computer's graphics card with Breeze ASR 25 (trained for Taiwanese Mandarin and mixed Chinese-English), which is more accurate than the small built-in model on an ordinary laptop.
@@ -156,11 +160,11 @@ I speak "your language" → "I only read subtitles" → "Chinese". Recognition r
 
 **Limits**
 
-- "Everyone speaks Chinese" listens only to **what the computer plays**, not the microphone. So the subtitle computer must be another computer that joined the class, not the one the teacher is speaking into.
-- Teacher in a classroom with a microphone (not through Teams): choose "Meeting room subtitle computer, everyone reads on their phones" plus the language most students speak; the microphone is used, and Chinese is then recognized by the multilingual model, not Breeze.
+- What "Everyone speaks Chinese" listens to depends on the scene (from r27; the page says which after you choose it): "I only read subtitles" listens to **what the computer plays** (a subtitle computer that joined Teams and hears the teacher); "Same classroom" and "Meeting room subtitle computer" listen to the **microphone** (the teacher speaks into this computer or the room microphone). Up to r26 it always listened to what the computer plays.
+- One session listens to one source: with the microphone it does not hear other people in Teams, and with the computer's sound it does not hear this computer's microphone.
 - Overseas sites must be able to reach the subtitle computer over the company network (port 19781). Ask IT or the network team first whether cross-site access works.
 - Translation quality depends on IT's settings: local mode (M2M100) is average for Indonesian and Vietnamese; server mode (a large model) is much better.
-- This setup combines existing features. Breeze's delay in live subtitles, cross-site access and many viewers at once have not been tested on real machines yet, so try it with one class first.
+- This setup combines existing features. Breeze's delay in live subtitles, microphone capture, cross-site access and many viewers at once have not been tested on real machines yet, so try it with one class first.
 
 ---
 

@@ -135,6 +135,7 @@ class Routes(unittest.TestCase):
         self.cfg = self.base / "config.json"
         self.cfg.write_text(json.dumps({"pcg_simple": {"it_password_hash": "h:itpass1"}}), encoding="utf-8")
         self.local, self.running, self.started = True, False, []
+        self.args = None
         self.b = FakeBackend()
 
         async def start_live(body):
@@ -143,7 +144,7 @@ class Routes(unittest.TestCase):
         simple_routes.register(
             app, self.base, lambda r: self.local, lambda raw: "h:" + raw, lambda raw, h: h == "h:" + (raw or ""),
             self.cfg, lambda c: self.cfg.write_text(json.dumps(c, ensure_ascii=False), encoding="utf-8"),
-            start_live=start_live, live_running=lambda: self.running, live_args=lambda: None,
+            start_live=start_live, live_running=lambda: self.running, live_args=lambda: self.args,
             gpu_alive=lambda h, p: False,
             update_hooks={"github_fetch": self._off, "models_fetch": self._off, "audio_backend": self.b})
         self.c = TestClient(app)
@@ -184,6 +185,54 @@ class Routes(unittest.TestCase):
                             ("post", "/api/simple/audio/test"), ("get", "/api/simple/audio/level")):
             self.assertEqual(getattr(self.c, method)(url).status_code, 403, url)
         self.assertEqual(self.b.opened, [])
+
+    def test_everyone_speaks_chinese_can_use_the_microphone(self):
+        """「大家都說中文」（r27）：場合是教室／會議室字幕機時頁面帶 mic → 用麥克風收音，一定給主程式麥克風的編號
+        （不給的話主程式收的是電腦播放的聲音）；其他場合照舊收電腦的聲音"""
+        self.c.post("/api/simple/live", json={"scenario": "zh"})                                  # 我只看字幕：電腦的聲音
+        self.assertEqual(self.started[-1]["mode"], "zh")
+        self.assertNotIn("device", self.started[-1])
+        self.c.post("/api/simple/live", json={"scenario": "zh", "mic": True})                     # 自動：Windows 預設麥克風
+        st = self.started[-1]
+        self.assertEqual((st["mode"], st["room"], st["device"]), ("zh", False, 3))
+        self.assertNotIn("mic_device", st)                                                        # 不是「電腦聲音＋麥克風」兩路
+        self.c.post("/api/simple/audio", json={"mic": "Jabra Speak 510"})                         # 同仁選的那一支
+        self.c.post("/api/simple/live", json={"scenario": "zh", "mic": True})
+        self.assertEqual(self.started[-1]["device"], 7)
+        self.c.post("/api/simple/audio", json={"mic": "拔掉的麥克風"})                              # 選的拔掉了：用預設
+        self.c.post("/api/simple/live", json={"scenario": "zh", "mic": True})
+        self.assertEqual(self.started[-1]["device"], 3)
+        # mic 只對「大家都說中文」有意義：其他語言不受影響
+        self.c.post("/api/simple/live", json={"scenario": "id", "me": "zh", "mic": True})
+        self.assertNotIn("device", self.started[-1])
+        # 完全沒有麥克風：不要默默改收電腦的聲音，直接說找不到
+        n = len(self.started)
+        self.b.mics = lambda: []
+        r = self.c.post("/api/simple/live", json={"scenario": "zh", "mic": True})
+        self.assertEqual((r.status_code, r.json()["code"]), (409, "no_mic"))
+        self.assertEqual(len(self.started), n)
+
+    def test_switching_chinese_source_replaces_the_running_session(self):
+        """上一場還在跑：同樣是中文，但一場收電腦的聲音、一場收麥克風，要換掉，不能當成「已經在跑」"""
+        self.running = True
+        self.args = ["--mode", "zh", "--local-asr"]                                               # 正在收電腦的聲音
+        self.assertTrue(self.c.post("/api/simple/live", json={"scenario": "zh"}).json().get("already"))
+        r = self.c.post("/api/simple/live", json={"scenario": "zh", "mic": True}).json()
+        self.assertFalse(r.get("already"))
+        self.assertEqual(self.started[-1]["device"], 3)
+        self.args = ["--mode", "zh", "--local-asr", "-d", "3"]                                    # 正在收麥克風
+        self.assertTrue(self.c.post("/api/simple/live", json={"scenario": "zh", "mic": True}).json().get("already"))
+        self.assertFalse(self.c.post("/api/simple/live", json={"scenario": "zh"}).json().get("already"))
+
+    def test_default_mic_index(self):
+        m = audio_test.Meter(self.b)
+        self.assertEqual(m.default_mic_index(), 3)
+        self.b.default_mic = lambda: "Jabra Speak"                 # 預設裝置的名稱被截短
+        self.assertEqual(m.default_mic_index(), 7)
+        self.b.default_mic = lambda: ""                            # 問不到預設：用第一支
+        self.assertEqual(m.default_mic_index(), 3)
+        self.b.mics = lambda: []
+        self.assertIsNone(m.default_mic_index())
 
     def test_chosen_mic_is_passed_to_the_engine(self):
         self.c.post("/api/simple/audio", json={"mic": "Jabra Speak 510"})

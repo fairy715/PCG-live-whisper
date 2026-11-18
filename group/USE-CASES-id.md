@@ -119,7 +119,7 @@ Misalnya atasan dari Taiwan memimpin rapat dalam bahasa Mandarin, dihadiri karya
 - Gunakan "komputer subtitle" ruang rapat (satu komputer dengan kartu grafis; pengaturan di panduan IT): pilih "**Komputer subtitle ruang rapat, semua membaca di ponsel**" dan bahasa yang paling banyak dipakai peserta lain (mis. Indonesia), klik Mulai; kode QR langsung tampil, tampilkan di proyektor.
 - Semua orang memindai kode QR dan memilih bahasanya sendiri di kanan atas (subtitle multibahasa, mulai r19): penonton Mandarin dan Indonesia membaca subtitle biasa; untuk penonton Vietnam, Hindi, atau Inggris, komputer subtitle menerjemahkan satu salinan lagi.
 - Mikrofon hanya membedakan Mandarin dan satu bahasa asing yang dipilih. Karyawan yang berbicara bahasa lain sebaiknya memakai bahasa Inggris atau dibantu orang lain.
-- "Semua berbahasa Mandarin" mendengarkan **suara yang diputar komputer** (ucapan orang lain di rapat online), bukan mikrofon ruangan. Di ruang rapat, pilih satu bahasa asing walaupun hanya karyawan Taiwan yang berbicara, agar mikrofon dipakai.
+- Jika hanya karyawan Taiwan yang berbicara di ruangan, pilih "**Semua berbahasa Mandarin**": mulai r27 pilihan ini memakai mikrofon, dan karyawan asing membaca bahasanya sendiri lewat subtitle multibahasa. (Sampai r26 pilihan ini hanya mendengarkan suara yang diputar komputer; perbarui dulu.)
 
 ---
 
@@ -138,6 +138,10 @@ Komputer subtitle punya kartu grafis NVIDIA (IT memasang paket GPU dan model Man
   2. Buka PCG Meeting Translator → saya berbicara "中文" → "**Rapat atau kelas online, saya hanya membaca subtitle**" → "**Semua berbahasa Mandarin**" → Mulai.
   3. Di layar subtitle tekan "**Bagikan**", lalu tempel alamat dan kata sandi staf ke chat Teams.
 
+**Komputer pengajar punya kartu grafis: langsung jadi komputer subtitle (mulai r27)**
+
+Pengajar mengajar di komputernya sendiri (lewat Teams atau di ruang kelas), tanpa komputer kedua: saya berbicara "中文" → "**Satu ruang kelas, satu mikrofon**" (atau "Komputer subtitle ruang rapat, semua membaca di ponsel") → "**Semua berbahasa Mandarin**" → Mulai. Program mendengarkan pengajar lewat **mikrofon** dan tetap mengenali dengan Breeze; tekan "Bagikan" lalu berikan alamatnya ke karyawan di luar negeri. Ucapan peserta di Teams tidak muncul di subtitle (hanya mikrofon).
+
 **Mengapa lebih akurat**
 
 - Bahasa Mandarin dikenali kartu grafis komputer subtitle dengan Breeze ASR 25 (dilatih untuk Mandarin Taiwan dan campuran Mandarin-Inggris), lebih akurat daripada model kecil bawaan di laptop biasa.
@@ -150,11 +154,11 @@ Saya berbicara "Bahasa Indonesia" → "saya hanya membaca subtitle" → "Mandari
 
 **Batasan**
 
-- "Semua berbahasa Mandarin" hanya mendengarkan **suara yang diputar komputer**, bukan mikrofon. Jadi komputer subtitle harus komputer lain yang ikut kelas, bukan komputer yang dipakai pengajar berbicara.
-- Pengajar di ruang kelas dengan mikrofon (tanpa Teams): pilih "Komputer subtitle ruang rapat, semua membaca di ponsel" ditambah bahasa yang paling banyak dipakai peserta; mikrofon dipakai, dan bahasa Mandarin dikenali model multibahasa, bukan Breeze.
+- Suara yang didengarkan "Semua berbahasa Mandarin" bergantung pada jenis rapat (mulai r27; halaman menuliskannya setelah dipilih): "saya hanya membaca subtitle" mendengarkan **suara yang diputar komputer** (komputer subtitle yang ikut Teams dan mendengar pengajar); "Satu ruang kelas" dan "Komputer subtitle ruang rapat" mendengarkan **mikrofon** (pengajar berbicara ke komputer ini atau mikrofon ruangan). Sampai r26 selalu suara yang diputar komputer.
+- Satu sesi mendengarkan satu sumber: dengan mikrofon, ucapan orang lain di Teams tidak terdengar; dengan suara komputer, mikrofon komputer ini tidak terdengar.
 - Pabrik luar negeri harus bisa menjangkau komputer subtitle lewat jaringan perusahaan (port 19781). Tanyakan dulu ke IT atau tim jaringan apakah akses antar lokasi bisa.
 - Kualitas terjemahan bergantung pada pengaturan IT: mode lokal (M2M100) biasa saja untuk bahasa Indonesia dan Vietnam; mode server (model besar) jauh lebih baik.
-- Cara ini menggabungkan fitur yang sudah ada. Jeda Breeze pada subtitle langsung, akses antar lokasi, dan banyak penonton sekaligus belum diuji di komputer nyata, jadi coba dulu pada satu kelas.
+- Cara ini menggabungkan fitur yang sudah ada. Jeda Breeze pada subtitle langsung, penangkapan suara lewat mikrofon, akses antar lokasi, dan banyak penonton sekaligus belum diuji di komputer nyata, jadi coba dulu pada satu kelas.
 
 ---
 

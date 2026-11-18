@@ -369,12 +369,15 @@ Các bước cho nhân viên nằm ở tình huống 8 trong tài liệu tình h
 **Chương trình thực tế hoạt động thế nào**
 
 - Gói mô hình tiếng Trung được dùng cho phụ đề một chiều nghe tiếng Trung: nhân viên nói tiếng Trung chọn "Mọi người đều nói tiếng Trung", và nhân viên nói ngoại ngữ chọn "Tiếng Trung → ngôn ngữ của bạn". Chế độ lớp học (một micro, hai ngôn ngữ) và "tôi cũng nói" dùng mô hình đa ngôn ngữ, không dùng Breeze.
-- "Mọi người đều nói tiếng Trung" nghe **âm thanh máy tính phát ra** (giọng giảng viên trong Teams), **không nghe micro**. Máy phụ đề phải là một máy khác tham gia lớp học, không phải máy giảng viên đang nói; đừng tắt tiếng loa hoặc tai nghe của máy đó.
-- Giảng viên dạy trong phòng học bằng micro: chọn "Máy phụ đề phòng họp, mọi người xem trên điện thoại" cùng một ngoại ngữ; micro được dùng và tiếng Trung do mô hình đa ngôn ngữ (large-v3-turbo) nhận dạng.
+- "Mọi người đều nói tiếng Trung" nghe nguồn nào là tùy loại cuộc họp (**từ r27**):
+  - "Họp hoặc lớp online, tôi chỉ đọc phụ đề": **âm thanh máy tính phát ra** (máy phụ đề tham gia Teams và nghe giảng viên). Đừng tắt tiếng loa hoặc tai nghe.
+  - "Cùng một phòng học, một micro" và "Máy phụ đề phòng họp, mọi người xem trên điện thoại": **micro** (giảng viên nói vào máy này hoặc micro của phòng). Dùng micro đã chọn trong "Âm thanh và micro", chưa chọn thì dùng micro mặc định của Windows; nếu hoàn toàn không có micro thì phiên không bắt đầu và trang báo không tìm thấy micro.
+  - Cả hai đều dùng gói mô hình tiếng Trung (Breeze). Mỗi phiên chỉ nghe một nguồn; bắt đầu lại "Mọi người đều nói tiếng Trung" ở loại cuộc họp khác sẽ thay phiên đang chạy.
+  - Đến r26 loại cuộc họp không ảnh hưởng: luôn nghe âm thanh máy tính phát ra (nên "Máy phụ đề phòng họp" với "Mọi người đều nói tiếng Trung" không nghe được micro của phòng).
 - Một ngôn ngữ chỉ được dịch khi có người xem chọn nó. Chỉ có chữ phụ đề được gửi đi nên lưu lượng rất nhỏ.
 - Khi bật "Speech recognition API", âm thanh được gửi cho API trước và Breeze chỉ là dự phòng. Muốn âm thanh ở lại trong công ty, đừng bật API bên ngoài.
 
-**Chưa thử trên máy thật**: độ trễ của Breeze với phụ đề trực tiếp (tùy card đồ họa), truy cập giữa các nhà máy, và nhiều người xem cùng lúc. Ngày 2026-11-18 mới chỉ xác nhận trên đám mây việc tải mô hình với một câu tiếng Trung và cách hoạt động nêu trên (kiểm thử tự động). Hãy thử trước với một buổi học.
+**Chưa thử trên máy thật**: độ trễ của Breeze với phụ đề trực tiếp (tùy card đồ họa), việc thu micro cho "Mọi người đều nói tiếng Trung" (đám mây không có thiết bị âm thanh nên mới chỉ kiểm tra việc chuyển số hiệu micro cho chương trình chính), truy cập giữa các nhà máy, và nhiều người xem cùng lúc. Ngày 2026-11-18 mới chỉ xác nhận trên đám mây việc tải mô hình với một câu tiếng Trung và cách hoạt động nêu trên (kiểm thử tự động). Hãy thử trước với một buổi học.
 
 ## ③ Máy nhân viên cần phụ đề trực tiếp
 
