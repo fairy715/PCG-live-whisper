@@ -259,6 +259,15 @@ class SimpleFlow(unittest.TestCase):
             self.assertRegex(admin, r'id="%s" class="res warn out"' % wid)     # 外送提醒用專屬的樣式
         self.assertIn("header .scope.ext{display:inline-block", simple)
 
+    def test_pages_keep_the_r31_guards(self):
+        """r31：同仁頁面不寫技術名稱；「顯示全部選項」用三選一，兩個打勾框只當內部狀態、不顯示"""
+        simple = (ROOT / "group" / "simple.html").read_text(encoding="utf-8")
+        self.assertNotIn("Open WebUI", simple)
+        self.assertEqual(simple.count('name="lmode"'), 3)
+        self.assertIn('id="speakBox" hidden', simple)
+        self.assertIn('id="roomBox" hidden', simple)
+        self.assertIn("$('modeBox').hidden=!showAll", simple)
+
     def test_version(self):
         """畫面上的版本：安裝檔寫的 group/version.json；原作者版本從 translate_meeting.py 讀"""
         simple_routes._VERSION.clear()

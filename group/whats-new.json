@@ -1,29 +1,24 @@
 {
  "_說明": "下一版發布時同仁頁面「有新版本」視窗顯示的新功能（每種語言 2～5 點，一點一句）。release 要等於這一次發布的 rN，發布流程才會附上；每次發布前更新這個檔",
- "release": "r30",
+ "release": "r31",
  "zh": [
-  "字幕進行中也可以按「回到首頁」：字幕不會停，首頁上方有「打開字幕畫面」可以再回來",
-  "按「停止」時的確認視窗改成兩個清楚的按鈕：「繼續開會」和「結束字幕」",
-  "用手機看字幕時，上方的控制列變小，看得到更多句字幕"
+  "「顯示全部選項」裡改成三選一：只看字幕、我也要說話、教室模式（原本是兩個打勾框，其實只能選一個）",
+  "畫面上方的說明不再出現看不懂的技術名稱"
  ],
  "en": [
-  "You can press “Back to home” while subtitles are running: they keep going, and the home page has “Open subtitle screen” to return",
-  "The confirmation when you press “Stop” now has two clear buttons: “Keep going” and “End subtitles”",
-  "On phones the top bar is smaller, so more subtitle lines fit on the screen"
+  "Under “Show all options” there is now one choice of three: only read subtitles, I will speak too, classroom mode (before, two checkboxes of which only one could be on)",
+  "The line at the top of the page no longer shows an unfamiliar technical name"
  ],
  "id": [
-  "Anda bisa menekan “Kembali ke beranda” saat subtitle berjalan: subtitle tidak berhenti, dan di beranda ada “Buka layar subtitle” untuk kembali",
-  "Konfirmasi saat menekan “Berhenti” kini punya dua tombol yang jelas: “Lanjutkan rapat” dan “Akhiri subtitle”",
-  "Di ponsel, bilah atas lebih kecil sehingga lebih banyak baris subtitle terlihat"
+  "Di “Tampilkan semua pilihan” kini ada satu pilihan dari tiga: hanya baca subtitle, saya juga berbicara, mode kelas (sebelumnya dua kotak centang yang hanya bisa dipilih salah satu)",
+  "Keterangan di bagian atas halaman tidak lagi menampilkan nama teknis yang asing"
  ],
  "vi": [
-  "Bạn có thể bấm “Về trang chính” khi phụ đề đang chạy: phụ đề không dừng, và trang chính có nút mở lại màn hình phụ đề",
-  "Hộp xác nhận khi bấm “Dừng” nay có hai nút rõ ràng: “Tiếp tục họp” và “Kết thúc phụ đề”",
-  "Trên điện thoại, thanh phía trên nhỏ hơn nên thấy được nhiều dòng phụ đề hơn"
+  "Trong “Hiện tất cả lựa chọn” nay chỉ chọn một trong ba: chỉ đọc phụ đề, tôi cũng nói, chế độ lớp học (trước đây là hai ô đánh dấu mà chỉ chọn được một)",
+  "Dòng giải thích ở đầu trang không còn hiện tên kỹ thuật khó hiểu"
  ],
  "hi": [
-  "सबटाइटल चलते समय भी “होम पर लौटें” दबा सकते हैं: सबटाइटल नहीं रुकते, और होम पेज पर वापस खोलने का बटन है",
-  "“रोकें” दबाने पर पुष्टि में अब दो साफ़ बटन हैं: “मीटिंग जारी रखें” और “सबटाइटल खत्म करें”",
-  "फ़ोन पर ऊपर की पट्टी छोटी है, इसलिए सबटाइटल की ज़्यादा पंक्तियाँ दिखती हैं"
+  "“सभी विकल्प दिखाएँ” में अब तीन में से एक चुनना है: सिर्फ़ सबटाइटल पढ़ें, मैं भी बोलूँगा, कक्षा मोड (पहले दो चेकबॉक्स थे जिनमें से एक ही चल सकता था)",
+  "पेज के ऊपर की पंक्ति में अब अनजान तकनीकी नाम नहीं दिखता"
  ]
 }
