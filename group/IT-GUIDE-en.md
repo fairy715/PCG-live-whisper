@@ -183,6 +183,7 @@ When live subtitles and recordings run on the staff computer's CPU (local mode, 
 | Target | Address | Where audio goes | Cost |
 |---|---|---|---|
 | OpenAI | `https://api.openai.com/v1`, models such as `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`, `whisper-1` | **Leaves the company** | Billed by audio length at OpenAI's published price; each computer showing subtitles counts separately |
+| Groq (r26) | `https://api.groq.com/openai/v1`, model `whisper-large-v3-turbo` (default) or `whisper-large-v3` | **Leaves the company** | Has a free tier with usage limits (see below); get a key at [console.groq.com/keys](https://console.groq.com/keys) |
 | A recognition service inside the company (RTX Spark, or an OpenAI-compatible server run by another team) | For example `http://10.x.x.x:8000/v1` | Stays in the company | No extra cost |
 
 - Fill in the address, model and key (an internal service may need no key) and press "**Test connection**": one second of silence is sent to check the address, key and model
@@ -193,6 +194,12 @@ When live subtitles and recordings run on the staff computer's CPU (local mode, 
 - When audio leaves the company, an orange notice is shown on the IT settings page and at the top of the staff page. Turn it off for confidential meetings or use an internal service
 - The key is stored in this computer's `config.json` (`pcg_simple.asr_api_key`) and is masked in diagnostic files; the Windows system environment variable `PCG_ASR_API=off` turns the API off temporarily
 - "I also speak" (two-way) mode still sends overlapping audio every 3 seconds, about 1.7 times the usage of one-way
+- **Groq (r26)**: press "Groq (free tier)" on the settings page to fill in the address and model, paste the key and press "Test connection". Recognition uses Whisper large-v3, more accurate than the built-in small model; the program still sends to the API first and falls back to this computer when the API cannot be used
+  - **The free tier has limits, shared by the whole account.** Figures collected by third-party sites (Groq may change them at any time; check the [limits page in the Groq console](https://console.groq.com/settings/limits)): about 20 requests per minute, about 2,000 requests per day, about 7,200 seconds of audio per hour and about 28,800 seconds (8 hours) per day
+  - In practice: one computer in "I only read subtitles" (one request per sentence) makes about 8–15 requests per minute, so roughly 2–4 hours per day; several computers sharing one key at the same time, or "I also speak" (one request every 3 seconds, exactly 20 per minute), reach the limit quickly
+  - **When the limit is reached (HTTP 429)**: that piece is recognized on this computer at once, and the API is paused for the time Groq asks for (at least 15 seconds, at most 10 minutes, 60 seconds if not stated), then used again automatically; subtitles do not stop, accuracy just returns to the local model for that time. "Test connection" shows "Connected, but the usage limit is reached"
+  - A key cannot be shipped inside the installer (the installer is public), so IT enters it once per computer; for heavy use, pay for the service or use a recognition service inside the company
+  - Tested on 2026-11-18 against a simulated server (including 429); not yet tested with a real Groq key
 - Tested on 2026-11-18 against a simulated API server; not yet tested with a real OpenAI key, so press "Test connection" when you first set it up
 
 ### Glossary (names and terms, r23)

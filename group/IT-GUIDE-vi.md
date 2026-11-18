@@ -185,6 +185,7 @@ Mục "**Speech recognition API**" trong trang cài đặt IT chuyển việc nh
 | Nơi kết nối | Địa chỉ | Âm thanh đi đâu | Chi phí |
 |---|---|---|---|
 | OpenAI | `https://api.openai.com/v1`, mô hình ví dụ `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`, `whisper-1` | **Ra khỏi công ty** | Tính theo thời lượng âm thanh theo giá OpenAI công bố; mỗi máy đang hiện phụ đề được tính riêng |
+| Groq (r26) | `https://api.groq.com/openai/v1`, mô hình `whisper-large-v3-turbo` (mặc định) hoặc `whisper-large-v3` | **Ra khỏi công ty** | Có hạn mức miễn phí kèm giới hạn sử dụng (xem bên dưới); lấy khóa tại [console.groq.com/keys](https://console.groq.com/keys) |
 | Dịch vụ nhận dạng trong công ty (RTX Spark, hoặc máy chủ tương thích OpenAI của nhóm khác) | Ví dụ `http://10.x.x.x:8000/v1` | Ở lại trong công ty | Không tốn thêm |
 
 - Điền địa chỉ, mô hình và khóa (dịch vụ nội bộ có thể không cần khóa) rồi bấm "**Test connection**": gửi 1 giây im lặng để kiểm tra địa chỉ, khóa và mô hình
@@ -195,6 +196,12 @@ Mục "**Speech recognition API**" trong trang cài đặt IT chuyển việc nh
 - Khi âm thanh ra khỏi công ty, thông báo màu cam hiện ở trang cài đặt IT và đầu trang của nhân viên. Hãy tắt khi họp mật hoặc dùng dịch vụ nội bộ
 - Khóa được lưu trong `config.json` của máy này (`pcg_simple.asr_api_key`) và được che trong tệp chẩn đoán; biến môi trường hệ thống Windows `PCG_ASR_API=off` tạm tắt API
 - Chế độ "Tôi cũng nói" (hai chiều) vẫn gửi âm thanh chồng lấn mỗi 3 giây, lượng dùng khoảng 1,7 lần so với một chiều
+- **Groq (r26)**: bấm "Groq (free tier)" trong trang cài đặt để điền sẵn địa chỉ và mô hình, dán khóa rồi bấm "Test connection". Nhận dạng dùng Whisper large-v3, chính xác hơn mô hình small có sẵn; chương trình vẫn gửi cho API trước và quay về máy này khi API không dùng được
+  - **Hạn mức miễn phí có giới hạn, dùng chung cho cả tài khoản.** Số liệu do các trang bên thứ ba tổng hợp (Groq có thể thay đổi bất cứ lúc nào; hãy xem [trang giới hạn trong bảng điều khiển Groq](https://console.groq.com/settings/limits)): khoảng 20 yêu cầu mỗi phút, khoảng 2.000 yêu cầu mỗi ngày, khoảng 7.200 giây âm thanh mỗi giờ và khoảng 28.800 giây (8 giờ) mỗi ngày
+  - Thực tế: một máy ở chế độ "Tôi chỉ xem phụ đề" (mỗi câu một yêu cầu) gửi khoảng 8–15 yêu cầu mỗi phút, tức khoảng 2–4 giờ mỗi ngày; nhiều máy dùng chung một khóa cùng lúc, hoặc "Tôi cũng nói" (3 giây một yêu cầu, đúng 20 yêu cầu mỗi phút), sẽ nhanh chạm giới hạn
+  - **Khi chạm giới hạn (HTTP 429)**: đoạn đó được nhận dạng ngay trên máy này, và API tạm dừng theo thời gian Groq yêu cầu (ít nhất 15 giây, nhiều nhất 10 phút, 60 giây nếu không nêu), sau đó tự động dùng lại; phụ đề không bị ngắt, chỉ là độ chính xác trở về mô hình cục bộ trong thời gian đó. "Test connection" sẽ báo đã kết nối nhưng chạm giới hạn sử dụng
+  - Không thể đặt sẵn khóa trong bộ cài (bộ cài là công khai), nên IT nhập một lần trên mỗi máy; nếu dùng nhiều, hãy trả phí hoặc dùng dịch vụ nhận dạng trong công ty
+  - Đã thử ngày 2026-11-18 với máy chủ mô phỏng (gồm cả 429); chưa thử với khóa Groq thật
 - Đã thử ngày 2026-11-18 với máy chủ API giả lập; chưa thử với khóa OpenAI thật, nên hãy bấm "Test connection" khi cài lần đầu
 
 ### Bảng thuật ngữ (tên riêng và thuật ngữ, r23)

@@ -183,6 +183,7 @@ Saat subtitle langsung dan rekaman diproses di CPU komputer karyawan (mode lokal
 | Tujuan | Alamat | Ke mana suara dikirim | Biaya |
 |---|---|---|---|
 | OpenAI | `https://api.openai.com/v1`, model misalnya `gpt-4o-transcribe`, `gpt-4o-mini-transcribe`, `whisper-1` | **Keluar dari perusahaan** | Ditagih menurut durasi suara sesuai harga resmi OpenAI; setiap komputer yang menampilkan subtitle dihitung sendiri |
+| Groq (r26) | `https://api.groq.com/openai/v1`, model `whisper-large-v3-turbo` (bawaan) atau `whisper-large-v3` | **Keluar dari perusahaan** | Ada kuota gratis dengan batas pemakaian (lihat di bawah); dapatkan kunci di [console.groq.com/keys](https://console.groq.com/keys) |
 | Layanan pengenalan di dalam perusahaan (RTX Spark, atau server kompatibel OpenAI milik tim lain) | Misalnya `http://10.x.x.x:8000/v1` | Tetap di dalam perusahaan | Tanpa biaya tambahan |
 
 - Isi alamat, model, dan kunci (layanan internal boleh tanpa kunci), lalu tekan "**Uji koneksi**": satu detik senyap dikirim untuk memeriksa alamat, kunci, dan model
@@ -193,6 +194,12 @@ Saat subtitle langsung dan rekaman diproses di CPU komputer karyawan (mode lokal
 - Jika suara keluar dari perusahaan, pemberitahuan oranye tampil di halaman Pengaturan IT dan di bagian atas halaman staf. Matikan untuk rapat rahasia atau gunakan layanan internal
 - Kunci disimpan di `config.json` komputer ini (`pcg_simple.asr_api_key`) dan disamarkan di file diagnostik; variabel lingkungan sistem Windows `PCG_ASR_API=off` mematikan API untuk sementara
 - Mode "Saya juga berbicara" (dua arah) tetap mengirim suara yang tumpang-tindih setiap 3 detik, sekitar 1,7 kali pemakaian satu arah
+- **Groq (r26)**: tekan "Groq (kuota gratis)" di halaman pengaturan untuk mengisi alamat dan model, tempel kunci, lalu tekan "Uji koneksi". Pengenalan memakai Whisper large-v3, lebih akurat daripada model small bawaan; program tetap mengirim ke API lebih dulu dan kembali ke komputer ini bila API tidak bisa dipakai
+  - **Kuota gratis punya batas, dipakai bersama oleh satu akun.** Angka dari situs pihak ketiga (Groq bisa mengubahnya kapan saja; periksa [halaman batas di konsol Groq](https://console.groq.com/settings/limits)): sekitar 20 permintaan per menit, sekitar 2.000 permintaan per hari, sekitar 7.200 detik suara per jam, dan sekitar 28.800 detik (8 jam) per hari
+  - Dalam praktik: satu komputer pada "Saya hanya membaca subtitle" (satu permintaan per kalimat) membuat sekitar 8–15 permintaan per menit, jadi kira-kira 2–4 jam per hari; beberapa komputer dengan satu kunci pada waktu yang sama, atau "Saya juga berbicara" (satu permintaan tiap 3 detik, tepat 20 per menit), cepat mencapai batas
+  - **Saat batas tercapai (HTTP 429)**: potongan itu langsung dikenali di komputer ini, dan API dijeda selama waktu yang diminta Groq (minimal 15 detik, maksimal 10 menit, 60 detik jika tidak disebutkan), lalu dipakai lagi secara otomatis; subtitle tidak berhenti, hanya akurasinya kembali ke model lokal selama itu. "Uji koneksi" menampilkan "Tersambung, tetapi batas pemakaian tercapai"
+  - Kunci tidak bisa disertakan di dalam penginstal (penginstal bersifat publik), jadi IT mengisinya sekali di tiap komputer; untuk pemakaian besar, gunakan layanan berbayar atau layanan pengenalan di dalam perusahaan
+  - Diuji pada 2026-11-18 dengan server simulasi (termasuk 429); belum diuji dengan kunci Groq asli
 - Diuji pada 2026-11-18 dengan server API tiruan; belum diuji dengan kunci OpenAI asli, jadi tekan "Uji koneksi" saat pertama kali mengatur
 
 ### Glosarium (nama dan istilah, r23)

@@ -3326,7 +3326,8 @@ def _pcg_asr_api_ready():
 
 
 def _pcg_asr_api_result(err=None):
-    """記一次成功或失敗：連續失敗 3 次暫停 2 分鐘；金鑰、模型不對暫停 10 分鐘（這段時間用本機辨識）"""
+    """記一次成功或失敗：連續失敗 3 次暫停 2 分鐘；金鑰、模型不對暫停 10 分鐘；用量達到上限（429，例如 Groq 的免費額度）
+    照伺服器說的時間暫停（這段時間用本機辨識）"""
     st = _PCG_ASR_API
     with st["lock"]:
         if err is None:
@@ -3334,6 +3335,12 @@ def _pcg_asr_api_result(err=None):
                 st["said"] = True
                 print(f"  {C_OK}語音辨識：API（{(st['cfg'] or {}).get('model') or '預設模型'}）{RESET}", flush=True)
             st["fails"] = 0
+            return
+        if getattr(err, "limited", False):                # 用量上限：不是壞掉，等一下就能再用
+            wait = int(getattr(err, "wait", 60) or 60)
+            st["pause_until"], st["fails"], st["said"] = time.monotonic() + wait, 0, False
+            print(f"  {C_WARN}[提示] 語音辨識 API 的用量達到上限（{str(err)[:120]}）：先改用這台電腦辨識，"
+                  f"{wait} 秒後再試{RESET}", flush=True)
             return
         st["fails"] += 1
         fatal = bool(getattr(err, "fatal", False))

@@ -1255,7 +1255,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "glossary": str(s.get("glossary") or ""), "glossary_info": _glossary_info(s),
                 "asr_api": {"enabled": asr_api_on(s),
                             "url": str((s.get("asr_api") or {}).get("url") or asr_api.DEFAULT_URL),
-                            "model": str((s.get("asr_api") or {}).get("model") or asr_api.DEFAULT_MODEL),
+                            "model": str((s.get("asr_api") or {}).get("model")
+                                         or asr_api.default_model((s.get("asr_api") or {}).get("url"))),
                             "internal": bool((s.get("asr_api") or {}).get("internal")),
                             "key_set": bool(str(s.get("asr_api_key") or "").strip()),
                             "scope": asr_api_scope(s)},
@@ -1310,7 +1311,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         if bad:
             return {"ok": False, "code": bad, "status": 0, "message": ""}
         key = str(body.get("asr_api_key") or "").strip() or str(settings().get("asr_api_key") or "").strip()
-        cfg = {"url": url, "model": str(body.get("asr_api_model") or "").strip() or asr_api.DEFAULT_MODEL, "key": key}
+        cfg = {"url": url, "model": str(body.get("asr_api_model") or "").strip() or asr_api.default_model(url), "key": key}
         import asyncio
         res = await asyncio.to_thread((update_hooks or {}).get("asr_test") or asr_api.test, cfg)
         return {"ok": bool(res.get("ok")), "status": res.get("status") or 0, "message": str(res.get("message") or "")[:300],
@@ -1571,7 +1572,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 return JSONResponse({"ok": False, "code": "asr_key_required", "error": "外部的語音辨識服務要填金鑰"},
                                     status_code=400)
             s["asr_api"] = {"enabled": on, "url": url if not bad else asr_api.DEFAULT_URL,
-                            "model": model or asr_api.DEFAULT_MODEL, "internal": internal}
+                            "model": model or asr_api.default_model(url), "internal": internal}
         if "glossary" in body:
             gl = str(body.get("glossary") or "").replace("\r\n", "\n").strip()
             if len(gl) > 20000:

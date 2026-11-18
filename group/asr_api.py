@@ -2,6 +2,7 @@
 
 IT 設定頁填「網址、金鑰、模型」之後，語音辨識改交給這個 API：
   - OpenAI（https://api.openai.com/v1，付費，聲音會送出公司）
+  - Groq（https://api.groq.com/openai/v1，Whisper large-v3；有免費額度、有用量上限，聲音會送出公司；r26）
   - 公司內部的辨識服務（RTX Spark、其他團隊架的 OpenAI 相容伺服器；聲音留在公司內）
 主程式（translate_meeting.py 的 _FwModel）把切好的每一段聲音送過來；API 連不上、金鑰不對時那一段改回這台電腦辨識，字幕不會斷。
 這個檔只做 HTTP 與格式轉換，主程式與 IT 設定頁的「測試連線」共用。
@@ -17,15 +18,32 @@ from urllib.parse import urlsplit
 
 DEFAULT_URL = "https://api.openai.com/v1"
 DEFAULT_MODEL = "gpt-4o-transcribe"
+GROQ_URL = "https://api.groq.com/openai/v1"
+GROQ_MODEL = "whisper-large-v3-turbo"
+LIMIT_WAIT = (15, 600)      # 用量達到上限（HTTP 429）時暫停幾秒：照伺服器說的 Retry-After，限制在這個範圍；沒說就 60 秒
 SR = 16000
 MAX_CHUNK_S = 25.0          # 一次送出去的聲音最長幾秒（長錄音在停頓的地方切開）
 LANGS = {"zh": "zh", "en": "en", "ja": "ja", "ko": "ko", "id": "id", "vi": "vi", "hi": "hi", "nan": "zh"}
 
 
 class ApiError(Exception):
-    def __init__(self, status, message):
+    def __init__(self, status, message, retry_after=None):
         super().__init__(f"HTTP {status}：{message}" if status else message)
-        self.status, self.message = status, message
+        self.status, self.message, self.retry_after = status, message, retry_after
+
+    @property
+    def limited(self):
+        """用量達到上限（免費額度的每分鐘、每天上限）：過一陣子就能再用"""
+        return self.status == 429
+
+    @property
+    def wait(self):
+        """用量達到上限時，建議暫停幾秒"""
+        lo, hi = LIMIT_WAIT
+        try:
+            return int(min(hi, max(lo, float(self.retry_after)))) if self.retry_after is not None else 60
+        except (TypeError, ValueError):
+            return 60
 
     @property
     def fatal(self):
@@ -39,6 +57,15 @@ def clean_url(url):
         if url.endswith(tail):
             url = url[:-len(tail)]
     return url
+
+
+def default_model(url):
+    """模型沒填時用哪一個：依網址（Groq 沒有 gpt-4o-transcribe）"""
+    try:
+        host = (urlsplit(clean_url(url)).hostname or "").lower()
+    except ValueError:
+        host = ""
+    return GROQ_MODEL if host == "groq.com" or host.endswith(".groq.com") else DEFAULT_MODEL
 
 
 def _private_host(host):
@@ -105,7 +132,7 @@ def _multipart(fields, wav):
 
 def post(cfg, wav, language=None, prompt=None, timeout=20, fmt="json", opener=None):
     """送一段 WAV，回傳 API 的 JSON（dict）。cfg：{"url", "model", "key"}。出錯丟 ApiError"""
-    body, ctype = _multipart({"model": cfg.get("model") or DEFAULT_MODEL, "response_format": fmt,
+    body, ctype = _multipart({"model": cfg.get("model") or default_model(cfg.get("url")), "response_format": fmt,
                               "language": LANGS.get(language or "", ""), "prompt": (prompt or "")[:800]}, wav)
     req = _ureq.Request(clean_url(cfg["url"]) + "/audio/transcriptions", data=body, method="POST")
     req.add_header("Content-Type", ctype)
@@ -123,7 +150,11 @@ def post(cfg, wav, language=None, prompt=None, timeout=20, fmt="json", opener=No
             detail = (j.get("error") or {}).get("message") if isinstance(j.get("error"), dict) else (j.get("error") or j.get("message") or detail)
         except Exception:  # noqa: BLE001
             detail = getattr(e, "reason", "") or ""
-        raise ApiError(e.code, str(detail or "")[:300]) from None
+        try:
+            after = float((e.headers.get("Retry-After") or "").strip())
+        except (AttributeError, TypeError, ValueError):
+            after = None
+        raise ApiError(e.code, str(detail or "")[:300], after) from None
     except Exception as e:  # noqa: BLE001  逾時、連不上、憑證問題
         raise ApiError(0, f"{type(e).__name__}: {str(e)[:200]}") from None
     try:

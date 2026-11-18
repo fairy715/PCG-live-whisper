@@ -36,7 +36,7 @@ class FakeApi:
     """假的 OpenAI 相容伺服器：記下每次呼叫；mode 決定回什麼"""
 
     def __init__(self):
-        self.calls, self.mode, self.key = [], "ok", "sk-test"
+        self.calls, self.mode, self.key, self.retry_after = [], "ok", "sk-test", "7"
         outer = self
 
         class H(BaseHTTPRequestHandler):
@@ -50,9 +50,11 @@ class FakeApi:
                 outer.calls.append({"path": self.path, "auth": self.headers.get("Authorization"), "fields": f,
                                     "wav": b"RIFF" in body})
 
-                def send(code, obj):
+                def send(code, obj, headers=()):
                     raw = obj if isinstance(obj, bytes) else json.dumps(obj).encode()
                     self.send_response(code)
+                    for k, v in headers:
+                        self.send_header(k, v)
                     self.send_header("Content-Length", str(len(raw)))
                     self.end_headers()
                     self.wfile.write(raw)
@@ -60,6 +62,9 @@ class FakeApi:
                     return send(404, {"error": {"message": "not found"}})
                 if outer.mode == "down":
                     return send(503, {"error": {"message": "overloaded"}})
+                if outer.mode == "limit":               # 免費額度用完（Groq）：429＋Retry-After
+                    return send(429, {"error": {"message": "Rate limit reached for model"}},
+                                [("Retry-After", outer.retry_after)] if outer.retry_after else [])
                 if outer.mode == "html":
                     return send(200, b"<html>login</html>")
                 if outer.key and self.headers.get("Authorization") != "Bearer " + outer.key:
@@ -154,6 +159,37 @@ class Client(unittest.TestCase):
             asr_api.post({"url": "http://127.0.0.1:9/v1", "model": "m"}, self.wav, timeout=2)
         self.assertEqual(e.exception.status, 0)
 
+    def test_rate_limit_carries_wait_time(self):
+        self.api.mode = "limit"
+        with self.assertRaises(asr_api.ApiError) as e:
+            asr_api.post(self.cfg, self.wav)
+        self.assertEqual((e.exception.status, e.exception.limited, e.exception.fatal), (429, True, False))
+        self.assertEqual(e.exception.wait, 15)                         # 伺服器說 7 秒：至少等 15 秒
+        self.api.retry_after = "90"
+        with self.assertRaises(asr_api.ApiError) as e:
+            asr_api.post(self.cfg, self.wav)
+        self.assertEqual(e.exception.wait, 90)
+        self.api.retry_after = "86400"
+        with self.assertRaises(asr_api.ApiError) as e:
+            asr_api.post(self.cfg, self.wav)
+        self.assertEqual(e.exception.wait, 600)                        # 最多 10 分鐘就再試一次
+        self.api.retry_after = ""
+        with self.assertRaises(asr_api.ApiError) as e:
+            asr_api.post(self.cfg, self.wav)
+        self.assertEqual(e.exception.wait, 60)                         # 沒說多久：60 秒
+        r = asr_api.test(self.cfg)
+        self.assertEqual((r["ok"], r["status"]), (False, 429))
+
+    def test_default_model_follows_the_service(self):
+        self.assertEqual(asr_api.default_model("https://api.groq.com/openai/v1"), "whisper-large-v3-turbo")
+        self.assertEqual(asr_api.default_model("https://api.openai.com/v1"), "gpt-4o-transcribe")
+        self.assertEqual(asr_api.default_model("https://notgroq.com/v1"), "gpt-4o-transcribe")
+        self.assertEqual(asr_api.default_model(""), "gpt-4o-transcribe")
+        self.assertEqual(asr_api.scope(asr_api.GROQ_URL), "external")
+        self.assertEqual(asr_api.check_url(asr_api.GROQ_URL + "/audio/transcriptions"), (asr_api.GROQ_URL, ""))
+        asr_api.post({"url": self.api.url, "key": "sk-test"}, self.wav)      # 模型沒填：依網址決定
+        self.assertEqual(self.api.calls[-1]["fields"]["model"], "gpt-4o-transcribe")
+
     def test_connection_test(self):
         self.assertEqual(asr_api.test(self.cfg), {"ok": True, "status": 200, "message": ""})
         r = asr_api.test(dict(self.cfg, key="bad"))
@@ -242,6 +278,20 @@ class Engine(unittest.TestCase):
             self.assertEqual(self.run_()[0][0][2], "本機")
         self.assertEqual(len(self.api.calls), 3)
 
+    def test_rate_limit_pauses_at_once_and_uses_local(self):
+        self.api.mode, self.api.retry_after = "limit", "40"
+        before = t.time.monotonic()
+        self.assertEqual(self.run_()[0], [(0.0, 1.0, "本機")])           # 這一段改在這台電腦辨識，字幕不斷
+        self.assertIsNone(t._pcg_asr_api_ready())                       # 第一次就暫停，不用等連續 3 次
+        self.assertEqual(t._PCG_ASR_API["fails"], 0)                    # 不算「壞掉」
+        wait = t._PCG_ASR_API["pause_until"] - before
+        self.assertTrue(39 <= wait <= 42, wait)                         # 照伺服器說的 40 秒
+        self.run_()
+        self.assertEqual(len(self.api.calls), 1)                        # 暫停期間不再打 API
+        t._PCG_ASR_API["pause_until"] = 0.0                             # 時間到：額度恢復，回到 API
+        self.api.mode = "ok"
+        self.assertIn("寶城", self.run_()[0][0][2])
+
     def test_off_by_default(self):
         t._PCG_ASR_API.update(loaded=True, cfg=None)
         self.assertEqual(self.run_()[0], [(0.0, 1.0, "本機")])
@@ -291,6 +341,21 @@ class Routes(unittest.TestCase):
         self.assertTrue(self.save(asr_api_enabled=True, asr_api_url="https://api.openai.com/v1").json()["state"]["asr_api"]["key_set"])
         r = self.save(asr_api_enabled=True, asr_api_url="https://api.openai.com/v1", clear_asr_api_key=True)
         self.assertEqual((r.status_code, r.json()["code"]), (400, "asr_key_required"))
+
+    def test_groq_default_model_and_key_required(self):
+        """Groq（r26）：模型沒填就用 whisper-large-v3-turbo（Groq 沒有 gpt-4o-transcribe）；是外部服務，要金鑰"""
+        r = self.save(asr_api_enabled=True, asr_api_url="https://api.groq.com/openai/v1")
+        self.assertEqual((r.status_code, r.json()["code"]), (400, "asr_key_required"))
+        r = self.save(asr_api_enabled=True, asr_api_url="https://api.groq.com/openai/v1/", asr_api_key="gsk_secret456")
+        a = r.json()["state"]["asr_api"]
+        self.assertEqual((a["url"], a["model"], a["scope"], a["key_set"]),
+                         ("https://api.groq.com/openai/v1", "whisper-large-v3-turbo", "external", True))
+        self.assertNotIn("gsk_secret456", r.text)
+        r = self.c.post("/api/simple/admin/asr-test", headers=self.h,
+                        json={"asr_api_url": "https://api.groq.com/openai/v1", "asr_api_model": ""})
+        self.assertTrue(r.json()["ok"])
+        self.assertEqual(self.tested[-1], {"url": "https://api.groq.com/openai/v1", "model": "whisper-large-v3-turbo",
+                                           "key": "gsk_secret456"})
 
     def test_validation(self):
         self.assertEqual(self.save(asr_api_enabled=True, asr_api_url="http://api.openai.com/v1", asr_api_key="k").json()["code"],

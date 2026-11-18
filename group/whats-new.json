@@ -1,34 +1,29 @@
 {
  "_說明": "下一版發布時同仁頁面「有新版本」視窗顯示的新功能（每種語言 2～5 點，一點一句）。release 要等於這一次發布的 rN，發布流程才會附上；每次發布前更新這個檔",
- "release": "r25",
+ "release": "r26",
  "zh": [
-  "電腦有 NVIDIA 顯示卡、還沒裝加速包時，打開頁面會提醒你安裝：裝好之後字幕更快，電腦也比較不卡",
-  "會依這台電腦和你常選的語言，推薦更準的語音模型（例如越南文、印尼文專用的模型），按「安裝」就會自動下載",
-  "新的中文模型 Breeze ASR 25：台灣華語和中英夾雜的會議辨識更準（需要 NVIDIA 顯示卡和加速包）",
-  "不想被提醒可以按「下次再說」或「不要再提醒」"
+  "IT 可以把語音辨識交給 Groq（有免費額度）：用更大的模型辨識，字幕更準",
+  "Groq 連不上或免費用量達到上限時，會自動改回這台電腦辨識，字幕不會斷",
+  "更新檔變小了（約 10 MB），更新更快"
  ],
  "en": [
-  "If the computer has an NVIDIA graphics card and the GPU pack is not installed yet, the page reminds you to install it: faster subtitles and a less busy computer",
-  "Based on this computer and the language you choose most, the page recommends a more accurate speech model (for example the Vietnamese or Indonesian model); press “Install” and it downloads by itself",
-  "New Chinese model Breeze ASR 25: more accurate for Taiwanese Mandarin and mixed Chinese-English meetings (needs an NVIDIA card and the GPU pack)",
-  "Do not want reminders? Press “Later” or “Do not remind me again”"
+  "IT can send speech recognition to Groq (which has a free tier): a larger model recognizes the speech, so subtitles are more accurate",
+  "If Groq cannot be reached or the free usage limit is reached, this computer recognizes instead, so subtitles do not stop",
+  "The update file is smaller (about 10 MB), so updating is faster"
  ],
  "id": [
-  "Jika komputer punya kartu grafis NVIDIA dan paket GPU belum dipasang, halaman akan mengingatkan Anda untuk memasangnya: subtitle lebih cepat dan komputer lebih ringan",
-  "Berdasarkan komputer ini dan bahasa yang paling sering Anda pilih, halaman menyarankan model suara yang lebih akurat (misalnya model khusus bahasa Vietnam atau Indonesia); tekan “Pasang” dan model diunduh otomatis",
-  "Model bahasa Mandarin baru Breeze ASR 25: lebih akurat untuk Mandarin Taiwan dan rapat campuran Mandarin-Inggris (perlu kartu NVIDIA dan paket GPU)",
-  "Tidak ingin diingatkan? Tekan “Nanti saja” atau “Jangan ingatkan lagi”"
+  "IT bisa menyerahkan pengenalan suara ke Groq (ada kuota gratis): suara dikenali dengan model yang lebih besar, sehingga subtitle lebih akurat",
+  "Jika Groq tidak terjangkau atau batas pemakaian gratis tercapai, komputer ini yang mengenali, sehingga subtitle tidak berhenti",
+  "Berkas pembaruan lebih kecil (sekitar 10 MB), sehingga pembaruan lebih cepat"
  ],
  "vi": [
-  "Nếu máy có card đồ họa NVIDIA mà chưa cài gói GPU, trang sẽ nhắc bạn cài: phụ đề nhanh hơn và máy đỡ nặng",
-  "Dựa vào máy này và ngôn ngữ bạn hay chọn, trang sẽ gợi ý mô hình giọng nói chính xác hơn (ví dụ mô hình riêng cho tiếng Việt hoặc tiếng Indonesia); bấm “Cài đặt” là tự tải về",
-  "Mô hình tiếng Trung mới Breeze ASR 25: chính xác hơn với tiếng Trung Đài Loan và cuộc họp pha tiếng Trung - tiếng Anh (cần card NVIDIA và gói GPU)",
-  "Không muốn bị nhắc? Bấm “Để sau” hoặc “Không nhắc lại”"
+  "IT có thể chuyển việc nhận dạng giọng nói cho Groq (có hạn mức miễn phí): dùng mô hình lớn hơn nên phụ đề chính xác hơn",
+  "Khi không kết nối được Groq hoặc hết hạn mức miễn phí, máy này sẽ tự nhận dạng, phụ đề không bị ngắt",
+  "Tệp cập nhật nhỏ hơn (khoảng 10 MB) nên cập nhật nhanh hơn"
  ],
  "hi": [
-  "अगर कंप्यूटर में NVIDIA ग्राफ़िक्स कार्ड है और GPU पैक अभी इंस्टॉल नहीं है, तो पेज आपको इंस्टॉल करने की याद दिलाता है: सबटाइटल तेज़ आते हैं और कंप्यूटर हल्का रहता है",
-  "इस कंप्यूटर और आपकी अक्सर चुनी जाने वाली भाषा के आधार पर पेज ज़्यादा सटीक आवाज़ मॉडल सुझाता है (जैसे वियतनामी या इंडोनेशियाई का अलग मॉडल); “इंस्टॉल करें” दबाएँ, यह अपने आप डाउनलोड हो जाता है",
-  "नया चीनी मॉडल Breeze ASR 25: ताइवानी मंदारिन और चीनी-अंग्रेज़ी मिली-जुली मीटिंग में ज़्यादा सटीक (NVIDIA कार्ड और GPU पैक ज़रूरी)",
-  "याद नहीं दिलाना चाहते? “बाद में” या “दोबारा याद न दिलाएँ” दबाएँ"
+  "IT आवाज़ की पहचान Groq को दे सकता है (इसमें मुफ़्त कोटा है): बड़ा मॉडल पहचान करता है, इसलिए सबटाइटल ज़्यादा सटीक होते हैं",
+  "Groq से संपर्क न हो या मुफ़्त इस्तेमाल की सीमा पूरी हो जाए, तो यही कंप्यूटर पहचान करता है और सबटाइटल नहीं रुकते",
+  "अपडेट फ़ाइल छोटी हो गई है (लगभग 10 MB), इसलिए अपडेट जल्दी होता है"
  ]
 }
