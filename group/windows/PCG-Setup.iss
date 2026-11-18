@@ -163,8 +163,13 @@ hi.Elapsed=बीता समय %1
 hi.SlowHint=एंटीवायरस स्कैन से यह चरण धीमा हो सकता है। कृपया यह विंडो बंद न करें।
 #endif
 
+; group\docs（宣傳影片、README 的截圖，約 27 MB）程式用不到，不放進安裝檔：完整安裝檔離 GitHub 單檔 2 GB 上限很近
+[InstallDelete]
+; 舊版（r25 以前）裝過的 group\docs：升級時順便刪掉
+Type: filesandordirs; Name: "{app}\group\docs"
+
 [Files]
-Source: "..\..\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion; Excludes: "\.git\*,\.github\*,\dist\*,\group\tests\*,\group\windows\lang\*,\docs\*,\images\*,\logs\*,\recordings\*,\venv\*,\python\*,\hf_cache\*,\models\*,\tools\*,\group_data\*,\PCG-offline\*,\config.json,*.pyc,__pycache__"
+Source: "..\..\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ignoreversion; Excludes: "\.git\*,\.github\*,\dist\*,\group\tests\*,\group\docs\*,\group\windows\lang\*,\docs\*,\images\*,\logs\*,\recordings\*,\venv\*,\python\*,\hf_cache\*,\models\*,\tools\*,\group_data\*,\PCG-offline\*,\config.json,*.pyc,__pycache__"
 
 #if defined(EmbedBundle) && !defined(PatchOnly)
 Source: "{#EmbedBundle}\*"; DestDir: "{tmp}\PCG-offline"; Flags: recursesubdirs createallsubdirs ignoreversion deleteafterinstall

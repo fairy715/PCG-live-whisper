@@ -61,6 +61,9 @@ jobs:
           $mb = [math]::Round($exe.Length / 1MB)
           Write-Host "$($exe.Name)：$mb MB"
           if ($exe.Length -ge 2GB) { throw "安裝檔 $mb MB 超過 GitHub Releases 的 2 GB 上限" }
+          $left = [math]::Round((2GB - $exe.Length) / 1MB)
+          Write-Host "離 2 GB 上限還有 $left MB"
+          if ($left -lt 25) { Write-Host "::warning::完整安裝檔離 GitHub 單檔 2 GB 上限只剩 $left MB，要先減少安裝檔的內容" }
 
       - name: 實際安裝一次（只用這一個檔案，旁邊沒有資源包）
         shell: pwsh
