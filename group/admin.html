@@ -38,6 +38,36 @@ label.f>input,label.f>select{margin-top:4px}
 .btn.ghost{background:none;color:var(--accent);border:1.5px solid var(--accent);padding:9px 16px;font-weight:600}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+/* r29：資料去向狀態列、可收合的區塊、固定在視窗底部的儲存列、測試中的動態圖示 */
+.dest{border:1.5px solid var(--line);border-radius:var(--radius);background:var(--card);padding:12px 16px;margin-bottom:16px;font-size:15px}
+.dest b{display:block;font-size:13px;color:var(--dim);font-weight:600;margin-bottom:4px}
+.dest div{display:flex;gap:8px;align-items:baseline}.dest div span:first-child{flex:none;color:var(--dim);min-width:5.5em}
+.dest .ext{color:var(--warn);font-weight:700}.dest.warn{border-color:var(--warn);background:var(--warn-soft)}
+.card[data-fold]>h2{margin:0}.card[data-fold]:not(.closed)>h2{margin-bottom:12px}
+.foldbtn{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%;font:inherit}
+.foldbtn::before{content:"▸";color:var(--dim);font-size:14px;transition:transform .15s}
+.card[data-fold]:not(.closed) .foldbtn::before{transform:rotate(90deg)}
+.foldbtn:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:6px}
+.foldsum{margin-left:auto;font-size:13px;font-weight:400;color:var(--dim)}
+.card[data-fold].closed>*:not(h2){display:none}
+.savebar{position:sticky;bottom:0;z-index:5;background:var(--bg);border-top:1px solid var(--line);margin:0 -16px;padding:4px 16px 12px}
+.savebar .actions{margin-top:10px}.dirty{font-size:14px;color:var(--warn);font-weight:600}
+.busy{display:inline-flex;align-items:center;gap:8px}
+@media (prefers-reduced-motion:reduce){.foldbtn::before{transition:none}}
+/* ul-icons:begin — Ultra Lab Motion Icons v0.3.1（MIT License，(c) Ultra Lab，https://github.com/ppcvote/ultralab-anim-icons）。
+   只取用到的幾個圖示，內嵌在這裡（公司電腦可能不能上網）；只用在「狀態」，系統開了「減少動態效果」時不會動 */
+.ul-i{width:var(--ul-size,24px);height:var(--ul-size,24px);stroke-width:var(--ul-stroke,1.5);overflow:visible;vertical-align:middle;flex:none}
+.ul-i *{transform-box:view-box;transform-origin:12px 12px}
+@media (prefers-reduced-motion:reduce){.ul-i *{animation:none!important}}
+.ul-loading-orbit .g{animation:ul-loading-orbit-spin calc(1.6s / var(--ul-speed,1)) linear calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}.ul-loading-orbit .a{animation:ul-loading-orbit-arc calc(2.8000000000000003s / var(--ul-speed,1)) ease-in-out calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}@keyframes ul-loading-orbit-spin{to{transform:rotate(360deg)}}@keyframes ul-loading-orbit-arc{from{stroke-dashoffset:55}to{stroke-dashoffset:-125}}
+.ul-listen .g1{animation:ul-listen-lv calc(1.8s / var(--ul-speed,1)) ease-in-out calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}.ul-listen .g2{animation:ul-listen-lv calc(1.8s / var(--ul-speed,1)) ease-in-out calc(-1.62s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}.ul-listen .e{transform-origin:12px 11.5px;animation:ul-listen-echo calc(1.8s / var(--ul-speed,1)) ease-out calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}@keyframes ul-listen-lv{0%,55%,100%{opacity:.3}25%{opacity:1}}@keyframes ul-listen-echo{0%{opacity:0;transform:scale(1)}12%{opacity:.6}70%,100%{opacity:0;transform:scale(1.25)}}
+.ul-translate .p{animation:ul-translate-p calc(3.6s / var(--ul-speed,1)) ease-in-out calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}.ul-translate .q{animation:ul-translate-q calc(3.6s / var(--ul-speed,1)) ease-in-out calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}@keyframes ul-translate-p{0%,15%{transform:translate(0,0)}45%,65%{transform:translate(8px,8px)}95%,100%{transform:translate(0,0)}}@keyframes ul-translate-q{0%,15%{transform:translate(0,0)}45%,65%{transform:translate(-8px,-8px)}95%,100%{transform:translate(0,0)}}
+.ul-summarize .l1{animation:ul-summarize-l1 calc(3.6s / var(--ul-speed,1)) ease-in-out calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}@keyframes ul-summarize-l1{0%,8%{opacity:1;transform:translateY(0) scaleX(1)}38%,68%{opacity:0;transform:translateY(6px) scaleX(.5)}92%,100%{opacity:1;transform:translateY(0) scaleX(1)}}.ul-summarize .l2{animation:ul-summarize-l2 calc(3.6s / var(--ul-speed,1)) ease-in-out calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}@keyframes ul-summarize-l2{0%,8%{opacity:1;transform:translateY(0) scaleX(1)}38%,68%{opacity:0;transform:translateY(2px) scaleX(.5)}92%,100%{opacity:1;transform:translateY(0) scaleX(1)}}.ul-summarize .l3{animation:ul-summarize-l3 calc(3.6s / var(--ul-speed,1)) ease-in-out calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}@keyframes ul-summarize-l3{0%,8%{opacity:1;transform:translateY(0) scaleX(1)}38%,68%{opacity:0;transform:translateY(-2px) scaleX(.5)}92%,100%{opacity:1;transform:translateY(0) scaleX(1)}}.ul-summarize .l4{animation:ul-summarize-l4 calc(3.6s / var(--ul-speed,1)) ease-in-out calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}@keyframes ul-summarize-l4{0%,8%{opacity:1;transform:translateY(0) scaleX(1)}38%,68%{opacity:0;transform:translateY(-6px) scaleX(.5)}92%,100%{opacity:1;transform:translateY(0) scaleX(1)}}.ul-summarize .r{animation:ul-summarize-r calc(3.6s / var(--ul-speed,1)) ease-in-out calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}@keyframes ul-summarize-r{0%,30%{opacity:0;transform:scaleX(.6)}42%,64%{opacity:1;transform:scaleX(1)}74%,100%{opacity:0;transform:scaleX(.6)}}
+.ul-sync .g{animation:ul-sync-turn calc(2.4s / var(--ul-speed,1)) cubic-bezier(.65,0,.35,1) calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}@keyframes ul-sync-turn{0%{transform:rotate(0)}55%,100%{transform:rotate(180deg)}}
+.ul-upload .a{animation:ul-upload-up calc(2.2s / var(--ul-speed,1)) ease-in-out calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}@keyframes ul-upload-up{0%{opacity:0;transform:translateY(3px)}22%,62%{opacity:1;transform:translateY(0)}88%,100%{opacity:0;transform:translateY(-4px)}}
+.ul-download .a{animation:ul-download-down calc(2.2s / var(--ul-speed,1)) ease-in-out calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}.ul-download .t{animation:ul-download-dip calc(2.2s / var(--ul-speed,1)) ease-in-out calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}@keyframes ul-download-down{0%{opacity:0;transform:translateY(-4px)}25%,60%{opacity:1;transform:translateY(0)}82%,100%{opacity:0;transform:translateY(3px)}}@keyframes ul-download-dip{0%,70%,100%{transform:translateY(0)}80%{transform:translateY(1px)}}
+.ul-connecting .o1{animation:ul-connecting-cw calc(3.6s / var(--ul-speed,1)) linear calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}.ul-connecting .o2{animation:ul-connecting-ccw calc(2.16s / var(--ul-speed,1)) linear calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}@keyframes ul-connecting-cw{to{transform:rotate(360deg)}}@keyframes ul-connecting-ccw{to{transform:rotate(-360deg)}}
+/* ul-icons:end */
 .res{font-size:14px;margin-top:10px;padding:10px 12px;border-radius:10px}
 .res.ok{background:var(--ok-soft);color:var(--ok)}.res.err{background:var(--err-soft);color:var(--err)}.res.warn{background:var(--warn-soft);color:var(--warn)}
 .note{font-size:13px;color:var(--dim);margin:6px 0 0}
@@ -73,6 +103,10 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
   </section>
 
   <form id="pMain" hidden>
+    <div class="dest" id="dest"><b data-t="dest_title"></b>
+      <div><span data-t="dest_audio"></span><span id="destAudio"></span></div>
+      <div><span data-t="dest_text"></span><span id="destText"></span></div>
+    </div>
     <div class="card">
       <h2 data-t="mode_title"></h2>
       <div class="modes">
@@ -95,6 +129,8 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
         <button type="button" class="chip" data-u="https://openrouter.ai/api/v1">OpenRouter</button>
       </div>
       <label class="f"><span data-t="llm_url"></span><input type="text" id="llmUrl" placeholder="https://ai.example.com"></label>
+      <div id="llmWarn" class="res warn" hidden data-t="llm_warn"></div>
+      <label class="check" id="llmInternalWrap" hidden><input type="checkbox" id="llmInternal"><span data-t="llm_internal"></span></label>
       <p class="note" id="llmUrlNote"></p>
       <label class="f"><span id="llmKeyLabel"></span><input type="password" id="llmKey" autocomplete="off" data-t-ph="llm_key_ph"></label>
       <label class="check" id="clearKeyWrap" hidden><input type="checkbox" id="clearKey"><span data-t="clear_llm_key"></span></label>
@@ -133,6 +169,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <p class="note" data-t="diarize_note"></p>
       <label class="check"><input type="checkbox" id="remoteView"><span data-t="remote_view"></span></label>
       <p class="note" data-t="remote_view_note"></p>
+      <div id="rvWarn" class="res warn" hidden data-t="rv_warn"></div>
       <label class="check"><input type="checkbox" id="multiLang"><span data-t="multi_lang"></span></label>
       <p class="note" data-t="multi_lang_note"></p>
       <label class="f"><span id="staffPwLabel"></span><input type="password" id="staffPw" autocomplete="new-password" data-t-ph="staff_pw_ph"></label>
@@ -160,7 +197,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" data-fold="gl">
       <h2 data-t="gl_title"></h2>
       <p class="note" data-t="gl_note"></p>
       <label class="f"><span data-t="gl_label"></span>
@@ -168,7 +205,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <p class="note" id="glInfo"></p>
     </div>
 
-    <div class="card">
+    <div class="card" data-fold="upd">
       <h2 data-t="upd_title"></h2>
       <label class="check"><input type="checkbox" id="updCheck"><span data-t="upd_check"></span></label>
       <label class="f"><span data-t="upd_who"></span>
@@ -177,7 +214,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <p class="note" data-t="upd_note"></p>
     </div>
 
-    <div class="card" id="cReport">
+    <div class="card" id="cReport" data-fold="sup">
       <h2 data-t="sup_title"></h2>
       <label class="f"><span data-t="sup_contact"></span><input type="text" id="supContact" maxlength="200" data-t-ph="sup_contact_ph"></label>
       <p class="note" data-t="sup_note"></p>
@@ -185,7 +222,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <div id="supRes" hidden></div>
     </div>
 
-    <div class="card" id="cModels">
+    <div class="card" id="cModels" data-fold="models">
       <h2 data-t="models_title"></h2>
       <p class="note" data-t="models_note"></p>
       <h3 class="sub" data-t="models_use"></h3>
@@ -201,24 +238,27 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <p class="note" data-t="models_offline"></p>
     </div>
 
+    <div class="savebar">
+    <div id="saveRes" hidden role="status"></div>
+    <div class="res warn" id="rsBox" hidden><span id="rsMsg"></span>
+      <div class="actions"><button class="btn" id="rsBtn" type="button" data-t="rs_btn"></button></div></div>
     <div class="actions">
       <button class="btn" type="submit" data-t="save"></button>
+      <span class="dirty" id="dirty" hidden data-t="unsaved"></span>
       <a href="/simple" data-t="back"></a>
       <button class="btn ghost" id="chgPwBtn" type="button" data-t="change_it_pw" style="margin-left:auto"></button>
     </div>
-    <div id="saveRes" hidden></div>
-    <div class="res warn" id="rsBox" hidden><span id="rsMsg"></span>
-      <div class="actions"><button class="btn" id="rsBtn" type="button" data-t="rs_btn"></button></div></div>
+    </div>
   </form>
 </div>
 
 <script>
 const I18N={
-zh:{multi_lang:"多語字幕：看字幕的人可以選自己的語言",multi_lang_note:"分享出去的字幕（QR Code）或這台的字幕畫面選了中文、印尼文、越南文、印地語、英文，而這一句沒有那種語言時，這台會另外翻一份。語音辨識不會增加，只多翻譯：本機模式在這台的 CPU（有 NVIDIA 加速包就用顯示卡），伺服器模式在大模型伺服器。沒人選的語言不翻；電腦較弱時可以關掉。改了之後，下一場字幕開始生效。",
+zh:{dest_title:"資料送到哪裡（照下面現在填的值）",dest_audio:"聲音",dest_text:"文字",dest_local:"只在這台電腦",dest_gpu:"公司的 GPU 伺服器（{h}）",dest_api_int:"公司內部的辨識服務（{h}）",dest_api_ext:"送到公司外部：{h}",dest_group:"集團 AI 平台（{h}）",dest_int:"公司內部的伺服器（{h}）",dest_ext:"送到公司外部：{h}",llm_internal:"這是公司內部的伺服器（文字不會送出公司）",llm_warn:"這個位址看起來不在公司內部的網路。同仁頁面會顯示「公司外部的 AI 服務」。如果它確實是公司內部的伺服器，請勾下面這一項。",rv_warn:"注意：還沒有設定同仁密碼。開啟後，同一個網路上的任何人掃 QR Code 都看得到會議的字幕。請在下面設定同仁密碼。",unsaved:"有變更還沒儲存",sum_gl:"{n} 個詞",sum_none:"還沒有填",sum_upd_on:"自動檢查",sum_upd_off:"不自動檢查",sum_models:"已安裝 {n} 個",multi_lang:"多語字幕：看字幕的人可以選自己的語言",multi_lang_note:"分享出去的字幕（QR Code）或這台的字幕畫面選了中文、印尼文、越南文、印地語、英文，而這一句沒有那種語言時，這台會另外翻一份。語音辨識不會增加，只多翻譯：本機模式在這台的 CPU（有 NVIDIA 加速包就用顯示卡），伺服器模式在大模型伺服器。沒人選的語言不翻；電腦較弱時可以關掉。改了之後，下一場字幕開始生效。",
   asr_title:"語音辨識 API（選填）",asr_note:"把語音辨識交給 API（OpenAI 相容的 /audio/transcriptions）：OpenAI、Groq（有免費額度），或公司內部的辨識服務（例如 RTX Spark）。通常比這台電腦的小模型準，筆電也不用跑辨識。API 連不上、金鑰不對或用量達到上限時，那一段會自動改回這台電腦辨識，字幕不會斷。開啟後優先於 GPU 伺服器。",asr_on:"語音辨識交給 API",asr_url:"API 網址（到 /v1 為止）",asr_api_model:"模型",asr_key:"金鑰（API key）",asr_key_set:"金鑰：已設定（要換才填）",asr_clear_key:"刪除已存的金鑰",asr_internal:"這是公司內部的服務（聲音不會送出公司）",asr_ext_warn:"注意：開啟後，會議的聲音會送到公司外部的服務；付費的服務依用量計費，免費額度有用量上限（每台開字幕的電腦各算一份）。請先確認符合公司資料規範；機密會議請關閉，或改用公司內部的服務。",asr_test:"測試連線",asr_testing:"測試中…",asr_ok:"連線成功：網址、金鑰、模型都可以用。",asr_fail:"連線失敗：{m}",asr_fail_401:"金鑰不對或沒有權限（{m}）",asr_fail_404:"網址或模型名稱不對（{m}）",asr_fail_429:"連得上，但用量達到上限（{m}）。過幾分鐘再試；上限期間會自動改用這台電腦辨識。",asr_groq:"Groq（有免費額度）",asr_groq_note:"Groq：Whisper large-v3，有免費額度，但每分鐘、每天有用量上限（整個帳號共用，多台電腦同時用很快就滿）；達到上限時那幾段會自動改回這台電腦辨識。聲音會送出公司。金鑰申請：",bad_asr_url:"語音辨識 API 的網址格式不正確（例如 https://api.openai.com/v1）",asr_url_https:"外部的語音辨識服務要用 https 網址",bad_asr_model:"模型名稱格式不正確",bad_asr_key:"金鑰格式不正確",asr_key_required:"外部的語音辨識服務要填金鑰",
   gl_title:"詞庫（專有名詞）",gl_note:"公司名、廠區、系統名稱、人名這些詞，辨識時會當提示、翻譯時照指定的寫法。一行一個詞；「=」後面是指定譯法（選填），「|」後面是常被聽錯的寫法（會自動換回來）。存檔後下一場字幕或錄音生效。",gl_label:"詞庫（一行一個詞）",gl_ph:"寶成 | 寶城 | 保成 = Pou Chen\nMES\nSukabumi | Suka Bumi",gl_info:"這台 {n} 個詞",gl_info_share:"，公司共用資料夾的 glossary.txt {m} 個詞（所有電腦共用；上次讀到的）",gl_info_tip:"。要讓所有電腦共用：把同樣格式的 glossary.txt 放在「更新」的公司共用資料夾。",bad_glossary:"詞庫太長（上限 20000 字）",
   sup_title:"問題回報",sup_contact:"同仁回報問題時寄給誰（信箱或 Teams 群組，選填）",sup_contact_ph:"例如 it-helpdesk@pcg.com.tw",sup_note:"同仁頁面下方有「回報問題」：寫下發生什麼事、按一下就下載診斷檔（版本、電腦規格、遮掉金鑰與密碼的設定、最近的程式記錄；不含錄音、逐字稿和會議紀錄）。這裡填的聯絡方式會顯示給同仁；填信箱時會多一個「寫信給 IT」按鈕。",sup_make:"產生這台電腦的診斷檔",sup_making:"正在產生…",sup_done:"已下載 {n}",sup_failed:"沒有產生診斷檔：{e}",bad_contact:"聯絡方式格式不正確",
-  title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式、設定伺服器位址。存檔後立即生效，同仁電腦不用重裝。',
+  title:'PCG 會議翻譯：IT 設定',tagline:'切換本機／伺服器模式、設定伺服器位址。存檔後，下一次開始字幕或處理錄音就會使用，同仁電腦不用重裝。',
   it_password:'IT 密碼',it_password_again:'再輸入一次',login:'登入',set_pw_title:'設定 IT 密碼',set_pw_note:'第一次使用，請設定 IT 密碼（至少 6 個字）。之後進入這一頁都要輸入。同仁不需要知道這組密碼。',
   login_title:'IT 登入',login_note:'這一頁只給 IT 使用。',set_pw_btn:'設定密碼',pw_mismatch:'兩次輸入的密碼不一樣',
   local_only:'第一次設定 IT 密碼只能在這台電腦上操作',pw_wrong:'IT 密碼不正確',too_short:'密碼至少 6 個字',
@@ -264,11 +304,11 @@ zh:{multi_lang:"多語字幕：看字幕的人可以選自己的語言",multi_la
   upd_note:'能上網的電腦會從 GitHub 發布頁取得小更新包。不能上網的電腦：把發布頁上的 PCG-Update-<版本>.exe（和同名的 .sha256 檔）放進這個資料夾，同仁電腦就能一鍵更新。只會安裝比目前新的小更新包，安裝前會比對檔案指紋；需要完整安裝檔的版本只會提示找 IT。',
   bad_share:'共用資料夾路徑格式不正確',
   need_llm:'伺服器模式要填大模型的網址',bad_host:'位址格式不正確',bad_key:'API 金鑰格式不正確',error:'發生錯誤'},
-en:{multi_lang:"Multi-language subtitles: viewers can choose their own language",multi_lang_note:"When someone viewing shared subtitles (QR code) or this computer's subtitle screen chooses Chinese, Indonesian, Vietnamese, Hindi or English and a sentence is not in that language, this computer translates one more copy. Speech recognition does not increase, only translation: on this computer's CPU in local mode (the graphics card with the NVIDIA pack), or on the LLM server in server mode. Languages nobody chose are not translated; turn it off on slow computers. Takes effect from the next subtitle session.",
+en:{dest_title:"Where data goes (from the values below)",dest_audio:"Audio",dest_text:"Text",dest_local:"This computer only",dest_gpu:"Company GPU server ({h})",dest_api_int:"Internal recognition service ({h})",dest_api_ext:"Sent outside the company: {h}",dest_group:"Group AI platform ({h})",dest_int:"Internal server ({h})",dest_ext:"Sent outside the company: {h}",llm_internal:"This is a server inside the company (text does not leave the company)",llm_warn:"This address does not look like the company network. The staff page will show “AI service outside the company”. If it really is an internal server, tick the box below.",rv_warn:"Note: no staff password is set. When this is on, anyone on the same network who scans the QR code can read the meeting subtitles. Set a staff password below.",unsaved:"Unsaved changes",sum_gl:"{n} terms",sum_none:"Not set",sum_upd_on:"Checks automatically",sum_upd_off:"No automatic check",sum_models:"{n} installed",multi_lang:"Multi-language subtitles: viewers can choose their own language",multi_lang_note:"When someone viewing shared subtitles (QR code) or this computer's subtitle screen chooses Chinese, Indonesian, Vietnamese, Hindi or English and a sentence is not in that language, this computer translates one more copy. Speech recognition does not increase, only translation: on this computer's CPU in local mode (the graphics card with the NVIDIA pack), or on the LLM server in server mode. Languages nobody chose are not translated; turn it off on slow computers. Takes effect from the next subtitle session.",
   asr_title:"Speech recognition API (optional)",asr_note:"Send speech recognition to an API (OpenAI-compatible /audio/transcriptions): OpenAI, Groq (has a free tier), or a recognition service inside the company (for example RTX Spark). Usually more accurate than the small model on this computer, and the laptop no longer runs recognition. If the API cannot be reached, the key is wrong or the usage limit is reached, that piece is recognized on this computer instead, so subtitles do not stop. When on, it takes priority over the GPU server.",asr_on:"Use an API for speech recognition",asr_url:"API address (up to /v1)",asr_api_model:"Model",asr_key:"API key",asr_key_set:"API key: set (fill in only to replace)",asr_clear_key:"Delete the saved key",asr_internal:"This is a service inside the company (audio does not leave the company)",asr_ext_warn:"Note: when on, meeting audio is sent to a service outside the company; paid services bill by usage and free tiers have usage limits (each computer showing subtitles counts separately). Check that this meets company data rules; turn it off for confidential meetings or use an internal service.",asr_test:"Test connection",asr_testing:"Testing…",asr_ok:"Connected: the address, key and model work.",asr_fail:"Connection failed: {m}",asr_fail_401:"The key is wrong or has no permission ({m})",asr_fail_404:"The address or model name is wrong ({m})",asr_fail_429:"Connected, but the usage limit is reached ({m}). Try again in a few minutes; while limited, this computer recognizes instead.",asr_groq:"Groq (free tier)",asr_groq_note:"Groq: Whisper large-v3 with a free tier, but there are per-minute and per-day usage limits (shared by the whole account, so several computers at once fill it quickly); when the limit is reached those pieces are recognized on this computer instead. Audio leaves the company. Get a key at:",bad_asr_url:"The speech API address is not valid (for example https://api.openai.com/v1)",asr_url_https:"An external speech service must use an https address",bad_asr_model:"The model name is not valid",bad_asr_key:"The key is not valid",asr_key_required:"An external speech service needs a key",
   gl_title:"Glossary (names and terms)",gl_note:"Company names, sites, system names and people: used as hints during recognition and translated the way you specify. One term per line; after “=” the required translation (optional), after “|” spellings it is often misheard as (changed back automatically). Applies from the next subtitles or recording after saving.",gl_label:"Glossary (one term per line)",gl_ph:"寶成 | 寶城 | 保成 = Pou Chen\nMES\nSukabumi | Suka Bumi",gl_info:"{n} terms on this computer",gl_info_share:", {m} terms from glossary.txt in the company shared folder (shared by all computers; as last read)",gl_info_tip:". To share with all computers: put a glossary.txt in the same format in the shared folder under “Updates”.",bad_glossary:"The glossary is too long (20000 characters at most)",
   sup_title:"Problem reports",sup_contact:"Where staff send problem reports (email or Teams group, optional)",sup_contact_ph:"e.g. it-helpdesk@example.com",sup_note:"The staff page has “Report a problem” at the bottom: staff describe what happened and download a diagnostic file with one click (version, computer specs, settings with keys and passwords removed, recent program logs; no recordings, transcripts or minutes). The contact entered here is shown to staff; an email address also adds an “Email IT” button.",sup_make:"Create a diagnostic file for this computer",sup_making:"Creating…",sup_done:"Downloaded {n}",sup_failed:"The diagnostic file was not created: {e}",bad_contact:"The contact is not valid",
-  title:'PCG Meeting Translator: IT settings',tagline:'Switch between local and server mode and set server addresses. Changes take effect immediately; no reinstall needed.',
+  title:'PCG Meeting Translator: IT settings',tagline:'Switch between local and server mode and set server addresses. After saving, the next subtitles or recording use the new settings; no reinstall needed.',
   it_password:'IT password',it_password_again:'Enter it again',login:'Sign in',set_pw_title:'Set the IT password',set_pw_note:'First use: set an IT password (at least 6 characters). It will be required to open this page. Staff do not need it.',
   login_title:'IT sign-in',login_note:'This page is for IT only.',set_pw_btn:'Set password',pw_mismatch:'The two passwords do not match',
   local_only:'The first IT password can only be set on this computer',pw_wrong:'Incorrect IT password',too_short:'At least 6 characters',
@@ -314,11 +354,11 @@ en:{multi_lang:"Multi-language subtitles: viewers can choose their own language"
   upd_note:'Computers with internet get the small update from the GitHub release page. For computers without internet, put PCG-Update-<version>.exe (and its .sha256 file) from the release page in this folder and staff can update with one click. Only newer small updates are installed, and the file fingerprint is checked first; versions that need the full installer only show “ask IT”.',
   bad_share:'Invalid shared folder path',
   need_llm:'Server mode needs the LLM URL',bad_host:'Invalid address',bad_key:'Invalid API key',error:'Something went wrong'},
-id:{multi_lang:"Subtitle multibahasa: penonton bisa memilih bahasanya sendiri",multi_lang_note:"Jika seseorang yang menonton subtitle yang dibagikan (kode QR) atau layar subtitle di komputer ini memilih Mandarin, Indonesia, Vietnam, Hindi, atau Inggris dan sebuah kalimat tidak dalam bahasa itu, komputer ini menerjemahkan satu salinan lagi. Pengenalan suara tidak bertambah, hanya terjemahan: di CPU komputer ini pada mode lokal (kartu grafis jika ada paket NVIDIA), atau di server LLM pada mode server. Bahasa yang tidak dipilih siapa pun tidak diterjemahkan; matikan di komputer yang lambat. Berlaku mulai sesi subtitle berikutnya.",
+id:{dest_title:"Ke mana data dikirim (dari nilai di bawah)",dest_audio:"Suara",dest_text:"Teks",dest_local:"Hanya di komputer ini",dest_gpu:"Server GPU perusahaan ({h})",dest_api_int:"Layanan pengenalan internal ({h})",dest_api_ext:"Dikirim ke luar perusahaan: {h}",dest_group:"Platform AI grup ({h})",dest_int:"Server internal ({h})",dest_ext:"Dikirim ke luar perusahaan: {h}",llm_internal:"Ini server di dalam perusahaan (teks tidak keluar dari perusahaan)",llm_warn:"Alamat ini tampaknya bukan jaringan perusahaan. Halaman staf akan menampilkan “layanan AI di luar perusahaan”. Jika memang server internal, centang kotak di bawah.",rv_warn:"Perhatian: kata sandi staf belum diatur. Jika ini aktif, siapa pun di jaringan yang sama yang memindai kode QR bisa membaca subtitle rapat. Atur kata sandi staf di bawah.",unsaved:"Ada perubahan yang belum disimpan",sum_gl:"{n} istilah",sum_none:"Belum diisi",sum_upd_on:"Periksa otomatis",sum_upd_off:"Tidak periksa otomatis",sum_models:"{n} terpasang",multi_lang:"Subtitle multibahasa: penonton bisa memilih bahasanya sendiri",multi_lang_note:"Jika seseorang yang menonton subtitle yang dibagikan (kode QR) atau layar subtitle di komputer ini memilih Mandarin, Indonesia, Vietnam, Hindi, atau Inggris dan sebuah kalimat tidak dalam bahasa itu, komputer ini menerjemahkan satu salinan lagi. Pengenalan suara tidak bertambah, hanya terjemahan: di CPU komputer ini pada mode lokal (kartu grafis jika ada paket NVIDIA), atau di server LLM pada mode server. Bahasa yang tidak dipilih siapa pun tidak diterjemahkan; matikan di komputer yang lambat. Berlaku mulai sesi subtitle berikutnya.",
   asr_title:"API pengenalan suara (opsional)",asr_note:"Serahkan pengenalan suara ke API (/audio/transcriptions yang kompatibel dengan OpenAI): OpenAI, Groq (ada kuota gratis), atau layanan pengenalan di dalam perusahaan (misalnya RTX Spark). Biasanya lebih akurat daripada model kecil di komputer ini, dan laptop tidak perlu menjalankan pengenalan. Jika API tidak terjangkau, kuncinya salah, atau batas pemakaian tercapai, potongan itu dikenali di komputer ini, sehingga subtitle tidak berhenti. Jika aktif, didahulukan daripada server GPU.",asr_on:"Gunakan API untuk pengenalan suara",asr_url:"Alamat API (sampai /v1)",asr_api_model:"Model",asr_key:"Kunci API",asr_key_set:"Kunci API: sudah diatur (isi hanya untuk mengganti)",asr_clear_key:"Hapus kunci yang tersimpan",asr_internal:"Ini layanan di dalam perusahaan (suara tidak keluar dari perusahaan)",asr_ext_warn:"Perhatian: jika aktif, suara rapat dikirim ke layanan di luar perusahaan; layanan berbayar ditagih sesuai pemakaian dan kuota gratis punya batas pemakaian (setiap komputer yang menampilkan subtitle dihitung sendiri). Pastikan sesuai aturan data perusahaan; matikan untuk rapat rahasia atau gunakan layanan internal.",asr_test:"Uji koneksi",asr_testing:"Menguji…",asr_ok:"Terhubung: alamat, kunci, dan model dapat dipakai.",asr_fail:"Koneksi gagal: {m}",asr_fail_401:"Kunci salah atau tidak punya izin ({m})",asr_fail_404:"Alamat atau nama model salah ({m})",asr_fail_429:"Tersambung, tetapi batas pemakaian tercapai ({m}). Coba lagi beberapa menit lagi; selama dibatasi, komputer ini yang mengenali.",asr_groq:"Groq (kuota gratis)",asr_groq_note:"Groq: Whisper large-v3 dengan kuota gratis, tetapi ada batas pemakaian per menit dan per hari (dipakai bersama satu akun, jadi cepat penuh jika beberapa komputer memakainya sekaligus); saat batas tercapai, potongan itu dikenali di komputer ini. Suara dikirim ke luar perusahaan. Dapatkan kunci di:",bad_asr_url:"Alamat API pengenalan suara tidak valid (misalnya https://api.openai.com/v1)",asr_url_https:"Layanan pengenalan suara eksternal harus memakai alamat https",bad_asr_model:"Nama model tidak valid",bad_asr_key:"Kunci tidak valid",asr_key_required:"Layanan pengenalan suara eksternal memerlukan kunci",
   gl_title:"Glosarium (nama dan istilah)",gl_note:"Nama perusahaan, lokasi pabrik, nama sistem, dan nama orang: dipakai sebagai petunjuk saat pengenalan suara dan diterjemahkan sesuai yang Anda tentukan. Satu istilah per baris; setelah “=” terjemahan yang diwajibkan (opsional), setelah “|” ejaan yang sering salah dengar (otomatis dikembalikan). Berlaku mulai subtitle atau rekaman berikutnya setelah disimpan.",gl_label:"Glosarium (satu istilah per baris)",gl_ph:"寶成 | 寶城 | 保成 = Pou Chen\nMES\nSukabumi | Suka Bumi",gl_info:"{n} istilah di komputer ini",gl_info_share:", {m} istilah dari glossary.txt di folder bersama perusahaan (dipakai semua komputer; hasil baca terakhir)",gl_info_tip:". Agar dipakai semua komputer: taruh glossary.txt dengan format yang sama di folder bersama pada bagian “Pembaruan”.",bad_glossary:"Glosarium terlalu panjang (maksimal 20000 karakter)",
   sup_title:"Laporan masalah",sup_contact:"Ke mana karyawan mengirim laporan masalah (email atau grup Teams, opsional)",sup_contact_ph:"mis. it-helpdesk@contoh.com",sup_note:"Halaman karyawan punya “Laporkan masalah” di bagian bawah: karyawan menulis apa yang terjadi dan mengunduh file diagnostik dengan satu klik (versi, spesifikasi komputer, pengaturan tanpa kunci dan kata sandi, log program terbaru; tanpa rekaman, transkrip, atau notulen). Kontak yang diisi di sini ditampilkan ke karyawan; alamat email juga menambahkan tombol “Email IT”.",sup_make:"Buat file diagnostik komputer ini",sup_making:"Sedang membuat…",sup_done:"{n} sudah diunduh",sup_failed:"File diagnostik tidak dibuat: {e}",bad_contact:"Kontak tidak valid",
-  title:'Penerjemah Rapat PCG: Pengaturan IT',tagline:'Beralih antara mode lokal dan mode server serta atur alamat server. Perubahan langsung berlaku; tidak perlu memasang ulang.',
+  title:'Penerjemah Rapat PCG: Pengaturan IT',tagline:'Beralih antara mode lokal dan mode server serta atur alamat server. Setelah disimpan, subtitle atau rekaman berikutnya memakai pengaturan baru; tidak perlu memasang ulang.',
   it_password:'Kata sandi IT',it_password_again:'Masukkan sekali lagi',login:'Masuk',set_pw_title:'Buat kata sandi IT',set_pw_note:'Pertama kali: buat kata sandi IT (minimal 6 karakter). Kata sandi ini diperlukan untuk membuka halaman ini. Karyawan tidak memerlukannya.',
   login_title:'Masuk IT',login_note:'Halaman ini hanya untuk IT.',set_pw_btn:'Buat kata sandi',pw_mismatch:'Kedua kata sandi tidak sama',
   local_only:'Kata sandi IT pertama hanya bisa dibuat di komputer ini',pw_wrong:'Kata sandi IT salah',too_short:'Minimal 6 karakter',
@@ -434,6 +474,7 @@ function showVer(v){const e=document.getElementById('ver');if(!e||!v)return;
   e.onclick=()=>{try{navigator.clipboard.writeText(full)}catch(x){}}}
 function showMain(){
   $('pLogin').hidden=true;$('pMain').hidden=false;showVer(state.version);
+  foldInit();applyLang();$('llmInternal').checked=!!state.llm_internal;
   document.querySelector(`input[name=backend][value=${state.backend}]`).checked=true;
   $('gpuHost').value=state.gpu_host||'';$('gpuPort').value=state.gpu_port||8978;
   $('llmUrl').value=state.llm_url||'';$('llmStyle').value=state.llm_url?(state.llm_api_style||'auto'):'openwebui';
@@ -461,6 +502,7 @@ function fillLocalModels(){
   }
   liveAutoNote();
 }
+const ULI={"connecting": "<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"ul-i ul-connecting\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"8\" opacity=\".18\"/><circle cx=\"12\" cy=\"12\" r=\"4.5\" opacity=\".18\"/><circle cx=\"12\" cy=\"12\" r=\"1.25\" fill=\"currentColor\" stroke=\"none\"/><g class=\"o1\"><circle cx=\"12\" cy=\"4\" r=\"1.6\" fill=\"currentColor\" stroke=\"none\"/></g><g class=\"o2\"><circle cx=\"12\" cy=\"16.5\" r=\"1.25\" fill=\"currentColor\" stroke=\"none\"/></g></svg>"};
 /* 語音辨識 API（r24） */
 function asrExternal(){
   if($('asrInternal').checked)return false;
@@ -469,17 +511,64 @@ function asrExternal(){
 }
 function asrIsGroq(){try{const h=new URL($('asrUrl').value.trim()).hostname;return h==='groq.com'||h.endsWith('.groq.com')}catch(e){return false}}
 const ASR_KNOWN=[...document.querySelectorAll('[data-asr]')].flatMap(b=>b.dataset.models.split(','));
+/* r29：資料去向狀態列——照畫面上現在填的值算（還沒儲存也看得到結果），外送一律橘色 */
+const hostOf=u=>{try{return new URL(/^[a-z]+:\/\//i.test(u)?u:'http://'+u).hostname}catch(e){return ''}};
+const privHost=h=>!h||h==='localhost'||h.endsWith('.local')||!h.includes('.')||/^(10\.|127\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.)/.test(h);
+function llmExternal(){const st=$('llmStyle').value;if(st==='openai')return true;if(st==='openwebui')return false;
+  return !$('llmInternal').checked&&!privHost(hostOf($('llmUrl').value.trim()))}
+function destPaint(){
+  const server=document.querySelector('input[name=backend]:checked')?.value==='server';
+  const set=(id,txt,ext)=>{const e=$(id);e.textContent=txt;e.className=ext?'ext':''};
+  let aExt=false,tExt=false;
+  if($('asrOn').checked){aExt=asrExternal();const h=hostOf($('asrUrl').value.trim()||'https://api.openai.com/v1');set('destAudio',t(aExt?'dest_api_ext':'dest_api_int',{h}),aExt)}
+  else if(server&&$('gpuHost').value.trim())set('destAudio',t('dest_gpu',{h:$('gpuHost').value.trim()}));
+  else set('destAudio',t('dest_local'));
+  if(!server)set('destText',t('dest_local'));
+  else{const h=hostOf($('llmUrl').value.trim()),st=$('llmStyle').value;tExt=llmExternal();
+    set('destText',t(tExt?'dest_ext':st==='openwebui'?'dest_group':'dest_int',{h:h||'?'}),tExt)}
+  $('dest').classList.toggle('warn',aExt||tExt);
+  const auto=$('llmStyle').value==='auto';
+  $('llmInternalWrap').hidden=!(server&&auto&&!privHost(hostOf($('llmUrl').value.trim())));
+  $('llmWarn').hidden=!(server&&auto&&tExt);
+  // 允許別台連進來看字幕、卻沒有同仁密碼：同一個網路上的人都看得到
+  const noPw=!($('staffPw').value||(state&&state.staff_password_set&&!$('clearStaff').checked));
+  $('rvWarn').hidden=!($('remoteView').checked&&noPw);
+}
+/* r29：不常改的區塊預設收合，標題旁顯示目前的值 */
+function foldInit(){
+  document.querySelectorAll('.card[data-fold]').forEach(c=>{
+    const h=c.querySelector('h2'),k=c.dataset.fold;if(h.querySelector('.foldbtn'))return;
+    const b=document.createElement('button');b.type='button';b.className='foldbtn';
+    const lab=document.createElement('span');lab.dataset.t=h.dataset.t;delete h.dataset.t;h.textContent='';
+    const sm=document.createElement('span');sm.className='foldsum';sm.id='fold_'+k;
+    b.append(lab,sm);h.append(b);
+    let open=false;try{open=sessionStorage.getItem('pcg_fold_'+k)==='1'}catch(e){}
+    if(location.hash&&c.querySelector(location.hash))open=true;      // 從別的頁面連到這個區塊裡的欄位：直接打開
+    const set=o=>{c.classList.toggle('closed',!o);b.setAttribute('aria-expanded',o?'true':'false');try{sessionStorage.setItem('pcg_fold_'+k,o?'1':'0')}catch(e){}};
+    set(open);b.onclick=()=>set(c.classList.contains('closed'));
+  });
+}
+function foldSum(){
+  const put=(k,v)=>{const e=$('fold_'+k);if(e)e.textContent=v};
+  const n=$('glossary').value.split('\n').filter(x=>x.trim()&&!x.trim().startsWith('#')).length;
+  put('gl',n?t('sum_gl',{n}):t('sum_none'));
+  put('upd',t($('updCheck').checked?'sum_upd_on':'sum_upd_off')+($('updShare').value.trim()?' · '+$('updShare').value.trim():''));
+  put('sup',$('supContact').value.trim()||t('sum_none'));
+  put('models',models?t('sum_models',{n:(models.installed||[]).length}):'');
+}
+let dirty=false;
 function asrVis(){
   const on=$('asrOn').checked,set=!!(state&&state.asr_api&&state.asr_api.key_set);
   $('asrBox').hidden=!on;$('asrWarn').hidden=!(on&&asrExternal());$('asrGroq').hidden=!asrIsGroq();
   $('asrKeyLabel').textContent=t(set?'asr_key_set':'asr_key');$('asrClearWrap').hidden=!set;
+  destPaint();
 }
 ['asrOn','asrInternal'].forEach(id=>$(id).addEventListener('change',asrVis));$('asrUrl').addEventListener('input',asrVis);
 // 按服務的按鈕：填網址；模型是空的、或是別家服務的模型名稱時，換成這一家的第一個（自己填的名稱不動）
 document.querySelectorAll('[data-asr]').forEach(b=>b.onclick=()=>{$('asrUrl').value=b.dataset.asr;const own=b.dataset.models.split(','),m=$('asrApiModel').value.trim();if(!m||(ASR_KNOWN.includes(m)&&!own.includes(m)))$('asrApiModel').value=own[0];$('asrInternal').checked=false;asrVis()});
-const asrBody=()=>({asr_api_enabled:$('asrOn').checked,asr_api_url:$('asrUrl').value,asr_api_model:$('asrApiModel').value,asr_api_key:$('asrKey').value,clear_asr_api_key:$('asrClear').checked,asr_api_internal:$('asrInternal').checked});
+const asrBody=()=>({asr_api_enabled:$('asrOn').checked,asr_api_url:$('asrUrl').value,asr_api_model:$('asrApiModel').value,asr_api_key:$('asrKey').value,clear_asr_api_key:$('asrClear').checked,asr_api_internal:$('asrInternal').checked,llm_internal:$('llmInternal').checked});
 $('asrTest').onclick=async()=>{
-  const b=$('asrTest'),r=$('asrRes');b.disabled=true;b.textContent=t('asr_testing');r.hidden=true;
+  const b=$('asrTest'),r=$('asrRes');b.disabled=true;b.innerHTML='<span class="busy">'+ULI.connecting+escH(t('asr_testing'))+'</span>';r.hidden=true;
   const j=await api('/api/simple/admin/asr-test',asrBody());
   b.disabled=false;b.textContent=t('asr_test');r.hidden=false;r.className='res '+(j.ok?'ok':'err');
   r.textContent=j.ok?t('asr_ok'):(j.code&&I18N.zh[j.code]?t(j.code):t(j.status===401||j.status===403?'asr_fail_401':j.status===404?'asr_fail_404':j.status===429?'asr_fail_429':'asr_fail',{m:(j.status?'HTTP '+j.status+' ':'')+(j.message||'')}));
@@ -501,7 +590,7 @@ function liveAutoNote(){
 function styleVis(){
   const st=$('llmStyle').value,k={openwebui:'owui',auto:'auto',openai:'ext'}[st]||'auto';
   $('llmUrlNote').textContent=t('url_'+k);$('llmKeyNote').textContent=t('key_'+k);
-  $('extWarn').hidden=$('presets').hidden=st!=='openai';
+  $('extWarn').hidden=$('presets').hidden=st!=='openai';destPaint();
   $('llmUrl').placeholder={openwebui:'https://ai.example.com',auto:'192.168.1.60:11434',openai:'https://api.openai.com/v1'}[st];
   $('llmModel').placeholder={openwebui:'luna',auto:'gemma4:26b',openai:''}[st];
   $('llmKeyLabel').textContent=t(state&&state.llm_api_key_set?'llm_key_set':'llm_key')+(st==='auto'?({zh:'（選填）',id:' (opsional)'}[lang]||' (optional)'):'');
@@ -513,12 +602,14 @@ function modeVis(){
   const gpu=!!$('gpuHost').value.trim();
   // 伺服器模式但沒有 GPU 伺服器：辨識在本機，本機辨識模型要看得到
   $('cLocal').hidden=server&&gpu;$('asrWrap').hidden=!gpu;$('m2mWarn').hidden=server||state.m2m_installed;
+  $('cServer').hidden=!server;          // 本機模式用不到伺服器的設定（r29）
+  destPaint();
 }
 document.querySelectorAll('input[name=backend]').forEach(r=>r.onchange=modeVis);
 $('gpuHost').oninput=modeVis;
 
 $('testBtn').onclick=async()=>{
-  const b=$('testBtn');b.disabled=true;b.textContent=t('testing');$('testRes').innerHTML='';
+  const b=$('testBtn');b.disabled=true;b.innerHTML='<span class="busy">'+ULI.connecting+escH(t('testing'))+'</span>';$('testRes').innerHTML='';
   const j=await api('/api/simple/admin/test',{gpu_host:$('gpuHost').value,gpu_port:$('gpuPort').value,
     llm_url:$('llmUrl').value,llm_api_style:$('llmStyle').value,llm_api_key:$('llmKey').value});
   b.disabled=false;b.textContent=t('test');
@@ -543,7 +634,7 @@ $('pMain').onsubmit=async e=>{
     staff_password:$('staffPw').value,clear_staff_password:$('clearStaff').checked,
     glossary:$('glossary').value,...asrBody(),update_check:$('updCheck').checked,update_who:$('updWho').value,update_share:$('updShare').value,support_contact:$('supContact').value});
   const r=$('saveRes');r.hidden=false;r.className='res '+(j.ok?'ok':'err');r.textContent=j.ok?t('saved'):errMsg(j);
-  if(j.ok){state=j.state;rsShow();$('staffPw').value='';$('clearStaff').checked=false;$('clearStaffWrap').hidden=!state.staff_password_set;
+  if(j.ok){state=j.state;dirty=false;$('dirty').hidden=true;rsShow();$('staffPw').value='';$('clearStaff').checked=false;$('clearStaffWrap').hidden=!state.staff_password_set;
     $('llmKey').value='';$('clearKey').checked=false;$('clearKeyWrap').hidden=!state.llm_api_key_set;applyLang()}
 };
 
@@ -603,7 +694,7 @@ function renderModels(){
     const busy=jb.state==='downloading'||jb.state==='installing';
     return `<div class="mrow"><div><b>${escH(p.name||p.id)}</b><small>${escH(info(p))} · ${escH(t(p.source_kind==='share'?'m_from_share':'m_from_gh'))}</small>${p.note?`<small>${escH(p.note)}</small>`:''}${st}</div>
     <button class="btn ghost" type="button" data-in="${escH(p.id)}"${busy?' disabled':''}>${escH(t(p.update?'m_update':'m_install'))}</button></div>`}).join(''):`<p class="note">${escH(t('m_none_avail'))}</p>`;
-  const errs=models.catalog_errors||[];$('mErr').hidden=!errs.length;$('mErr').textContent=errs.join('；');
+  const errs=models.catalog_errors||[];$('mErr').hidden=!errs.length;$('mErr').textContent=errs.join('；');foldSum();
 }
 $('mInst').onclick=async e=>{const id=e.target.dataset?.rm;if(!id)return;
   if(!confirm(t('m_confirm_remove',{n:e.target.dataset.n})))return;
@@ -617,6 +708,8 @@ $('mApply').onclick=async()=>{
   const r=$('mUseRes');r.hidden=false;r.className='res '+(j.ok?'ok':'err');r.textContent=j.ok?t('models_applied'):errMsg(j);
   if(j.ok)loadModels();
 };
+// 有改動還沒儲存：儲存列提醒；資料去向、區塊摘要跟著畫面上的值更新
+['input','change'].forEach(ev=>$('pMain').addEventListener(ev,e=>{if(e.target.closest('#cModels'))return;dirty=true;$('dirty').hidden=false;destPaint();foldSum()}));
 applyLang();load();
 </script>
 </body>

@@ -357,6 +357,19 @@ class Routes(unittest.TestCase):
         self.assertEqual(self.tested[-1], {"url": "https://api.groq.com/openai/v1", "model": "whisper-large-v3-turbo",
                                            "key": "gsk_secret456"})
 
+    def test_llm_internal_is_saved_and_reported(self):
+        """r29：「這是公司內部的伺服器」的勾選會存起來，設定頁也拿得到目前算出來的去向"""
+        self.cfg.write_text(json.dumps({"llm_host": "llm.vendor.com", "llm_port": 443, "llm_url": "https://llm.vendor.com",
+                                        "pcg_simple": {"it_password_hash": "h:itpass1", "backend": "server"}}), encoding="utf-8")
+        st = self.c.post("/api/simple/admin/save", headers=self.h, json={"backend": "server", "llm_url": "https://llm.vendor.com", "llm_internal": False}).json()["state"]
+        self.assertEqual((st["llm_internal"], st["llm_scope"]), (False, "external"))
+        st = self.c.post("/api/simple/admin/save", headers=self.h, json={"backend": "server", "llm_url": "https://llm.vendor.com", "llm_internal": True}).json()["state"]
+        self.assertEqual((st["llm_internal"], st["llm_scope"]), (True, "internal"))
+        self.assertTrue(json.loads(self.cfg.read_text(encoding="utf-8"))["pcg_simple"]["llm_internal"])
+        st = self.c.post("/api/simple/admin/save", headers=self.h, json={"backend": "server", "llm_url": "https://llm.vendor.com", "llm_internal": False}).json()["state"]
+        self.assertFalse(st["llm_internal"])
+        self.assertNotIn("llm_internal", json.loads(self.cfg.read_text(encoding="utf-8"))["pcg_simple"])
+
     def test_validation(self):
         self.assertEqual(self.save(asr_api_enabled=True, asr_api_url="http://api.openai.com/v1", asr_api_key="k").json()["code"],
                          "asr_url_https")

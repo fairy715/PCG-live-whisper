@@ -194,6 +194,49 @@ class SimpleFlow(unittest.TestCase):
         page = self.c.get("/simple").text
         self.assertNotIn("不會送到外部", page)
 
+    def test_data_scope_follows_the_address_not_only_the_type(self):
+        """r29：類型選「內部伺服器」但位址是公司外部的網域或公網 IP → 同仁頁面顯示「公司外部」
+        （原本只看 IT 選的類型，填了外部網址還是顯示「公司內部」）。IT 勾「這是公司內部的伺服器」才算內部"""
+        scope = lambda: self.c.get("/api/simple/config", headers=self.h).json()["data_scope"]
+
+        def put(host, style=None, **ps):
+            cfg = {"pcg_simple": dict(backend="server", **ps), "llm_host": host}
+            if style:
+                cfg["llm_api_style"] = style
+            self.cfg.write_text(json.dumps(cfg), encoding="utf-8")
+        for host, want in (("10.0.0.6", "internal"), ("192.168.1.9", "internal"), ("spark01", "internal"),
+                           ("spark.local", "internal"), ("llm.vendor.com", "external"), ("8.8.8.8", "external")):
+            put(host)
+            self.assertEqual(scope(), want, host)
+            put(host, "auto")
+            self.assertEqual(scope(), want, host)
+        put("llm.pouchen.example", llm_internal=True)             # 內部服務用網域名稱：IT 確認是內部的
+        self.assertEqual(scope(), "internal")
+        put("ai.group.example", "openwebui")                       # 集團平台照 IT 選的類型
+        self.assertEqual(scope(), "group")
+        put("10.0.0.6", "openai")                                  # 選了外部服務：不管位址都是外部
+        self.assertEqual(scope(), "external")
+        self.assertEqual(simple_routes.llm_scope("auto", ""), "internal")      # 還沒填位址：不亂報外部
+
+    def test_pages_keep_the_r29_guards(self):
+        """r29 的幾個保證寫在頁面裡，改版時不要不小心拿掉"""
+        simple = (ROOT / "group" / "simple.html").read_text(encoding="utf-8")
+        live = (ROOT / "group" / "live.html").read_text(encoding="utf-8")
+        admin = (ROOT / "group" / "admin.html").read_text(encoding="utf-8")
+        self.assertNotIn("prompt(t('pw'))", live)                  # 字幕頁的密碼不用瀏覽器的 prompt（明文）
+        self.assertIn('type="password" id="pwInput"', live)
+        self.assertIn('role="log"', live)
+        for page in (simple, live, admin):
+            self.assertIn("prefers-reduced-motion:reduce){.ul-i *{animation:none!important}}", page)   # 動態圖示尊重系統設定
+            self.assertIn("MIT License", page)                     # 圖示庫的授權聲明跟著圖示走
+        for emoji in "💻🎧🏫📡🔊🌐":
+            self.assertNotIn(emoji, simple)                        # 場合圖示是內嵌 SVG，不是 emoji
+        self.assertIn('input[name=live][value="zh2${me}"]', simple)        # 外語同仁預設選好「對方說中文」
+        self.assertIn("const quiet=!store.get('pcg_tour_done')||!!live.running", simple)   # 導覽、字幕進行中不跳建議視窗
+        self.assertEqual(admin.count('data-fold="'), 4)
+        self.assertIn('id="rvWarn"', admin)
+        self.assertNotIn("存檔後立即生效", admin)
+
     def test_version(self):
         """畫面上的版本：安裝檔寫的 group/version.json；原作者版本從 translate_meeting.py 讀"""
         simple_routes._VERSION.clear()

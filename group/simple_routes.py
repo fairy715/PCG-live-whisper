@@ -121,6 +121,20 @@ _OUTPUT_KINDS = [
 ]
 
 
+def llm_scope(style, host, internal=False):
+    """翻譯與會議紀錄的文字送到哪裡：group＝集團 Open WebUI；external＝公司外部；internal＝公司內部的伺服器。
+    r29：類型選「內部伺服器」但位址是公司外部的網域或公網 IP 時照外部處理（原本只看 IT 選的類型，
+    填了外部網址同仁頁面還是顯示「公司內部」）。內部服務用網域名稱時 IT 勾「這是公司內部的伺服器」"""
+    if style == "openwebui":
+        return "group"
+    if style == "openai":
+        return "external"
+    host = str(host or "").strip()
+    if host and not internal and not asr_api._private_host(host):
+        return "external"
+    return "internal"
+
+
 def asr_api_on(s):
     """語音辨識 API（r24）：IT 開了而且填了網址"""
     a = (s or {}).get("asr_api")
@@ -623,8 +637,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         group＝集團 Open WebUI；external＝公司外部的 AI 服務（IT 設定頁選的伺服器類型）"""
         if pf["backend"] != "server":
             return "local"
-        style = read_cfg().get("llm_api_style")
-        return {"openwebui": "group", "openai": "external"}.get(style, "internal")
+        cfg = read_cfg()
+        return llm_scope(cfg.get("llm_api_style"), cfg.get("llm_host"), settings().get("llm_internal"))
 
     @app.get("/api/simple/jobs")
     async def simple_jobs(request: Request):
@@ -1250,6 +1264,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "llm_url": cfg.get("llm_url") or (f"{cfg['llm_host']}:{cfg.get('llm_port', 11434)}"
                                                   if cfg.get("llm_host") else ""),
                 "llm_api_style": cfg.get("llm_api_style") if cfg.get("llm_api_style") in LLM_STYLES else "auto",
+                "llm_internal": bool(s.get("llm_internal")),
+                "llm_scope": llm_scope(cfg.get("llm_api_style"), cfg.get("llm_host"), s.get("llm_internal")),
                 "llm_api_key_set": bool(str(cfg.get("llm_api_key") or "").strip()),
                 "llm_model": s.get("llm_model", ""), "summary_model": s.get("summary_model", ""),
                 "asr_model": s.get("asr_model", "large-v3-turbo"),
@@ -1604,6 +1620,11 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             else:
                 s.pop("support_contact", None)
         s["allow_remote_view"] = bool(body.get("allow_remote_view"))
+        if "llm_internal" in body:
+            if body.get("llm_internal"):
+                s["llm_internal"] = True
+            else:
+                s.pop("llm_internal", None)
         if "multi_lang" in body:
             s["multi_lang"] = bool(body.get("multi_lang"))
         if gh:
