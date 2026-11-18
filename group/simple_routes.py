@@ -1011,7 +1011,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             return JSONResponse({"ok": False, "code": "pick_language", "error": "請選擇對方說的語言"}, status_code=400)
         s = settings()
         mode, room, shown = picked
-        # 「大家都說中文」用麥克風收音（r27）：場合是「同一間教室」或「會議室字幕機」時頁面會帶 mic。
+        # 「大家都說中文」用麥克風收音（r28）：場合是「同一間教室」或「會議室字幕機」時頁面會帶 mic。
         # 其他場合收電腦播放的聲音（例如字幕機加入 Teams 聽老師的聲音）
         zh_mic = mode == "zh" and bool(body.get("mic"))
         if live_running and live_running():

@@ -360,8 +360,8 @@ Langkah untuk karyawan ada di skenario 8 pada contoh penggunaan. Satu komputer s
 1. Ikuti langkah "komputer subtitle ruang rapat" di atas: penginstal lengkap, paket GPU, "Izinkan komputer dan ponsel lain menonton subtitle", kata sandi staf. Breeze berukuran large-v2: disarankan memori video 6 GB atau lebih; kartu 4 GB perlu diuji.
 2. Di "Model (paket model)", pasang "**Breeze ASR 25（台灣華語、中英夾雜）**" (sekitar 1,5 GB).
 3. Tetapkan Breeze untuk bahasa Mandarin:
-   - **Mulai r27**: di "Model untuk setiap bahasa", baris "Mandarin", pilih Breeze ASR 25 untuk "Subtitle langsung" lalu tekan "Terapkan pengaturan model".
-   - **r25 dan r26**: halaman pengaturan tidak punya baris "Mandarin". Satu-satunya cara adalah halaman staf di komputer subtitle: pilih "Semua berbahasa Mandarin", muat ulang, lalu tekan "Pasang" pada jendela "Disarankan memasang model suara yang lebih akurat" (setelah terpasang, model otomatis ditetapkan untuk Mandarin). Setelah itu **jangan tekan "Terapkan pengaturan model"**, karena menghapus penetapan Mandarin. Disarankan memperbarui ke r27.
+   - **Mulai r28**: di "Model untuk setiap bahasa", baris "Mandarin", pilih Breeze ASR 25 untuk "Subtitle langsung" lalu tekan "Terapkan pengaturan model".
+   - **r25 dan r26**: halaman pengaturan tidak punya baris "Mandarin". Satu-satunya cara adalah halaman staf di komputer subtitle: pilih "Semua berbahasa Mandarin", muat ulang, lalu tekan "Pasang" pada jendela "Disarankan memasang model suara yang lebih akurat" (setelah terpasang, model otomatis ditetapkan untuk Mandarin). Setelah itu **jangan tekan "Terapkan pengaturan model"**, karena menghapus penetapan Mandarin. Disarankan memperbarui ke r28.
 4. Firewall: aturan di atas hanya membuka subnet yang sama. Untuk pabrik luar negeri, ganti `-RemoteAddress` dengan subnet mereka (misalnya `10.10.0.0/16,10.20.0.0/16`) dan minta tim jaringan memastikan TCP 19781 dari tiap lokasi ke komputer subtitle terbuka.
 5. Isi istilah pelajaran (perusahaan, pabrik, sistem, nama) ke glosarium.
 6. Kualitas terjemahan: mode lokal memakai M2M100, biasa saja untuk bahasa Indonesia dan Vietnam; agar lebih baik, alihkan komputer subtitle ke mode server dan terjemahkan dengan platform AI grup atau model besar internal (pengenalan tetap di komputer subtitle).
@@ -369,7 +369,7 @@ Langkah untuk karyawan ada di skenario 8 pada contoh penggunaan. Satu komputer s
 **Cara kerja program yang sebenarnya**
 
 - Paket model Mandarin dipakai untuk subtitle satu arah yang mendengarkan bahasa Mandarin: staf berbahasa Mandarin yang memilih "Semua berbahasa Mandarin", dan staf berbahasa asing yang memilih "Mandarin → bahasa Anda". Mode kelas (satu mikrofon, dua bahasa) dan "saya juga berbicara" memakai model multibahasa, bukan Breeze.
-- Suara yang didengarkan "Semua berbahasa Mandarin" bergantung pada jenis rapat (**mulai r27**):
+- Suara yang didengarkan "Semua berbahasa Mandarin" bergantung pada jenis rapat (**mulai r28**):
   - "Rapat atau kelas online, saya hanya membaca subtitle": **suara yang diputar komputer** (komputer subtitle yang ikut Teams dan mendengar pengajar). Speaker atau headset jangan dibisukan.
   - "Satu ruang kelas, satu mikrofon" dan "Komputer subtitle ruang rapat, semua membaca di ponsel": **mikrofon** (pengajar berbicara ke komputer ini atau mikrofon ruangan). Dipakai mikrofon yang dipilih di "Suara dan mikrofon", atau mikrofon bawaan Windows jika belum dipilih; jika tidak ada mikrofon sama sekali, sesi tidak dimulai dan halaman menyatakan mikrofon tidak ditemukan.
   - Keduanya memakai paket model Mandarin (Breeze). Satu sesi mendengarkan satu sumber; memulai lagi "Semua berbahasa Mandarin" pada jenis rapat lain menggantikan sesi yang sedang berjalan.

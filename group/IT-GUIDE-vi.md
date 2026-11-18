@@ -360,8 +360,8 @@ Các bước cho nhân viên nằm ở tình huống 8 trong tài liệu tình h
 1. Làm theo các bước "máy phụ đề phòng họp" ở trên: bộ cài đầy đủ, gói GPU, "Allow other computers and phones to view subtitles", mật khẩu nhân viên. Breeze có kích thước large-v2: nên có bộ nhớ đồ họa từ 6 GB; card 4 GB cần thử thực tế.
 2. Trong "Models (model packs)", cài "**Breeze ASR 25（台灣華語、中英夾雜）**" (khoảng 1,5 GB).
 3. Chỉ định Breeze cho tiếng Trung:
-   - **Từ r27**: ở mục "Model for each language", dòng "Chinese", chọn Breeze ASR 25 cho "Live subtitles" rồi bấm "Apply model settings".
-   - **r25 và r26**: trang cài đặt không có dòng "Chinese". Cách duy nhất là trang nhân viên trên máy phụ đề: chọn "Mọi người đều nói tiếng Trung", tải lại trang, rồi bấm "Cài đặt" trong cửa sổ "Nên cài mô hình giọng nói chính xác hơn" (cài xong mô hình tự được chỉ định cho tiếng Trung). Sau đó **đừng bấm "Apply model settings"**, vì sẽ xóa chỉ định cho tiếng Trung. Nên cập nhật lên r27.
+   - **Từ r28**: ở mục "Model for each language", dòng "Chinese", chọn Breeze ASR 25 cho "Live subtitles" rồi bấm "Apply model settings".
+   - **r25 và r26**: trang cài đặt không có dòng "Chinese". Cách duy nhất là trang nhân viên trên máy phụ đề: chọn "Mọi người đều nói tiếng Trung", tải lại trang, rồi bấm "Cài đặt" trong cửa sổ "Nên cài mô hình giọng nói chính xác hơn" (cài xong mô hình tự được chỉ định cho tiếng Trung). Sau đó **đừng bấm "Apply model settings"**, vì sẽ xóa chỉ định cho tiếng Trung. Nên cập nhật lên r28.
 4. Tường lửa: quy tắc ở trên chỉ mở cùng mạng con. Với nhà máy nước ngoài, thay `-RemoteAddress` bằng các mạng con của họ (ví dụ `10.10.0.0/16,10.20.0.0/16`) và nhờ nhóm mạng xác nhận TCP 19781 từ từng nhà máy tới máy phụ đề thông suốt.
 5. Nhập thuật ngữ của khóa học (công ty, nhà máy, hệ thống, tên người) vào bảng thuật ngữ.
 6. Chất lượng bản dịch: chế độ cục bộ dùng M2M100, ở mức trung bình với tiếng Indonesia và tiếng Việt; muốn tốt hơn, chuyển máy phụ đề sang chế độ máy chủ và dịch bằng nền tảng AI của tập đoàn hoặc mô hình lớn nội bộ (nhận dạng vẫn chạy trên máy phụ đề).
@@ -369,7 +369,7 @@ Các bước cho nhân viên nằm ở tình huống 8 trong tài liệu tình h
 **Chương trình thực tế hoạt động thế nào**
 
 - Gói mô hình tiếng Trung được dùng cho phụ đề một chiều nghe tiếng Trung: nhân viên nói tiếng Trung chọn "Mọi người đều nói tiếng Trung", và nhân viên nói ngoại ngữ chọn "Tiếng Trung → ngôn ngữ của bạn". Chế độ lớp học (một micro, hai ngôn ngữ) và "tôi cũng nói" dùng mô hình đa ngôn ngữ, không dùng Breeze.
-- "Mọi người đều nói tiếng Trung" nghe nguồn nào là tùy loại cuộc họp (**từ r27**):
+- "Mọi người đều nói tiếng Trung" nghe nguồn nào là tùy loại cuộc họp (**từ r28**):
   - "Họp hoặc lớp online, tôi chỉ đọc phụ đề": **âm thanh máy tính phát ra** (máy phụ đề tham gia Teams và nghe giảng viên). Đừng tắt tiếng loa hoặc tai nghe.
   - "Cùng một phòng học, một micro" và "Máy phụ đề phòng họp, mọi người xem trên điện thoại": **micro** (giảng viên nói vào máy này hoặc micro của phòng). Dùng micro đã chọn trong "Âm thanh và micro", chưa chọn thì dùng micro mặc định của Windows; nếu hoàn toàn không có micro thì phiên không bắt đầu và trang báo không tìm thấy micro.
   - Cả hai đều dùng gói mô hình tiếng Trung (Breeze). Mỗi phiên chỉ nghe một nguồn; bắt đầu lại "Mọi người đều nói tiếng Trung" ở loại cuộc họp khác sẽ thay phiên đang chạy.

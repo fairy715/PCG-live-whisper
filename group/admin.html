@@ -568,7 +568,7 @@ $('chgPwBtn').onclick=async()=>{
 
 /* ── 模型管理（模型包）── */
 let models=null,mTimer=null;
-const LANGS3=['zh','id','vi','hi'];   // 中文（r27）：Breeze ASR 25 等中文模型包；少了這一列 IT 沒辦法指定，按「套用」還會把推薦視窗設好的中文清掉
+const LANGS3=['zh','id','vi','hi'];   // 中文（r28）：Breeze ASR 25 等中文模型包；少了這一列 IT 沒辦法指定，按「套用」還會把推薦視窗設好的中文清掉
 const escH=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 async function loadModels(refresh){
   const j=await api('/api/simple/admin/models'+(refresh?'?refresh=1':''));

@@ -119,7 +119,12 @@ if ($haveVer -ne $wantVer) {
     New-Item -ItemType Directory -Force -Path $tmp | Out-Null
     $zip = Join-Path $tmp "python.zip"
     Copy-Item $nupkg.FullName $zip
-    Expand-Archive -Path $zip -DestinationPath $tmp -Force
+    # 不用 Expand-Archive：2026-11-18 發布流程（從 PowerShell 7 啟動安裝程式）在新的 Windows 映像檔上失敗，
+    # 「Cannot find an overload for ExtractToDirectory and the argument count: 3」——Windows PowerShell 5.1 載到
+    # PowerShell 7 那一份 Archive 模組（PSModulePath 被繼承）。直接用 .NET 解壓縮，兩種 PowerShell 都一樣；
+    # $tmp 是剛建立的空資料夾，不會有同名檔案
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [System.IO.Compression.ZipFile]::ExtractToDirectory($zip, $tmp)
     if (Test-Path $pyDir) { Remove-Item $pyDir -Recurse -Force }
     Copy-Tree (Join-Path $tmp "tools") $pyDir
     # 清暫存：刪不掉也不影響安裝（只記一行）

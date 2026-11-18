@@ -328,7 +328,7 @@ class SimpleFlow(unittest.TestCase):
         self.assertNotEqual(self.started[-1]["model"], "pack:breeze-asr-25")
 
     def test_it_page_can_assign_a_chinese_pack(self):
-        """IT 設定頁「每種語言用哪個模型」要有中文那一列（r27）：少了它 IT 沒辦法指定 Breeze，
+        """IT 設定頁「每種語言用哪個模型」要有中文那一列（r28）：少了它 IT 沒辦法指定 Breeze，
         按「套用模型設定」還會把推薦視窗設好的中文清掉"""
         html = (ROOT / "group" / "admin.html").read_text(encoding="utf-8")
         m = re.search(r"const LANGS3=\[([^\]]*)\]", html)

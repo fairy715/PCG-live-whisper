@@ -704,7 +704,7 @@ function caps(s){           // 這個選項能不能「我也要說話」、教�
 }
 function visibleScen(){
   if(showAll)return liveScen;
-  // 會議室字幕機＝一支麥克風（教室模式）＋分享；教室、字幕機也可以選「大家都說中文」（r27：這時收麥克風，
+  // 會議室字幕機＝一支麥克風（教室模式）＋分享；教室、字幕機也可以選「大家都說中文」（r28：這時收麥克風，
   // 外國同仁用多語字幕看自己的語言）
   const ok=s=>(scene!=='room'||caps(s).r||s.id==='zh')&&(scene!=='speak'||caps(s).b)&&(scene!=='hub'||caps(s).r||s.id==='zh');
   if(me!=='zh')return liveScen.filter(s=>s.id==='zh2'+me||(FOREIGN.includes(s.id)&&s.id!==me)).filter(ok);
@@ -735,7 +735,7 @@ function renderScenarios(){
   $('fileScenarios').innerHTML=cardsHtml(fileScen,'file',fileTitle,fileSub);
 }
 const picked=name=>document.querySelector(`input[name=${name}]:checked`)?.value;
-// 「大家都說中文」收哪裡的聲音（r27）：教室、會議室字幕機＝麥克風；其他場合＝電腦播放的聲音
+// 「大家都說中文」收哪裡的聲音（r28）：教室、會議室字幕機＝麥克風；其他場合＝電腦播放的聲音
 const zhMic=()=>!showAll&&picked('live')==='zh'&&(scene==='room'||scene==='hub');
 
 /* ── 即時字幕 ─────────────────────────────────────────── */

@@ -188,7 +188,7 @@ class Meter:
         return None
 
     def default_mic_index(self):
-        """Windows 預設麥克風的 sounddevice 編號；沒有麥克風回 None（r27：「大家都說中文」用麥克風收音時要明確指定）"""
+        """Windows 預設麥克風的 sounddevice 編號；沒有麥克風回 None（r28：「大家都說中文」用麥克風收音時要明確指定）"""
         try:
             name = clean_name(self.backend.default_mic())
             mics = list(self.backend.mics())

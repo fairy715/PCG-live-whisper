@@ -187,7 +187,7 @@ class Routes(unittest.TestCase):
         self.assertEqual(self.b.opened, [])
 
     def test_everyone_speaks_chinese_can_use_the_microphone(self):
-        """「大家都說中文」（r27）：場合是教室／會議室字幕機時頁面帶 mic → 用麥克風收音，一定給主程式麥克風的編號
+        """「大家都說中文」（r28）：場合是教室／會議室字幕機時頁面帶 mic → 用麥克風收音，一定給主程式麥克風的編號
         （不給的話主程式收的是電腦播放的聲音）；其他場合照舊收電腦的聲音"""
         self.c.post("/api/simple/live", json={"scenario": "zh"})                                  # 我只看字幕：電腦的聲音
         self.assertEqual(self.started[-1]["mode"], "zh")
