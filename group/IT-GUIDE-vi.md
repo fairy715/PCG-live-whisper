@@ -388,6 +388,10 @@ Các bước cho nhân viên nằm ở tình huống 8 trong tài liệu tình h
 - **Chế độ cục bộ ẩn phần cài đặt máy chủ.**
 - **Bật xem từ xa mà chưa đặt mật khẩu nhân viên**: có cảnh báo màu cam dưới ô đánh dấu.
 - Tiêu đề trang trước đây ghi thay đổi có hiệu lực ngay; thực tế là từ lần phụ đề hoặc bản ghi tiếp theo. Câu chữ đã được sửa.
+- **Hai nút kiểm tra** (r30): “Test the LLM connection” và “Test the GPU server”, kết quả hiện ngay dưới từng nút. Sau khi kiểm tra LLM thành công, trang sẽ xem tên trong “Translation model” và “Minutes (summary) model” có trong danh sách của máy chủ hay không và cảnh báo nếu không có (gõ sai tên mô hình là nguyên nhân phổ biến nhất khiến phụ đề không được dịch).
+- **Đổi mật khẩu IT** (r30): cửa sổ ngay trên trang, không hiện ký tự, nhập hai lần; ít nhất 6 ký tự.
+- **Máy không có internet** (r30): mục Models hiện “This computer cannot reach GitHub right now, so only model packs in the company shared folder are listed”. Đây là bình thường, không phải lỗi.
+- **Cảnh báo dữ liệu ra khỏi công ty** (r30) có vạch cam dày bên trái để phân biệt với thông báo thường.
 
 ### Biểu tượng dùng trong giao diện (r29)
 

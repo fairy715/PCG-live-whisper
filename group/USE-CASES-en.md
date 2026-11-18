@@ -176,6 +176,8 @@ I speak "your language" → "Only read subtitles" → "Chinese". Recognition run
 - **Grey button**: something is not chosen yet; press it and the page tells you which step is missing.
 - **Microphone icon at the top left of the subtitle screen**: it moves while the program is listening and nobody is speaking, and stays still while subtitles are appearing. An orange connection icon means the connection dropped and is being restored.
 - **Room subtitle computer**: opens in large yellow-on-black subtitle mode; use A−/A+ at the top right to change the size one step at a time.
+- **Going back to the home page while subtitles are running** (r30): the subtitle screen has “Back to home” at the bottom. Subtitles keep running; the home page then shows “Subtitles are running” and “Open subtitle screen” at the top to return.
+- **Pressing “Stop”** (r30): the page asks “Keep going” or “End subtitles”, so a mistaken press does not stop the session.
 - **First time you open the page** only the tour appears; the update and install suggestions wait until next time, and they never appear while subtitles are running.
 
 ---

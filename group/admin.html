@@ -39,6 +39,9 @@ label.f>input,label.f>select{margin-top:4px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
 /* r29：資料去向狀態列、可收合的區塊、固定在視窗底部的儲存列、測試中的動態圖示 */
+/* r30：資料會送出公司的提醒用專屬的樣式（左邊粗色條、粗體），和一般的提示區分開 */
+.res.out{border-left:5px solid var(--warn);font-weight:600}
+dialog{border:0;border-radius:16px;padding:22px;background:var(--card);color:var(--text);width:min(420px,94vw)}dialog::backdrop{background:rgba(0,0,0,.5)}
 .dest{border:1.5px solid var(--line);border-radius:var(--radius);background:var(--card);padding:12px 16px;margin-bottom:16px;font-size:15px}
 .dest b{display:block;font-size:13px;color:var(--dim);font-weight:600;margin-bottom:4px}
 .dest div{display:flex;gap:8px;align-items:baseline}.dest div span:first-child{flex:none;color:var(--dim);min-width:5.5em}
@@ -121,7 +124,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <h3 class="sub" data-t="llm_section"></h3>
       <label class="f"><span data-t="llm_style"></span>
         <select id="llmStyle"><option value="openwebui" data-t="style_owui"></option><option value="auto" data-t="style_auto"></option><option value="openai" data-t="style_ext"></option></select></label>
-      <div id="extWarn" class="res warn" hidden data-t="ext_warn"></div>
+      <div id="extWarn" class="res warn out" hidden data-t="ext_warn"></div>
       <div class="presets" id="presets" hidden>
         <button type="button" class="chip" data-u="https://api.openai.com/v1">OpenAI</button>
         <button type="button" class="chip" data-u="https://api.deepseek.com/v1">DeepSeek</button>
@@ -129,24 +132,26 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
         <button type="button" class="chip" data-u="https://openrouter.ai/api/v1">OpenRouter</button>
       </div>
       <label class="f"><span data-t="llm_url"></span><input type="text" id="llmUrl" placeholder="https://ai.example.com"></label>
-      <div id="llmWarn" class="res warn" hidden data-t="llm_warn"></div>
+      <div id="llmWarn" class="res warn out" hidden data-t="llm_warn"></div>
       <label class="check" id="llmInternalWrap" hidden><input type="checkbox" id="llmInternal"><span data-t="llm_internal"></span></label>
       <p class="note" id="llmUrlNote"></p>
       <label class="f"><span id="llmKeyLabel"></span><input type="password" id="llmKey" autocomplete="off" data-t-ph="llm_key_ph"></label>
       <label class="check" id="clearKeyWrap" hidden><input type="checkbox" id="clearKey"><span data-t="clear_llm_key"></span></label>
       <p class="note" id="llmKeyNote"></p>
+      <div class="actions"><button class="btn ghost" id="testLlm" type="button" data-t="test_llm"></button></div>
+      <div id="testLlmRes"></div>
+      <label class="f"><span data-t="llm_model"></span><input type="text" id="llmModel" list="modelList" placeholder="luna"></label>
+      <label class="f"><span data-t="summary_model"></span><input type="text" id="sumModel" list="modelList" data-t-ph="default_ph"></label>
+      <datalist id="modelList"></datalist>
+      <p class="note" data-t="model_note"></p>
       <h3 class="sub" data-t="gpu_section"></h3>
       <div class="row">
         <label class="f"><span data-t="gpu_host"></span><input type="text" id="gpuHost" placeholder="192.168.1.50" data-t-ph="gpu_ph"></label>
         <label class="f"><span data-t="port"></span><input type="number" id="gpuPort" min="1" max="65535"></label>
       </div>
       <p class="note" data-t="gpu_note"></p>
-      <div class="actions"><button class="btn ghost" id="testBtn" type="button" data-t="test"></button></div>
-      <div id="testRes"></div>
-      <label class="f"><span data-t="llm_model"></span><input type="text" id="llmModel" list="modelList" placeholder="luna"></label>
-      <label class="f"><span data-t="summary_model"></span><input type="text" id="sumModel" list="modelList" data-t-ph="default_ph"></label>
-      <datalist id="modelList"></datalist>
-      <p class="note" data-t="model_note"></p>
+      <div class="actions"><button class="btn ghost" id="testGpu" type="button" data-t="test_gpu"></button></div>
+      <div id="testGpuRes"></div>
       <label class="f" id="asrWrap"><span data-t="asr_model"></span>
         <select id="asrModel"><option>large-v3-turbo</option><option>large-v3</option><option>medium</option></select></label>
     </div>
@@ -169,7 +174,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <p class="note" data-t="diarize_note"></p>
       <label class="check"><input type="checkbox" id="remoteView"><span data-t="remote_view"></span></label>
       <p class="note" data-t="remote_view_note"></p>
-      <div id="rvWarn" class="res warn" hidden data-t="rv_warn"></div>
+      <div id="rvWarn" class="res warn out" hidden data-t="rv_warn"></div>
       <label class="check"><input type="checkbox" id="multiLang"><span data-t="multi_lang"></span></label>
       <p class="note" data-t="multi_lang_note"></p>
       <label class="f"><span id="staffPwLabel"></span><input type="password" id="staffPw" autocomplete="new-password" data-t-ph="staff_pw_ph"></label>
@@ -191,7 +196,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
         <datalist id="asrModels"><option value="gpt-4o-transcribe"><option value="gpt-4o-mini-transcribe"><option value="whisper-1"><option value="whisper-large-v3-turbo"><option value="whisper-large-v3"></datalist>
         <label class="check" id="asrClearWrap" hidden><input type="checkbox" id="asrClear"><span data-t="asr_clear_key"></span></label>
         <label class="check"><input type="checkbox" id="asrInternal"><span data-t="asr_internal"></span></label>
-        <div id="asrWarn" class="res warn" hidden data-t="asr_ext_warn"></div>
+        <div id="asrWarn" class="res warn out" hidden data-t="asr_ext_warn"></div>
         <div class="actions"><button class="btn ghost" id="asrTest" type="button" data-t="asr_test"></button></div>
         <div id="asrRes" class="res" hidden></div>
       </div>
@@ -250,11 +255,22 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
     </div>
     </div>
   </form>
+
+  <dialog id="cpDlg">
+    <form id="cpForm">
+      <h2 style="margin:0 0 10px;font-size:17px" data-t="change_it_pw"></h2>
+      <label class="f"><span data-t="new_it_pw"></span><input type="password" id="cpNew" autocomplete="new-password"></label>
+      <label class="f"><span data-t="pw_again"></span><input type="password" id="cpAgain" autocomplete="new-password"></label>
+      <div class="res err" id="cpErr" hidden role="alert"></div>
+      <div class="res ok" id="cpOk" hidden data-t="pw_changed"></div>
+      <div class="actions" style="justify-content:flex-end"><button class="btn ghost" id="cpCancel" type="button" data-t="cancel_btn"></button><button class="btn" type="submit" data-t="save"></button></div>
+    </form>
+  </dialog>
 </div>
 
 <script>
 const I18N={
-zh:{dest_title:"資料送到哪裡（照下面現在填的值）",dest_audio:"聲音",dest_text:"文字",dest_local:"只在這台電腦",dest_gpu:"公司的 GPU 伺服器（{h}）",dest_api_int:"公司內部的辨識服務（{h}）",dest_api_ext:"送到公司外部：{h}",dest_group:"集團 AI 平台（{h}）",dest_int:"公司內部的伺服器（{h}）",dest_ext:"送到公司外部：{h}",llm_internal:"這是公司內部的伺服器（文字不會送出公司）",llm_warn:"這個位址看起來不在公司內部的網路。同仁頁面會顯示「公司外部的 AI 服務」。如果它確實是公司內部的伺服器，請勾下面這一項。",rv_warn:"注意：還沒有設定同仁密碼。開啟後，同一個網路上的任何人掃 QR Code 都看得到會議的字幕。請在下面設定同仁密碼。",unsaved:"有變更還沒儲存",sum_gl:"{n} 個詞",sum_none:"還沒有填",sum_upd_on:"自動檢查",sum_upd_off:"不自動檢查",sum_models:"已安裝 {n} 個",multi_lang:"多語字幕：看字幕的人可以選自己的語言",multi_lang_note:"分享出去的字幕（QR Code）或這台的字幕畫面選了中文、印尼文、越南文、印地語、英文，而這一句沒有那種語言時，這台會另外翻一份。語音辨識不會增加，只多翻譯：本機模式在這台的 CPU（有 NVIDIA 加速包就用顯示卡），伺服器模式在大模型伺服器。沒人選的語言不翻；電腦較弱時可以關掉。改了之後，下一場字幕開始生效。",
+zh:{test_llm:"測試大模型連線",test_gpu:"測試 GPU 伺服器",test_nothing:"還沒有填位址",model_missing:"「{m}」不在這台伺服器的模型清單裡，請確認名稱（可以從欄位的下拉清單選）",pw_again:"再輸入一次",pw_short:"密碼至少要 6 個字",cancel_btn:"取消",m_err_github:"這台電腦現在連不到 GitHub，下面只列出公司共用資料夾裡的模型包。不能上網的電腦這是正常的。",m_err_share:"公司共用資料夾裡的模型清單（catalog.json）讀不了，請確認檔案是完整的。",dest_title:"資料送到哪裡（照下面現在填的值）",dest_audio:"聲音",dest_text:"文字",dest_local:"只在這台電腦",dest_gpu:"公司的 GPU 伺服器（{h}）",dest_api_int:"公司內部的辨識服務（{h}）",dest_api_ext:"送到公司外部：{h}",dest_group:"集團 AI 平台（{h}）",dest_int:"公司內部的伺服器（{h}）",dest_ext:"送到公司外部：{h}",llm_internal:"這是公司內部的伺服器（文字不會送出公司）",llm_warn:"這個位址看起來不在公司內部的網路。同仁頁面會顯示「公司外部的 AI 服務」。如果它確實是公司內部的伺服器，請勾下面這一項。",rv_warn:"注意：還沒有設定同仁密碼。開啟後，同一個網路上的任何人掃 QR Code 都看得到會議的字幕。請在下面設定同仁密碼。",unsaved:"有變更還沒儲存",sum_gl:"{n} 個詞",sum_none:"還沒有填",sum_upd_on:"自動檢查",sum_upd_off:"不自動檢查",sum_models:"已安裝 {n} 個",multi_lang:"多語字幕：看字幕的人可以選自己的語言",multi_lang_note:"分享出去的字幕（QR Code）或這台的字幕畫面選了中文、印尼文、越南文、印地語、英文，而這一句沒有那種語言時，這台會另外翻一份。語音辨識不會增加，只多翻譯：本機模式在這台的 CPU（有 NVIDIA 加速包就用顯示卡），伺服器模式在大模型伺服器。沒人選的語言不翻；電腦較弱時可以關掉。改了之後，下一場字幕開始生效。",
   asr_title:"語音辨識 API（選填）",asr_note:"把語音辨識交給 API（OpenAI 相容的 /audio/transcriptions）：OpenAI、Groq（有免費額度），或公司內部的辨識服務（例如 RTX Spark）。通常比這台電腦的小模型準，筆電也不用跑辨識。API 連不上、金鑰不對或用量達到上限時，那一段會自動改回這台電腦辨識，字幕不會斷。開啟後優先於 GPU 伺服器。",asr_on:"語音辨識交給 API",asr_url:"API 網址（到 /v1 為止）",asr_api_model:"模型",asr_key:"金鑰（API key）",asr_key_set:"金鑰：已設定（要換才填）",asr_clear_key:"刪除已存的金鑰",asr_internal:"這是公司內部的服務（聲音不會送出公司）",asr_ext_warn:"注意：開啟後，會議的聲音會送到公司外部的服務；付費的服務依用量計費，免費額度有用量上限（每台開字幕的電腦各算一份）。請先確認符合公司資料規範；機密會議請關閉，或改用公司內部的服務。",asr_test:"測試連線",asr_testing:"測試中…",asr_ok:"連線成功：網址、金鑰、模型都可以用。",asr_fail:"連線失敗：{m}",asr_fail_401:"金鑰不對或沒有權限（{m}）",asr_fail_404:"網址或模型名稱不對（{m}）",asr_fail_429:"連得上，但用量達到上限（{m}）。過幾分鐘再試；上限期間會自動改用這台電腦辨識。",asr_groq:"Groq（有免費額度）",asr_groq_note:"Groq：Whisper large-v3，有免費額度，但每分鐘、每天有用量上限（整個帳號共用，多台電腦同時用很快就滿）；達到上限時那幾段會自動改回這台電腦辨識。聲音會送出公司。金鑰申請：",bad_asr_url:"語音辨識 API 的網址格式不正確（例如 https://api.openai.com/v1）",asr_url_https:"外部的語音辨識服務要用 https 網址",bad_asr_model:"模型名稱格式不正確",bad_asr_key:"金鑰格式不正確",asr_key_required:"外部的語音辨識服務要填金鑰",
   gl_title:"詞庫（專有名詞）",gl_note:"公司名、廠區、系統名稱、人名這些詞，辨識時會當提示、翻譯時照指定的寫法。一行一個詞；「=」後面是指定譯法（選填），「|」後面是常被聽錯的寫法（會自動換回來）。存檔後下一場字幕或錄音生效。",gl_label:"詞庫（一行一個詞）",gl_ph:"寶成 | 寶城 | 保成 = Pou Chen\nMES\nSukabumi | Suka Bumi",gl_info:"這台 {n} 個詞",gl_info_share:"，公司共用資料夾的 glossary.txt {m} 個詞（所有電腦共用；上次讀到的）",gl_info_tip:"。要讓所有電腦共用：把同樣格式的 glossary.txt 放在「更新」的公司共用資料夾。",bad_glossary:"詞庫太長（上限 20000 字）",
   sup_title:"問題回報",sup_contact:"同仁回報問題時寄給誰（信箱或 Teams 群組，選填）",sup_contact_ph:"例如 it-helpdesk@pcg.com.tw",sup_note:"同仁頁面下方有「回報問題」：寫下發生什麼事、按一下就下載診斷檔（版本、電腦規格、遮掉金鑰與密碼的設定、最近的程式記錄；不含錄音、逐字稿和會議紀錄）。這裡填的聯絡方式會顯示給同仁；填信箱時會多一個「寫信給 IT」按鈕。",sup_make:"產生這台電腦的診斷檔",sup_making:"正在產生…",sup_done:"已下載 {n}",sup_failed:"沒有產生診斷檔：{e}",bad_contact:"聯絡方式格式不正確",
@@ -304,7 +320,7 @@ zh:{dest_title:"資料送到哪裡（照下面現在填的值）",dest_audio:"�
   upd_note:'能上網的電腦會從 GitHub 發布頁取得小更新包。不能上網的電腦：把發布頁上的 PCG-Update-<版本>.exe（和同名的 .sha256 檔）放進這個資料夾，同仁電腦就能一鍵更新。只會安裝比目前新的小更新包，安裝前會比對檔案指紋；需要完整安裝檔的版本只會提示找 IT。',
   bad_share:'共用資料夾路徑格式不正確',
   need_llm:'伺服器模式要填大模型的網址',bad_host:'位址格式不正確',bad_key:'API 金鑰格式不正確',error:'發生錯誤'},
-en:{dest_title:"Where data goes (from the values below)",dest_audio:"Audio",dest_text:"Text",dest_local:"This computer only",dest_gpu:"Company GPU server ({h})",dest_api_int:"Internal recognition service ({h})",dest_api_ext:"Sent outside the company: {h}",dest_group:"Group AI platform ({h})",dest_int:"Internal server ({h})",dest_ext:"Sent outside the company: {h}",llm_internal:"This is a server inside the company (text does not leave the company)",llm_warn:"This address does not look like the company network. The staff page will show “AI service outside the company”. If it really is an internal server, tick the box below.",rv_warn:"Note: no staff password is set. When this is on, anyone on the same network who scans the QR code can read the meeting subtitles. Set a staff password below.",unsaved:"Unsaved changes",sum_gl:"{n} terms",sum_none:"Not set",sum_upd_on:"Checks automatically",sum_upd_off:"No automatic check",sum_models:"{n} installed",multi_lang:"Multi-language subtitles: viewers can choose their own language",multi_lang_note:"When someone viewing shared subtitles (QR code) or this computer's subtitle screen chooses Chinese, Indonesian, Vietnamese, Hindi or English and a sentence is not in that language, this computer translates one more copy. Speech recognition does not increase, only translation: on this computer's CPU in local mode (the graphics card with the NVIDIA pack), or on the LLM server in server mode. Languages nobody chose are not translated; turn it off on slow computers. Takes effect from the next subtitle session.",
+en:{test_llm:"Test the LLM connection",test_gpu:"Test the GPU server",test_nothing:"No address entered yet",model_missing:"“{m}” is not in this server’s model list. Check the name (you can pick from the field’s drop-down list)",pw_again:"Enter it again",pw_short:"The password needs at least 6 characters",cancel_btn:"Cancel",m_err_github:"This computer cannot reach GitHub right now, so only model packs in the company shared folder are listed. This is normal for computers without internet access.",m_err_share:"The model list (catalog.json) in the company shared folder cannot be read. Check that the file is complete.",dest_title:"Where data goes (from the values below)",dest_audio:"Audio",dest_text:"Text",dest_local:"This computer only",dest_gpu:"Company GPU server ({h})",dest_api_int:"Internal recognition service ({h})",dest_api_ext:"Sent outside the company: {h}",dest_group:"Group AI platform ({h})",dest_int:"Internal server ({h})",dest_ext:"Sent outside the company: {h}",llm_internal:"This is a server inside the company (text does not leave the company)",llm_warn:"This address does not look like the company network. The staff page will show “AI service outside the company”. If it really is an internal server, tick the box below.",rv_warn:"Note: no staff password is set. When this is on, anyone on the same network who scans the QR code can read the meeting subtitles. Set a staff password below.",unsaved:"Unsaved changes",sum_gl:"{n} terms",sum_none:"Not set",sum_upd_on:"Checks automatically",sum_upd_off:"No automatic check",sum_models:"{n} installed",multi_lang:"Multi-language subtitles: viewers can choose their own language",multi_lang_note:"When someone viewing shared subtitles (QR code) or this computer's subtitle screen chooses Chinese, Indonesian, Vietnamese, Hindi or English and a sentence is not in that language, this computer translates one more copy. Speech recognition does not increase, only translation: on this computer's CPU in local mode (the graphics card with the NVIDIA pack), or on the LLM server in server mode. Languages nobody chose are not translated; turn it off on slow computers. Takes effect from the next subtitle session.",
   asr_title:"Speech recognition API (optional)",asr_note:"Send speech recognition to an API (OpenAI-compatible /audio/transcriptions): OpenAI, Groq (has a free tier), or a recognition service inside the company (for example RTX Spark). Usually more accurate than the small model on this computer, and the laptop no longer runs recognition. If the API cannot be reached, the key is wrong or the usage limit is reached, that piece is recognized on this computer instead, so subtitles do not stop. When on, it takes priority over the GPU server.",asr_on:"Use an API for speech recognition",asr_url:"API address (up to /v1)",asr_api_model:"Model",asr_key:"API key",asr_key_set:"API key: set (fill in only to replace)",asr_clear_key:"Delete the saved key",asr_internal:"This is a service inside the company (audio does not leave the company)",asr_ext_warn:"Note: when on, meeting audio is sent to a service outside the company; paid services bill by usage and free tiers have usage limits (each computer showing subtitles counts separately). Check that this meets company data rules; turn it off for confidential meetings or use an internal service.",asr_test:"Test connection",asr_testing:"Testing…",asr_ok:"Connected: the address, key and model work.",asr_fail:"Connection failed: {m}",asr_fail_401:"The key is wrong or has no permission ({m})",asr_fail_404:"The address or model name is wrong ({m})",asr_fail_429:"Connected, but the usage limit is reached ({m}). Try again in a few minutes; while limited, this computer recognizes instead.",asr_groq:"Groq (free tier)",asr_groq_note:"Groq: Whisper large-v3 with a free tier, but there are per-minute and per-day usage limits (shared by the whole account, so several computers at once fill it quickly); when the limit is reached those pieces are recognized on this computer instead. Audio leaves the company. Get a key at:",bad_asr_url:"The speech API address is not valid (for example https://api.openai.com/v1)",asr_url_https:"An external speech service must use an https address",bad_asr_model:"The model name is not valid",bad_asr_key:"The key is not valid",asr_key_required:"An external speech service needs a key",
   gl_title:"Glossary (names and terms)",gl_note:"Company names, sites, system names and people: used as hints during recognition and translated the way you specify. One term per line; after “=” the required translation (optional), after “|” spellings it is often misheard as (changed back automatically). Applies from the next subtitles or recording after saving.",gl_label:"Glossary (one term per line)",gl_ph:"寶成 | 寶城 | 保成 = Pou Chen\nMES\nSukabumi | Suka Bumi",gl_info:"{n} terms on this computer",gl_info_share:", {m} terms from glossary.txt in the company shared folder (shared by all computers; as last read)",gl_info_tip:". To share with all computers: put a glossary.txt in the same format in the shared folder under “Updates”.",bad_glossary:"The glossary is too long (20000 characters at most)",
   sup_title:"Problem reports",sup_contact:"Where staff send problem reports (email or Teams group, optional)",sup_contact_ph:"e.g. it-helpdesk@example.com",sup_note:"The staff page has “Report a problem” at the bottom: staff describe what happened and download a diagnostic file with one click (version, computer specs, settings with keys and passwords removed, recent program logs; no recordings, transcripts or minutes). The contact entered here is shown to staff; an email address also adds an “Email IT” button.",sup_make:"Create a diagnostic file for this computer",sup_making:"Creating…",sup_done:"Downloaded {n}",sup_failed:"The diagnostic file was not created: {e}",bad_contact:"The contact is not valid",
@@ -354,7 +370,7 @@ en:{dest_title:"Where data goes (from the values below)",dest_audio:"Audio",dest
   upd_note:'Computers with internet get the small update from the GitHub release page. For computers without internet, put PCG-Update-<version>.exe (and its .sha256 file) from the release page in this folder and staff can update with one click. Only newer small updates are installed, and the file fingerprint is checked first; versions that need the full installer only show “ask IT”.',
   bad_share:'Invalid shared folder path',
   need_llm:'Server mode needs the LLM URL',bad_host:'Invalid address',bad_key:'Invalid API key',error:'Something went wrong'},
-id:{dest_title:"Ke mana data dikirim (dari nilai di bawah)",dest_audio:"Suara",dest_text:"Teks",dest_local:"Hanya di komputer ini",dest_gpu:"Server GPU perusahaan ({h})",dest_api_int:"Layanan pengenalan internal ({h})",dest_api_ext:"Dikirim ke luar perusahaan: {h}",dest_group:"Platform AI grup ({h})",dest_int:"Server internal ({h})",dest_ext:"Dikirim ke luar perusahaan: {h}",llm_internal:"Ini server di dalam perusahaan (teks tidak keluar dari perusahaan)",llm_warn:"Alamat ini tampaknya bukan jaringan perusahaan. Halaman staf akan menampilkan “layanan AI di luar perusahaan”. Jika memang server internal, centang kotak di bawah.",rv_warn:"Perhatian: kata sandi staf belum diatur. Jika ini aktif, siapa pun di jaringan yang sama yang memindai kode QR bisa membaca subtitle rapat. Atur kata sandi staf di bawah.",unsaved:"Ada perubahan yang belum disimpan",sum_gl:"{n} istilah",sum_none:"Belum diisi",sum_upd_on:"Periksa otomatis",sum_upd_off:"Tidak periksa otomatis",sum_models:"{n} terpasang",multi_lang:"Subtitle multibahasa: penonton bisa memilih bahasanya sendiri",multi_lang_note:"Jika seseorang yang menonton subtitle yang dibagikan (kode QR) atau layar subtitle di komputer ini memilih Mandarin, Indonesia, Vietnam, Hindi, atau Inggris dan sebuah kalimat tidak dalam bahasa itu, komputer ini menerjemahkan satu salinan lagi. Pengenalan suara tidak bertambah, hanya terjemahan: di CPU komputer ini pada mode lokal (kartu grafis jika ada paket NVIDIA), atau di server LLM pada mode server. Bahasa yang tidak dipilih siapa pun tidak diterjemahkan; matikan di komputer yang lambat. Berlaku mulai sesi subtitle berikutnya.",
+id:{test_llm:"Uji koneksi LLM",test_gpu:"Uji server GPU",test_nothing:"Alamat belum diisi",model_missing:"“{m}” tidak ada di daftar model server ini. Periksa namanya (bisa dipilih dari daftar tarik-turun kolom)",pw_again:"Masukkan sekali lagi",pw_short:"Kata sandi minimal 6 karakter",cancel_btn:"Batal",m_err_github:"Komputer ini sedang tidak bisa menjangkau GitHub, jadi hanya paket model di folder bersama perusahaan yang ditampilkan. Ini normal untuk komputer tanpa akses internet.",m_err_share:"Daftar model (catalog.json) di folder bersama perusahaan tidak bisa dibaca. Pastikan berkasnya lengkap.",dest_title:"Ke mana data dikirim (dari nilai di bawah)",dest_audio:"Suara",dest_text:"Teks",dest_local:"Hanya di komputer ini",dest_gpu:"Server GPU perusahaan ({h})",dest_api_int:"Layanan pengenalan internal ({h})",dest_api_ext:"Dikirim ke luar perusahaan: {h}",dest_group:"Platform AI grup ({h})",dest_int:"Server internal ({h})",dest_ext:"Dikirim ke luar perusahaan: {h}",llm_internal:"Ini server di dalam perusahaan (teks tidak keluar dari perusahaan)",llm_warn:"Alamat ini tampaknya bukan jaringan perusahaan. Halaman staf akan menampilkan “layanan AI di luar perusahaan”. Jika memang server internal, centang kotak di bawah.",rv_warn:"Perhatian: kata sandi staf belum diatur. Jika ini aktif, siapa pun di jaringan yang sama yang memindai kode QR bisa membaca subtitle rapat. Atur kata sandi staf di bawah.",unsaved:"Ada perubahan yang belum disimpan",sum_gl:"{n} istilah",sum_none:"Belum diisi",sum_upd_on:"Periksa otomatis",sum_upd_off:"Tidak periksa otomatis",sum_models:"{n} terpasang",multi_lang:"Subtitle multibahasa: penonton bisa memilih bahasanya sendiri",multi_lang_note:"Jika seseorang yang menonton subtitle yang dibagikan (kode QR) atau layar subtitle di komputer ini memilih Mandarin, Indonesia, Vietnam, Hindi, atau Inggris dan sebuah kalimat tidak dalam bahasa itu, komputer ini menerjemahkan satu salinan lagi. Pengenalan suara tidak bertambah, hanya terjemahan: di CPU komputer ini pada mode lokal (kartu grafis jika ada paket NVIDIA), atau di server LLM pada mode server. Bahasa yang tidak dipilih siapa pun tidak diterjemahkan; matikan di komputer yang lambat. Berlaku mulai sesi subtitle berikutnya.",
   asr_title:"API pengenalan suara (opsional)",asr_note:"Serahkan pengenalan suara ke API (/audio/transcriptions yang kompatibel dengan OpenAI): OpenAI, Groq (ada kuota gratis), atau layanan pengenalan di dalam perusahaan (misalnya RTX Spark). Biasanya lebih akurat daripada model kecil di komputer ini, dan laptop tidak perlu menjalankan pengenalan. Jika API tidak terjangkau, kuncinya salah, atau batas pemakaian tercapai, potongan itu dikenali di komputer ini, sehingga subtitle tidak berhenti. Jika aktif, didahulukan daripada server GPU.",asr_on:"Gunakan API untuk pengenalan suara",asr_url:"Alamat API (sampai /v1)",asr_api_model:"Model",asr_key:"Kunci API",asr_key_set:"Kunci API: sudah diatur (isi hanya untuk mengganti)",asr_clear_key:"Hapus kunci yang tersimpan",asr_internal:"Ini layanan di dalam perusahaan (suara tidak keluar dari perusahaan)",asr_ext_warn:"Perhatian: jika aktif, suara rapat dikirim ke layanan di luar perusahaan; layanan berbayar ditagih sesuai pemakaian dan kuota gratis punya batas pemakaian (setiap komputer yang menampilkan subtitle dihitung sendiri). Pastikan sesuai aturan data perusahaan; matikan untuk rapat rahasia atau gunakan layanan internal.",asr_test:"Uji koneksi",asr_testing:"Menguji…",asr_ok:"Terhubung: alamat, kunci, dan model dapat dipakai.",asr_fail:"Koneksi gagal: {m}",asr_fail_401:"Kunci salah atau tidak punya izin ({m})",asr_fail_404:"Alamat atau nama model salah ({m})",asr_fail_429:"Tersambung, tetapi batas pemakaian tercapai ({m}). Coba lagi beberapa menit lagi; selama dibatasi, komputer ini yang mengenali.",asr_groq:"Groq (kuota gratis)",asr_groq_note:"Groq: Whisper large-v3 dengan kuota gratis, tetapi ada batas pemakaian per menit dan per hari (dipakai bersama satu akun, jadi cepat penuh jika beberapa komputer memakainya sekaligus); saat batas tercapai, potongan itu dikenali di komputer ini. Suara dikirim ke luar perusahaan. Dapatkan kunci di:",bad_asr_url:"Alamat API pengenalan suara tidak valid (misalnya https://api.openai.com/v1)",asr_url_https:"Layanan pengenalan suara eksternal harus memakai alamat https",bad_asr_model:"Nama model tidak valid",bad_asr_key:"Kunci tidak valid",asr_key_required:"Layanan pengenalan suara eksternal memerlukan kunci",
   gl_title:"Glosarium (nama dan istilah)",gl_note:"Nama perusahaan, lokasi pabrik, nama sistem, dan nama orang: dipakai sebagai petunjuk saat pengenalan suara dan diterjemahkan sesuai yang Anda tentukan. Satu istilah per baris; setelah “=” terjemahan yang diwajibkan (opsional), setelah “|” ejaan yang sering salah dengar (otomatis dikembalikan). Berlaku mulai subtitle atau rekaman berikutnya setelah disimpan.",gl_label:"Glosarium (satu istilah per baris)",gl_ph:"寶成 | 寶城 | 保成 = Pou Chen\nMES\nSukabumi | Suka Bumi",gl_info:"{n} istilah di komputer ini",gl_info_share:", {m} istilah dari glossary.txt di folder bersama perusahaan (dipakai semua komputer; hasil baca terakhir)",gl_info_tip:". Agar dipakai semua komputer: taruh glossary.txt dengan format yang sama di folder bersama pada bagian “Pembaruan”.",bad_glossary:"Glosarium terlalu panjang (maksimal 20000 karakter)",
   sup_title:"Laporan masalah",sup_contact:"Ke mana karyawan mengirim laporan masalah (email atau grup Teams, opsional)",sup_contact_ph:"mis. it-helpdesk@contoh.com",sup_note:"Halaman karyawan punya “Laporkan masalah” di bagian bawah: karyawan menulis apa yang terjadi dan mengunduh file diagnostik dengan satu klik (versi, spesifikasi komputer, pengaturan tanpa kunci dan kata sandi, log program terbaru; tanpa rekaman, transkrip, atau notulen). Kontak yang diisi di sini ditampilkan ke karyawan; alamat email juga menambahkan tombol “Email IT”.",sup_make:"Buat file diagnostik komputer ini",sup_making:"Sedang membuat…",sup_done:"{n} sudah diunduh",sup_failed:"File diagnostik tidak dibuat: {e}",bad_contact:"Kontak tidak valid",
@@ -608,19 +624,22 @@ function modeVis(){
 document.querySelectorAll('input[name=backend]').forEach(r=>r.onchange=modeVis);
 $('gpuHost').oninput=modeVis;
 
-$('testBtn').onclick=async()=>{
-  const b=$('testBtn');b.disabled=true;b.innerHTML='<span class="busy">'+ULI.connecting+escH(t('testing'))+'</span>';$('testRes').innerHTML='';
-  const j=await api('/api/simple/admin/test',{gpu_host:$('gpuHost').value,gpu_port:$('gpuPort').value,
-    llm_url:$('llmUrl').value,llm_api_style:$('llmStyle').value,llm_api_key:$('llmKey').value});
-  b.disabled=false;b.textContent=t('test');
+/* r30：大模型和 GPU 伺服器各測各的，結果顯示在自己的按鈕下面；大模型測通之後順便看填的模型名稱在不在清單裡 */
+async function runTest(btnId,resId,label,body){
+  const b=$(btnId),box=$(resId);b.disabled=true;b.innerHTML='<span class="busy">'+ULI.connecting+escH(t('testing'))+'</span>';box.innerHTML='';
+  const j=await api('/api/simple/admin/test',body);
+  b.disabled=false;b.textContent=t(label);
   const out=[];
-  if(j.gpu)out.push([j.gpu.ok,j.gpu.ok?t('gpu_ok')+(j.gpu.detail?`（${j.gpu.detail}）`:''):`${t('gpu_fail')}：${j.gpu.detail}`]);
-  if(j.llm){out.push([j.llm.ok,j.llm.ok?t('llm_ok',{type:j.llm.type,n:j.llm.models.length}):`${t('llm_fail')}：${j.llm.detail}`]);
+  if(j.gpu)out.push([j.gpu.ok?'ok':'err',j.gpu.ok?t('gpu_ok')+(j.gpu.detail?`（${j.gpu.detail}）`:''):`${t('gpu_fail')}：${j.gpu.detail}`]);
+  if(j.llm){out.push([j.llm.ok?'ok':'err',j.llm.ok?t('llm_ok',{type:j.llm.type,n:j.llm.models.length}):`${t('llm_fail')}：${j.llm.detail}`]);
     if(j.llm.ok){$('modelList').innerHTML=j.llm.models.map(m=>`<option value="${m.replace(/"/g,'&quot;')}">`).join('');
-      if(j.llm.style==='openwebui'&&$('llmStyle').value!=='openwebui'){$('llmStyle').value='openwebui';styleVis()}}}
-  if(!j.ok&&!out.length)out.push([false,errMsg(j)]);
-  for(const [ok,msg] of out){const d=document.createElement('div');d.className='res '+(ok?'ok':'err');d.textContent=msg;$('testRes').appendChild(d)}
-};
+      if(j.llm.style==='openwebui'&&$('llmStyle').value!=='openwebui'){$('llmStyle').value='openwebui';styleVis()}
+      for(const id of ['llmModel','sumModel']){const v=$(id).value.trim();if(v&&j.llm.models.length&&!j.llm.models.includes(v))out.push(['warn',t('model_missing',{m:v})])}}}
+  if(!out.length)out.push(['err',j.ok?t('test_nothing'):errMsg(j)]);
+  for(const [k,msg] of out){const d=document.createElement('div');d.className='res '+k;d.textContent=msg;box.appendChild(d)}
+}
+$('testLlm').onclick=()=>runTest('testLlm','testLlmRes','test_llm',{llm_url:$('llmUrl').value,llm_api_style:$('llmStyle').value,llm_api_key:$('llmKey').value});
+$('testGpu').onclick=()=>runTest('testGpu','testGpuRes','test_gpu',{gpu_host:$('gpuHost').value,gpu_port:$('gpuPort').value});
 
 $('liveModel').addEventListener('change',liveAutoNote);
 $('pMain').onsubmit=async e=>{
@@ -651,10 +670,16 @@ $('supMake').onclick=async()=>{
   }catch(e){x.className='res err';x.textContent=t('sup_failed',{e:e.message||e})}
   x.hidden=false;b.disabled=false;b.textContent=t('sup_make');
 };
-$('chgPwBtn').onclick=async()=>{
-  const p=prompt(t('new_it_pw'));if(!p)return;
+// 改 IT 密碼（r30）：頁面內的視窗，不顯示明文、要輸入兩次（原本是瀏覽器的輸入視窗，打錯一個字就把自己鎖在外面）
+$('chgPwBtn').onclick=()=>{for(const id of ['cpNew','cpAgain'])$(id).value='';$('cpErr').hidden=true;$('cpOk').hidden=true;$('cpDlg').showModal();$('cpNew').focus()};
+$('cpCancel').onclick=()=>$('cpDlg').close();
+$('cpForm').onsubmit=async e=>{
+  e.preventDefault();const p=$('cpNew').value,er=$('cpErr');
+  const bad=p.length<6?'pw_short':p!==$('cpAgain').value?'pw_mismatch':'';
+  if(bad){er.hidden=false;er.textContent=t(bad);return}
   const j=await api('/api/simple/admin/password',{new:p});
-  if(j.ok){token=p;sessionStorage.setItem('pcg_it',token);alert(t('pw_changed'))}else alert(errMsg(j));
+  if(!j.ok){er.hidden=false;er.textContent=errMsg(j);return}
+  token=p;sessionStorage.setItem('pcg_it',token);er.hidden=true;$('cpOk').hidden=false;setTimeout(()=>$('cpDlg').close(),1200);
 };
 
 /* ── 模型管理（模型包）── */
@@ -694,7 +719,8 @@ function renderModels(){
     const busy=jb.state==='downloading'||jb.state==='installing';
     return `<div class="mrow"><div><b>${escH(p.name||p.id)}</b><small>${escH(info(p))} · ${escH(t(p.source_kind==='share'?'m_from_share':'m_from_gh'))}</small>${p.note?`<small>${escH(p.note)}</small>`:''}${st}</div>
     <button class="btn ghost" type="button" data-in="${escH(p.id)}"${busy?' disabled':''}>${escH(t(p.update?'m_update':'m_install'))}</button></div>`}).join(''):`<p class="note">${escH(t('m_none_avail'))}</p>`;
-  const errs=models.catalog_errors||[];$('mErr').hidden=!errs.length;$('mErr').textContent=errs.join('；');foldSum();
+  // 連不到 GitHub 對不能上網的電腦是正常的：用白話說明（r30；原本顯示「GitHub 連不到（OSError）」）
+  const errs=(models.catalog_errors||[]).map(x=>/GitHub/.test(x)?t('m_err_github'):/catalog\.json/.test(x)?t('m_err_share'):x);$('mErr').hidden=!errs.length;$('mErr').textContent=errs.join(' ');foldSum();
 }
 $('mInst').onclick=async e=>{const id=e.target.dataset?.rm;if(!id)return;
   if(!confirm(t('m_confirm_remove',{n:e.target.dataset.n})))return;

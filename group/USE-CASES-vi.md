@@ -170,6 +170,8 @@ Tôi nói "Tiếng Việt" → "Chỉ đọc phụ đề" → "Tiếng Trung →
 - **Nút màu xám**: còn bước chưa chọn; bấm vào, trang sẽ cho biết còn thiếu bước nào.
 - **Biểu tượng micro ở góc trên bên trái màn hình phụ đề**: chuyển động khi chương trình đang nghe mà chưa ai nói, đứng yên khi phụ đề đang hiện. Biểu tượng kết nối màu cam nghĩa là mất kết nối và đang kết nối lại.
 - **Máy phụ đề phòng họp**: mở ra là chế độ phụ đề chữ lớn; dùng A−/A+ ở góc trên bên phải để đổi từng cỡ chữ.
+- **Quay về trang chính khi phụ đề đang chạy** (r30): cuối màn hình phụ đề có nút “Về trang chính”. Phụ đề không dừng; phía trên trang chính sẽ có nút để mở lại màn hình phụ đề.
+- **Bấm “Dừng”** (r30): trang hỏi “Tiếp tục họp” hay “Kết thúc phụ đề”, nên bấm nhầm cũng không dừng ngay.
 - **Lần đầu mở trang** chỉ có phần hướng dẫn; gợi ý cập nhật và cài đặt sẽ chờ lần sau, và không bao giờ hiện khi phụ đề đang chạy.
 
 ---

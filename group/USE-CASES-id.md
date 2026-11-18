@@ -170,6 +170,8 @@ Saya berbicara "Bahasa Indonesia" → "Hanya baca subtitle" → "Mandarin → In
 - **Tombol berwarna abu-abu**: masih ada yang belum dipilih; tekan tombol itu dan halaman memberi tahu langkah mana yang kurang.
 - **Ikon mikrofon di kiri atas layar subtitle**: bergerak saat program mendengarkan dan belum ada yang berbicara, diam saat subtitle sedang muncul. Ikon sambungan berwarna oranye berarti koneksi terputus dan sedang disambung ulang.
 - **Komputer subtitle**: langsung terbuka dalam mode subtitle huruf besar; pakai A−/A+ di kanan atas untuk mengubah ukuran satu tingkat.
+- **Kembali ke beranda saat subtitle berjalan** (r30): di bawah layar subtitle ada “Kembali ke beranda”. Subtitle tidak berhenti; di bagian atas beranda muncul tombol untuk membuka lagi layar subtitle.
+- **Menekan “Berhenti”** (r30): halaman menanyakan “Lanjutkan rapat” atau “Akhiri subtitle”, jadi salah tekan tidak langsung menghentikan sesi.
 - **Saat pertama kali membuka halaman** hanya panduan yang muncul; saran pembaruan dan pemasangan menunggu sampai lain kali, dan tidak pernah muncul saat subtitle berjalan.
 
 ---

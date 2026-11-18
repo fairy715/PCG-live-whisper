@@ -388,6 +388,10 @@ Langkah untuk karyawan ada di skenario 8 pada contoh penggunaan. Satu komputer s
 - **Mode lokal menyembunyikan pengaturan server.**
 - **Menonton jarak jauh aktif tanpa kata sandi staf**: muncul peringatan oranye di bawah kotak centang.
 - Judul halaman sebelumnya menulis perubahan langsung berlaku; sebenarnya berlaku mulai subtitle atau rekaman berikutnya. Teksnya sudah diperbaiki.
+- **Dua tombol uji** (r30): “Uji koneksi LLM” dan “Uji server GPU”, masing-masing menampilkan hasil di bawahnya. Setelah uji LLM berhasil, halaman memeriksa apakah nama di “Model terjemahan” dan “Model notulen (ringkasan)” ada di daftar server dan memperingatkan jika tidak ada (salah ketik nama model adalah penyebab paling umum subtitle tidak diterjemahkan).
+- **Ganti kata sandi IT** (r30): jendela di halaman, isian tersembunyi, dimasukkan dua kali; minimal 6 karakter.
+- **Komputer tanpa internet** (r30): Model menampilkan “Komputer ini sedang tidak bisa menjangkau GitHub, jadi hanya paket model di folder bersama perusahaan yang ditampilkan”. Ini normal, bukan kesalahan.
+- **Peringatan bahwa data keluar dari perusahaan** (r30) memiliki garis oranye tebal di kiri, agar berbeda dari pemberitahuan biasa.
 
 ### Ikon yang dipakai di antarmuka (r29)
 

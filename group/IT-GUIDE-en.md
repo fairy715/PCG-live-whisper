@@ -386,6 +386,10 @@ The staff steps are in scenario 9 of the use cases. One subtitle computer joins 
 - **Local mode hides the server settings.**
 - **Remote viewing on without a staff password**: an orange warning appears under the checkbox.
 - The header used to say changes take effect immediately; in fact they apply from the next subtitles or recording. The text has been corrected.
+- **Two test buttons** (r30): “Test the LLM connection” and “Test the GPU server”, each showing its result below itself. After the LLM test succeeds, the page checks whether the names in “Translation model” and “Minutes (summary) model” are in the server’s list and warns if not (a mistyped model name is the most common reason subtitles are not translated).
+- **Change IT password** (r30): a window on the page, hidden input, entered twice; at least 6 characters.
+- **Computers without internet** (r30): Models shows “This computer cannot reach GitHub right now, so only model packs in the company shared folder are listed”. This is normal, not an error.
+- **Warnings that data leaves the company** (r30) have a thick orange bar on the left, to set them apart from ordinary notices.
 
 ### Icons used in the interface (r29)
 

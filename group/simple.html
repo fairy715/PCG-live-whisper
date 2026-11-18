@@ -28,7 +28,9 @@ body{margin:0;background:var(--bg);color:var(--text);
 header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:20px}
 header h1{font-size:22px;margin:0;font-weight:700}
 header .sub{color:var(--dim);font-size:14px}
-header .scope{margin-top:4px}header .scope.ext{color:var(--warn,#9a6700);font-weight:600}
+header .scope{margin-top:4px}
+/* r30：資料會送出公司時，這一行用專屬的樣式（左邊粗色條），和「有新版本」這類一般提示區分開 */
+header .scope.ext{display:inline-block;margin-top:6px;padding:6px 10px;border-left:5px solid var(--warn,#9a6700);border-radius:8px;background:var(--warn-soft,#fff8e6);color:var(--warn,#9a6700);font-weight:700}
 .lang{flex:none;display:flex;align-items:center;gap:6px;color:var(--dim);font-size:14px}
 .lang select{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 8px}
 .tabs{display:flex;flex-wrap:wrap;gap:0 16px;margin-bottom:20px;border-bottom:1px solid var(--line)}

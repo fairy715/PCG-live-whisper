@@ -1,39 +1,29 @@
 {
  "_說明": "下一版發布時同仁頁面「有新版本」視窗顯示的新功能（每種語言 2～5 點，一點一句）。release 要等於這一次發布的 rN，發布流程才會附上；每次發布前更新這個檔",
- "release": "r29",
+ "release": "r30",
  "zh": [
-  "畫面更清楚：場合改成圖示加短標題；開始前會顯示「你會聽到什麼語言 → 字幕是什麼語言」，選反了一眼就看得出來",
-  "開過字幕之後，下次打開只要按「開始」；要換語言或場合再按「修改」",
-  "外語同仁：已經幫你選好「對方說中文 → 翻成你的語言」",
-  "字幕畫面會顯示正在聽、重新連線中；會議室字幕機一開就是大字，A−／A+ 一次跳一檔",
-  "手機看字幕時，密碼改在畫面上的視窗輸入，不會顯示出來"
+  "字幕進行中也可以按「回到首頁」：字幕不會停，首頁上方有「打開字幕畫面」可以再回來",
+  "按「停止」時的確認視窗改成兩個清楚的按鈕：「繼續開會」和「結束字幕」",
+  "用手機看字幕時，上方的控制列變小，看得到更多句字幕"
  ],
  "en": [
-  "Clearer screen: scenes now have icons and short names; before starting, the page shows “You will hear … → subtitles in …”, so a wrong choice is obvious",
-  "After your first session, just press “Start” next time; press “Change” to pick another language or scene",
-  "Foreign-language staff: “Chinese → your language” is already selected for you",
-  "The subtitle screen shows when it is listening or reconnecting; the room subtitle computer opens in large text, and A−/A+ jump one size at a time",
-  "On phones, the password is typed in a window on the page and is hidden"
+  "You can press “Back to home” while subtitles are running: they keep going, and the home page has “Open subtitle screen” to return",
+  "The confirmation when you press “Stop” now has two clear buttons: “Keep going” and “End subtitles”",
+  "On phones the top bar is smaller, so more subtitle lines fit on the screen"
  ],
  "id": [
-  "Layar lebih jelas: jenis rapat kini memakai ikon dan nama pendek; sebelum mulai, halaman menampilkan “Anda mendengar … → subtitle …”, jadi pilihan yang salah langsung terlihat",
-  "Setelah sesi pertama, lain kali cukup tekan “Mulai”; tekan “Ubah” untuk memilih bahasa atau jenis rapat lain",
-  "Staf berbahasa asing: “Mandarin → bahasa Anda” sudah dipilihkan",
-  "Layar subtitle menunjukkan saat sedang mendengarkan atau menyambung ulang; komputer subtitle ruangan langsung memakai huruf besar, dan A−/A+ berpindah satu ukuran",
-  "Di ponsel, kata sandi diketik di jendela pada halaman dan disembunyikan"
+  "Anda bisa menekan “Kembali ke beranda” saat subtitle berjalan: subtitle tidak berhenti, dan di beranda ada “Buka layar subtitle” untuk kembali",
+  "Konfirmasi saat menekan “Berhenti” kini punya dua tombol yang jelas: “Lanjutkan rapat” dan “Akhiri subtitle”",
+  "Di ponsel, bilah atas lebih kecil sehingga lebih banyak baris subtitle terlihat"
  ],
  "vi": [
-  "Màn hình rõ hơn: loại cuộc họp có biểu tượng và tên ngắn; trước khi bắt đầu, trang hiện “Bạn sẽ nghe … → phụ đề …”, chọn sai sẽ thấy ngay",
-  "Sau lần dùng đầu tiên, lần sau chỉ cần bấm “Bắt đầu”; bấm “Thay đổi” để chọn ngôn ngữ hoặc loại cuộc họp khác",
-  "Nhân viên nói ngoại ngữ: đã chọn sẵn “Tiếng Trung → ngôn ngữ của bạn”",
-  "Màn hình phụ đề cho biết đang nghe hay đang kết nối lại; máy phụ đề phòng họp mở ra là chữ lớn, A−/A+ đổi từng cỡ",
-  "Trên điện thoại, mật khẩu được nhập trong cửa sổ trên trang và được ẩn đi"
+  "Bạn có thể bấm “Về trang chính” khi phụ đề đang chạy: phụ đề không dừng, và trang chính có nút mở lại màn hình phụ đề",
+  "Hộp xác nhận khi bấm “Dừng” nay có hai nút rõ ràng: “Tiếp tục họp” và “Kết thúc phụ đề”",
+  "Trên điện thoại, thanh phía trên nhỏ hơn nên thấy được nhiều dòng phụ đề hơn"
  ],
  "hi": [
-  "स्क्रीन ज़्यादा साफ़: मीटिंग के प्रकार अब आइकन और छोटे नाम के साथ हैं; शुरू करने से पहले पेज दिखाता है “आप सुनेंगे … → सबटाइटल …”, गलत चुनाव तुरंत दिख जाता है",
-  "पहली बार के बाद, अगली बार बस “शुरू करें” दबाएँ; भाषा या मीटिंग का प्रकार बदलने के लिए “बदलें” दबाएँ",
-  "विदेशी भाषा वाले सहकर्मी: “चीनी → आपकी भाषा” पहले से चुना हुआ है",
-  "सबटाइटल स्क्रीन बताती है कि सुन रही है या दोबारा जुड़ रही है; मीटिंग रूम का सबटाइटल कंप्यूटर बड़े अक्षरों में खुलता है, A−/A+ एक-एक आकार बदलते हैं",
-  "फ़ोन पर पासवर्ड पेज की विंडो में डाला जाता है और छिपा रहता है"
+  "सबटाइटल चलते समय भी “होम पर लौटें” दबा सकते हैं: सबटाइटल नहीं रुकते, और होम पेज पर वापस खोलने का बटन है",
+  "“रोकें” दबाने पर पुष्टि में अब दो साफ़ बटन हैं: “मीटिंग जारी रखें” और “सबटाइटल खत्म करें”",
+  "फ़ोन पर ऊपर की पट्टी छोटी है, इसलिए सबटाइटल की ज़्यादा पंक्तियाँ दिखती हैं"
  ]
 }

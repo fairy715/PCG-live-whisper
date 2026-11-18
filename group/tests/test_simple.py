@@ -237,6 +237,28 @@ class SimpleFlow(unittest.TestCase):
         self.assertIn('id="rvWarn"', admin)
         self.assertNotIn("存檔後立即生效", admin)
 
+    def test_pages_keep_the_r30_guards(self):
+        """r30 的幾個保證：不再用瀏覽器內建的 confirm／prompt 做重要的事；字幕進行中也回得了首頁"""
+        live = (ROOT / "group" / "live.html").read_text(encoding="utf-8")
+        admin = (ROOT / "group" / "admin.html").read_text(encoding="utf-8")
+        simple = (ROOT / "group" / "simple.html").read_text(encoding="utf-8")
+        self.assertNotIn("confirm(", live)                         # 停止字幕：頁面內的視窗，按鈕寫要做的事
+        self.assertIn('id="stopDlg"', live)
+        self.assertEqual(live.count("stop_yes:"), 5)               # 五種語言都有
+        self.assertIn('id="homeBtn" href="/simple"', live)         # 進行中也有「回到首頁」
+        self.assertIn("$('homeBtn').hidden=!state.local||state.ended", live)
+        self.assertIn("box.replaceChild(", live)                   # 只換有變的那一句，不整段重畫
+        self.assertNotIn("prompt(", admin)                         # 改 IT 密碼：正式的欄位、輸入兩次
+        self.assertIn('type="password" id="cpAgain"', admin)
+        self.assertIn('id="testLlm"', admin)
+        self.assertIn('id="testGpu"', admin)
+        self.assertNotIn('id="testBtn"', admin)
+        self.assertIn("model_missing", admin)
+        self.assertIn("m_err_github", admin)
+        for wid in ("extWarn", "llmWarn", "asrWarn", "rvWarn"):
+            self.assertRegex(admin, r'id="%s" class="res warn out"' % wid)     # 外送提醒用專屬的樣式
+        self.assertIn("header .scope.ext{display:inline-block", simple)
+
     def test_version(self):
         """畫面上的版本：安裝檔寫的 group/version.json；原作者版本從 translate_meeting.py 讀"""
         simple_routes._VERSION.clear()
