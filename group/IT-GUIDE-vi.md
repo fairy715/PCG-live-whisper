@@ -263,6 +263,41 @@ Tiếng Indonesia small dùng maleo-ai/whisper-small-id (Apache-2.0); cahya/whis
 - Nhận dạng thử khi đóng gói (giọng tổng hợp): PhoWhisper medium và tiếng Indonesia small đúng hoàn toàn; PhoWhisper small và tiếng Indonesia medium mỗi gói sai một từ. Hãy thử với bản ghi âm thật
 - Ở chế độ máy chủ có máy chủ GPU, nhận dạng chạy trên máy chủ và các gói trên máy nhân viên không được dùng
 
+#### Kết quả đo: tỷ lệ lỗi của từng mô hình (bộ dữ liệu công khai, 2026-11-19)
+
+Các đề xuất ở trên có số liệu đo: mỗi mô hình được chạy một lần trên các bộ dữ liệu giọng nói công khai rồi so với văn bản chuẩn. Mỗi ngôn ngữ 50 câu; tỷ lệ lỗi = số chữ (tiếng Trung) hoặc số từ (ngôn ngữ khác) bị sai ÷ số chữ/từ trong văn bản chuẩn, **càng thấp càng tốt**.
+
+| Mô hình | Tiếng Trung | Tiếng Indonesia | Tiếng Việt | Tiếng Hindi | Tiếng Anh | Trung-Anh xen kẽ | Thời gian xử lý ÷ độ dài âm thanh |
+|---|---|---|---|---|---|---|---|
+| Whisper base (gói) | 17,2% | 30,6% | 40,1% | 105,7% | 8,9% | 37,6% | 0,1 |
+| **Whisper small (có sẵn trong bộ cài)** | 10,6% | 16,1% | 20,7% | 55,9% | 6,1% | 28,1% | 0,3 |
+| Gói small riêng cho ngôn ngữ đó | — | 9,2% | 13,1% | 14,8% | — | — | 0,3 (tiếng Hindi 0,6) |
+| Whisper medium (gói) | 6,0% | 9,1% | 14,0% | 36,7% | 4,4% | 26,8% | 0,85 |
+| Gói medium riêng cho ngôn ngữ đó | — | 7,1% | 9,7% | 11,2% | — | — | 0,85 (tiếng Hindi 1,5) |
+| Whisper large-v3-turbo (gói) | 5,9% | 7,6% | 10,2% | 30,5% | 4,8% | 20,9% | 1,0 |
+| Breeze ASR 25 (gói) | 5,3% | — | — | — | — | 17,8% | 1,6 |
+
+- "Riêng cho ngôn ngữ đó": PhoWhisper cho tiếng Việt, maleo-ai (small) / cahya (medium) cho tiếng Indonesia, vasista22 cho tiếng Hindi.
+- Cột cuối được đo trên máy 4 nhân **không có card đồ họa**: 0,3 nghĩa là 10 giây âm thanh mất 3 giây xử lý; gần bằng hoặc lớn hơn 1 thì không theo kịp phụ đề trực tiếp, cần card NVIDIA và gói GPU.
+
+**Những điều thấy được từ số liệu**
+
+- **Mô hình small có sẵn là điểm nghẽn**: trừ tiếng Anh, thay nó giúp giảm từ 40% đến hơn một nửa số lỗi; rõ nhất là tiếng Hindi (55,9% → 11,2%).
+- **Ngoại ngữ vẫn cải thiện được khi không có card đồ họa**: các gói small cho tiếng Indonesia, tiếng Việt và tiếng Hindi chạy nhanh gần bằng mô hình có sẵn và giảm tỷ lệ lỗi từ 16,1% / 20,7% / 55,9% xuống 9,2% / 13,1% / 14,8%. Với máy thường nghe các ngôn ngữ này, đây là bước ít tốn kém nhất.
+- **Tiếng Trung không có lựa chọn ít tốn kém**: chỉ medium, large-v3-turbo và Breeze ASR 25 mới giảm từ 10,6% xuống dưới 6%, và cả ba đều ở mức sát hoặc vượt giới hạn phụ đề trực tiếp trên máy thường, nên cần card đồ họa.
+- **Máy có card đồ họa**: Breeze ASR 25 cho tiếng Trung và Trung-Anh xen kẽ; gói medium riêng cho tiếng Indonesia, tiếng Việt và tiếng Hindi; large-v3-turbo nếu chỉ muốn cài một mô hình chung, nhưng tiếng Hindi của nó kém (30,5%).
+- **Breeze và large-v3-turbo không phân biệt được trên tiếng Trung thuần** (5,3% so với 5,9%, chênh 11 chữ); khoảng cách ở Trung-Anh xen kẽ rõ hơn (17,8% so với 20,9%).
+
+**Giới hạn (không áp dụng trực tiếp các con số này cho cuộc họp thực tế)**
+
+- Dữ liệu là bản ghi đọc sạch; cuộc họp thực tế có micro đặt xa, nhiều người nói chen nhau và giọng địa phương, nên tỷ lệ lỗi sẽ cao hơn trong bảng. Thứ hạng giữa các mô hình vẫn dùng để tham khảo được.
+- Bộ tiếng Trung là tiếng phổ thông của Trung Quốc đại lục, không phải giọng Đài Loan; ưu thế của Breeze ASR 25 với tiếng Trung Đài Loan có thể bị đánh giá thấp.
+- Mỗi ngôn ngữ chỉ có 50 câu: chênh một hai điểm phần trăm chưa chắc là khác biệt thật.
+- Tiếng Hindi với base vượt 100%, nghĩa là mô hình xuất ra thêm nhiều từ sai; chưa kiểm tra nguyên nhân từng câu.
+- Nếu cuộc họp thực tế tệ hơn bảng này nhiều thì nguyên nhân thường là âm thanh (micro quá xa, phòng bị vang); đổi mô hình hay card đồ họa không giúp được phần đó.
+
+**Dữ liệu và chạy lại**: tiếng Trung, tiếng Indonesia, tiếng Việt, tiếng Hindi và tiếng Anh dùng [FLEURS](https://huggingface.co/datasets/google/fleurs) (Google, CC-BY 4.0), Trung-Anh xen kẽ dùng [ASCEND](https://huggingface.co/datasets/CAiRE/ASCEND) (CAiRE, CC-BY-SA 4.0); không dùng bản ghi âm nào của công ty. Mã nguồn là `group/bench_asr.py`; chạy lại trên GitHub tại Actions → "語音辨識模型比較" → Run workflow (chọn được ngôn ngữ, số câu và mô hình; tất cả mô hình với 50 câu mất khoảng 3 giờ 40 phút). Kết quả lần này: [nhật ký chạy](https://github.com/fairy715/PCG-live-whisper/actions/runs/44498791993).
+
 #### Theo cấu hình máy (laptop mới)
 
 Trước hết xem máy có card NVIDIA không (Task Manager → "Performance" → GPU):

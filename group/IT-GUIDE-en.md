@@ -261,6 +261,41 @@ Indonesian small uses maleo-ai/whisper-small-id (Apache-2.0); cahya/whisper-smal
 - Test recognition during packaging (synthetic speech): PhoWhisper medium and Indonesian small were fully correct; PhoWhisper small and Indonesian medium had one wrong word each. Test with real recordings
 - In server mode with a GPU server, recognition happens on the server and the packs on staff computers are not used
 
+#### Measured: error rate of each model (public datasets, 2026-11-19)
+
+The recommendations above are backed by a measurement: every model was run once on public speech datasets and compared with the reference text. 50 sentences per language; error rate = wrong characters (Chinese) or words (other languages) ÷ characters/words in the reference, **lower is better**.
+
+| Model | Chinese | Indonesian | Vietnamese | Hindi | English | Mixed Chinese-English | Processing time ÷ audio length |
+|---|---|---|---|---|---|---|---|
+| Whisper base (pack) | 17.2% | 30.6% | 40.1% | 105.7% | 8.9% | 37.6% | 0.1 |
+| **Whisper small (built into the installer)** | 10.6% | 16.1% | 20.7% | 55.9% | 6.1% | 28.1% | 0.3 |
+| The language's own small pack | — | 9.2% | 13.1% | 14.8% | — | — | 0.3 (Hindi 0.6) |
+| Whisper medium (pack) | 6.0% | 9.1% | 14.0% | 36.7% | 4.4% | 26.8% | 0.85 |
+| The language's own medium pack | — | 7.1% | 9.7% | 11.2% | — | — | 0.85 (Hindi 1.5) |
+| Whisper large-v3-turbo (pack) | 5.9% | 7.6% | 10.2% | 30.5% | 4.8% | 20.9% | 1.0 |
+| Breeze ASR 25 (pack) | 5.3% | — | — | — | — | 17.8% | 1.6 |
+
+- "The language's own pack": PhoWhisper for Vietnamese, maleo-ai (small) / cahya (medium) for Indonesian, vasista22 for Hindi.
+- The last column was measured on a 4-core machine **without a graphics card**: 0.3 means 10 seconds of audio take 3 seconds; close to or above 1 cannot keep up with live subtitles and needs an NVIDIA card with the GPU pack.
+
+**What the numbers show**
+
+- **The built-in small model is the bottleneck**: except for English, replacing it removes 40% to more than half of the errors; Hindi shows it most (55.9% → 11.2%).
+- **Foreign languages improve even without a graphics card**: the small packs for Indonesian, Vietnamese and Hindi run at about the same speed as the built-in model and lower the error rate from 16.1% / 20.7% / 55.9% to 9.2% / 13.1% / 14.8%. On computers that often listen to these languages this is the cheapest step.
+- **Chinese has no cheap option**: only medium, large-v3-turbo and Breeze ASR 25 go from 10.6% to below 6%, and all three are at or beyond the live limit on an ordinary computer, so a graphics card is needed.
+- **Computers with a graphics card**: Breeze ASR 25 for Chinese and mixed Chinese-English; each language's medium pack for Indonesian, Vietnamese and Hindi; large-v3-turbo if you want one general model, but its Hindi is poor (30.5%).
+- **Breeze and large-v3-turbo cannot be told apart on plain Chinese** (5.3% vs 5.9%, a difference of 11 characters); the gap on mixed Chinese-English is clearer (17.8% vs 20.9%).
+
+**Limits (the numbers do not transfer directly to real meetings)**
+
+- The data is clean read speech; real meetings have distant microphones, people talking over each other and accents, so error rates will be higher than in the table. The ranking between models is still a useful guide.
+- The Chinese set is Mandarin from mainland China, not a Taiwanese accent; the advantage of Breeze ASR 25 on Taiwanese Mandarin may be understated.
+- Only 50 sentences per language: a difference of one or two percentage points does not mean a real difference.
+- Hindi with base is above 100%, which means it output many extra wrong words; the cause was not checked sentence by sentence.
+- If real meetings are much worse than this table, the cause is usually the audio (microphone too far away, room echo); a different model or a graphics card does not help with that.
+
+**Data and re-running**: Chinese, Indonesian, Vietnamese, Hindi and English use [FLEURS](https://huggingface.co/datasets/google/fleurs) (Google, CC-BY 4.0), mixed Chinese-English uses [ASCEND](https://huggingface.co/datasets/CAiRE/ASCEND) (CAiRE, CC-BY-SA 4.0); no company recordings were used. The script is `group/bench_asr.py`; re-run it on GitHub under Actions → "語音辨識模型比較" → Run workflow (languages, number of sentences and models can be chosen; all models with 50 sentences each take about 3 hours 40 minutes). This result: [run log](https://github.com/fairy715/PCG-live-whisper/actions/runs/44498791993).
+
 #### By computer (new laptops)
 
 First check for an NVIDIA graphics card (Task Manager → "Performance" → GPU):

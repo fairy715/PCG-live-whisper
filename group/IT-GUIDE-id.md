@@ -261,6 +261,41 @@ Bahasa Indonesia small memakai maleo-ai/whisper-small-id (Apache-2.0); cahya/whi
 - Uji pengenalan saat pembuatan paket (suara sintetis): PhoWhisper medium dan Indonesia small benar seluruhnya; PhoWhisper small dan Indonesia medium masing-masing salah satu kata. Uji dengan rekaman nyata
 - Dalam mode server dengan server GPU, pengenalan suara dilakukan di server dan paket di komputer karyawan tidak dipakai
 
+#### Hasil uji: tingkat kesalahan tiap model (dataset publik, 2026-11-19)
+
+Saran di atas didukung hasil uji: setiap model dijalankan sekali pada dataset suara publik lalu dibandingkan dengan teks acuan. 50 kalimat per bahasa; tingkat kesalahan = karakter (Mandarin) atau kata (bahasa lain) yang salah ÷ jumlah karakter/kata pada teks acuan, **makin rendah makin baik**.
+
+| Model | Mandarin | Indonesia | Vietnam | Hindi | Inggris | Campuran Mandarin-Inggris | Waktu proses ÷ panjang suara |
+|---|---|---|---|---|---|---|---|
+| Whisper base (paket) | 17,2% | 30,6% | 40,1% | 105,7% | 8,9% | 37,6% | 0,1 |
+| **Whisper small (bawaan installer)** | 10,6% | 16,1% | 20,7% | 55,9% | 6,1% | 28,1% | 0,3 |
+| Paket small khusus bahasa itu | — | 9,2% | 13,1% | 14,8% | — | — | 0,3 (Hindi 0,6) |
+| Whisper medium (paket) | 6,0% | 9,1% | 14,0% | 36,7% | 4,4% | 26,8% | 0,85 |
+| Paket medium khusus bahasa itu | — | 7,1% | 9,7% | 11,2% | — | — | 0,85 (Hindi 1,5) |
+| Whisper large-v3-turbo (paket) | 5,9% | 7,6% | 10,2% | 30,5% | 4,8% | 20,9% | 1,0 |
+| Breeze ASR 25 (paket) | 5,3% | — | — | — | — | 17,8% | 1,6 |
+
+- "Khusus bahasa itu": PhoWhisper untuk bahasa Vietnam, maleo-ai (small) / cahya (medium) untuk bahasa Indonesia, vasista22 untuk bahasa Hindi.
+- Kolom terakhir diukur pada mesin 4 inti **tanpa kartu grafis**: 0,3 berarti suara 10 detik diproses dalam 3 detik; mendekati atau di atas 1 tidak bisa mengikuti subtitle langsung dan memerlukan kartu NVIDIA dengan paket GPU.
+
+**Yang terlihat dari angka ini**
+
+- **Model small bawaan adalah titik lemahnya**: kecuali bahasa Inggris, menggantinya mengurangi kesalahan 40% sampai lebih dari separuh; paling jelas pada bahasa Hindi (55,9% → 11,2%).
+- **Bahasa asing bisa membaik tanpa kartu grafis**: paket small untuk bahasa Indonesia, Vietnam, dan Hindi kecepatannya hampir sama dengan model bawaan dan menurunkan tingkat kesalahan dari 16,1% / 20,7% / 55,9% menjadi 9,2% / 13,1% / 14,8%. Untuk komputer yang sering mendengarkan bahasa-bahasa ini, inilah langkah paling murah.
+- **Bahasa Mandarin tidak punya pilihan murah**: hanya medium, large-v3-turbo, dan Breeze ASR 25 yang menurunkan 10,6% menjadi di bawah 6%, dan ketiganya berada di batas atau melewati batas subtitle langsung pada komputer biasa, jadi perlu kartu grafis.
+- **Komputer dengan kartu grafis**: Breeze ASR 25 untuk bahasa Mandarin dan campuran Mandarin-Inggris; paket medium masing-masing untuk bahasa Indonesia, Vietnam, dan Hindi; large-v3-turbo kalau hanya ingin satu model umum, tetapi hasilnya untuk bahasa Hindi buruk (30,5%).
+- **Breeze dan large-v3-turbo tidak bisa dibedakan pada bahasa Mandarin murni** (5,3% vs 5,9%, selisih 11 karakter); selisih pada campuran Mandarin-Inggris lebih jelas (17,8% vs 20,9%).
+
+**Batasan (angka ini tidak bisa langsung dipakai untuk rapat sebenarnya)**
+
+- Datanya rekaman bacaan yang bersih; rapat sebenarnya memiliki mikrofon yang jauh, orang berbicara bersamaan, dan logat, sehingga tingkat kesalahannya lebih tinggi daripada tabel. Urutan antarmodel tetap bisa dijadikan acuan.
+- Data bahasa Mandarin berasal dari Tiongkok daratan, bukan logat Taiwan; keunggulan Breeze ASR 25 pada bahasa Mandarin Taiwan mungkin terlihat lebih kecil daripada sebenarnya.
+- Hanya 50 kalimat per bahasa: selisih satu atau dua poin persen belum tentu berarti benar-benar berbeda.
+- Bahasa Hindi dengan base melebihi 100%, artinya model mengeluarkan banyak kata salah tambahan; penyebabnya belum diperiksa per kalimat.
+- Kalau rapat sebenarnya jauh lebih buruk daripada tabel ini, penyebabnya biasanya suara (mikrofon terlalu jauh, gema ruangan); mengganti model atau kartu grafis tidak membantu untuk hal itu.
+
+**Data dan menjalankan ulang**: bahasa Mandarin, Indonesia, Vietnam, Hindi, dan Inggris memakai [FLEURS](https://huggingface.co/datasets/google/fleurs) (Google, CC-BY 4.0), campuran Mandarin-Inggris memakai [ASCEND](https://huggingface.co/datasets/CAiRE/ASCEND) (CAiRE, CC-BY-SA 4.0); tidak ada rekaman perusahaan yang dipakai. Skripnya `group/bench_asr.py`; jalankan ulang di GitHub lewat Actions → "語音辨識模型比較" → Run workflow (bahasa, jumlah kalimat, dan model bisa dipilih; semua model dengan 50 kalimat memerlukan sekitar 3 jam 40 menit). Hasil kali ini: [catatan eksekusi](https://github.com/fairy715/PCG-live-whisper/actions/runs/44498791993).
+
 #### Menurut spesifikasi komputer (laptop baru)
 
 Periksa dulu apakah ada kartu grafis NVIDIA (Task Manager → "Performance" → GPU):
