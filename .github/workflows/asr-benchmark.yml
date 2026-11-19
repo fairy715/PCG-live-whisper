@@ -1,0 +1,65 @@
+# PCG 集團版：用公開的語音資料集比較各個語音辨識模型的錯字率（group/bench_asr.py）。
+# 手動執行；不會用到公司的任何資料，也不會發布任何東西。結果在這次執行的摘要與附件（bench/results.md）。
+name: 語音辨識模型比較
+
+on:
+  workflow_dispatch:
+    inputs:
+      langs:
+        description: "要比的語言（逗號分隔）：zh,id,vi,hi,en"
+        default: "zh,id,vi,hi,en"
+        required: false
+      n:
+        description: "每種語言取幾句（越多越準、越久）"
+        default: "40"
+        required: false
+      models:
+        description: "只跑這些模型代號（逗號分隔，空白＝全部）"
+        default: ""
+        required: false
+      ascend:
+        description: "要不要跑中英夾雜（ASCEND）：yes／no"
+        default: "yes"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    env:
+      IN_LANGS: ${{ inputs.langs }}     # 手動輸入的參數一律經環境變數傳進指令（不直接拼進 run，避免指令注入）
+      IN_N: ${{ inputs.n }}
+      IN_MODELS: ${{ inputs.models }}
+      IN_ASCEND: ${{ inputs.ascend }}
+      PYTHONUTF8: "1"
+      HF_HUB_DISABLE_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 空出磁碟空間（模型與資料集很大）
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          df -h /
+      - name: 安裝套件
+        run: python -m pip install --quiet faster-whisper huggingface_hub opencc-python-reimplemented pyarrow numpy fastapi
+      - name: 比較
+        run: |
+          case "$IN_N" in ''|*[!0-9]*) IN_N=40 ;; esac
+          python group/bench_asr.py --out bench --langs "$IN_LANGS" --n "$IN_N" --models "$IN_MODELS" --ascend "$IN_ASCEND"
+      - name: 結果寫進摘要
+        if: always()
+        run: |
+          if [ -f bench/results.md ]; then cat bench/results.md >> "$GITHUB_STEP_SUMMARY"; else echo "沒有產生結果" >> "$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: asr-benchmark
+          path: |
+            bench/results.md
+            bench/results.json
+          if-no-files-found: ignore
