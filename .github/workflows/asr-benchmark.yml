@@ -46,7 +46,9 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
           df -h /
       - name: 安裝套件
-        run: python -m pip install --quiet faster-whisper huggingface_hub opencc-python-reimplemented pyarrow numpy fastapi
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg      # FLEURS 的聲音檔要用 ffmpeg 轉
+          python -m pip install --quiet faster-whisper huggingface_hub opencc-python-reimplemented pyarrow numpy fastapi
       - name: 比較
         run: |
           case "$IN_N" in ''|*[!0-9]*) IN_N=40 ;; esac
@@ -63,3 +65,6 @@ jobs:
             bench/results.md
             bench/results.json
           if-no-files-found: ignore
+      - name: 結果
+        if: always()
+        run: cat bench/results.md 2>/dev/null || echo "沒有產生結果"

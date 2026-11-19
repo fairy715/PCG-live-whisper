@@ -28,6 +28,11 @@ class Text(unittest.TestCase):
         self.assertEqual(b.tokens("先請 QC 報告 IPQC 的不良率", "zh-en"),
                          ["先", "请", "qc", "报", "告", "ipqc", "的", "不", "良", "率"])
 
+    def test_spelled_out_abbreviations_are_one_word(self):
+        self.assertEqual(b.tokens("我专业是 i s m information systems", "zh-en"), b.tokens("我專業是ISM Information Systems", "zh-en"))
+        self.assertEqual(b.tokens("a b c", "en"), ["abc"])
+        self.assertEqual(b.tokens("I am a student", "en"), ["i", "am", "a", "student"])       # 中間隔著別的詞：不併
+
     def test_error_rate(self):
         self.assertEqual(b.edit_distance(list("abc"), list("abc")), 0)
         self.assertEqual(b.edit_distance(list("abc"), list("axc")), 1)

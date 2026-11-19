@@ -97,8 +97,19 @@ def tokens(text, lang):
                 word = []
     if word:
         out.append("".join(word))
-    out = [w.strip("'") for w in out]
-    return [w for w in out if w]
+    out = [w for w in (w.strip("'") for w in out) if w]
+    # 一個字母一個字母念的縮寫（標準答案寫「i s m」、模型寫「ISM」）併成一個詞，不然同一件事會算成三個錯
+    merged, run = [], []
+    for w in out + [""]:
+        if len(w) == 1 and w.isascii() and w.isalpha():
+            run.append(w)
+            continue
+        if run:
+            merged.append("".join(run))
+            run = []
+        if w:
+            merged.append(w)
+    return merged
 
 
 def edit_distance(a, b):
@@ -201,8 +212,10 @@ def load_ascend(n):
             has_zh, has_en = any(_is_cjk(c) for c in text), bool(re.search(r"[A-Za-z]{2,}", text))
             if not (lang_tag == "mixed" or (has_zh and has_en)) or not isinstance(au, dict) or not au.get("bytes"):
                 continue
+            if len(tokens(text, "zh-en")) < 6:           # 太短的（「ok 福建」）一兩個字就差很多，不列入
+                continue
             a = wav_to_16k(au["bytes"])
-            if not 1.0 <= len(a) / 16000 <= 28.0:
+            if not 2.0 <= len(a) / 16000 <= 28.0:
                 continue
             out.append({"id": str(row.get("id") or len(out)), "ref": text, "audio": a})
             if len(out) >= n:
