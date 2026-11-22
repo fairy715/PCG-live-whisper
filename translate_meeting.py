@@ -3235,6 +3235,83 @@ def _pcg_gloss():
     return _PCG_GLOSS[0]
 
 
+# ── 這場會議的資料（r32，group/meeting_notes.py）：同仁開始字幕前貼的議程、與會者、料號 ──────
+_PCG_NOTES = [None]
+_PCG_NOTES_HOT = [None, ""]          # [整理過的那一份資料, 它的提示詞]
+
+
+def _pcg_notes():
+    """這場會議的資料（group_data/meeting-notes.txt，WebUI 在開始字幕前寫好）；沒有就是空字串"""
+    if _PCG_NOTES[0] is None:
+        try:
+            from group import meeting_notes as _mn
+            _PCG_NOTES[0] = _mn.load(SCRIPT_DIR)
+        except Exception:
+            _PCG_NOTES[0] = ""
+    return _PCG_NOTES[0]
+
+
+def _pcg_notes_hot():
+    """這場會議的資料裡短的詞（每一句辨識都會用到：同一份資料只整理一次）"""
+    notes = _pcg_notes()
+    if not notes:
+        return ""
+    if _PCG_NOTES_HOT[0] != notes:
+        try:
+            from group import meeting_notes as _mn
+            _PCG_NOTES_HOT[:] = [notes, _mn.hotwords(notes)]
+        except Exception:
+            _PCG_NOTES_HOT[:] = [notes, ""]
+    return _PCG_NOTES_HOT[1]
+
+
+def _pcg_hotwords(api=False):
+    """給語音辨識的提示詞：這場會議的詞＋詞庫的詞（沒有就是空字串）"""
+    g, nh = _pcg_gloss(), _pcg_notes_hot()
+    gh = g.hotwords() if g else ""
+    if not nh:
+        return gh
+    try:
+        from group import meeting_notes as _mn
+        return _mn.join_hotwords(nh, gh, api=api)
+    except Exception:
+        return gh
+
+
+def _pcg_notes_echo(text):
+    """這一段是不是把這場會議的提示詞照抄出來（沒人說話時偶爾會這樣）"""
+    nh = _pcg_notes_hot()
+    if not nh or not text:
+        return False
+    try:
+        from group import meeting_notes as _mn
+        return _mn.echo(text, nh)
+    except Exception:
+        return False
+
+
+def _pcg_prompt_extra(text, direction):
+    """放在翻譯提示最前面的東西：這場會議的背景資料（r32）＋詞庫（r23）"""
+    notes = _pcg_notes()
+    head = ""
+    if notes:
+        try:
+            from group import meeting_notes as _mn
+            head = _mn.prompt_block(notes)
+        except Exception:
+            head = ""
+    return head + _pcg_gloss_prompt(text, direction)
+
+
+def _pcg_asr_rule(prompt):
+    """「聽錯的字用最合理的意思翻」（r32）：見 group/meeting_notes.py 的 asr_rule"""
+    try:
+        from group import meeting_notes as _mn
+        return _mn.asr_rule(prompt)
+    except Exception:
+        return prompt
+
+
 def _pcg_gloss_fix(text):
     """辨識結果裡「常被聽錯的寫法」換回正確的詞"""
     g = _pcg_gloss()
@@ -3244,15 +3321,15 @@ def _pcg_gloss_fix(text):
 def _pcg_gloss_segments(segs):
     """faster-whisper 的每一段：修正聽錯的寫法；整段只有詞庫的詞（提示詞被照抄）就丟掉"""
     g = _pcg_gloss()
-    if not g:
+    if not g and not _pcg_notes():
         yield from segs
         return
     import dataclasses
     for seg in segs:
         text = getattr(seg, "text", None)
         if isinstance(text, str):
-            fixed = g.fix(text)
-            if g.only_terms(fixed):
+            fixed = g.fix(text) if g else text
+            if (g and g.only_terms(fixed)) or _pcg_notes_echo(fixed):
                 continue
             if fixed != text:
                 try:
@@ -3420,7 +3497,7 @@ class _FwModel:
     def transcribe(self, *args, **kwargs):
         """集團版：語音辨識 API（r24）開著而且指定了語言 → 送 API（失敗的那一塊改用這個模型）；
         詞庫（r23）：帶上提示詞，結果修正聽錯的寫法"""
-        g = _pcg_gloss()
+        g = _pcg_gloss() or _pcg_notes()
         if kwargs.get("language") and _pcg_asr_api_ready():
             audio = self._api_audio(args[0] if args else kwargs.get("audio"))
             if audio is not None:
@@ -3431,11 +3508,11 @@ class _FwModel:
 
     def _local(self, args, kwargs):
         """這台電腦的模型辨識（有詞庫就帶提示詞）"""
-        g = _pcg_gloss()
-        if (g and _PCG_GLOSS_HOTWORDS_OK[0] and kwargs.get("language")
+        hot = _pcg_hotwords()              # 這場會議的詞（r32）＋詞庫的詞
+        if (hot and _PCG_GLOSS_HOTWORDS_OK[0] and kwargs.get("language")
                 and "hotwords" not in kwargs and not kwargs.get("prefix")):
             try:
-                return self._transcribe(*args, **dict(kwargs, hotwords=g.hotwords()))
+                return self._transcribe(*args, **dict(kwargs, hotwords=hot))
             except TypeError as e:
                 if "hotwords" not in str(e):
                     raise
@@ -3461,8 +3538,7 @@ class _FwModel:
         from group import asr_api
         lang = kwargs.get("language")
         total = len(audio)
-        g = _pcg_gloss()
-        prompt = g.hotwords() if g else None
+        prompt = _pcg_hotwords(api=True) or None
         if total > 28 * _SEG_SR or kwargs.get("vad_filter"):
             spans = _pcg_silero_spans(audio)
             if total <= 28 * _SEG_SR:
@@ -4059,6 +4135,8 @@ def _webui_send(event: dict):
                     _pcg_extra.feed(event)               # 集團版多語字幕：加編號、有人要看別的語言就另外翻
                 except Exception:  # noqa: BLE001
                     pass
+            elif event.get("type") == "started":
+                _pcg_reply.start()                       # 集團版打字回覆（r32）：字幕開始後才等同仁打字
             _webui_queue.put_nowait(event)
         except Exception:
             pass
@@ -5836,7 +5914,8 @@ class OllamaTranslator:
                      # 台語辨識結果本身就是漢字，翻英文與中翻英同一條路徑
                      "nan2en": self._build_prompt_zh2en}
         builder = _dispatch.get(self.direction) or self._xl_builder() or self._build_prompt_en2zh
-        return _pcg_gloss_prompt(text, self.direction) + builder(text, context)   # 集團版詞庫（r23）
+        # 集團版：這場會議的背景資料（r32）＋詞庫（r23）放最前面；「聽錯的字用最合理的意思翻」（r32）
+        return _pcg_prompt_extra(text, self.direction) + _pcg_asr_rule(builder(text, context))
 
     def _build_prompt_en2zh(self, text, context):
         prompt = (
@@ -6846,6 +6925,70 @@ class _PcgExtraSubs:
 
 
 _pcg_extra = _PcgExtraSubs()
+
+
+# ══ 集團版 r32：打字回覆 ══════════════════════════════════════════
+# 同仁在字幕畫面用自己的語言打字，WebUI 把句子寫進 .pcg_say（group/reply.py），這裡翻成對方的語言、
+# 用 pcg_reply 事件送回去。翻譯器照多語字幕的做法建：本機用同一份 M2M100，伺服器模式用同一台大模型。
+_PCG_SAY_FLAG = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".pcg_say")
+
+
+class _PcgReply:
+    POLL = 0.25
+    STALE = 60.0            # 比這個舊的請求是上一場留下來的，不理
+
+    def __init__(self):
+        self.started = False
+        self.last = None
+
+    def start(self):
+        """字幕開始時呼叫（重複呼叫沒關係）"""
+        if self.started:
+            return
+        self.started = True
+        threading.Thread(target=self._loop, daemon=True, name="pcg-reply").start()
+
+    def _loop(self):
+        while True:
+            time.sleep(self.POLL)
+            try:
+                self.poll()
+            except Exception:  # noqa: BLE001
+                pass
+
+    def poll(self):
+        try:
+            with open(_PCG_SAY_FLAG, encoding="utf-8") as f:
+                req = json.loads(f.read(8000))
+        except (OSError, ValueError):
+            return
+        rid = req.get("id") if isinstance(req, dict) else None
+        if rid is None or rid == self.last:
+            return
+        self.last = rid
+        try:
+            fresh = time.time() - float(req.get("at") or 0) <= self.STALE
+        except (TypeError, ValueError):
+            fresh = False
+        if fresh:
+            _webui_send(self.answer(rid, req.get("text"), req.get("src"), req.get("tgt")))
+
+    def answer(self, rid, text, src, tgt):
+        text, direction = " ".join(str(text or "").split()), f"{src}2{tgt}"
+        if not text or direction not in NllbTranslator._DIRECTION_MAP:
+            return {"type": "pcg_reply", "id": rid, "ok": False, "code": "say_unsupported"}
+        t0 = time.monotonic()
+        try:
+            out = _pcg_extra.translator(direction).translate(text)
+        except Exception as e:  # noqa: BLE001
+            return {"type": "pcg_reply", "id": rid, "ok": False, "code": "say_failed", "error": str(e)[:200]}
+        if not out or isinstance(out, _TranslateFailed) or not str(out).strip():
+            return {"type": "pcg_reply", "id": rid, "ok": False, "code": "say_failed"}
+        return {"type": "pcg_reply", "id": rid, "ok": True, "text": str(out).strip(), "src": src, "tgt": tgt,
+                "took": round(time.monotonic() - t0, 2)}
+
+
+_pcg_reply = _PcgReply()
 
 
 def _is_private_host(host):

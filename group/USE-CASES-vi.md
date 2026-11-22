@@ -162,6 +162,37 @@ Tôi nói "Tiếng Việt" → "Chỉ đọc phụ đề" → "Tiếng Trung →
 
 ---
 
+## Tên người, mã hàng hay bị nghe sai? Dán thông tin cuộc họp trước khi bắt đầu (r32)
+
+"**+ Thêm thông tin về cuộc họp này**" ở phần phụ đề trực tiếp (phần "Ghi âm → Biên bản" cũng có):
+
+1. Dán **tên người tham dự, tên sản phẩm, mã hàng và các mục trong chương trình họp**, mỗi dòng một mục hoặc cách nhau bằng dấu phẩy. Ví dụ:
+
+   ```
+   Người tham dự: Wang Hsiao-ming, Nguyễn Văn An
+   Nghiệm thu thiết bị nhà máy
+   PO-12345
+   ```
+2. Bấm "Bắt đầu phụ đề trực tiếp". Khi nghe thấy âm gần giống, phần nhận dạng sẽ ưu tiên cách viết này; khi LLM dịch, tên và thuật ngữ cũng theo cách viết này.
+3. Thông tin chỉ lưu trên máy này và vẫn còn khi mở lại (họp định kỳ không cần dán lại); cuộc họp khác thì sửa hoặc bấm "Xóa".
+
+- Không cần dán cả bài trình bày: từ ngắn giúp nhiều nhất. Câu dài chỉ làm bối cảnh cho phần dịch, không dùng để hỗ trợ nhận dạng.
+- Khi máy này ở **chế độ cục bộ**, thông tin chỉ giúp nhận dạng giọng nói (mô hình dịch cục bộ không dùng được).
+- Khi đầu trang có nhắc nhở màu cam (âm thanh hoặc văn bản được gửi ra dịch vụ bên ngoài công ty), thông tin này cũng được gửi kèm: đừng dán nội dung mật.
+- Những từ cả công ty đều dùng (tên công ty, nhà máy, tên hệ thống) nên nhờ IT đưa vào "Bảng thuật ngữ", không cần dán mỗi lần.
+
+## Người kia không hiểu tôi nói? Gõ chữ trên màn hình phụ đề (r32)
+
+"**Gõ để trả lời**" ở cuối màn hình phụ đề: gõ bằng ngôn ngữ của bạn, bấm "Dịch", ngôn ngữ của người kia sẽ hiện bằng chữ lớn.
+
+- **Đọc to**, hoặc xoay màn hình **cho người kia xem**; họp trực tuyến thì bấm "Sao chép" rồi dán vào khung trò chuyện của Teams/Zoom.
+- Nút bên trái ghi chiều dịch (ví dụ "tiếng Việt → tiếng Trung ⇄"); bấm để đổi chiều, người kia cũng có thể gõ bằng ngôn ngữ của họ trên máy của bạn.
+- Mỗi lần một câu, tối đa 300 ký tự. Câu đã gõ vẫn nằm trong phần hội thoại của trang này; **người xem phụ đề bằng điện thoại không thấy**.
+- Chỉ có khi phụ đề đang chạy, trên máy đang thu âm; "Mọi người đều nói tiếng Trung" không có phần dịch nên không có chức năng này.
+- Muốn ẩn đi: bấm lại "Gõ để trả lời" ở phía dưới. Ở chế độ phụ đề nền đen, phần này mặc định được ẩn.
+
+---
+
 ## Những trợ giúp trên màn hình (r29)
 
 - **Câu xác nhận trước khi bắt đầu**: phía trên nút có dòng “Bạn sẽ nghe: tiếng Trung → phụ đề: tiếng Việt”. Nếu không đúng ý bạn thì bước 3 đang bị ngược; hãy đổi lại rồi mới bắt đầu.

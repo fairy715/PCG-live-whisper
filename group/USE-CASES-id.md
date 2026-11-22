@@ -162,6 +162,37 @@ Saya berbicara "Bahasa Indonesia" → "Hanya baca subtitle" → "Mandarin → In
 
 ---
 
+## Nama dan nomor part sering salah dengar? Tempelkan informasi rapat ini dulu (r32)
+
+"**+ Tambahkan informasi rapat ini**" di subtitle langsung (juga ada di "Rekaman → Notulen"):
+
+1. Tempelkan **nama peserta, nama produk, nomor part, dan butir agenda** rapat ini, satu per baris atau dipisahkan koma. Contoh:
+
+   ```
+   Peserta: Wang Hsiao-ming, Budi Santoso
+   Serah terima mesin pabrik Jawa Tengah
+   PO-12345
+   ```
+2. Klik "Mulai subtitle langsung". Saat pengenalan suara mendengar bunyi yang mirip, penulisan inilah yang diutamakan; saat LLM menerjemahkan, nama dan istilah juga mengikuti penulisan ini.
+3. Informasi ini hanya disimpan di komputer ini dan masih ada saat dibuka lagi (rapat rutin tidak perlu menempel ulang); untuk rapat lain, ubah atau klik "Hapus".
+
+- Tidak perlu menempelkan seluruh presentasi: kata-kata pendek paling membantu. Kalimat panjang hanya menjadi latar untuk terjemahan dan tidak dipakai untuk membantu pengenalan suara.
+- Saat komputer ini dalam **mode lokal**, informasi ini hanya membantu pengenalan suara (model terjemahan lokal tidak bisa memakainya).
+- Saat ada peringatan oranye di bagian atas halaman (suara atau teks dikirim ke layanan di luar perusahaan), informasi ini ikut terkirim: jangan menempelkan isi yang rahasia.
+- Kata yang dipakai seluruh perusahaan (nama perusahaan, pabrik, nama sistem) sebaiknya dimasukkan IT ke "Glosarium", sehingga tidak perlu ditempel setiap kali.
+
+## Lawan bicara tidak mengerti ucapan saya? Ketik di layar subtitle (r32)
+
+"**Ketik balasan**" di bagian bawah layar subtitle: ketik dalam bahasa Anda, klik "Terjemahkan", dan bahasa lawan bicara muncul dengan huruf besar.
+
+- **Bacakan**, atau putar layar dan **tunjukkan**; di rapat online klik "Salin" lalu tempel ke obrolan Teams/Zoom.
+- Tombol di sebelah kiri menunjukkan arahnya (mis. "Indonesia → Mandarin ⇄"); klik untuk menukar, sehingga lawan bicara juga bisa mengetik dalam bahasanya di komputer Anda.
+- Satu kalimat setiap kali, paling banyak 300 karakter. Kalimat yang diketik tetap ada di percakapan halaman ini; **orang yang menonton subtitle di ponsel tidak melihatnya**.
+- Hanya tersedia saat subtitle berjalan, di komputer yang menangkap suara; "Semua berbahasa Mandarin" tidak memiliki terjemahan, jadi tidak ada fitur ini.
+- Untuk menyembunyikannya, klik lagi "Ketik balasan" di bagian bawah. Di tampilan subtitle berlatar hitam, bagian ini tersembunyi secara bawaan.
+
+---
+
 ## Bantuan di layar (r29)
 
 - **Kalimat konfirmasi sebelum mulai**: di atas tombol tertulis “Anda mendengar: Mandarin → subtitle: Indonesia”. Jika tidak sesuai harapan, langkah 3 terbalik; ubah dulu sebelum mulai.

@@ -39,12 +39,16 @@ try:
     from group import glossary
     from group import asr_api
     from group import audio_test
+    from group import meeting_notes
+    from group import reply as reply_mod
 except ImportError:                     # 測試時直接 import simple_routes
     import model_packs
     import diagnostics
     import glossary
     import asr_api
     import audio_test
+    import meeting_notes
+    import reply as reply_mod
 
 # 情境：同仁看到的是「錄音裡主要說什麼語言 → 拿到什麼」，背後對應主程式的模式代號
 DEFAULT_SCENARIOS = [
@@ -244,7 +248,7 @@ class SimpleQueue:
                     if j.get("finished") and now - j["finished"] > keep]:
             del self.jobs[jid]
 
-    def add(self, owner, filename, path, scenario, topic, speakers):
+    def add(self, owner, filename, path, scenario, topic, speakers, notes=""):
         jid = time.strftime("%Y%m%d%H%M%S") + "-" + secrets.token_hex(3)
         with self.lock:
             self._prune()
@@ -252,6 +256,7 @@ class SimpleQueue:
                               "scenario": scenario["id"], "mode": scenario["mode"],
                               "scenario_title": f"{scenario['title']}會議" if not scenario["title"].endswith("會議")
                               else scenario["title"], "topic": topic, "speakers": speakers,
+                              "notes": notes,        # 這場會議的資料（r32）：只給主程式用，不放進清單
                               "state": "queued", "created": time.time(), "started": None, "finished": None,
                               "error": "", "out_dir": "", "stage": ""}
             self._save()
@@ -336,6 +341,7 @@ class SimpleQueue:
     def _args(self, job):
         s = self.settings()
         glossary_sync(self.base, s)                # 詞庫（r23）：主程式讀 group_data/glossary.txt
+        meeting_notes.save(self.base, job.get("notes") or "")     # 這場會議的資料（r32）；沒有就清掉上一場的
         pf = profile(s, self.has_gpu())
         args = [sys.executable, str(self.base / "translate_meeting.py"),
                 "--input", job["path"], "--mode", job["mode"], "-m",
@@ -519,7 +525,7 @@ def parse_llm(text, keep_v1=False):
 
 def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path, write_config,
              start_live=None, live_running=None, live_args=None, set_view_password=None, gpu_alive=None,
-             update_hooks=None, stop_live=None):
+             update_hooks=None, stop_live=None, reply=None):
     """把簡易版的路由掛到 WebUI 的 FastAPI app 上（webui.py 呼叫）。
     start_live(body)：用 WebUI 原本的方式啟動即時字幕；live_running()：WebUI 是否正在跑；
     stop_live()：停止即時字幕（首頁「字幕進行中」旁的停止按鈕）"""
@@ -649,7 +655,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
 
     @app.post("/api/simple/jobs")
     async def simple_submit(request: Request, file: UploadFile = File(...), scenario: str = Form(...),
-                            topic: str = Form(""), speakers: str = Form("")):
+                            topic: str = Form(""), speakers: str = Form(""), notes: str = Form("")):
         owner, err = auth(request)
         if err:
             return err
@@ -679,7 +685,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             dest.unlink(missing_ok=True)
             dest_dir.rmdir()
             return JSONResponse({"ok": False, "code": "too_large", "error": str(e)}, status_code=413)
-        jid = queue.add(owner, name, dest, sc, topic.strip()[:60], spk)
+        jid = queue.add(owner, name, dest, sc, topic.strip()[:60], spk, meeting_notes.clean(notes))
         return {"ok": True, "id": jid}
 
     @app.post("/api/simple/jobs/{jid}/cancel")
@@ -821,6 +827,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "remote_view": bool(settings().get("allow_remote_view", False)),
                 # 設定改了但還沒重新啟動（r20）：頁面要先重開程式，手機才連得進來（或關掉分享後才真的關上）
                 "bound": bound_all(), "can_restart": can_restart(),
+                # 打字回覆（r32）：這一場是哪兩種語言（只辨識不翻譯的沒有）；只有收音的這台電腦能用
+                "reply": (reply_mod.pair(mode) if reply is not None and args and "--input" not in args else None),
                 "scenarios": [{k: s[k] for k in ("id", "title", "flag")}
                               | {"can_bidi": bool(s["bidi"]), "can_room": s["id"] in ROOM_SCENARIOS}
                               for s in LIVE_SCENARIOS]}
@@ -1037,7 +1045,9 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                                      "error": "這台電腦正在處理錄音檔，處理完再開即時字幕"}, status_code=409)
             cur_mode = cur[cur.index("--mode") + 1] if "--mode" in cur[:-1] else None
             same_src = mode != "zh" or ("-d" in cur) == zh_mic       # 中文：收電腦的聲音和收麥克風是兩回事
-            if cur_mode is None or (cur_mode == mode and ("--room" in cur) == room and same_src):
+            # 這場會議的資料（r32）改了也要重開：主程式開始時才讀
+            same_notes = meeting_notes.clean(body.get("notes")) == meeting_notes.load(base_dir)
+            if cur_mode is None or (cur_mode == mode and ("--room" in cur) == room and same_src and same_notes):
                 return {"ok": True, "already": True}
         pf = profile(s, has_gpu())
         if room:
@@ -1071,6 +1081,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             start.update(asr="moonshine", moonshine_model="medium")
         import asyncio
         await asyncio.to_thread(glossary_sync, base_dir, s)      # 詞庫（r23）
+        await asyncio.to_thread(meeting_notes.save, base_dir, body.get("notes"))     # 這場會議的資料（r32）
         # 聲音與麥克風（r24）：同仁指定的麥克風（存的是名稱）換成編號交給主程式；找不到（拔掉了）就用預設
         if room or "_" in mode:
             await asyncio.to_thread(_meter.stop)
@@ -1092,6 +1103,27 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         except Exception as e:
             return JSONResponse({"ok": False, "code": "live_failed", "error": f"啟動失敗：{e}"}, status_code=500)
         return {"ok": True, "mode": shown, "room": room}
+
+    @app.post("/api/simple/say")
+    async def simple_say(request: Request, body: dict = {}):
+        """打字回覆（r32）：把同仁打的句子翻成對方的語言。交給正在跑字幕的主程式翻（group/reply.py）"""
+        if not is_local(request):
+            return JSONResponse({"ok": False, "code": "local_only", "error": "只能在收音的這台電腦上打字"}, status_code=403)
+        args = (live_args() if live_args else None) or []
+        if reply is None or not (live_running and live_running()) or "--input" in args:
+            return JSONResponse({"ok": False, "code": "say_not_running", "error": "字幕進行中才能用"}, status_code=409)
+        pr = reply_mod.pair(args[args.index("--mode") + 1] if "--mode" in args[:-1] else "")
+        if not pr:
+            return JSONResponse({"ok": False, "code": "say_unsupported", "error": "這一場沒有翻譯"}, status_code=400)
+        text = reply_mod.clean(body.get("text"))
+        if not text:
+            return JSONResponse({"ok": False, "code": "say_empty", "error": "請先打字"}, status_code=400)
+        src, tgt = (pr["other"], pr["me"]) if body.get("swap") else (pr["me"], pr["other"])
+        ev = await reply.ask(text, src, tgt)
+        if not ev.get("ok"):
+            return JSONResponse({"ok": False, "code": ev.get("code") or "say_failed", "error": "沒有翻成功，請再試一次"},
+                                status_code=504 if ev.get("code") == "say_timeout" else 502)
+        return {"ok": True, "text": str(ev.get("text") or ""), "src": src, "tgt": tgt}
 
     # ─── 一鍵更新（小更新包）：來源是 IT 設定的共用資料夾，或 GitHub 發布頁（見 updater.py） ───
     from group import updater as _upd

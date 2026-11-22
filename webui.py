@@ -756,6 +756,12 @@ async def _event_dispatcher():
     _event_queue = asyncio.Queue(maxsize=500)
     while True:
         msg = await _event_queue.get()
+        if _pcg_on_event is not None:
+            try:
+                if _pcg_on_event(msg):       # 集團版打字回覆（r32）：翻譯結果只回給打字的那一頁，不轉給看字幕的人
+                    continue
+            except Exception:  # noqa: BLE001
+                pass
         await broadcast(msg)
 
 
@@ -2604,6 +2610,7 @@ def _tts_args(body):
     return args
 
 
+_pcg_on_event = None       # 集團版打字回覆（r32）：主程式的事件先給它看（group/reply.py，檔案後面的集團版區塊設定）
 _pcg_wants = None          # 集團版多語字幕：看字幕的人要哪種語言（group/multilang.py，檔案後面的集團版區塊設定）
 
 
@@ -2749,7 +2756,11 @@ try:
         await asyncio.to_thread(_stop_proc)
         await broadcast(json.dumps({"type": "stopped"}))      # 開著的字幕頁顯示「字幕已結束」
 
+    from group import reply as _pcg_reply_mod
+    _pcg_reply_desk = _pcg_reply_mod.Desk(BASE_DIR)
+    _pcg_on_event = _pcg_reply_desk.on_event
     _pcg_simple.register(app, BASE_DIR, _is_local, _pw_hash, _pw_match, CONFIG_FILE, _write_config,
+                         reply=_pcg_reply_desk,
                          start_live=_pcg_start_live,
                          live_running=lambda: _proc is not None and _proc.poll() is None,
                          live_args=lambda: list(_proc.args) if _proc is not None and _proc.poll() is None else None,

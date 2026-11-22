@@ -168,6 +168,37 @@ I speak "your language" → "Only read subtitles" → "Chinese". Recognition run
 
 ---
 
+## Names and part numbers often misheard? Paste this meeting's information first (r32)
+
+"**+ Add information about this meeting**" under live subtitles (also under "Recording → Minutes"):
+
+1. Paste the **participants' names, product names, part numbers and agenda items** of this meeting, one per line or separated by commas. For example:
+
+   ```
+   Participants: Wang Hsiao-ming, Budi Santoso
+   Central Java plant equipment acceptance
+   PO-12345
+   ```
+2. Click "Start live subtitles". When recognition hears something similar it prefers these spellings; when an LLM translates, names and terms follow them too.
+3. The information is kept on this computer only and is still there next time (no need to paste it again for a regular meeting); for a different meeting, change it or click "Clear".
+
+- You do not need to paste a whole slide deck: short words help most. Long sentences are only background for translation and are not used to help recognition.
+- When this computer is in **local mode**, the information only helps recognition (the local translation model cannot use it).
+- When the orange notice is shown at the top of the page (audio or text goes to a service outside the company), this information is sent along with it: do not paste confidential content.
+- Words the whole company uses (company name, plants, system names) belong in the "Glossary" kept by IT, so nobody has to paste them every time.
+
+## The other side cannot understand me? Type on the subtitle screen (r32)
+
+"**Type a reply**" at the bottom of the subtitle screen: type in your language, click "Translate", and the other side's language appears in large type.
+
+- **Read it aloud**, or turn the screen and **show it**; in an online meeting click "Copy" and paste it into the Teams/Zoom chat.
+- The button on the left shows the direction (e.g. "Chinese → Indonesian ⇄"); click it to swap, so the other person can also type in their language on your computer.
+- One sentence at a time, up to 300 characters. What you typed stays in the conversation on this page; **people watching subtitles on their phones do not see it**.
+- Only available while subtitles are running, on the computer that captures the sound; "Everyone speaks Chinese" has no translation, so it has no typed reply.
+- To hide it, click "Type a reply" at the bottom again. In the black subtitle view it is hidden by default.
+
+---
+
 ## Helpers on the screen (r29)
 
 - **Confirmation line before you start**: above the button the page says “You will hear: Indonesian → subtitles in: Chinese”. If that is not what you expect, step 3 is the wrong way round; change it before starting.

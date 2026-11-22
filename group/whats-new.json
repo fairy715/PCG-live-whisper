@@ -1,24 +1,29 @@
 {
  "_說明": "下一版發布時同仁頁面「有新版本」視窗顯示的新功能（每種語言 2～5 點，一點一句）。release 要等於這一次發布的 rN，發布流程才會附上；每次發布前更新這個檔",
- "release": "r31",
+ "release": "r32",
  "zh": [
-  "「顯示全部選項」裡改成三選一：只看字幕、我也要說話、教室模式（原本是兩個打勾框，其實只能選一個）",
-  "畫面上方的說明不再出現看不懂的技術名稱"
+  "開始前可以貼上「這場會議的資料」（與會者姓名、產品名稱、料號、議程），辨識和翻譯會照這些寫法；錄音檔也可以帶",
+  "字幕畫面下方新增「打字回覆」：用你的語言打字，對方的語言用大字顯示，可以念出來、給對方看，或複製貼到會議的聊天",
+  "用大模型翻譯時，語音辨識聽錯的字會依前後文用最合理的意思翻"
  ],
  "en": [
-  "Under “Show all options” there is now one choice of three: only read subtitles, I will speak too, classroom mode (before, two checkboxes of which only one could be on)",
-  "The line at the top of the page no longer shows an unfamiliar technical name"
+  "Before you start you can paste “information about this meeting” (participants’ names, product names, part numbers, agenda); recognition and translation follow these spellings. Recordings can carry it too",
+  "New “Type a reply” at the bottom of the subtitle screen: type in your language and the other side’s language appears in large type to read aloud, show, or copy into the meeting chat",
+  "When an LLM translates, words misheard by speech recognition are translated by their most plausible meaning in context"
  ],
  "id": [
-  "Di “Tampilkan semua pilihan” kini ada satu pilihan dari tiga: hanya baca subtitle, saya juga berbicara, mode kelas (sebelumnya dua kotak centang yang hanya bisa dipilih salah satu)",
-  "Keterangan di bagian atas halaman tidak lagi menampilkan nama teknis yang asing"
+  "Sebelum mulai, Anda bisa menempelkan “informasi rapat ini” (nama peserta, nama produk, nomor part, agenda); pengenalan suara dan terjemahan mengikuti penulisan ini. Rekaman juga bisa membawanya",
+  "Baru: “Ketik balasan” di bagian bawah layar subtitle: ketik dalam bahasa Anda, bahasa lawan bicara muncul dengan huruf besar untuk dibacakan, ditunjukkan, atau disalin ke obrolan rapat",
+  "Saat LLM menerjemahkan, kata yang salah dengar oleh pengenalan suara diterjemahkan menurut makna yang paling masuk akal dalam konteks"
  ],
  "vi": [
-  "Trong “Hiện tất cả lựa chọn” nay chỉ chọn một trong ba: chỉ đọc phụ đề, tôi cũng nói, chế độ lớp học (trước đây là hai ô đánh dấu mà chỉ chọn được một)",
-  "Dòng giải thích ở đầu trang không còn hiện tên kỹ thuật khó hiểu"
+  "Trước khi bắt đầu có thể dán “thông tin về cuộc họp này” (tên người tham dự, tên sản phẩm, mã hàng, chương trình họp); nhận dạng và dịch sẽ theo cách viết này. Bản ghi âm cũng dùng được",
+  "Mới: “Gõ để trả lời” ở cuối màn hình phụ đề: gõ bằng ngôn ngữ của bạn, ngôn ngữ của người kia hiện bằng chữ lớn để đọc to, cho xem hoặc sao chép vào khung trò chuyện",
+  "Khi LLM dịch, những từ bị nhận dạng giọng nói nghe sai sẽ được dịch theo nghĩa hợp lý nhất trong ngữ cảnh"
  ],
  "hi": [
-  "“सभी विकल्प दिखाएँ” में अब तीन में से एक चुनना है: सिर्फ़ सबटाइटल पढ़ें, मैं भी बोलूँगा, कक्षा मोड (पहले दो चेकबॉक्स थे जिनमें से एक ही चल सकता था)",
-  "पेज के ऊपर की पंक्ति में अब अनजान तकनीकी नाम नहीं दिखता"
+  "शुरू करने से पहले “इस मीटिंग की जानकारी” (प्रतिभागियों के नाम, उत्पाद के नाम, पार्ट नंबर, एजेंडा) चिपका सकते हैं; पहचान और अनुवाद इन्हीं वर्तनी के अनुसार होगा। रिकॉर्डिंग के साथ भी दे सकते हैं",
+  "नया: सबटाइटल स्क्रीन के नीचे “लिखकर जवाब दें”: अपनी भाषा में लिखें, सामने वाले की भाषा बड़े अक्षरों में दिखेगी — पढ़कर सुनाएँ, दिखाएँ या मीटिंग चैट में कॉपी करें",
+  "जब LLM अनुवाद करता है, तो आवाज़ की पहचान में गलत सुने गए शब्दों का अनुवाद संदर्भ के अनुसार सबसे उचित अर्थ में होता है"
  ]
 }

@@ -307,6 +307,54 @@ def glossary_check():
         t._PCG_GLOSS[0] = saved
 
 
+def notes_reply_check():
+    """r32：這場會議的資料——真的用 small 模型辨識，帶了這場的詞不可以比沒帶差、一般的句子不可以被塞進這些詞；
+    打字回覆——真的用 M2M100 把打的句子翻成對方的語言（中文 → 印尼文、印尼文 → 中文）。詞是測試用的假資料"""
+    sys.argv = [sys.argv[0]]
+    import translate_meeting as t
+    from group import meeting_notes as mn
+    terms = ["Sukabumi", "Serang", "IPQC", "Kanban"]
+    notes = mn.clean("與會者：Budi Santoso\n" + ", ".join(terms) + "\n這一行是很長的句子，不應該被當成提示詞。")
+    saved = (t._PCG_NOTES[0], t._PCG_GLOSS[0])
+    model = t._FwModel("small", device="cpu", compute_type="int8", cpu_threads=t._pcg_cpu_threads()[0])
+
+    def run(audio):
+        segs, _ = model.transcribe(audio, language="en", beam_size=5)
+        return " ".join(x.text.strip() for x in segs)
+
+    def hits(text):
+        return sum(1 for w in terms if w.lower() in text.lower())
+    try:
+        a = _speak_16k("The I P Q C reports from Sukabumi and Serang are on the Kanban board.")
+        b = _speak_16k("We will check the inventory tomorrow morning.")
+        t._PCG_GLOSS[0], t._PCG_NOTES[0] = (), ""
+        plain = run(a)
+        t._PCG_NOTES[0] = notes
+        hot = t._pcg_hotwords()
+        if "Sukabumi" not in hot or "很長的句子" in hot:
+            raise RuntimeError(f"提示詞不對：{hot}")
+        hinted, other = run(a), run(b)
+        if hits(hinted) < hits(plain):
+            raise RuntimeError(f"帶了這場會議的詞反而比較差：沒帶「{plain}」，有帶「{hinted}」")
+        if hits(other) or "inventory" not in other.lower():
+            raise RuntimeError(f"一般的句子被這場會議的詞影響：「{other}」")
+        t._PCG_NOTES[0] = ""
+        r = t._PcgReply()
+        to_id = r.answer(1, "請再說一次，我沒有聽清楚。", "zh", "id")
+        to_zh = r.answer(2, "Tolong kirim laporan besok pagi.", "id", "zh")
+        for ev in (to_id, to_zh):
+            if not ev.get("ok") or not str(ev.get("text") or "").strip():
+                raise RuntimeError(f"打字回覆沒有譯文：{ev}")
+        if any("\u4e00" <= c <= "\u9fff" for c in to_id["text"]):
+            raise RuntimeError(f"中文 → 印尼文的譯文還有中文：{to_id['text']}")
+        if not any("\u4e00" <= c <= "\u9fff" for c in to_zh["text"]):
+            raise RuntimeError(f"印尼文 → 中文的譯文沒有中文：{to_zh['text']}")
+        return (f"這場會議的詞 {hits(plain)}→{hits(hinted)}/{len(terms)}｜沒帶：{plain}｜有帶：{hinted}｜"
+                f"打字回覆：{to_id['text']}（{to_id['took']} 秒）／{to_zh['text']}（{to_zh['took']} 秒）")
+    finally:
+        t._PCG_NOTES[0], t._PCG_GLOSS[0] = saved
+
+
 def main():
     for stream in (sys.stdout, sys.stderr):          # 非中文版 Windows 的命令列印中文會當掉
         try:
@@ -328,6 +376,7 @@ def main():
         check("多語字幕（同時翻成四種語言）", multilang)
         check("即時字幕依停頓切句（VAD）", live_segment)
         check("詞庫（提示詞、聽錯修正、指定譯法）", glossary_check)
+        check("這場會議的資料與打字回覆（r32）", notes_reply_check)
     print("結果：" + ("全部通過" if ok else "有項目沒通過"))
     sys.exit(0 if ok else 1)
 

@@ -137,6 +137,9 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 .lang svg{width:18px;height:18px;color:var(--dim);vertical-align:middle}
 .sumline{margin:16px 0 0;padding:10px 12px;border-radius:10px;background:var(--accent-soft);font-weight:600;font-size:15px;line-height:1.5}
 .need{color:var(--warn);font-weight:600}
+/* r32：這場會議的資料 */
+.notesW{margin-top:6px}.notesW .field{margin-top:10px;color:var(--text);font-weight:600}
+.notesTa{display:block;width:100%;min-height:104px;font:inherit;padding:10px;border:1.5px solid var(--line);border-radius:10px;box-sizing:border-box;background:var(--card);color:var(--text);margin-top:6px;resize:vertical}
 .quick{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border:1.5px solid var(--accent);border-radius:12px;background:var(--accent-soft)}
 .quick b{font-size:16px;line-height:1.4}.quick .linkbtn{margin-left:auto;padding:0}
 .busy{display:inline-flex;align-items:center;gap:8px;justify-content:center}
@@ -230,6 +233,18 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
         <label class="field"><span data-t="topic_live"></span>
           <input type="text" id="liveTopic" maxlength="60" data-t-ph="topic_live_ph"></label>
         </div>
+        <!-- r32：這場會議的資料（議程、與會者、料號）→ 辨識提示＋翻譯背景 -->
+        <div class="notesW">
+          <button class="linkbtn" id="liveNotesBtn" type="button" data-t="notes_btn" aria-expanded="false"></button>
+          <div id="liveNotesBox" hidden>
+            <label class="field" for="liveNotes"><span data-t="notes_title"></span></label>
+            <textarea class="notesTa" id="liveNotes" maxlength="4000" rows="5" data-t-ph="notes_ph"></textarea>
+            <p class="note" data-t="notes_hint"></p>
+            <p class="note notesLocal" hidden data-t="notes_local"></p>
+            <p class="note need notesExt" hidden data-t="notes_ext"></p>
+            <button class="linkbtn" id="liveNotesClear" type="button" data-t="notes_clear"></button>
+          </div>
+        </div>
         <button class="linkbtn lnk-ico" id="audBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg><span data-t="aud_btn"></span></button>
         <p class="sumline" id="liveSum" hidden aria-live="polite"></p>
         <button class="btn" id="liveStart" type="button" data-t="start_live"></button>
@@ -258,6 +273,17 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
           <input type="text" id="fileTopic" maxlength="60" data-t-ph="topic_file_ph"></label>
         <label class="field"><span data-t="speakers"></span>
           <input type="number" id="fileSpeakers" min="1" max="20" inputmode="numeric"></label>
+      </div>
+      <div class="notesW">
+        <button class="linkbtn" id="fileNotesBtn" type="button" data-t="notes_btn" aria-expanded="false"></button>
+        <div id="fileNotesBox" hidden>
+          <label class="field" for="fileNotes"><span data-t="notes_title"></span></label>
+          <textarea class="notesTa" id="fileNotes" maxlength="4000" rows="5" data-t-ph="notes_ph"></textarea>
+          <p class="note" data-t="notes_hint"></p>
+          <p class="note notesLocal" hidden data-t="notes_local"></p>
+          <p class="note need notesExt" hidden data-t="notes_ext"></p>
+          <button class="linkbtn" id="fileNotesClear" type="button" data-t="notes_clear"></button>
+        </div>
       </div>
       <button class="btn" id="fileSubmit" type="submit" disabled data-t="submit"></button>
       <div class="bar" id="upBar"><i></i></div>
@@ -384,6 +410,7 @@ zh:{
   room_t:'教室模式（同一間教室，一支麥克風）',room_s:'老師說中文、學生說對方的語言都可以：每一句自動判斷是哪一種語言，再翻成另一種。一次一個人講效果最好；很短的話（例如「好」）可能判斷錯。',
   speak_t:'我也要說話（雙向）',speak_s:'用麥克風：我說中文，會翻成對方的語言顯示出來。請戴耳機，避免把對方的聲音錄進麥克風。',
   overlay_t:'字幕浮在所有視窗最上面',overlay_s:'開會軟體全螢幕時也看得到字幕',
+  notes_btn:'＋ 加上這場會議的資料（選填，辨識和翻譯會比較準）',notes_title:'這場會議的資料（選填）',notes_ph:'王小明、Budi Santoso\n中爪新廠設備驗收\nPO-12345',notes_hint:'貼上與會者姓名、產品名稱、料號、議程，一行一項或用逗號分開。辨識和翻譯會照這些寫法。',notes_local:'這台電腦是本機模式：這些資料只用來幫助辨識（本機的翻譯模型用不到）。',notes_ext:'注意：這些資料會和會議內容一起送到公司外部的服務。',notes_clear:'清除',
   topic_live:'會議主題（選填，可提高專有名詞的翻譯準確度）',topic_live_ph:'例：中爪新廠設備驗收',
   start_live:'開始即時字幕',preparing:'準備中…',
   live_note:'開始後會切到字幕畫面；要結束時按畫面下方的「停止」。第一次開始需要十幾秒準備。',
@@ -437,6 +464,7 @@ en:{
   room_t:'Classroom mode (same room, one microphone)',room_s:'Chinese and the other language can both be spoken: each sentence is detected automatically and translated into the other language. Works best one speaker at a time; very short replies may be detected wrongly.',
   speak_t:'I will speak too (two-way)',speak_s:'Uses your microphone: when you speak Chinese, it is translated into their language. Please wear headphones so the microphone does not pick up the other side.',
   overlay_t:'Keep subtitles on top of all windows',overlay_s:'Subtitles stay visible even when the meeting app is full screen',
+  notes_btn:'+ Add information about this meeting (optional, improves recognition and translation)',notes_title:'Information about this meeting (optional)',notes_ph:'Wang Hsiao-ming, Budi Santoso\nCentral Java plant equipment acceptance\nPO-12345',notes_hint:'Paste participants’ names, product names, part numbers and the agenda, one per line or separated by commas. Recognition and translation will follow these spellings.',notes_local:'This computer is in local mode: the information only helps recognition (the local translation model cannot use it).',notes_ext:'Note: this information is sent to a service outside the company together with the meeting content.',notes_clear:'Clear',
   topic_live:'Meeting topic (optional, improves translation of technical terms)',topic_live_ph:'e.g. Central Java plant equipment acceptance',
   start_live:'Start live subtitles',preparing:'Preparing…',
   live_note:'The subtitle screen opens after you start; press “Stop” at the bottom to end. The first start takes about 10–20 seconds.',
@@ -490,6 +518,7 @@ id:{
   room_t:'Mode kelas (satu ruangan, satu mikrofon)',room_s:'Bahasa Mandarin dan bahasa lain boleh dipakai bergantian: setiap kalimat dikenali otomatis lalu diterjemahkan ke bahasa lainnya. Paling baik satu orang berbicara bergantian; jawaban sangat pendek bisa salah dikenali.',
   speak_t:'Saya juga akan berbicara (dua arah)',speak_s:'Memakai mikrofon: saat saya berbicara bahasa Mandarin, akan diterjemahkan ke bahasa lawan bicara. Gunakan headphone agar suara lawan bicara tidak masuk ke mikrofon.',
   overlay_t:'Subtitle selalu di atas semua jendela',overlay_s:'Subtitle tetap terlihat saat aplikasi rapat layar penuh',
+  notes_btn:'+ Tambahkan informasi rapat ini (opsional, pengenalan dan terjemahan lebih akurat)',notes_title:'Informasi rapat ini (opsional)',notes_ph:'Wang Hsiao-ming, Budi Santoso\nSerah terima mesin pabrik Jawa Tengah\nPO-12345',notes_hint:'Tempelkan nama peserta, nama produk, nomor part, dan agenda, satu per baris atau dipisahkan koma. Pengenalan suara dan terjemahan akan mengikuti penulisan ini.',notes_local:'Komputer ini dalam mode lokal: informasi ini hanya membantu pengenalan suara (model terjemahan lokal tidak bisa memakainya).',notes_ext:'Perhatian: informasi ini dikirim ke layanan di luar perusahaan bersama isi rapat.',notes_clear:'Hapus',
   topic_live:'Topik rapat (opsional, membantu menerjemahkan istilah teknis)',topic_live_ph:'mis. Serah terima mesin pabrik Jawa Tengah',
   start_live:'Mulai subtitle langsung',preparing:'Menyiapkan…',
   live_note:'Setelah dimulai, layar subtitle akan terbuka; tekan “Berhenti” di bawah untuk selesai. Persiapan pertama sekitar 10–20 detik.',
@@ -543,6 +572,7 @@ vi:{
   room_t:'Chế độ lớp học (cùng phòng, một micro)',room_s:'Có thể nói tiếng Trung và ngôn ngữ kia: mỗi câu được tự nhận biết rồi dịch sang ngôn ngữ còn lại. Tốt nhất là từng người nói một; câu quá ngắn có thể bị nhận sai.',
   speak_t:'Tôi cũng sẽ nói (hai chiều)',speak_s:'Dùng micro: khi tôi nói tiếng Trung, sẽ được dịch sang tiếng của người kia. Hãy đeo tai nghe để micro không thu tiếng của bên kia.',
   overlay_t:'Phụ đề luôn nằm trên mọi cửa sổ',overlay_s:'Vẫn thấy phụ đề khi ứng dụng họp ở chế độ toàn màn hình',
+  notes_btn:'+ Thêm thông tin về cuộc họp này (không bắt buộc, nhận dạng và dịch chính xác hơn)',notes_title:'Thông tin về cuộc họp này (không bắt buộc)',notes_ph:'Wang Hsiao-ming, Nguyễn Văn An\nNghiệm thu thiết bị nhà máy\nPO-12345',notes_hint:'Dán tên người tham dự, tên sản phẩm, mã hàng và chương trình họp, mỗi dòng một mục hoặc cách nhau bằng dấu phẩy. Nhận dạng và dịch sẽ theo cách viết này.',notes_local:'Máy này đang ở chế độ cục bộ: thông tin chỉ giúp nhận dạng giọng nói (mô hình dịch cục bộ không dùng được).',notes_ext:'Lưu ý: thông tin này được gửi đến dịch vụ bên ngoài công ty cùng với nội dung cuộc họp.',notes_clear:'Xóa',
   topic_live:'Chủ đề cuộc họp (không bắt buộc, giúp dịch thuật ngữ chuyên ngành chính xác hơn)',topic_live_ph:'VD: Nghiệm thu thiết bị nhà máy',
   start_live:'Bắt đầu phụ đề trực tiếp',preparing:'Đang chuẩn bị…',
   live_note:'Sau khi bắt đầu sẽ chuyển sang màn hình phụ đề; bấm “Dừng” ở phía dưới để kết thúc. Lần đầu cần khoảng 10–20 giây để chuẩn bị.',
@@ -596,6 +626,7 @@ hi:{
   room_t:'कक्षा मोड (एक ही कमरा, एक माइक्रोफ़ोन)',room_s:'चीनी और दूसरी भाषा दोनों बोली जा सकती हैं: हर वाक्य की भाषा अपने आप पहचानी जाती है और दूसरी भाषा में अनुवाद होता है। एक समय में एक व्यक्ति बोले तो सबसे अच्छा; बहुत छोटे जवाब गलत पहचाने जा सकते हैं।',
   speak_t:'मैं भी बोलूँगा (दो-तरफ़ा)',speak_s:'माइक्रोफ़ोन से: जब मैं चीनी बोलूँ, तो सामने वाले की भाषा में अनुवाद दिखेगा। कृपया हेडफ़ोन लगाएँ, ताकि सामने वाले की आवाज़ माइक्रोफ़ोन में न जाए।',
   overlay_t:'सबटाइटल सभी विंडो के ऊपर रखें',overlay_s:'मीटिंग ऐप फ़ुल स्क्रीन होने पर भी सबटाइटल दिखते रहें',
+  notes_btn:'+ इस मीटिंग की जानकारी जोड़ें (वैकल्पिक, पहचान और अनुवाद बेहतर होता है)',notes_title:'इस मीटिंग की जानकारी (वैकल्पिक)',notes_ph:'Wang Hsiao-ming, Rajesh Kumar\nप्लांट उपकरण स्वीकृति\nPO-12345',notes_hint:'प्रतिभागियों के नाम, उत्पाद के नाम, पार्ट नंबर और एजेंडा चिपकाएँ, हर पंक्ति में एक या अल्पविराम से अलग। पहचान और अनुवाद इन्हीं वर्तनी के अनुसार होगा।',notes_local:'यह कंप्यूटर लोकल मोड में है: यह जानकारी केवल आवाज़ की पहचान में मदद करती है (लोकल अनुवाद मॉडल इसका उपयोग नहीं कर सकता)।',notes_ext:'ध्यान दें: यह जानकारी मीटिंग की सामग्री के साथ कंपनी के बाहर की सेवा को भेजी जाती है।',notes_clear:'साफ़ करें',
   topic_live:'मीटिंग का विषय (वैकल्पिक, तकनीकी शब्दों का अनुवाद बेहतर होता है)',topic_live_ph:'जैसे: प्लांट उपकरण स्वीकृति',
   start_live:'लाइव सबटाइटल शुरू करें',preparing:'तैयारी हो रही है…',
   live_note:'शुरू करने के बाद सबटाइटल स्क्रीन खुलेगी; बंद करने के लिए नीचे “रोकें” दबाएँ। पहली बार तैयारी में लगभग 10–20 सेकंड लगते हैं।',
@@ -867,6 +898,17 @@ async function restartForShare(){
   }
   return{ok:false,error:t('rs_fail')};
 }
+/* r32：這場會議的資料。即時字幕的會記在這台電腦（例會每次都一樣），有內容就直接展開讓人看得到；錄音檔的送出後清掉 */
+function notesInit(p,keep){
+  const ta=$(p+'Notes'),box=$(p+'NotesBox'),btn=$(p+'NotesBtn');
+  const show=on=>{box.hidden=!on;btn.hidden=on;btn.setAttribute('aria-expanded',on?'true':'false')};
+  if(keep)ta.value=store.get('pcg_notes')||'';
+  show(!!ta.value.trim());
+  btn.onclick=()=>{show(true);ta.focus()};
+  ta.oninput=()=>{if(keep)store.set('pcg_notes',ta.value)};
+  $(p+'NotesClear').onclick=()=>{ta.value='';if(keep)store.set('pcg_notes','');show(false)};
+}
+notesInit('live',true);notesInit('file',false);
 $('liveStart').onclick=async()=>{
   const b=$('liveStart');
   if(!picked('live')){            // 還沒選完：說明差哪一步，捲過去閃一下
@@ -880,7 +922,7 @@ $('liveStart').onclick=async()=>{
     b.textContent=t('preparing');
   }
   const j=await api('/api/simple/live',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({scenario:picked('live'),me:foreignMe()?me:'zh',speak:$('liveSpeak').checked,room:$('liveRoom').checked,mic:zhMic(),overlay:$('liveOverlay').checked,topic:$('liveTopic').value})});
+    body:JSON.stringify({scenario:picked('live'),me:foreignMe()?me:'zh',speak:$('liveSpeak').checked,room:$('liveRoom').checked,mic:zhMic(),overlay:$('liveOverlay').checked,topic:$('liveTopic').value,notes:$('liveNotes').value})});
   if(j.ok){store.set('pcg_quick','1');location.href='/simple/live'+(scene==='hub'&&!showAll?'?share=1':'');return}   // 會議室字幕機：一打開就顯示 QR Code
   alert(errText(j));b.disabled=false;b.textContent=t('start_live');
 };
@@ -1034,7 +1076,7 @@ drop.ondrop=e=>{e.preventDefault();drop.classList.remove('over');setFile(e.dataT
 $('fileForm').onsubmit=e=>{
   e.preventDefault();if(!file||!picked('file'))return;
   const fd=new FormData();fd.append('file',file);fd.append('scenario',picked('file'));
-  fd.append('topic',$('fileTopic').value);fd.append('speakers',$('fileSpeakers').value);
+  fd.append('topic',$('fileTopic').value);fd.append('speakers',$('fileSpeakers').value);fd.append('notes',$('fileNotes').value);
   const x=new XMLHttpRequest();x.open('POST','/api/simple/jobs');
   for(const [k,v] of Object.entries(hdr()))x.setRequestHeader(k,v);
   const bar=$('upBar'),btn=$('fileSubmit');bar.style.display='block';btn.disabled=true;btn.textContent=t('uploading');
@@ -1044,7 +1086,7 @@ $('fileForm').onsubmit=e=>{
     done();let j={};try{j=JSON.parse(x.responseText)}catch(err){}
     if(x.status===401&&j.need_password){await askPassword();$('fileForm').requestSubmit();return}
     if(!j.ok){alert(errText(j));updSubmit();return}
-    setFile(null);$('fileInput').value='';$('fileTopic').value='';$('fileSpeakers').value='';
+    setFile(null);$('fileInput').value='';$('fileTopic').value='';$('fileSpeakers').value='';$('fileNotesClear').click();
     loadJobs();
   };
   x.onerror=()=>{done();updSubmit();alert(t('e_network'))};
@@ -1179,6 +1221,10 @@ function showVer(v){const e=document.getElementById('ver');if(!e||!v)return;
     // 語音辨識 API（r24）：聲音送到公司外部時優先提醒；只接內部辨識服務、其他都在本機時說明在公司內部處理
     e.dataset.t=cfg.asr_scope==='external'?'scope_asr_external':(cfg.asr_scope==='internal'&&cfg.data_scope==='local'?'scope_asr_internal':'scope_'+cfg.data_scope);
     e.hidden=false;e.classList.toggle('ext',cfg.data_scope==='external'||cfg.asr_scope==='external');applyLang()}
+  // 這場會議的資料（r32）：本機模式說明只幫助辨識；會送到公司外部時提醒
+  {const ext=cfg.data_scope==='external'||cfg.asr_scope==='external';
+   document.querySelectorAll('.notesExt').forEach(e=>{e.hidden=!ext});
+   document.querySelectorAll('.notesLocal').forEach(e=>{e.hidden=ext||cfg.data_scope!=='local'})}
   if(cfg.minutes===false){$('langNote').dataset.tHtml='lang_note_local';$('fileNote').dataset.t='file_note_local';applyLang()}
   const live=await initLive();isLocal=!!live.local;
   // 第一次開啟（導覽會出來）或字幕正在進行：不跳「有新版本／顯示卡／模型」的視窗，下次打開再說（r29）

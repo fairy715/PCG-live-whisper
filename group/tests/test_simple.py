@@ -71,13 +71,22 @@ class SimpleFlow(unittest.TestCase):
             self.stopped += 1
             self.running = False
 
+        self.said = []
+
+        class _Desk:                      # 打字回覆（r32）：假的主程式，照方向回一句
+            async def ask(_s, text, src, tgt):
+                self.said.append((text, src, tgt))
+                return {"ok": False, "code": "say_timeout"} if text == "TIMEOUT" else \
+                    {"ok": True, "text": f"[{src}2{tgt}] {text}"}
+
         self.q = simple_routes.register(
             app, self.base, lambda r: self.local, _pw_hash, _pw_match, self.cfg,
             lambda c: self.cfg.write_text(json.dumps(c, ensure_ascii=False), encoding="utf-8"),
             start_live=start_live, live_running=lambda: self.running,
             live_args=lambda: self.args,
             set_view_password=self.view_pw.append, gpu_alive=lambda h, p: self.gpu_up,
-            update_hooks={"github_fetch": self._no_github, "launch": self.launched.append}, stop_live=stop_live)
+            update_hooks={"github_fetch": self._no_github, "launch": self.launched.append}, stop_live=stop_live,
+            reply=_Desk())
         self.c = TestClient(app)
         self.h = {"X-Client-Id": "browserA1234"}
 
@@ -267,6 +276,74 @@ class SimpleFlow(unittest.TestCase):
         self.assertIn('id="speakBox" hidden', simple)
         self.assertIn('id="roomBox" hidden', simple)
         self.assertIn("$('modeBox').hidden=!showAll", simple)
+
+    def test_meeting_notes_reach_the_engine_and_stay_out_of_lists(self):
+        """r32：這場會議的資料 → 開始字幕（或處理錄音）前寫成主程式讀的檔；不出現在工作清單裡"""
+        notes_file = self.base / "group_data" / "meeting-notes.txt"
+        r = self.c.post("/api/simple/live", json={"scenario": "id", "notes": "王小明、Budi Santoso\nPO-12345\n"}).json()
+        self.assertTrue(r["ok"], r)
+        self.assertEqual(notes_file.read_text(encoding="utf-8"), "王小明、Budi Santoso\nPO-12345\n")
+        # 同一種語言還在跑：資料沒改就回到那一場；改了就重開（主程式開始時才讀）
+        self.running, self.args = True, ["python", "translate_meeting.py", "--webui", "--mode", "id2zh"]
+        n = len(self.started)
+        r = self.c.post("/api/simple/live", json={"scenario": "id", "notes": "王小明、Budi Santoso\nPO-12345"}).json()
+        self.assertTrue(r.get("already"), r)
+        r = self.c.post("/api/simple/live", json={"scenario": "id", "notes": "換了一場"}).json()
+        self.assertFalse(r.get("already"), r)
+        self.assertEqual(len(self.started), n + 1)
+        self.running = False
+        # 沒填：上一場的資料清掉
+        self.c.post("/api/simple/live", json={"scenario": "id"})
+        self.assertFalse(notes_file.exists())
+        # 錄音檔也可以帶；清單裡看不到內容
+        r = self.submit(notes="料號 SKU 88-A").json()
+        self.wait(r["id"])
+        self.assertEqual(notes_file.read_text(encoding="utf-8"), "料號 SKU 88-A\n")
+        self.assertNotIn("SKU 88-A", self.c.get("/api/simple/jobs", headers=self.h).text)
+        self.wait(self.submit().json()["id"])            # 下一個沒帶資料的錄音：不沿用上一個的
+        self.assertFalse(notes_file.exists())
+
+    def test_typed_reply(self):
+        """r32：打字回覆——只有收音的這台電腦、字幕進行中、這一場有翻譯時能用；方向照這一場的語言"""
+        self.args = ["python", "translate_meeting.py", "--webui", "--mode", "id2zh"]
+        say = lambda **b: self.c.post("/api/simple/say", json=b)
+        self.assertEqual(say(text="你好").json()["code"], "say_not_running")
+        self.running = True
+        self.assertEqual(self.c.get("/api/simple/live").json()["reply"], {"me": "zh", "other": "id"})
+        r = say(text="  請再說  一次 ").json()
+        self.assertEqual((r["ok"], r["text"], r["src"], r["tgt"]), (True, "[zh2id] 請再說 一次", "zh", "id"))
+        r = say(text="Tolong ulangi", swap=True).json()            # 對調：對方在這台電腦上打字
+        self.assertEqual((r["src"], r["tgt"]), ("id", "zh"))
+        self.assertEqual(say(text="   ").json()["code"], "say_empty")
+        self.assertEqual(len(say(text="字" * 999).json()["text"]), len("[zh2id] ") + 300)
+        r = say(text="TIMEOUT")
+        self.assertEqual((r.status_code, r.json()["code"]), (504, "say_timeout"))
+        # 外語同仁的電腦（對方說中文，翻成越南文）：打越南文翻成中文
+        self.args = ["python", "translate_meeting.py", "--webui", "--mode", "zh2vi"]
+        self.assertEqual(say(text="Xin chào").json()["tgt"], "zh")
+        # 大家都說中文：這一場沒有翻譯
+        self.args = ["python", "translate_meeting.py", "--webui", "--mode", "zh"]
+        self.assertIsNone(self.c.get("/api/simple/live").json()["reply"])
+        self.assertEqual(say(text="你好").json()["code"], "say_unsupported")
+        # 正在處理錄音檔：不是即時字幕
+        self.args = ["python", "translate_meeting.py", "--input", "a.mp3", "--mode", "id2zh"]
+        self.assertEqual(say(text="你好").json()["code"], "say_not_running")
+        # 分享出去的手機不能打字
+        self.args = ["python", "translate_meeting.py", "--webui", "--mode", "id2zh"]
+        self.local = False
+        self.assertEqual(say(text="你好").status_code, 403)
+
+    def test_pages_keep_the_r32_guards(self):
+        """r32：這場會議的資料要送出去、會外送時要提醒；打字回覆的結果不送給看字幕的人"""
+        simple = (ROOT / "group" / "simple.html").read_text(encoding="utf-8")
+        live = (ROOT / "group" / "live.html").read_text(encoding="utf-8")
+        webui = (ROOT / "webui.py").read_text(encoding="utf-8")
+        self.assertIn("notes:$('liveNotes').value", simple)
+        self.assertIn("fd.append('notes',$('fileNotes').value)", simple)
+        self.assertEqual(simple.count('data-t="notes_ext"'), 2)
+        self.assertIn("/api/simple/say", live)
+        self.assertIn("state.local&&!!state.reply&&state.running&&!state.ended", live)
+        self.assertIn("if _pcg_on_event(msg):", webui)
 
     def test_version(self):
         """畫面上的版本：安裝檔寫的 group/version.json；原作者版本從 translate_meeting.py 讀"""

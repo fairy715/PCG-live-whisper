@@ -431,6 +431,35 @@ The staff steps are in scenario 9 of the use cases. One subtitle computer joins 
 - Scene icons are single-colour SVG drawn in the page, no longer emoji (emoji look different on Windows 10 and 11).
 - The states “listening, preparing, processing, reconnecting, testing” use moving icons from [Ultra Lab Motion Icons](https://github.com/ppcvote/ultralab-anim-icons) v0.3.1 (MIT License). Only the 8 icons in use are embedded in the pages; nothing is loaded from the internet. They do not move when Windows has animation effects turned off (Settings → Accessibility → Visual effects → Animation effects).
 
+### This meeting's information, misheard words, typed replies (r32)
+
+**This meeting's information**: the agenda, participants and part numbers staff paste before starting subtitles (or before submitting a recording).
+
+| | Glossary (r23) | This meeting's information (r32) |
+|---|---|---|
+| Maintained by | IT, shared by the whole company | The staff member, for this meeting only |
+| Contents | Company name, plants, system names | Participants, products, part numbers, agenda of this meeting |
+| Fixed translations, misheard spellings | Yes | No |
+
+- **Storage**: the staff member's browser (still there next time); when subtitles start it is written to `group_data\meeting-notes.txt` (plain text, deleted when the next session has none). Up to 4,000 characters. The diagnostic file does not include it, and the job list does not show it.
+- **Recognition**: short words (up to 40 characters each, at most 40 of them, 200 characters in total) become prompt words, placed before the glossary's words (the prompt is limited to about 220 tokens). A line with a full stop or longer than 80 characters counts as a sentence and is not used as a prompt word.
+- **Translation (server mode)**: the first 1,200 characters go at the very start of every translation prompt, marked as reference only. Every sentence carries this extra text: a local LLM (Ollama, vLLM) gets slightly slower, and an external AI service bills more input. M2M100 in local mode cannot use it.
+- **Where the data goes**: wherever translation and speech recognition go. With the speech recognition API on, the prompt words are sent to that API with every piece of audio; with an LLM outside the company, the background is sent outside the company. In both cases the staff page shows an orange notice under the box.
+- When nobody is speaking Whisper sometimes copies its prompt: a result that lies entirely inside the prompt words and spans two or more of them is dropped.
+
+**Misheard words** (server mode): the subtitle text comes from speech recognition and contains homophones and misheard words. The translation prompt used to tell the LLM to "translate literally even when the meaning is unclear", so an error was translated as an error. From r32 it says: "when a word looks misheard, translate the most plausible meaning from the context; keep an unknown name as heard; do not comment". The original-language subtitle is not changed, only the translation. If the LLM guesses too much, set the Windows system environment variable `PCG_TRANSLATE_GUESS=off` to go back to the old behaviour (restart the program afterwards).
+
+**Typed replies**: at the bottom of the subtitle screen staff type in their own language and get the other side's language in large type.
+
+- The program that is running the subtitles translates: the same M2M100 in local mode (no extra memory), the same LLM in server mode. The data goes where subtitle translation goes.
+- Only on the computer that captures the sound (`/api/simple/say` refuses other computers); the result is returned only to the page that typed it and is not sent to people watching on phones.
+- One sentence at a time, up to 300 characters; no result within 30 seconds is shown as a failure. In local mode the first use of a direction takes a few seconds longer.
+- "Everyone speaks Chinese" only recognizes and does not translate, so it has no typed reply.
+
+**What has been verified** (2026-11-22): unit tests; the real WebUI with a stand-in engine operated in a browser (Chinese, Indonesian and Vietnamese interface, including phone width); the Windows self-check before every release really recognizes with the small model and the prompt words and really translates typed sentences with M2M100, and nothing is published if it fails. **Not yet verified in real meetings**: how much the prompt words help with real voices, and how the "misheard words" rule behaves on each LLM. Please try it in your own meetings.
+
+The approach follows the script context, caption prompt and reply window of [OwnVoice Meet](https://github.com/Zaious/ownvoice-meet) (Apache-2.0); the code was rewritten for the group edition and no source code was copied.
+
 ## ③ Staff computers that need live subtitles
 
 ### Windows

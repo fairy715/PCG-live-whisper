@@ -433,6 +433,35 @@ Các bước cho nhân viên nằm ở tình huống 8 trong tài liệu tình h
 - Biểu tượng loại cuộc họp là SVG một màu vẽ ngay trong trang, không còn dùng emoji (emoji trên Windows 10 và 11 trông khác nhau).
 - Các trạng thái “đang nghe, đang chuẩn bị, đang xử lý, đang kết nối lại, đang kiểm tra” dùng biểu tượng động lấy từ [Ultra Lab Motion Icons](https://github.com/ppcvote/ultralab-anim-icons) v0.3.1 (giấy phép MIT). Chỉ 8 biểu tượng đang dùng được nhúng vào trang; không tải gì từ internet. Biểu tượng không chuyển động khi Windows tắt hiệu ứng động (Settings → Accessibility → Visual effects → Animation effects).
 
+### Thông tin cuộc họp, từ nghe sai, gõ để trả lời (r32)
+
+**Thông tin cuộc họp này**: chương trình họp, người tham dự, mã hàng mà nhân viên dán trước khi bắt đầu phụ đề (hoặc trước khi gửi bản ghi âm).
+
+| | Bảng thuật ngữ (r23) | Thông tin cuộc họp này (r32) |
+|---|---|---|
+| Ai quản lý | IT, cả công ty dùng chung | Nhân viên tự dán, chỉ dùng cho cuộc họp này |
+| Nội dung | Tên công ty, nhà máy, tên hệ thống | Người tham dự, sản phẩm, mã hàng, chương trình của cuộc họp này |
+| Chỉ định cách dịch, cách viết nghe sai | Được | Không |
+
+- **Lưu trữ**: trình duyệt của nhân viên (mở lại vẫn còn); khi bắt đầu phụ đề được ghi vào `group_data\meeting-notes.txt` (văn bản thuần, bị xóa khi phiên sau không điền). Tối đa 4.000 ký tự. Tệp chẩn đoán không chứa tệp này, danh sách công việc cũng không hiển thị nội dung.
+- **Nhận dạng**: các từ ngắn (mỗi từ tối đa 40 ký tự, nhiều nhất 40 từ, tổng 200 ký tự) làm từ gợi ý, đặt trước các từ của bảng thuật ngữ (gợi ý có giới hạn độ dài, khoảng 220 token). Dòng có dấu chấm hoặc dài hơn 80 ký tự được coi là câu và không làm từ gợi ý.
+- **Dịch (chế độ máy chủ)**: 1.200 ký tự đầu được đặt ở đầu mỗi prompt dịch, ghi rõ chỉ để tham khảo. Câu nào cũng mang thêm đoạn này: LLM cục bộ (Ollama, vLLM) chậm hơn một chút, dịch vụ AI bên ngoài tính thêm lượng đầu vào. M2M100 ở chế độ cục bộ không dùng được.
+- **Dữ liệu đi đâu**: đi theo phần dịch và phần nhận dạng giọng nói. Khi bật API nhận dạng giọng nói, từ gợi ý được gửi tới API đó cùng mỗi đoạn âm thanh; khi LLM ở ngoài công ty, phần bối cảnh được gửi ra ngoài công ty. Trong hai trường hợp này trang nhân viên hiện nhắc nhở màu cam dưới ô nhập.
+- Khi không ai nói, Whisper đôi khi chép lại gợi ý: kết quả nằm trọn trong các từ gợi ý và trải qua từ hai từ trở lên sẽ bị bỏ.
+
+**Từ nghe sai** (chế độ máy chủ): văn bản phụ đề đến từ nhận dạng giọng nói nên có từ đồng âm và từ nghe sai. Trước đây prompt dịch yêu cầu LLM "dịch từng chữ ngay cả khi nghĩa không rõ", nên nghe sai thì dịch sai theo. Từ r32 đổi thành: "khi một từ có vẻ bị nghe sai, hãy dịch theo nghĩa hợp lý nhất dựa vào ngữ cảnh; tên riêng không nhận ra thì giữ nguyên như nghe được; không bình luận". Phụ đề gốc không bị sửa, chỉ bản dịch thay đổi. Nếu thấy LLM đoán quá nhiều, đặt biến môi trường hệ thống Windows `PCG_TRANSLATE_GUESS=off` để quay về cách cũ (khởi động lại chương trình sau khi đặt).
+
+**Gõ để trả lời**: ở cuối màn hình phụ đề, nhân viên gõ bằng ngôn ngữ của mình và ngôn ngữ của người kia hiện bằng chữ lớn.
+
+- Chương trình đang chạy phụ đề sẽ dịch: cùng một M2M100 ở chế độ cục bộ (không tốn thêm bộ nhớ), cùng một LLM ở chế độ máy chủ. Dữ liệu đi đến cùng nơi với phần dịch phụ đề.
+- Chỉ dùng được trên máy đang thu âm (`/api/simple/say` từ chối máy khác); kết quả chỉ trả về trang đã gõ, không gửi cho người xem bằng điện thoại.
+- Mỗi lần một câu, tối đa 300 ký tự; quá 30 giây không có kết quả sẽ báo thất bại. Ở chế độ cục bộ, lần đầu dùng một chiều dịch sẽ chậm hơn vài giây.
+- "Mọi người đều nói tiếng Trung" chỉ nhận dạng, không dịch, nên không có chức năng này.
+
+**Đã kiểm chứng đến đâu** (2026-11-22): kiểm thử đơn vị; WebUI thật với bộ máy thay thế được thao tác thực tế trong trình duyệt (giao diện tiếng Trung, tiếng Indonesia và tiếng Việt, kể cả chiều rộng điện thoại); phần tự kiểm tra trên Windows trước mỗi lần phát hành thật sự nhận dạng bằng mô hình small kèm từ gợi ý và thật sự dịch câu đã gõ bằng M2M100, không đạt thì không phát hành. **Chưa kiểm chứng trong cuộc họp thực tế**: từ gợi ý giúp được bao nhiêu với giọng người thật, và quy tắc "từ nghe sai" hoạt động thế nào trên từng LLM. Hãy thử trong cuộc họp của chính bạn.
+
+Cách làm tham khảo phần bối cảnh bài nói, prompt phụ đề và cửa sổ trả lời của [OwnVoice Meet](https://github.com/Zaious/ownvoice-meet) (Apache-2.0); mã được viết lại cho bản tập đoàn, không sao chép mã nguồn.
+
 ## ③ Máy nhân viên cần phụ đề trực tiếp
 
 ### Windows

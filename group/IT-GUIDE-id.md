@@ -433,6 +433,35 @@ Langkah untuk karyawan ada di skenario 8 pada contoh penggunaan. Satu komputer s
 - Ikon jenis rapat adalah SVG satu warna yang digambar di halaman, bukan emoji lagi (emoji tampil berbeda di Windows 10 dan 11).
 - Status “mendengarkan, menyiapkan, memproses, menyambung ulang, menguji” memakai ikon bergerak dari [Ultra Lab Motion Icons](https://github.com/ppcvote/ultralab-anim-icons) v0.3.1 (Lisensi MIT). Hanya 8 ikon yang dipakai yang disematkan di halaman; tidak ada yang dimuat dari internet. Ikon tidak bergerak jika efek animasi Windows dimatikan (Settings → Accessibility → Visual effects → Animation effects).
 
+### Informasi rapat ini, kata yang salah dengar, balasan ketik (r32)
+
+**Informasi rapat ini**: agenda, peserta, dan nomor part yang ditempel karyawan sebelum memulai subtitle (atau sebelum mengirim rekaman).
+
+| | Glosarium (r23) | Informasi rapat ini (r32) |
+|---|---|---|
+| Dikelola oleh | IT, dipakai seluruh perusahaan | Karyawan sendiri, hanya untuk rapat ini |
+| Isi | Nama perusahaan, pabrik, nama sistem | Peserta, produk, nomor part, agenda rapat ini |
+| Terjemahan tetap, penulisan salah dengar | Bisa | Tidak |
+
+- **Penyimpanan**: browser karyawan (masih ada saat dibuka lagi); saat subtitle dimulai ditulis ke `group_data\meeting-notes.txt` (teks biasa, dihapus bila sesi berikutnya kosong). Paling banyak 4.000 karakter. File diagnostik tidak memuatnya, dan daftar pekerjaan tidak menampilkannya.
+- **Pengenalan suara**: kata pendek (maksimal 40 karakter per kata, paling banyak 40 kata, total 200 karakter) menjadi kata petunjuk, ditempatkan sebelum kata-kata glosarium (panjang petunjuk terbatas, sekitar 220 token). Baris yang memiliki titik atau lebih dari 80 karakter dianggap kalimat dan tidak dijadikan kata petunjuk.
+- **Terjemahan (mode server)**: 1.200 karakter pertama ditaruh di awal setiap prompt terjemahan, dengan keterangan hanya sebagai rujukan. Setiap kalimat membawa teks tambahan ini: LLM lokal (Ollama, vLLM) menjadi sedikit lebih lambat, dan layanan AI eksternal menghitung input lebih banyak. M2M100 pada mode lokal tidak bisa memakainya.
+- **Tujuan data**: mengikuti terjemahan dan pengenalan suara. Bila API pengenalan suara aktif, kata petunjuk dikirim ke API itu bersama setiap potongan suara; bila LLM berada di luar perusahaan, latar ini dikirim ke luar perusahaan. Pada kedua keadaan ini halaman karyawan menampilkan peringatan oranye di bawah kotaknya.
+- Saat tidak ada yang berbicara, Whisper kadang menyalin petunjuknya: hasil yang seluruhnya berada di dalam kata petunjuk dan mencakup dua kata atau lebih akan dibuang.
+
+**Kata yang salah dengar** (mode server): teks subtitle berasal dari pengenalan suara dan mengandung kata yang bunyinya mirip atau salah dengar. Dulu prompt terjemahan meminta LLM "menerjemahkan kata demi kata walaupun maknanya tidak jelas", sehingga kesalahan ikut diterjemahkan. Mulai r32 isinya: "bila sebuah kata tampak salah dengar, terjemahkan makna yang paling masuk akal menurut konteks; nama yang tidak dikenal dibiarkan seperti terdengar; jangan berkomentar". Subtitle bahasa asli tidak diubah, hanya terjemahannya. Bila LLM terlalu banyak menebak, atur variabel lingkungan sistem Windows `PCG_TRANSLATE_GUESS=off` untuk kembali ke cara lama (mulai ulang program setelahnya).
+
+**Balasan ketik**: di bagian bawah layar subtitle, karyawan mengetik dalam bahasanya sendiri dan bahasa lawan bicara muncul dengan huruf besar.
+
+- Yang menerjemahkan adalah program yang sedang menjalankan subtitle: M2M100 yang sama pada mode lokal (tanpa memori tambahan), LLM yang sama pada mode server. Tujuan datanya sama dengan terjemahan subtitle.
+- Hanya di komputer yang menangkap suara (`/api/simple/say` menolak komputer lain); hasilnya hanya dikembalikan ke halaman yang mengetik dan tidak dikirim ke orang yang menonton di ponsel.
+- Satu kalimat setiap kali, paling banyak 300 karakter; bila 30 detik tidak ada hasil, ditampilkan sebagai gagal. Pada mode lokal, pemakaian pertama suatu arah perlu beberapa detik lebih lama.
+- "Semua berbahasa Mandarin" hanya mengenali suara tanpa menerjemahkan, jadi tidak ada fitur ini.
+
+**Yang sudah diverifikasi** (2026-11-22): unit test; WebUI asli dengan mesin pengganti yang dioperasikan di browser (antarmuka Mandarin, Indonesia, dan Vietnam, termasuk lebar ponsel); pemeriksaan mandiri Windows sebelum setiap rilis benar-benar mengenali suara dengan model small beserta kata petunjuk dan benar-benar menerjemahkan kalimat ketikan dengan M2M100, dan bila gagal tidak ada yang dirilis. **Belum diverifikasi pada rapat sebenarnya**: seberapa besar bantuan kata petunjuk pada suara orang sungguhan, dan bagaimana aturan "kata yang salah dengar" bekerja pada tiap LLM. Silakan coba pada rapat Anda sendiri.
+
+Pendekatannya mengikuti konteks naskah, prompt subtitle, dan jendela balasan dari [OwnVoice Meet](https://github.com/Zaious/ownvoice-meet) (Apache-2.0); kodenya ditulis ulang untuk edisi grup dan tidak ada kode sumber yang disalin.
+
 ## ③ Komputer karyawan yang perlu subtitle langsung
 
 ### Windows
