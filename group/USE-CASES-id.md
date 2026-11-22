@@ -193,6 +193,18 @@ Saya berbicara "Bahasa Indonesia" → "Hanya baca subtitle" → "Mandarin → In
 
 ---
 
+## Mendapatkan transkrip atau notulen setelah subtitle selesai (r33)
+
+Tidak perlu merekam terpisah: setiap sesi subtitle langsung otomatis disimpan sebagai transkrip (hanya di komputer yang menangkap suara; 10 sesi terakhir disimpan).
+
+- **Layar subtitle**: setelah mengklik "Berhenti", di bagian atas muncul "**Unduh transkrip**"; pada mode server ada juga "**Jadikan notulen rapat**", yang menambahkan pekerjaan ke daftar "Rekaman → Notulen" untuk diunduh beberapa menit kemudian.
+- **Halaman utama**: saat dibuka lagi, di bagian atas ada "Sesi subtitle terakhir (tanggal, jumlah kalimat)" dengan dua tombol yang sama.
+- Transkrip berupa file teks: setiap kalimat memiliki waktu, teks asli, dan terjemahan; balasan ketik diberi tanda "（打字）" (diketik).
+- Orang yang menonton di ponsel tidak bisa mengambil transkrip; mintalah rekan yang menjalankan subtitle untuk mengunduhnya.
+- **Subtitle berhenti sendiri?** Bila lebih dari 20 menit tidak ada subtitle baru, program mengakhiri sesi (layar menjelaskan alasannya), supaya sesi yang terlupa tidak terus membebani komputer. Untuk istirahat panjang, klik "Jeda" dulu agar tidak diakhiri; waktunya bisa diubah oleh IT.
+
+---
+
 ## Bantuan di layar (r29)
 
 - **Kalimat konfirmasi sebelum mulai**: di atas tombol tertulis “Anda mendengar: Mandarin → subtitle: Indonesia”. Jika tidak sesuai harapan, langkah 3 terbalik; ubah dulu sebelum mulai.

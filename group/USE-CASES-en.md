@@ -199,6 +199,18 @@ I speak "your language" → "Only read subtitles" → "Chinese". Recognition run
 
 ---
 
+## Getting a transcript or minutes after the subtitles end (r33)
+
+No separate recording is needed: every live subtitle session is saved as a transcript (only on the computer that captures the sound; the 10 most recent sessions are kept).
+
+- **Subtitle screen**: after you click "Stop", "**Download transcript**" appears at the top; in server mode there is also "**Turn into meeting minutes**", which adds a job to the "Recording → Minutes" list for download a few minutes later.
+- **Home page**: next time you open it, "Last subtitle session (date, sentences)" is at the top, with the same two buttons.
+- The transcript is a text file: each sentence has its time, the original and the translation; typed replies are marked "（打字）" (typed).
+- People watching on their phones cannot get the transcript; ask the colleague who ran the subtitles to download it.
+- **The subtitles ended by themselves?** After more than 20 minutes without a new subtitle the program ends the session (the screen says why), so a forgotten session does not keep the computer busy. For a long break, click "Pause" first and it will not be ended; IT can change the time.
+
+---
+
 ## Helpers on the screen (r29)
 
 - **Confirmation line before you start**: above the button the page says “You will hear: Indonesian → subtitles in: Chinese”. If that is not what you expect, step 3 is the wrong way round; change it before starting.

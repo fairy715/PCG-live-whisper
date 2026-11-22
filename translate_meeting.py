@@ -3429,6 +3429,15 @@ def _pcg_asr_api_result(err=None):
                   f"{wait // 60} 分鐘後再試{RESET}", flush=True)
 
 
+def _pcg_asr_usage(seconds=0.0, limited=False):
+    """今天送了多少（r33）：記在 group_data/asr-usage.json，IT 設定頁顯示"""
+    try:
+        from group import asr_api
+        asr_api.usage_note(SCRIPT_DIR, seconds, limited)
+    except Exception:  # noqa: BLE001
+        pass
+
+
 def _pcg_asr_api_chunk(cfg, audio, language, prompt, offset_s, end_s):
     """一塊聲音（16 kHz）送 API → [(開始秒, 結束秒, 文字)]。出錯丟 asr_api.ApiError"""
     from group import asr_api
@@ -3561,8 +3570,11 @@ class _FwModel:
                     try:
                         items = _pcg_asr_api_chunk(cfg, piece, lang, prompt, off, end)
                         _pcg_asr_api_result()
+                        _pcg_asr_usage(len(piece) / _SEG_SR)
                     except asr_api.ApiError as err:
                         _pcg_asr_api_result(err)
+                        if getattr(err, "limited", False):
+                            _pcg_asr_usage(limited=True)
                 if items is None:                         # API 不能用：這一塊在這台電腦辨識
                     segs, _ = self._local((piece,), dict(local_kw, vad_filter=False))
                     items = [(off + x.start, off + x.end, x.text) for x in segs]
@@ -21988,7 +22000,10 @@ def main():
                 _summary_to_html(summary, html_path, source_name,
                                  summary_txt_path=output_path, transcript_txt_path=transcript_path,
                                  metadata=_batch_meta)
-            open_file_in_editor(html_path)
+            # 集團版 r33：簡易頁面把即時字幕的逐字稿交來整理（PCG_NONINTERACTIVE=1）時不開視窗、不等按鍵
+            _pcg_batch = os.environ.get("PCG_NONINTERACTIVE") == "1"
+            if not _pcg_batch:
+                open_file_in_editor(html_path)
 
             t_batch_elapsed = time.monotonic() - t_batch_start
             b_min, b_sec = divmod(int(t_batch_elapsed), 60)
@@ -21998,9 +22013,10 @@ def main():
             print(f"  {C_WHITE}{output_path}{RESET}")
             print(f"  {C_WHITE}{html_path}{RESET}")
             print(f"{C_DIM}{'═' * 60}{RESET}")
-            open_file_in_editor(output_path)
-            print(f"\n{C_HIGHLIGHT}按 ESC 鍵退出{RESET}", flush=True)
-            _wait_for_esc()
+            if not _pcg_batch:
+                open_file_in_editor(output_path)
+                print(f"\n{C_HIGHLIGHT}按 ESC 鍵退出{RESET}", flush=True)
+                _wait_for_esc()
             sbar.stop()
 
         except KeyboardInterrupt:

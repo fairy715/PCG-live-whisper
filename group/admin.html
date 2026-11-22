@@ -177,6 +177,8 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <div id="rvWarn" class="res warn out" hidden data-t="rv_warn"></div>
       <label class="check"><input type="checkbox" id="multiLang"><span data-t="multi_lang"></span></label>
       <p class="note" data-t="multi_lang_note"></p>
+      <label class="f"><span data-t="idle_min"></span><input type="number" id="idleMin" min="0" max="600" step="1" inputmode="numeric"></label>
+      <p class="note" data-t="idle_note"></p>
       <label class="f"><span id="staffPwLabel"></span><input type="password" id="staffPw" autocomplete="new-password" data-t-ph="staff_pw_ph"></label>
       <label class="check" id="clearStaffWrap" hidden><input type="checkbox" id="clearStaff"><span data-t="clear_staff_pw"></span></label>
     </div>
@@ -187,6 +189,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <label class="check"><input type="checkbox" id="asrOn"><span data-t="asr_on"></span></label>
       <div id="asrBox">
         <div class="chips"><button type="button" class="chip" data-asr="https://api.openai.com/v1" data-models="gpt-4o-transcribe,gpt-4o-mini-transcribe,whisper-1">OpenAI</button><button type="button" class="chip" data-asr="https://api.groq.com/openai/v1" data-models="whisper-large-v3-turbo,whisper-large-v3" data-t="asr_groq"></button></div>
+        <p class="note" id="asrUsage" hidden></p>
         <p class="note" id="asrGroq" hidden><span data-t="asr_groq_note"></span> <a href="https://console.groq.com/keys" target="_blank" rel="noopener">console.groq.com/keys</a></p>
         <label class="f"><span data-t="asr_url"></span><input type="text" id="asrUrl" maxlength="300" placeholder="https://api.openai.com/v1"></label>
         <div class="row" style="grid-template-columns:1fr 1fr">
@@ -234,6 +237,7 @@ h3.sub{font-size:14px;margin:18px 0 6px;color:var(--dim);font-weight:600}h3.sub:
       <div class="muse" id="mUse"></div>
       <div style="margin-top:12px"><button class="btn ghost" type="button" id="mApply" data-t="models_apply"></button></div>
       <div id="mUseRes" hidden></div>
+      <p class="note" id="mBench" hidden></p>
       <h3 class="sub" data-t="models_installed"></h3>
       <div id="mInst"></div>
       <h3 class="sub" data-t="models_available"></h3>
@@ -310,6 +314,7 @@ zh:{test_llm:"測試大模型連線",test_gpu:"測試 GPU 伺服器",test_nothin
   models_installed:'這台電腦已安裝',models_available:'可以安裝',models_refresh:'重新整理清單',
   models_offline:'不能上網的電腦：把發布頁「model-packs」的 catalog.json 與模型包檔案放到上方「更新」的公司共用資料夾（或它的 models 子資料夾）。',
   m_lang:'語言',m_live:'即時字幕',m_file:'錄音檔',m_mt:'本機翻譯',m_builtin:'內建（照上方的本機模型）',m_m2m:'M2M100（內建，快）',
+  idle_min:'太久沒有字幕就自動結束（分鐘，0＝不自動結束）',idle_note:'字幕機忘了關會一直佔著 CPU 和顯示卡；用語音辨識 API 時還會一直用額度。超過這個時間沒有新的字幕就自動結束，畫面會說明原因。同仁按了「暫停」的時間不算。',asr_usage:'今天這台電腦已經送出 {n} 次、約 {m} 分鐘的聲音；碰到用量上限 {k} 次。額度是整個帳號共用的，其他電腦送的不算在這裡。',m_bench_note:'實測錯誤率（越低越好）：公開的朗讀錄音、每種語言 {n} 句（{d}）。實際會議會比較高，模型之間的排名可以參考。內建的 Whisper small：{r}',m_bench:'實測錯誤率：{r}',m_bench_one:'{l} {a}%',m_bench_vs:'（內建 {b}%）',m_bench_cpu:'沒有顯示卡時，處理時間是聲音長度的 {x} 倍',m_bench_slow:'：一般電腦很難跟上即時字幕，建議有 NVIDIA 顯示卡',m_bench_sep:'、',m_lang_zhen:'中英夾雜',
   m_none_inst:'還沒有安裝模型包',m_none_avail:'清單是空的（按「重新整理清單」）',m_install:'安裝',m_update:'更新',m_remove:'移除',
   m_confirm_remove:'確定要移除「{n}」？用到它的語言會改回內建模型。',m_dl:'下載中 {a}／{b} MB',m_inst_ing:'安裝中…',m_failed:'安裝失敗：{e}',
   m_done:'已安裝',m_size:'{n} MB',m_ver:'版本 {v}',m_from_share:'公司共用資料夾',m_from_gh:'GitHub',
@@ -360,6 +365,7 @@ en:{test_llm:"Test the LLM connection",test_gpu:"Test the GPU server",test_nothi
   models_installed:'Installed on this computer',models_available:'Available',models_refresh:'Refresh list',
   models_offline:'Computers without internet: put catalog.json and the pack files from the "model-packs" release page in the shared folder set under Updates (or its models subfolder).',
   m_lang:'Language',m_live:'Live subtitles',m_file:'Recordings',m_mt:'Local translation',m_builtin:'Built-in (local models above)',m_m2m:'M2M100 (built-in, fast)',
+  idle_min:'End automatically after this long without subtitles (minutes, 0 = never)',idle_note:'A subtitle computer left on keeps using the CPU and graphics card, and with the speech recognition API it keeps using quota. After this long without a new subtitle the session ends and the screen says why. Time while staff have pressed “Pause” does not count.',asr_usage:'Today this computer has sent {n} requests, about {m} minutes of audio, and hit the usage limit {k} times. The quota is shared by the whole account; other computers are not counted here.',m_bench_note:'Measured error rate (lower is better): public read-speech recordings, {n} sentences per language ({d}). Real meetings are higher; the ranking between models is a useful guide. Built-in Whisper small: {r}',m_bench:'Measured error rate: {r}',m_bench_one:'{l} {a}%',m_bench_vs:' (built-in {b}%)',m_bench_cpu:'Without a graphics card, processing takes {x}× the audio length',m_bench_slow:': hard to keep up with live subtitles on an ordinary computer; an NVIDIA card is recommended',m_bench_sep:', ',m_lang_zhen:'Mixed Chinese-English',
   m_none_inst:'No model packs installed yet',m_none_avail:'The list is empty (click “Refresh list”)',m_install:'Install',m_update:'Update',m_remove:'Remove',
   m_confirm_remove:'Remove “{n}”? Languages that use it go back to the built-in model.',m_dl:'Downloading {a} / {b} MB',m_inst_ing:'Installing…',m_failed:'Install failed: {e}',
   m_done:'Installed',m_size:'{n} MB',m_ver:'version {v}',m_from_share:'company shared folder',m_from_gh:'GitHub',
@@ -410,6 +416,7 @@ id:{test_llm:"Uji koneksi LLM",test_gpu:"Uji server GPU",test_nothing:"Alamat be
   models_installed:'Terpasang di komputer ini',models_available:'Tersedia',models_refresh:'Muat ulang daftar',
   models_offline:'Komputer tanpa internet: taruh catalog.json dan file paket dari halaman rilis "model-packs" di folder bersama yang diatur di Pembaruan (atau subfolder models-nya).',
   m_lang:'Bahasa',m_live:'Subtitle langsung',m_file:'Rekaman',m_mt:'Terjemahan lokal',m_builtin:'Bawaan (model lokal di atas)',m_m2m:'M2M100 (bawaan, cepat)',
+  idle_min:'Akhiri otomatis bila sekian lama tidak ada subtitle (menit, 0 = tidak pernah)',idle_note:'Komputer subtitle yang lupa dimatikan terus memakai CPU dan kartu grafis; dengan API pengenalan suara, kuota juga terus terpakai. Bila selama ini tidak ada subtitle baru, sesi diakhiri dan layar menjelaskan alasannya. Waktu saat karyawan menekan “Jeda” tidak dihitung.',asr_usage:'Hari ini komputer ini sudah mengirim {n} permintaan, sekitar {m} menit suara, dan {k} kali mencapai batas pemakaian. Kuota dipakai bersama satu akun; komputer lain tidak dihitung di sini.',m_bench_note:'Tingkat kesalahan hasil uji (makin rendah makin baik): rekaman bacaan publik, {n} kalimat per bahasa ({d}). Rapat sebenarnya lebih tinggi; urutan antarmodel bisa dijadikan acuan. Whisper small bawaan: {r}',m_bench:'Tingkat kesalahan hasil uji: {r}',m_bench_one:'{l} {a}%',m_bench_vs:' (bawaan {b}%)',m_bench_cpu:'Tanpa kartu grafis, waktu proses {x}× panjang suara',m_bench_slow:': sulit mengikuti subtitle langsung di komputer biasa; disarankan memakai kartu NVIDIA',m_bench_sep:', ',m_lang_zhen:'Campuran Mandarin-Inggris',
   m_none_inst:'Belum ada paket model yang terpasang',m_none_avail:'Daftar kosong (klik “Muat ulang daftar”)',m_install:'Pasang',m_update:'Perbarui',m_remove:'Hapus',
   m_confirm_remove:'Hapus “{n}”? Bahasa yang memakainya kembali ke model bawaan.',m_dl:'Mengunduh {a} / {b} MB',m_inst_ing:'Memasang…',m_failed:'Pemasangan gagal: {e}',
   m_done:'Terpasang',m_size:'{n} MB',m_ver:'versi {v}',m_from_share:'folder bersama perusahaan',m_from_gh:'GitHub',
@@ -502,7 +509,8 @@ function showMain(){
   const aa=state.asr_api||{};$('asrOn').checked=!!aa.enabled;$('asrUrl').value=aa.url||'';$('asrApiModel').value=aa.model||'';
   $('asrInternal').checked=!!aa.internal;$('asrKey').value='';$('asrClear').checked=false;asrVis();
   $('updCheck').checked=state.update_check!==false;$('updWho').value=state.update_who||'staff';$('updShare').value=state.update_share||'';$('supContact').value=state.support_contact||'';
-  $('diarize').checked=!!state.diarize;$('remoteView').checked=!!state.allow_remote_view;$('multiLang').checked=state.multi_lang!==false;$('clearStaffWrap').hidden=!state.staff_password_set;
+  $('diarize').checked=!!state.diarize;$('remoteView').checked=!!state.allow_remote_view;$('multiLang').checked=state.multi_lang!==false;$('idleMin').value=state.live_idle_min??20;
+  {const u=state.asr_usage||{},e=$('asrUsage');e.hidden=!(u.requests||u.limited);e.textContent=t('asr_usage',{n:u.requests||0,m:Math.round((u.seconds||0)/60),k:u.limited||0})}$('clearStaffWrap').hidden=!state.staff_password_set;
   modeVis();applyLang();loadModels();
 }
 /* 本機辨識模型：內建 small＋裝好的多語模型包（離線安裝的電腦不會自己下載模型，所以只列出這台有的） */
@@ -649,7 +657,7 @@ $('pMain').onsubmit=async e=>{
     gpu_host:$('gpuHost').value,gpu_port:$('gpuPort').value,
     llm_url:$('llmUrl').value,llm_api_style:$('llmStyle').value,llm_api_key:$('llmKey').value,clear_llm_api_key:$('clearKey').checked,
     llm_model:$('llmModel').value,summary_model:$('sumModel').value,asr_model:$('asrModel').value,
-    local_live_model:$('liveModel').value,local_file_model:$('fileModel').value,diarize:$('diarize').checked,allow_remote_view:$('remoteView').checked,multi_lang:$('multiLang').checked,
+    local_live_model:$('liveModel').value,local_file_model:$('fileModel').value,diarize:$('diarize').checked,allow_remote_view:$('remoteView').checked,multi_lang:$('multiLang').checked,live_idle_min:$('idleMin').value,
     staff_password:$('staffPw').value,clear_staff_password:$('clearStaff').checked,
     glossary:$('glossary').value,...asrBody(),update_check:$('updCheck').checked,update_who:$('updWho').value,update_share:$('updShare').value,support_contact:$('supContact').value});
   const r=$('saveRes');r.hidden=false;r.className='res '+(j.ok?'ok':'err');r.textContent=j.ok?t('saved'):errMsg(j);
@@ -708,8 +716,15 @@ function renderModels(){
   h+=`<span></span><p class="note" style="grid-column:span 2;margin:0">${escH(t('m_use_note'))}</p>`;
   $('mUse').innerHTML=h;
   const info=p=>[(p.languages||[]).map(l=>t('m_lang_'+l)!=='m_lang_'+l?t('m_lang_'+l):l).join('、'),p.size_mb?t('m_size',{n:p.size_mb}):'',p.version?t('m_ver',{v:p.version}):'',p.license||''].filter(Boolean).join(' · ');
+  // 實測錯誤率（r33）：每個模型旁邊直接寫出來，IT 不用翻文件
+  const bn=models.bench||{},bl=l=>t('m_lang_'+(l==='zh-en'?'zhen':l));
+  const pc=x=>Number(x).toFixed(1);
+  const rates=(b,vs)=>(b.rates||[]).map(([l,a,x])=>t('m_bench_one',{l:bl(l),a:pc(a)})+(vs&&x!=null?t('m_bench_vs',{b:pc(x)}):'')).join(t('m_bench_sep'));
+  const bench=id=>{const b=(bn.packs||{})[id];if(!b)return '';
+    return `<small>${escH(t('m_bench',{r:rates(b,true)}))}${b.cpu?' · '+escH(t('m_bench_cpu',{x:b.cpu})+(b.cpu>=0.8?t('m_bench_slow'):'')):''}</small>`};
+  $('mBench').hidden=!bn.builtin;if(bn.builtin)$('mBench').textContent=t('m_bench_note',{n:bn.sentences,d:bn.date,r:rates(bn.builtin,false)});
   const inst=models.installed||[];
-  $('mInst').innerHTML=inst.length?inst.map(p=>`<div class="mrow"><div><b>${escH(p.name||p.id)}</b><small>${escH(info(p))}</small>${p.note?`<small>${escH(p.note)}</small>`:''}</div>
+  $('mInst').innerHTML=inst.length?inst.map(p=>`<div class="mrow"><div><b>${escH(p.name||p.id)}</b><small>${escH(info(p))}</small>${p.note?`<small>${escH(p.note)}</small>`:''}${bench(p.id)}</div>
     <button class="btn ghost" type="button" data-rm="${escH(p.id)}" data-n="${escH(p.name||p.id)}">${escH(t('m_remove'))}</button></div>`).join(''):`<p class="note">${escH(t('m_none_inst'))}</p>`;
   const av=(models.available||[]).filter(p=>!p.installed_version||p.update);
   $('mAvail').innerHTML=av.length?av.map(p=>{const jb=(models.jobs||{})[p.id]||{};let st='';
@@ -717,7 +732,7 @@ function renderModels(){
     else if(jb.state==='installing')st=`<small>${escH(t('m_inst_ing'))}</small>`;
     else if(jb.state==='failed')st=`<small style="color:var(--err)">${escH(t('m_failed',{e:jb.error||''}))}</small>`;
     const busy=jb.state==='downloading'||jb.state==='installing';
-    return `<div class="mrow"><div><b>${escH(p.name||p.id)}</b><small>${escH(info(p))} · ${escH(t(p.source_kind==='share'?'m_from_share':'m_from_gh'))}</small>${p.note?`<small>${escH(p.note)}</small>`:''}${st}</div>
+    return `<div class="mrow"><div><b>${escH(p.name||p.id)}</b><small>${escH(info(p))} · ${escH(t(p.source_kind==='share'?'m_from_share':'m_from_gh'))}</small>${p.note?`<small>${escH(p.note)}</small>`:''}${bench(p.id)}${st}</div>
     <button class="btn ghost" type="button" data-in="${escH(p.id)}"${busy?' disabled':''}>${escH(t(p.update?'m_update':'m_install'))}</button></div>`}).join(''):`<p class="note">${escH(t('m_none_avail'))}</p>`;
   // 連不到 GitHub 對不能上網的電腦是正常的：用白話說明（r30；原本顯示「GitHub 連不到（OSError）」）
   const errs=(models.catalog_errors||[]).map(x=>/GitHub/.test(x)?t('m_err_github'):/catalog\.json/.test(x)?t('m_err_share'):x);$('mErr').hidden=!errs.length;$('mErr').textContent=errs.join(' ');foldSum();

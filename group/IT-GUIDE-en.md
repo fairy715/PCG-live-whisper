@@ -460,6 +460,26 @@ The staff steps are in scenario 9 of the use cases. One subtitle computer joins 
 
 The approach follows the script context, caption prompt and reply window of [OwnVoice Meet](https://github.com/Zaious/ownvoice-meet) (Apache-2.0); the code was rewritten for the group edition and no source code was copied.
 
+### Transcripts, automatic end, today's usage, measured numbers next to models (r33)
+
+**Transcript of live subtitles**
+
+- The WebUI records every sentence it sends to the subtitle screen in `group_data\live\<start time>.jsonl` (written during the meeting, so it survives a crash) and keeps the 10 most recent sessions. The content is meeting text and stays on this computer, like the log files already kept in `logs\`; the diagnostic file does not include it.
+- Only the computer that captures the sound can download it (`/simple/live/transcript/…` refuses other computers); people watching on phones cannot.
+- **Turn into meeting minutes** (server mode): the transcript is passed to the main program's `--summarize` with the minutes model IT configured, in the same queue as "My recordings" (one job at a time). The text is sent to the LLM, the same destination as minutes from recordings. With very few sentences (fewer than 2 segments after merging) or no Chinese text, the older summary method is used, without the decisions / actions / risks sections.
+
+**Automatic end after a long time without subtitles**
+
+- IT settings page, "End automatically after this long without subtitles (minutes)": 20 by default, 0 = never (1–600). Checked every 30 seconds.
+- It counts "no new subtitle", not volume: time with only music or noise that produces no text counts too. Time while staff have pressed "Pause" does not count; processing recordings is not affected.
+- When it ends, the subtitle screen (including phone viewers) shows "No new subtitles for more than N minutes, so the session ended automatically". For all-day classes with long breaks, raise the value or tell staff to press Pause first.
+
+**How much the speech recognition API was used today**: the "Speech recognition API" card shows this computer's requests, minutes of audio and usage-limit hits for today (stored in `group_data\asr-usage.json`, reset daily). The quota is shared by the whole account, other computers are not counted here; see the provider's console for what is actually left.
+
+**Measured error rate next to each model**: under "Models", every recognition pack shows its measured error rate on public datasets, the built-in small model for comparison, and the speed without a graphics card. Numbers and limits are those in "Measured: error rate of each model" above; after re-running the comparison, put the new numbers into `group/model_bench.py`.
+
+**What has been verified** (2026-11-22): unit tests; the real WebUI with a stand-in engine walked through in a browser (automatic end, download, minutes, IT settings page; Chinese and Indonesian interface); "turn into meeting minutes" was also run through the main program's real `--summarize` against a fake LLM server (the original mode opens a window and waits for ESC when it finishes, which would hang a background job; it no longer waits). **Not yet verified with a real LLM and real meetings**: the quality of the minutes.
+
 ## ③ Staff computers that need live subtitles
 
 ### Windows

@@ -462,6 +462,26 @@ Langkah untuk karyawan ada di skenario 8 pada contoh penggunaan. Satu komputer s
 
 Pendekatannya mengikuti konteks naskah, prompt subtitle, dan jendela balasan dari [OwnVoice Meet](https://github.com/Zaious/ownvoice-meet) (Apache-2.0); kodenya ditulis ulang untuk edisi grup dan tidak ada kode sumber yang disalin.
 
+### Transkrip, berakhir otomatis, pemakaian hari ini, angka uji di samping model (r33)
+
+**Transkrip subtitle langsung**
+
+- WebUI mencatat setiap kalimat yang dikirim ke layar subtitle di `group_data\live\<waktu mulai>.jsonl` (ditulis selama rapat, jadi tetap ada walaupun program macet) dan menyimpan 10 sesi terakhir. Isinya teks rapat dan tetap berada di komputer ini, seperti file log yang sudah ada di `logs\`; file diagnostik tidak memuatnya.
+- Hanya komputer yang menangkap suara yang bisa mengunduhnya (`/simple/live/transcript/…` menolak komputer lain); penonton di ponsel tidak bisa.
+- **Jadikan notulen rapat** (mode server): transkrip diserahkan ke `--summarize` milik program utama dengan model notulen yang diatur IT, dalam antrean yang sama dengan daftar rekaman (satu pekerjaan setiap kali). Teks dikirim ke LLM, tujuannya sama dengan notulen dari rekaman. Bila kalimatnya sangat sedikit (kurang dari 2 segmen setelah digabung) atau tidak ada teks Mandarin, dipakai cara ringkasan lama, tanpa bagian keputusan / tindak lanjut / risiko.
+
+**Berakhir otomatis bila lama tidak ada subtitle**
+
+- Halaman Pengaturan IT, "Akhiri otomatis bila sekian lama tidak ada subtitle (menit)": bawaan 20, 0 = tidak pernah (1–600). Diperiksa setiap 30 detik.
+- Yang dihitung adalah "tidak ada subtitle baru", bukan volume: waktu yang hanya berisi musik atau bising tanpa teks juga dihitung. Waktu saat karyawan menekan "Jeda" tidak dihitung; pemrosesan rekaman tidak terpengaruh.
+- Saat berakhir, layar subtitle (termasuk penonton di ponsel) menampilkan "Lebih dari N menit tidak ada subtitle baru, sesi diakhiri otomatis". Untuk kelas seharian dengan istirahat panjang, perbesar nilainya atau minta karyawan menekan Jeda dulu.
+
+**Pemakaian API pengenalan suara hari ini**: kartu "API pengenalan suara" menampilkan jumlah permintaan, menit suara, dan berapa kali batas pemakaian tercapai hari ini di komputer ini (disimpan di `group_data\asr-usage.json`, direset tiap hari). Kuota dipakai bersama satu akun, komputer lain tidak dihitung di sini; sisa sebenarnya lihat di konsol penyedia layanan.
+
+**Tingkat kesalahan hasil uji di samping tiap model**: di "Model", setiap paket pengenalan suara menampilkan tingkat kesalahan pada dataset publik, pembanding model small bawaan, dan kecepatan tanpa kartu grafis. Angka dan batasannya sama dengan bagian "Hasil uji: tingkat kesalahan tiap model" di atas; setelah pengujian diulang, masukkan angka baru ke `group/model_bench.py`.
+
+**Yang sudah diverifikasi** (2026-11-22): unit test; WebUI asli dengan mesin pengganti dijalankan di browser (berakhir otomatis, unduh, notulen, halaman Pengaturan IT; antarmuka Mandarin dan Indonesia); "jadikan notulen rapat" juga dijalankan lewat `--summarize` asli milik program utama terhadap server LLM tiruan (mode aslinya membuka jendela dan menunggu tombol ESC saat selesai, yang akan membuat pekerjaan latar macet; sekarang tidak menunggu). **Belum diverifikasi dengan LLM asli dan rapat sebenarnya**: mutu notulennya.
+
 ## ③ Komputer karyawan yang perlu subtitle langsung
 
 ### Windows

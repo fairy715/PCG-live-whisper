@@ -41,6 +41,8 @@ try:
     from group import audio_test
     from group import meeting_notes
     from group import reply as reply_mod
+    from group import transcript as transcript_mod
+    from group import model_bench
 except ImportError:                     # 測試時直接 import simple_routes
     import model_packs
     import diagnostics
@@ -49,6 +51,8 @@ except ImportError:                     # 測試時直接 import simple_routes
     import audio_test
     import meeting_notes
     import reply as reply_mod
+    import transcript as transcript_mod
+    import model_bench
 
 # 情境：同仁看到的是「錄音裡主要說什麼語言 → 拿到什麼」，背後對應主程式的模式代號
 DEFAULT_SCENARIOS = [
@@ -151,6 +155,18 @@ def asr_api_scope(s):
         return ""
     a = s["asr_api"]
     return asr_api.scope(a.get("url"), bool(a.get("internal")))
+
+
+IDLE_DEFAULT_MIN = 20
+
+
+def idle_minutes(s):
+    """太久沒有字幕自動結束（r33）：幾分鐘（0＝不自動結束）。IT 設定頁可以改，沒設過用 20 分鐘"""
+    try:
+        v = int(float((s or {}).get("live_idle_min", IDLE_DEFAULT_MIN)))
+    except (TypeError, ValueError):
+        v = IDLE_DEFAULT_MIN
+    return max(0, min(600, v))
 
 
 def glossary_sync(base_dir, s):
@@ -263,6 +279,39 @@ class SimpleQueue:
         self.wake.set()
         return jid
 
+    def add_minutes(self, owner, text, title, mode):
+        """r33：即時字幕的逐字稿 → 會議紀錄（主程式的 --summarize；只在伺服器模式）。
+        逐字稿先寫到 logs/live_<編號>/，處理完會議紀錄也搬到同一個資料夾"""
+        jid = time.strftime("%Y%m%d%H%M%S") + "-" + secrets.token_hex(3)
+        d = self.base / "logs" / f"live_{jid}"
+        d.mkdir(parents=True, exist_ok=True)
+        src = d / "即時字幕_時間逐字稿.txt"
+        src.write_text(text, encoding="utf-8")
+        with self.lock:
+            self._prune()
+            self.jobs[jid] = {"id": jid, "owner": owner, "file": title, "path": str(src), "kind": "minutes",
+                              "scenario": "live", "mode": mode, "scenario_title": "即時字幕",
+                              "topic": "", "speakers": None, "notes": "",
+                              "state": "queued", "created": time.time(), "started": None, "finished": None,
+                              "error": "", "out_dir": "", "stage": ""}
+            self._save()
+        self.wake.set()
+        return jid
+
+    def _collect_minutes(self, job):
+        """--summarize 把會議紀錄寫在 logs/ 最上層（摘要_日期時間.txt／.html）：搬到這件工作自己的資料夾"""
+        d = Path(job["path"]).parent
+        logs = self.base / "logs"
+        since = (job.get("started") or time.time()) - 2
+        try:
+            for f in logs.iterdir():
+                if f.is_file() and "摘要" in f.name and f.suffix.lower() in (".txt", ".html") \
+                        and f.stat().st_mtime >= since:
+                    f.replace(d / f.name)
+        except OSError:
+            pass
+        return str(d.relative_to(self.base)).replace("\\", "/")
+
     def list_for(self, owner):
         with self.lock:
             queued = sorted((j for j in self.jobs.values() if j["state"] == "queued"), key=lambda j: j["created"])
@@ -340,6 +389,11 @@ class SimpleQueue:
 
     def _args(self, job):
         s = self.settings()
+        if job.get("kind") == "minutes":           # r33：即時字幕的逐字稿 → 會議紀錄（不用辨識）
+            args = [sys.executable, str(self.base / "translate_meeting.py"), "--summarize", job["path"]]
+            if s.get("summary_model"):
+                args += ["--summary-model", s["summary_model"]]
+            return args
         glossary_sync(self.base, s)                # 詞庫（r23）：主程式讀 group_data/glossary.txt
         meeting_notes.save(self.base, job.get("notes") or "")     # 這場會議的資料（r32）；沒有就清掉上一場的
         pf = profile(s, self.has_gpu())
@@ -423,6 +477,8 @@ class SimpleQueue:
             j = self.jobs.get(job["id"])
             if j is None:
                 return
+            if j.get("kind") == "minutes" and rc == 0:
+                out_dir = self._collect_minutes(j)
             j["out_dir"] = out_dir
             j["finished"] = time.time()
             if j.get("cancel"):
@@ -525,7 +581,7 @@ def parse_llm(text, keep_v1=False):
 
 def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path, write_config,
              start_live=None, live_running=None, live_args=None, set_view_password=None, gpu_alive=None,
-             update_hooks=None, stop_live=None, reply=None):
+             update_hooks=None, stop_live=None, reply=None, transcript=None):
     """把簡易版的路由掛到 WebUI 的 FastAPI app 上（webui.py 呼叫）。
     start_live(body)：用 WebUI 原本的方式啟動即時字幕；live_running()：WebUI 是否正在跑；
     stop_live()：停止即時字幕（首頁「字幕進行中」旁的停止按鈕）"""
@@ -699,8 +755,9 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
     async def simple_file(request: Request, jid: str, name: str):
         # 逐字稿 HTML 用相對路徑載入同資料夾的錄音：瀏覽器帶不了標頭，所以這條用網址上的 ?k=（工作的下載代號）
         job = queue.get(jid)
-        if not job or not secrets.compare_digest(request.query_params.get("k", "") or
-                                                 request.cookies.get(f"pcg_{jid}", ""), job.get("dl_key", "")):
+        # 還沒產生過下載代號的工作一律拿不到（r33：原本兩邊都是空字串會比對成功，接著出錯變成 500）
+        if not job or not job.get("dl_key") or not secrets.compare_digest(
+                request.query_params.get("k", "") or request.cookies.get(f"pcg_{jid}", ""), job["dl_key"]):
             return JSONResponse({"ok": False, "error": "找不到檔案或連結已失效"}, status_code=404)
         d = queue.out_path(job)
         target = (d / name).resolve() if d else None
@@ -817,6 +874,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
     @app.get("/api/simple/live")
     async def simple_live_info(request: Request):
         """即時字幕只能在自己的電腦上開（要抓這台電腦播出來的聲音）"""
+        idle_watch()                     # 太久沒有字幕自動結束（r33）
         args = live_args() if live_args else None
         mode = args[args.index("--mode") + 1] if args and "--mode" in args[:-1] else ""
         return {"ok": True, "local": bool(is_local(request)), "available": start_live is not None,
@@ -1098,11 +1156,62 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 return JSONResponse({"ok": False, "code": "no_mic",
                                      "error": "找不到麥克風。請接上麥克風，或到「聲音與麥克風」選一支再試"}, status_code=409)
             start["device"] = mi
+        idle_watch()                     # 太久沒有字幕自動結束（r33）
         try:
             await start_live(start)
         except Exception as e:
             return JSONResponse({"ok": False, "code": "live_failed", "error": f"啟動失敗：{e}"}, status_code=500)
         return {"ok": True, "mode": shown, "room": room}
+
+    # ─── 太久沒有字幕自動結束（r33）：字幕機忘了關會一直佔著 CPU、顯示卡（用語音辨識 API 還會一直用額度） ───
+    _idle = {"since": None, "key": None}
+
+    def idle_due(now=None):
+        """現在該不該自動結束：字幕進行中（不是處理錄音檔）、沒有按暫停、超過 IT 設定的分鐘數沒有新的字幕。
+        回傳超過的分鐘數（該結束）或 0"""
+        now = time.time() if now is None else now
+        args = (live_args() if live_args else None) or []
+        if transcript is None or not (live_running and live_running()) or "--input" in args:
+            _idle.update(since=None, key=None)
+            return 0
+        key = tuple(args)
+        if _idle["key"] != key:                      # 新的一場：從現在開始算（載入模型的時間不算）
+            _idle.update(since=now, key=key)
+        limit = idle_minutes(settings())
+        if not limit or (Path(base_dir) / ".webui_pause").exists():
+            _idle["since"] = now                     # 關掉了、或同仁按了暫停：不算，繼續開會後重新算
+            return 0
+        quiet = now - max(_idle["since"], transcript.last or 0)
+        return limit if quiet >= limit * 60 else 0
+
+    async def idle_check(now=None):
+        mins = idle_due(now)
+        if mins and stop_live is not None:
+            try:
+                await stop_live(reason="idle", minutes=mins)
+            except TypeError:                        # 舊的 stop_live 不收參數
+                await stop_live()
+            _idle.update(since=None, key=None)
+        return mins
+
+    async def _idle_loop():
+        import asyncio
+        while True:
+            await asyncio.sleep(30)
+            try:
+                await idle_check()
+            except Exception:  # noqa: BLE001
+                pass
+
+    def idle_watch():
+        """開始定時檢查（重複呼叫沒關係）。WebUI 用 lifespan 啟動，on_event("startup") 不會被呼叫，
+        所以在有人打開字幕頁或按開始時才啟動；要在事件迴圈裡呼叫"""
+        import asyncio
+        task = _idle.get("task")
+        if task is None or task.done():
+            _idle["task"] = asyncio.create_task(_idle_loop())
+
+    queue.idle_check, queue.idle_due = idle_check, idle_due      # 測試用
 
     @app.post("/api/simple/say")
     async def simple_say(request: Request, body: dict = {}):
@@ -1123,7 +1232,65 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         if not ev.get("ok"):
             return JSONResponse({"ok": False, "code": ev.get("code") or "say_failed", "error": "沒有翻成功，請再試一次"},
                                 status_code=504 if ev.get("code") == "say_timeout" else 502)
-        return {"ok": True, "text": str(ev.get("text") or ""), "src": src, "tgt": tgt}
+        out = str(ev.get("text") or "")
+        if transcript is not None:
+            transcript.typed(src, tgt, text, out)          # 逐字稿（r33）也記下打字的句子
+        return {"ok": True, "text": out, "src": src, "tgt": tgt}
+
+    # ─── 即時字幕的逐字稿（r33，group/transcript.py）：只能在收音的這台電腦上拿 ───
+    def _local_only(request):
+        if not is_local(request):
+            return JSONResponse({"ok": False, "code": "local_only", "error": "只能在收音的這台電腦上使用"}, status_code=403)
+        if transcript is None:
+            return JSONResponse({"ok": False, "code": "live_unavailable", "error": "這個版本不支援"}, status_code=503)
+        return None
+
+    @app.get("/api/simple/live/transcripts")
+    async def simple_transcripts(request: Request):
+        err = _local_only(request)
+        if err:
+            return err
+        import asyncio
+        items = await asyncio.to_thread(transcript.sessions)
+        running = bool(live_running and live_running()) and "--input" not in ((live_args() if live_args else None) or [])
+        for x in items:
+            x["running"] = bool(x.pop("current", False) and running)
+        return {"ok": True, "sessions": items, "minutes": bool(profile(settings(), has_gpu())["summarize"])}
+
+    @app.get("/simple/live/transcript/{sid}.txt")
+    async def simple_transcript_file(request: Request, sid: str):
+        err = _local_only(request)
+        if err:
+            return err
+        import asyncio
+        text = await asyncio.to_thread(transcript.text, sid)
+        if text is None:
+            return JSONResponse({"ok": False, "code": "not_found", "error": "找不到這一場的逐字稿"}, status_code=404)
+        # 開頭加 BOM：舊版記事本、Excel 才會當成 UTF-8
+        return Response(("\ufeff" + text).encode("utf-8"), media_type="text/plain; charset=utf-8",
+                        headers={"Content-Disposition": f'attachment; filename="PCG-transcript-{sid}.txt"',
+                                 "Cache-Control": "no-store"})
+
+    @app.post("/api/simple/live/minutes")
+    async def simple_live_minutes(request: Request, body: dict = {}):
+        """這一場的逐字稿 → 會議紀錄（排進「我送出的錄音」；只有伺服器模式有大模型可以整理）"""
+        err = _local_only(request)
+        if err:
+            return err
+        owner, err = auth(request)
+        if err:
+            return err
+        if not profile(settings(), has_gpu())["summarize"]:
+            return JSONResponse({"ok": False, "code": "minutes_local", "error": "本機模式沒有大模型，不能整理會議紀錄"},
+                                status_code=409)
+        import asyncio
+        sid = str(body.get("id") or "")
+        text = await asyncio.to_thread(transcript.text, sid)
+        if text is None:
+            return JSONResponse({"ok": False, "code": "not_found", "error": "找不到這一場的逐字稿"}, status_code=404)
+        info = next((x for x in transcript.sessions() if x["id"] == sid), {})
+        title = "即時字幕 " + time.strftime("%m/%d %H:%M", time.localtime(info.get("started") or time.time()))
+        return {"ok": True, "id": queue.add_minutes(owner, text, title, info.get("mode") or "")}
 
     # ─── 一鍵更新（小更新包）：來源是 IT 設定的共用資料夾，或 GitHub 發布頁（見 updater.py） ───
     from group import updater as _upd
@@ -1309,6 +1476,8 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "allow_remote_view": bool(s.get("allow_remote_view", False)),
                 "remote_bound": bound_all(), "can_restart": can_restart(),
                 "multi_lang": s.get("multi_lang", True) is not False,
+                "live_idle_min": idle_minutes(s),                      # 太久沒有字幕自動結束（r33；0＝不自動結束）
+                "asr_usage": asr_api.usage_today(base_dir),            # 語音辨識 API 今天送了多少（r33，只算這台電腦）
                 "m2m_installed": (base_dir / "models" / "m2m100_418m" / "model.bin").is_file(),
                 "update_check": bool(s.get("update_check", True)),
                 "update_who": "it" if s.get("update_who") == "it" else "staff",
@@ -1463,6 +1632,7 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "available": avail, "catalog_errors": _cat_cache.get("errs") or [],
                 "jobs": {k: dict(v) for k, v in model_packs.JOBS.items()},
                 "asr_packs": s.get("asr_packs") or {}, "mt_pack": s.get("mt_pack") or "",
+                "bench": model_bench.summary(),            # 實測錯誤率（r33）：顯示在每個模型旁邊
                 "disk_free_gb": round(free / 1073741824, 1)}
 
     _cat_cache = {}
@@ -1659,6 +1829,11 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 s.pop("llm_internal", None)
         if "multi_lang" in body:
             s["multi_lang"] = bool(body.get("multi_lang"))
+        if "live_idle_min" in body:
+            try:
+                s["live_idle_min"] = max(0, min(600, int(float(body.get("live_idle_min") or 0))))
+            except (TypeError, ValueError):
+                pass
         if gh:
             rw = cfg.get("remote_whisper") if isinstance(cfg.get("remote_whisper"), dict) else {}
             rw.update(host=gh, whisper_port=int(body.get("gpu_port") or 8978))

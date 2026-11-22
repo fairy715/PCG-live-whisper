@@ -24,8 +24,16 @@ from group import simple_routes  # noqa: E402
 FAKE_MAIN = r'''
 import os, sys, time
 a = sys.argv
-inp = a[a.index("--input") + 1]; mode = a[a.index("--mode") + 1]
 open(os.path.join(os.path.dirname(__file__), "args.txt"), "a").write(" ".join(a[1:]) + "\n")
+if "--summarize" in a and "--input" not in a:      # r33：即時字幕的逐字稿 → 會議紀錄（主程式把結果寫在 logs/ 最上層）
+    src = a[a.index("--summarize") + 1]
+    if "壞掉" in open(src, encoding="utf-8").read():
+        print("[錯誤] 無法連接 LLM 伺服器"); sys.exit(1)
+    os.makedirs("logs", exist_ok=True)
+    for n in ("摘要_20261122_150000.txt", "摘要_20261122_150000.html"):
+        open(os.path.join("logs", n), "w").write("x")
+    print("  摘要完成"); sys.exit(0)
+inp = a[a.index("--input") + 1]; mode = a[a.index("--mode") + 1]
 if "FAIL" in inp:
     print("[錯誤] 無法讀取音訊檔"); sys.exit(2)
 base = os.path.splitext(os.path.basename(inp))[0]
@@ -67,9 +75,15 @@ class SimpleFlow(unittest.TestCase):
 
         self.stopped = 0
 
-        async def stop_live():
+        self.stop_why = []
+
+        async def stop_live(reason=None, minutes=None):
             self.stopped += 1
+            self.stop_why.append((reason, minutes))
             self.running = False
+
+        from group import transcript as _tr
+        self.tr = _tr.Recorder(self.base)
 
         self.said = []
 
@@ -86,7 +100,7 @@ class SimpleFlow(unittest.TestCase):
             live_args=lambda: self.args,
             set_view_password=self.view_pw.append, gpu_alive=lambda h, p: self.gpu_up,
             update_hooks={"github_fetch": self._no_github, "launch": self.launched.append}, stop_live=stop_live,
-            reply=_Desk())
+            reply=_Desk(), transcript=self.tr)
         self.c = TestClient(app)
         self.h = {"X-Client-Id": "browserA1234"}
 
@@ -332,6 +346,106 @@ class SimpleFlow(unittest.TestCase):
         self.args = ["python", "translate_meeting.py", "--webui", "--mode", "id2zh"]
         self.local = False
         self.assertEqual(say(text="你好").status_code, 403)
+
+    def _session(self, *lines, mode="id2zh"):
+        """假裝開過一場字幕：主程式送來 started 和幾句字幕"""
+        self.tr.on_event(json.dumps({"type": "started", "mode": mode}))
+        for i, (a, b) in enumerate(lines):
+            self.tr.on_event(json.dumps({"type": "transcription", "source": "main", "src_lang": "ID", "src_text": a,
+                                         "dst_lang": "中", "dst_text": b, "timestamp": f"14:30:{i:02d}", "id": i + 1},
+                                        ensure_ascii=False))
+        return self.tr.sid
+
+    def test_live_transcript_download_and_minutes(self):
+        """r33：字幕結束後下載這一場的逐字稿；伺服器模式可以直接整理成會議紀錄（排進工作清單）"""
+        self.assertEqual(self.c.get("/api/simple/live/transcripts").json()["sessions"], [])
+        self.args = ["python", "translate_meeting.py", "--webui", "--mode", "id2zh"]
+        self.running = True
+        sid = self._session(("Selamat pagi", "早安"), ("Terima kasih", "謝謝"))
+        self.c.post("/api/simple/say", json={"text": "請再說一次"})
+        j = self.c.get("/api/simple/live/transcripts").json()
+        self.assertEqual((len(j["sessions"]), j["sessions"][0]["lines"], j["sessions"][0]["running"], j["minutes"]),
+                         (1, 3, True, False))                      # 本機模式沒有大模型：不能整理會議紀錄
+        r = self.c.get(f"/simple/live/transcript/{sid}.txt")
+        self.assertEqual(r.status_code, 200)
+        self.assertIn("attachment", r.headers["content-disposition"])
+        text = r.content.decode("utf-8-sig")
+        self.assertIn("[14:30:00] [ID] Selamat pagi\n[14:30:00] [中] 早安\n", text)
+        self.assertIn("（打字）請再說一次", text)
+        self.assertEqual(self.c.get("/simple/live/transcript/20260101_000000.txt").status_code, 404)
+        self.assertEqual(self.c.post("/api/simple/live/minutes", headers=self.h, json={"id": sid}).json()["code"],
+                         "minutes_local")
+        # 伺服器模式：逐字稿交給主程式的 --summarize，結果出現在「我送出的錄音」
+        self.running = False
+        self.cfg.write_text(json.dumps({"pcg_simple": {"backend": "server", "summary_model": "deepseek"}}), encoding="utf-8")
+        j = self.c.get("/api/simple/live/transcripts").json()
+        self.assertEqual((j["minutes"], j["sessions"][0]["running"]), (True, False))
+        r = self.c.post("/api/simple/live/minutes", headers=self.h, json={"id": sid}).json()
+        self.assertTrue(r["ok"], r)
+        job = self.wait(r["id"])
+        self.assertEqual(job["state"], "done", job)
+        self.assertEqual(sorted(o["kind"] for o in job["outputs"]), ["minutes_html", "minutes_txt", "transcript_txt"])
+        self.assertTrue(job["file"].startswith("即時字幕 "))
+        args = (self.base / "args.txt").read_text(encoding="utf-8")
+        self.assertRegex(args, r"--summarize \S+即時字幕_時間逐字稿\.txt --summary-model deepseek")
+        self.assertEqual(list((self.base / "logs").glob("摘要*")), [])      # 會議紀錄搬進這件工作自己的資料夾
+        name = next(o["name"] for o in job["outputs"] if o["kind"] == "minutes_html")
+        self.assertEqual(self.c.get(f"/simple/files/{r['id']}/{name}").status_code, 404)     # 沒有下載代號拿不到
+        key = self.c.get(f"/api/simple/jobs/{r['id']}/link", headers=self.h).json()["key"]
+        self.assertEqual(self.c.get(f"/simple/files/{r['id']}/{name}?k={key}").status_code, 200)
+        # 大模型連不上：工作顯示失敗，不是卡住
+        sid2 = self._session(("壞掉", "壞掉"))
+        r = self.c.post("/api/simple/live/minutes", headers=self.h, json={"id": sid2}).json()
+        self.assertEqual(self.wait(r["id"])["state"], "failed")
+        # 分享出去的手機拿不到逐字稿
+        self.local = False
+        self.assertEqual(self.c.get("/api/simple/live/transcripts").status_code, 403)
+        self.assertEqual(self.c.get(f"/simple/live/transcript/{sid}.txt").status_code, 403)
+        self.assertEqual(self.c.post("/api/simple/live/minutes", headers=self.h, json={"id": sid}).status_code, 403)
+
+    def test_live_ends_by_itself_after_a_long_silence(self):
+        """r33：太久沒有新的字幕就自動結束（預設 20 分鐘）；IT 可以改時間或關掉；按了暫停、處理錄音檔時不算"""
+        import asyncio
+        self.args = ["python", "translate_meeting.py", "--webui", "--mode", "id2zh"]
+        now = time.time()
+        self.assertEqual(self.q.idle_due(now), 0)                    # 沒有在跑
+        self.running = True
+        self.assertEqual(self.q.idle_due(now), 0)                    # 剛開始：從現在算
+        self.assertEqual(self.q.idle_due(now + 19 * 60), 0)
+        self.assertEqual(self.q.idle_due(now + 21 * 60), 20)
+        self._session(("Selamat pagi", "早安"))                      # 有新的字幕：重新算
+        self.assertEqual(self.q.idle_due(time.time() + 19 * 60), 0)
+        (self.base / ".webui_pause").write_text("1")                 # 同仁按了暫停：不算
+        self.assertEqual(self.q.idle_due(time.time() + 99 * 60), 0)
+        (self.base / ".webui_pause").unlink()
+        self.assertEqual(self.q.idle_due(time.time() + 99 * 60), 0)  # 繼續開會：從繼續的時候重新算
+        self.cfg.write_text(json.dumps({"pcg_simple": {"live_idle_min": 0}}), encoding="utf-8")
+        self.assertEqual(self.q.idle_due(time.time() + 999 * 60), 0)  # IT 關掉
+        self.cfg.write_text(json.dumps({"pcg_simple": {"live_idle_min": 5}}), encoding="utf-8")
+        self.assertEqual(self.q.idle_due(time.time() + 4 * 60), 0)
+        far = time.time() + 6 * 60
+        self.args = ["python", "translate_meeting.py", "--input", "a.mp3", "--mode", "id2zh"]
+        self.assertEqual(self.q.idle_due(far), 0)                    # 處理錄音檔：不是即時字幕
+        self.args = ["python", "translate_meeting.py", "--webui", "--mode", "id2zh"]
+        self.assertEqual(self.q.idle_due(time.time()), 0)
+        self.assertEqual(asyncio.run(self.q.idle_check(time.time() + 6 * 60)), 5)
+        self.assertEqual((self.stopped, self.stop_why[-1], self.running), (1, ("idle", 5), False))
+        self.assertEqual(asyncio.run(self.q.idle_check(time.time() + 60 * 60)), 0)     # 已經停了，不會再停一次
+
+    def test_pages_keep_the_r33_guards(self):
+        """r33：逐字稿只在收音的這台電腦出現；自動結束要說明原因；模型旁邊有實測數字"""
+        simple = (ROOT / "group" / "simple.html").read_text(encoding="utf-8")
+        live = (ROOT / "group" / "live.html").read_text(encoding="utf-8")
+        admin = (ROOT / "group" / "admin.html").read_text(encoding="utf-8")
+        self.assertIn("const tr=state.ended&&state.local?state.tr:null", live)
+        self.assertIn("if(ev.reason==='idle')state.idleMin=ev.minutes||0", live)
+        self.assertIn("if(j.local)loadLastTr()", simple)
+        self.assertIn("live_idle_min:$('idleMin').value", admin)
+        routes = (ROOT / "group" / "simple_routes.py").read_text(encoding="utf-8")
+        self.assertNotIn("@app.on_event", routes)         # WebUI 用 lifespan 啟動，on_event 不會被呼叫（r33 實測抓到）
+        self.assertEqual(routes.count("idle_watch()                     #"), 2)
+        self.assertIn("${bench(p.id)}", admin)
+        self.assertIn('id="asrUsage"', admin)
 
     def test_pages_keep_the_r32_guards(self):
         """r32：這場會議的資料要送出去、會外送時要提醒；打字回覆的結果不送給看字幕的人"""

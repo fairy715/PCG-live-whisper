@@ -193,6 +193,18 @@ Tôi nói "Tiếng Việt" → "Chỉ đọc phụ đề" → "Tiếng Trung →
 
 ---
 
+## Lấy bản ghi lời hoặc biên bản sau khi phụ đề kết thúc (r33)
+
+Không cần ghi âm riêng: mỗi phiên phụ đề trực tiếp đều được tự động lưu thành bản ghi lời (chỉ trên máy đang thu âm; giữ 10 phiên gần nhất).
+
+- **Màn hình phụ đề**: sau khi bấm "Dừng", phía trên hiện "**Tải bản ghi lời**"; ở chế độ máy chủ còn có "**Tạo biên bản cuộc họp**", thêm một công việc vào danh sách "Ghi âm → Biên bản" để tải về sau vài phút.
+- **Trang chính**: lần mở sau, ở trên cùng có "Phiên phụ đề gần nhất (ngày, số câu)" với hai nút giống vậy.
+- Bản ghi lời là tệp văn bản: mỗi câu có thời gian, nguyên văn và bản dịch; câu gõ để trả lời được đánh dấu "（打字）" (gõ).
+- Người xem bằng điện thoại không lấy được bản ghi lời; hãy nhờ đồng nghiệp chạy phụ đề tải về.
+- **Phụ đề tự kết thúc?** Quá 20 phút không có phụ đề mới thì chương trình tự kết thúc phiên (màn hình ghi rõ lý do), để phiên bị quên không chiếm máy mãi. Nghỉ giải lao lâu thì bấm "Tạm dừng" trước sẽ không bị kết thúc; IT có thể chỉnh thời gian.
+
+---
+
 ## Những trợ giúp trên màn hình (r29)
 
 - **Câu xác nhận trước khi bắt đầu**: phía trên nút có dòng “Bạn sẽ nghe: tiếng Trung → phụ đề: tiếng Việt”. Nếu không đúng ý bạn thì bước 3 đang bị ngược; hãy đổi lại rồi mới bắt đầu.

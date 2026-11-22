@@ -223,3 +223,50 @@ def test(cfg, opener=None):
         return {"ok": True, "status": 200, "message": ""}
     except ApiError as e:
         return {"ok": False, "status": e.status, "message": e.message}
+
+
+# ── 今天送了多少（r33）：主程式每送一段就記一筆，IT 設定頁顯示。只算這台電腦；額度是整個帳號共用的 ──
+USAGE_FILE = "asr-usage.json"
+
+
+def _usage_path(base_dir):
+    import os
+    return os.path.join(str(base_dir), "group_data", USAGE_FILE)
+
+
+def usage_today(base_dir, now=None):
+    """今天（這台電腦的日期）送出的次數、聲音秒數、碰到用量上限的次數"""
+    import json
+    import time
+    day = time.strftime("%Y-%m-%d", time.localtime(now))
+    try:
+        with open(_usage_path(base_dir), encoding="utf-8") as f:
+            d = json.load(f)
+    except (OSError, ValueError):
+        d = {}
+    if not isinstance(d, dict) or d.get("day") != day:
+        d = {}
+    return {"day": day, "requests": int(d.get("requests") or 0), "seconds": round(float(d.get("seconds") or 0), 1),
+            "limited": int(d.get("limited") or 0)}
+
+
+def usage_note(base_dir, seconds=0.0, limited=False, now=None):
+    """記一筆：成功送出一段（seconds 秒），或碰到用量上限一次。寫不進去就算了，不影響辨識"""
+    import json
+    import os
+    d = usage_today(base_dir, now)
+    if limited:
+        d["limited"] += 1
+    else:
+        d["requests"] += 1
+        d["seconds"] = round(d["seconds"] + max(0.0, float(seconds or 0)), 1)
+    path = _usage_path(base_dir)
+    try:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        tmp = path + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(d, f)
+        os.replace(tmp, path)
+    except OSError:
+        pass
+    return d

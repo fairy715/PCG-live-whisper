@@ -2752,15 +2752,24 @@ try:
     async def _pcg_start_live(body):
         await asyncio.to_thread(_start_proc, _build_args(body))
 
-    async def _pcg_stop_live():
+    async def _pcg_stop_live(reason=None, minutes=None):
         await asyncio.to_thread(_stop_proc)
-        await broadcast(json.dumps({"type": "stopped"}))      # 開著的字幕頁顯示「字幕已結束」
+        ev = {"type": "stopped"}                              # 開著的字幕頁顯示「字幕已結束」
+        if reason:
+            ev.update(reason=reason, minutes=minutes)         # r33：太久沒有字幕自動結束，畫面上說明原因
+        await broadcast(json.dumps(ev))
 
     from group import reply as _pcg_reply_mod
     _pcg_reply_desk = _pcg_reply_mod.Desk(BASE_DIR)
-    _pcg_on_event = _pcg_reply_desk.on_event
+    from group import transcript as _pcg_transcript_mod
+    _pcg_transcript = _pcg_transcript_mod.Recorder(BASE_DIR)
+
+    def _pcg_on_event(msg):
+        _pcg_transcript.on_event(msg)            # 逐字稿（r33）：每一句字幕記下來
+        return _pcg_reply_desk.on_event(msg)     # 打字回覆（r32）的結果不轉給看字幕的人
+
     _pcg_simple.register(app, BASE_DIR, _is_local, _pw_hash, _pw_match, CONFIG_FILE, _write_config,
-                         reply=_pcg_reply_desk,
+                         reply=_pcg_reply_desk, transcript=_pcg_transcript,
                          start_live=_pcg_start_live,
                          live_running=lambda: _proc is not None and _proc.poll() is None,
                          live_args=lambda: list(_proc.args) if _proc is not None and _proc.poll() is None else None,

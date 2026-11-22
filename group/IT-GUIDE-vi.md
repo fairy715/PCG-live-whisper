@@ -462,6 +462,26 @@ Các bước cho nhân viên nằm ở tình huống 8 trong tài liệu tình h
 
 Cách làm tham khảo phần bối cảnh bài nói, prompt phụ đề và cửa sổ trả lời của [OwnVoice Meet](https://github.com/Zaious/ownvoice-meet) (Apache-2.0); mã được viết lại cho bản tập đoàn, không sao chép mã nguồn.
 
+### Bản ghi lời, tự kết thúc, lượng dùng hôm nay, số đo bên cạnh mô hình (r33)
+
+**Bản ghi lời của phụ đề trực tiếp**
+
+- WebUI ghi lại từng câu gửi tới màn hình phụ đề vào `group_data\live\<giờ bắt đầu>.jsonl` (ghi trong lúc họp nên chương trình treo vẫn còn) và giữ 10 phiên gần nhất. Nội dung là văn bản cuộc họp, nằm trên máy này giống các tệp nhật ký đã có trong `logs\`; tệp chẩn đoán không chứa các tệp này.
+- Chỉ máy đang thu âm mới tải được (`/simple/live/transcript/…` từ chối máy khác); người xem bằng điện thoại không lấy được.
+- **Tạo biên bản cuộc họp** (chế độ máy chủ): bản ghi lời được giao cho `--summarize` của chương trình chính với mô hình biên bản do IT cài đặt, cùng hàng đợi với danh sách bản ghi âm (mỗi lần một việc). Văn bản được gửi tới LLM, cùng nơi với biên bản từ bản ghi âm. Khi quá ít câu (dưới 2 đoạn sau khi gộp) hoặc không có tiếng Trung thì dùng cách tóm tắt cũ, không có các phần quyết định / việc cần làm / rủi ro.
+
+**Tự kết thúc khi lâu không có phụ đề**
+
+- Trang cài đặt IT, "End automatically after this long without subtitles (minutes)": mặc định 20, 0 = không bao giờ (1–600). Kiểm tra mỗi 30 giây.
+- Tính theo "không có phụ đề mới", không theo âm lượng: thời gian chỉ có nhạc hoặc tiếng ồn không ra chữ cũng được tính. Thời gian nhân viên bấm "Tạm dừng" không tính; xử lý bản ghi âm không bị ảnh hưởng.
+- Khi kết thúc, màn hình phụ đề (kể cả người xem bằng điện thoại) hiện "Hơn N phút không có phụ đề mới nên phiên đã tự kết thúc". Lớp học cả ngày có giờ nghỉ dài thì tăng giá trị này hoặc dặn nhân viên bấm Tạm dừng trước.
+
+**Lượng dùng API nhận dạng giọng nói hôm nay**: thẻ "Speech recognition API" hiện số lần gửi, số phút âm thanh và số lần chạm giới hạn trong hôm nay của máy này (lưu ở `group_data\asr-usage.json`, mỗi ngày tính lại). Hạn mức dùng chung cho cả tài khoản, máy khác không tính ở đây; lượng còn lại thực tế xem ở trang quản trị của nhà cung cấp.
+
+**Tỷ lệ lỗi đo được bên cạnh từng mô hình**: trong "Models", mỗi gói nhận dạng hiện tỷ lệ lỗi đo trên bộ dữ liệu công khai, so với mô hình small có sẵn, và tốc độ khi không có card đồ họa. Con số và giới hạn giống mục "Kết quả đo: tỷ lệ lỗi của từng mô hình" ở trên; sau khi chạy lại phép so sánh, hãy điền số mới vào `group/model_bench.py`.
+
+**Đã kiểm chứng đến đâu** (2026-11-22): kiểm thử đơn vị; WebUI thật với bộ máy thay thế được thao tác trọn quy trình trong trình duyệt (tự kết thúc, tải về, biên bản, trang cài đặt IT; giao diện tiếng Trung và tiếng Indonesia); "tạo biên bản cuộc họp" còn được chạy qua `--summarize` thật của chương trình chính với máy chủ LLM giả (chế độ gốc mở cửa sổ và chờ phím ESC khi xong, sẽ làm công việc nền bị treo; nay không chờ nữa). **Chưa kiểm chứng với LLM thật và cuộc họp thực tế**: chất lượng của biên bản.
+
 ## ③ Máy nhân viên cần phụ đề trực tiếp
 
 ### Windows
