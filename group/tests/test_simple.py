@@ -439,6 +439,7 @@ class SimpleFlow(unittest.TestCase):
         admin = (ROOT / "group" / "admin.html").read_text(encoding="utf-8")
         self.assertIn("const tr=state.ended&&state.local?state.tr:null", live)
         self.assertIn("if(ev.reason==='idle')state.idleMin=ev.minutes||0", live)
+        self.assertIn(".banner.end{background:#fff4d6;color:var(--warn);position:sticky;top:0", live)   # 字幕多時也看得到
         self.assertIn("if(j.local)loadLastTr()", simple)
         self.assertIn("live_idle_min:$('idleMin').value", admin)
         routes = (ROOT / "group" / "simple_routes.py").read_text(encoding="utf-8")

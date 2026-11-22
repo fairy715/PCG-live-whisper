@@ -1,29 +1,29 @@
 {
  "_說明": "下一版發布時同仁頁面「有新版本」視窗顯示的新功能（每種語言 2～5 點，一點一句）。release 要等於這一次發布的 rN，發布流程才會附上；每次發布前更新這個檔",
- "release": "r32",
+ "release": "r33",
  "zh": [
-  "開始前可以貼上「這場會議的資料」（與會者姓名、產品名稱、料號、議程），辨識和翻譯會照這些寫法；錄音檔也可以帶",
-  "字幕畫面下方新增「打字回覆」：用你的語言打字，對方的語言用大字顯示，可以念出來、給對方看，或複製貼到會議的聊天",
-  "用大模型翻譯時，語音辨識聽錯的字會依前後文用最合理的意思翻"
+  "字幕結束後可以下載這一場的逐字稿（時間、原文、翻譯），不用另外錄音；伺服器模式還可以直接整理成會議紀錄",
+  "首頁最上面會顯示「上一場字幕」，隨時可以再下載",
+  "超過 20 分鐘沒有新的字幕會自動結束，畫面會說明原因；中間要休息很久請先按「暫停」"
  ],
  "en": [
-  "Before you start you can paste “information about this meeting” (participants’ names, product names, part numbers, agenda); recognition and translation follow these spellings. Recordings can carry it too",
-  "New “Type a reply” at the bottom of the subtitle screen: type in your language and the other side’s language appears in large type to read aloud, show, or copy into the meeting chat",
-  "When an LLM translates, words misheard by speech recognition are translated by their most plausible meaning in context"
+  "After the subtitles end you can download the transcript of the session (time, original, translation) without a separate recording; in server mode you can also turn it into meeting minutes",
+  "The home page shows “Last subtitle session” at the top, so you can download it again any time",
+  "After more than 20 minutes without a new subtitle the session ends by itself and the screen says why; for a long break, click “Pause” first"
  ],
  "id": [
-  "Sebelum mulai, Anda bisa menempelkan “informasi rapat ini” (nama peserta, nama produk, nomor part, agenda); pengenalan suara dan terjemahan mengikuti penulisan ini. Rekaman juga bisa membawanya",
-  "Baru: “Ketik balasan” di bagian bawah layar subtitle: ketik dalam bahasa Anda, bahasa lawan bicara muncul dengan huruf besar untuk dibacakan, ditunjukkan, atau disalin ke obrolan rapat",
-  "Saat LLM menerjemahkan, kata yang salah dengar oleh pengenalan suara diterjemahkan menurut makna yang paling masuk akal dalam konteks"
+  "Setelah subtitle selesai, Anda bisa mengunduh transkrip sesi itu (waktu, teks asli, terjemahan) tanpa merekam terpisah; pada mode server bisa langsung dijadikan notulen rapat",
+  "Halaman utama menampilkan “Sesi subtitle terakhir” di bagian atas, sehingga bisa diunduh lagi kapan saja",
+  "Bila lebih dari 20 menit tidak ada subtitle baru, sesi berakhir sendiri dan layar menjelaskan alasannya; untuk istirahat panjang, klik “Jeda” dulu"
  ],
  "vi": [
-  "Trước khi bắt đầu có thể dán “thông tin về cuộc họp này” (tên người tham dự, tên sản phẩm, mã hàng, chương trình họp); nhận dạng và dịch sẽ theo cách viết này. Bản ghi âm cũng dùng được",
-  "Mới: “Gõ để trả lời” ở cuối màn hình phụ đề: gõ bằng ngôn ngữ của bạn, ngôn ngữ của người kia hiện bằng chữ lớn để đọc to, cho xem hoặc sao chép vào khung trò chuyện",
-  "Khi LLM dịch, những từ bị nhận dạng giọng nói nghe sai sẽ được dịch theo nghĩa hợp lý nhất trong ngữ cảnh"
+  "Sau khi phụ đề kết thúc có thể tải bản ghi lời của phiên đó (thời gian, nguyên văn, bản dịch) mà không cần ghi âm riêng; ở chế độ máy chủ còn có thể tạo ngay biên bản cuộc họp",
+  "Trang chính hiện “Phiên phụ đề gần nhất” ở trên cùng, có thể tải lại bất cứ lúc nào",
+  "Quá 20 phút không có phụ đề mới thì phiên tự kết thúc và màn hình ghi rõ lý do; nghỉ giải lao lâu hãy bấm “Tạm dừng” trước"
  ],
  "hi": [
-  "शुरू करने से पहले “इस मीटिंग की जानकारी” (प्रतिभागियों के नाम, उत्पाद के नाम, पार्ट नंबर, एजेंडा) चिपका सकते हैं; पहचान और अनुवाद इन्हीं वर्तनी के अनुसार होगा। रिकॉर्डिंग के साथ भी दे सकते हैं",
-  "नया: सबटाइटल स्क्रीन के नीचे “लिखकर जवाब दें”: अपनी भाषा में लिखें, सामने वाले की भाषा बड़े अक्षरों में दिखेगी — पढ़कर सुनाएँ, दिखाएँ या मीटिंग चैट में कॉपी करें",
-  "जब LLM अनुवाद करता है, तो आवाज़ की पहचान में गलत सुने गए शब्दों का अनुवाद संदर्भ के अनुसार सबसे उचित अर्थ में होता है"
+  "सबटाइटल खत्म होने के बाद उस सत्र का ट्रांसक्रिप्ट (समय, मूल, अनुवाद) डाउनलोड कर सकते हैं, अलग से रिकॉर्डिंग की ज़रूरत नहीं; सर्वर मोड में सीधे मीटिंग मिनट्स भी बना सकते हैं",
+  "होम पेज पर सबसे ऊपर “पिछला सबटाइटल सत्र” दिखता है, जिसे कभी भी फिर डाउनलोड कर सकते हैं",
+  "20 मिनट से ज़्यादा कोई नया सबटाइटल न आने पर सत्र अपने-आप खत्म हो जाता है और स्क्रीन पर कारण लिखा होता है; लंबे ब्रेक के लिए पहले “विराम” दबाएँ"
  ]
 }
