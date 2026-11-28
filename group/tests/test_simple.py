@@ -88,8 +88,11 @@ class SimpleFlow(unittest.TestCase):
         self.said = []
 
         class _Desk:                      # 打字回覆（r32）：假的主程式，照方向回一句
-            async def ask(_s, text, src, tgt):
-                self.said.append((text, src, tgt))
+            async def ask(_s, text, src, tgt, timeout=30, kind="say"):
+                self.said.append((text, src, tgt) if kind == "say" else (kind, text, tgt))
+                if kind == "explain":                  # r34：沒看懂？AI 重新翻譯並解釋
+                    return {"ok": False, "code": "say_timeout"} if "TIMEOUT" in text else \
+                        {"ok": True, "text": f"翻譯（{tgt}）：…"}
                 return {"ok": False, "code": "say_timeout"} if text == "TIMEOUT" else \
                     {"ok": True, "text": f"[{src}2{tgt}] {text}"}
 
@@ -402,6 +405,55 @@ class SimpleFlow(unittest.TestCase):
         self.assertEqual(self.c.get("/api/simple/live/transcripts").status_code, 403)
         self.assertEqual(self.c.get(f"/simple/live/transcript/{sid}.txt").status_code, 403)
         self.assertEqual(self.c.post("/api/simple/live/minutes", headers=self.h, json={"id": sid}).status_code, 403)
+
+    def test_explain_the_last_passage(self):
+        """r34：沒看懂？AI 重新翻譯並解釋——伺服器模式、字幕進行中才有；看字幕的人（含分享出去的手機）都能按"""
+        self.args = ["python", "translate_meeting.py", "--webui", "--mode", "id2zh"]
+        ask = lambda h=None, **b: self.c.post("/api/simple/explain", headers=h or self.h, json=b)
+        self.assertEqual(ask(lang="zh").json()["code"], "say_not_running")
+        self.running = True
+        self.assertFalse(self.c.get("/api/simple/live").json()["explain"])          # 本機模式沒有大模型
+        self.assertEqual(ask(lang="zh").json()["code"], "explain_local")
+        self.cfg.write_text(json.dumps({"pcg_simple": {"backend": "server", "password_hash": "h:staff1"}}), encoding="utf-8")
+        self.assertTrue(self.c.get("/api/simple/live").json()["explain"])
+        self.assertEqual(ask(lang="zh").json()["code"], "explain_empty")            # 還沒有字幕
+        self._session(("Nomor pesanan PO-12345 dikirim hari Jumat.", "訂單 PO-12345 星期五出貨。"), ("Terima kasih", "謝謝"))
+        other = {"X-Client-Id": "browserB5678"}
+        r = ask(other, lang="vi").json()
+        self.assertEqual((r["ok"], r["text"], r["lang"]), (True, "翻譯（vi）：…", "vi"))
+        kind, text, tgt = self.said[-1]
+        self.assertEqual((kind, tgt), ("explain", "vi"))
+        self.assertEqual(text, "[ID] Nomor pesanan PO-12345 dikirim hari Jumat.\n[ID] Terima kasih")
+        self.assertEqual(ask(other, lang="vi").status_code, 429)                    # 同一個人連按要等幾秒
+        self.assertEqual(ask({"X-Client-Id": "browserC9012"}, lang="xx").json()["lang"], "zh")    # 不認得的語言用中文
+        # 分享出去的手機：要同仁密碼（和看字幕一樣），有密碼就能按
+        self.local = False
+        phone = {"X-Client-Id": "phoneD345678"}
+        self.assertEqual(ask(phone, lang="id").status_code, 401)
+        self.assertTrue(ask({**phone, "X-Simple-Token": "staff1"}, lang="id").json()["ok"])
+
+    def test_transcript_download_in_one_language(self):
+        """r34：逐字稿可以只要一種語言的版本（?lang=）"""
+        sid = self._session(("Selamat pagi", "早安"), ("Terima kasih", "謝謝"))
+        s = self.c.get("/api/simple/live/transcripts").json()["sessions"][0]
+        self.assertEqual(s["langs"], ["id", "zh"])
+        r = self.c.get(f"/simple/live/transcript/{sid}.txt?lang=zh")
+        text = r.content.decode("utf-8-sig")
+        self.assertIn("[14:30:00] 早安\n[14:30:01] 謝謝\n", text)
+        self.assertNotIn("Selamat", text)
+        self.assertIn(f"PCG-transcript-{sid}-zh.txt", r.headers["content-disposition"])
+        self.assertEqual(self.c.get(f"/simple/live/transcript/{sid}.txt?lang=vi").status_code, 404)
+        self.assertIn("Selamat pagi", self.c.get(f"/simple/live/transcript/{sid}.txt?lang=../x").content.decode("utf-8-sig"))
+
+    def test_pages_keep_the_r34_guards(self):
+        """r34：大字區與清單的順序、AI 解釋只在有大模型時出現、音量條沒有資料時不顯示"""
+        live = (ROOT / "group" / "live.html").read_text(encoding="utf-8")
+        simple = (ROOT / "group" / "simple.html").read_text(encoding="utf-8")
+        self.assertIn("body:not(.sub) .msgs{flex-direction:column-reverse}", live)
+        self.assertIn("$('ask').hidden=!(state.explain&&state.running&&!state.ended&&events.some(e=>e.source!=='typed'))", live)
+        self.assertIn("$('lvlW').hidden=!(state.lvlSeen&&state.running&&!state.ended&&!state.paused)", live)
+        self.assertIn("'?lang='+w.value", live)
+        self.assertIn("'?lang='+w.value", simple)
 
     def test_live_ends_by_itself_after_a_long_silence(self):
         """r33：太久沒有新的字幕就自動結束（預設 20 分鐘）；IT 可以改時間或關掉；按了暫停、處理錄音檔時不算"""

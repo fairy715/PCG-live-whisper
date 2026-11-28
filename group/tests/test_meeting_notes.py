@@ -199,6 +199,37 @@ class EngineReply(unittest.TestCase):
     def test_a_request_left_from_an_earlier_session_is_ignored(self):
         self.assertIsNone(self.ask(id=9, text="好", src="zh", tgt="id", at=time.time() - 600))
 
+    def test_explain_uses_the_running_llm_and_refuses_in_local_mode(self):
+        """r34：沒看懂？AI 重新翻譯並解釋——用主程式正在用的大模型；本機模式沒有大模型"""
+        old = (t._pcg_tr_note["tr"], t.call_ollama_raw, t._PCG_NOTES[0], t._PCG_GLOSS[0])
+        t._PCG_NOTES[0], t._PCG_GLOSS[0] = "", ()
+        asked = []
+
+        def fake_llm(prompt, model, host, port, **kw):
+            asked.append((prompt, model, host, port, kw.get("server_type")))
+            return "<think>…</think>**翻译**：订单 PO-12345 星期五出货。\n\n\n说明：PO 是订单编号。"
+        try:
+            t._pcg_tr_note["tr"] = None
+            self.assertEqual(self.ask(id=11, kind="explain", text="[ID] Nomor pesanan", tgt="zh")["code"], "explain_local")
+            tr = t.OllamaTranslator("deepseek", host="10.0.0.9", port=8000, direction="id2zh", skip_check=True,
+                                    server_type="openai")
+            t._pcg_tr_note["tr"] = tr
+            t.call_ollama_raw = fake_llm
+            ev = self.ask(id=12, kind="explain", text="[ID] Nomor pesanan PO-12345 dikirim hari Jumat.", tgt="zh")
+            self.assertEqual((ev["ok"], ev["id"]), (True, 12))
+            self.assertNotIn("think", ev["text"])                 # 思考過程、粗體記號拿掉
+            self.assertNotIn("**", ev["text"])
+            self.assertIn("PO-12345", ev["text"])
+            if t.S2TWP.convert("订单") == "訂單":                  # 有裝 OpenCC：整段簡體會換成台灣繁體
+                self.assertEqual(ev["text"], "翻譯：訂單 PO-12345 星期五出貨。\n\n說明：PO 是訂單編號。")
+            self.assertEqual(asked[0][1:], ("deepseek", "10.0.0.9", 8000, "openai"))
+            self.assertIn("PO-12345", asked[0][0])
+            self.assertEqual(self.ask(id=13, kind="explain", text="  ", tgt="zh")["code"], "explain_empty")
+            t.call_ollama_raw = lambda *a, **k: (_ for _ in ()).throw(OSError("連不上"))
+            self.assertEqual(self.ask(id=14, kind="explain", text="[ID] x", tgt="zh")["code"], "explain_failed")
+        finally:
+            t._pcg_tr_note["tr"], t.call_ollama_raw, t._PCG_NOTES[0], t._PCG_GLOSS[0] = old
+
     def test_the_watcher_starts_with_the_subtitles(self):
         old = t._pcg_reply
         t._pcg_reply = types.SimpleNamespace(n=0, start=lambda: setattr(t._pcg_reply, "n", t._pcg_reply.n + 1))

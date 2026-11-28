@@ -86,8 +86,36 @@ def fold(raw):
     return out
 
 
-def to_text(header, lines):
-    """逐字稿的文字檔（原作者記錄檔的格式，可以交給 --summarize）"""
+TAG_LANG = {"中": "zh", "台": "zh", "EN": "en", "ID": "id", "VI": "vi", "HI": "hi", "日": "ja", "韓": "ko"}
+
+
+def _versions(ln):
+    """這一句有哪幾種語言的版本：[(語言代碼, 標籤, 文字)]，原文在前"""
+    out = []
+    for tag, text in ((ln.get("src_tag"), ln.get("src")), (ln.get("dst_tag"), ln.get("dst"))):
+        if tag and text and text != "（翻譯失敗）":
+            out.append((TAG_LANG.get(tag, tag), tag, text))
+    for tag, text in sorted((ln.get("extra") or {}).items()):
+        if tag and text and tag not in (ln.get("src_tag"), ln.get("dst_tag")):
+            out.append((TAG_LANG.get(tag, tag), tag, text))
+    return out
+
+
+def langs_of(lines):
+    """這一場出現過的語言（代碼），照出現的順序"""
+    out = []
+    for ln in lines:
+        for code, _tag, _text in _versions(ln):
+            if code not in out:
+                out.append(code)
+    return out
+
+
+def to_text(header, lines, only=None):
+    """逐字稿的文字檔（原作者記錄檔的格式，可以交給 --summarize）。
+    only＝語言代碼（r34）：每一句只留那一種語言的版本（原文或譯文），沒有那種語言的句子略過"""
+    if only:
+        return _to_text_one(header, lines, only)
     out = []
     started = header.get("started") or 0
     title = mode_title(header.get("mode"))
@@ -105,6 +133,20 @@ def to_text(header, lines):
             if tag and tag not in (ln.get("src_tag"), ln.get("dst_tag")):
                 out.append(f"[{ts}] [{tag}] {text}")
         out.append("")
+    return "\n".join(out).rstrip() + "\n"
+
+
+def _to_text_one(header, lines, only):
+    started = header.get("started") or 0
+    out = ["PCG 會議翻譯 即時字幕逐字稿　" + time.strftime("%Y-%m-%d %H:%M", time.localtime(started))
+           + "　" + LANG_NAME.get(only, only), ""]
+    for ln in lines:
+        hit = next((v for v in _versions(ln) if v[0] == only), None)
+        if not hit:
+            continue
+        ts = ln.get("ts") or time.strftime("%H:%M:%S", time.localtime(ln.get("t") or started))
+        mark = "（打字）" if ln.get("k") == "t" and hit[1] == ln.get("src_tag") else ""
+        out.append(f"[{ts}] {mark}{hit[2]}")
     return "\n".join(out).rstrip() + "\n"
 
 
@@ -225,13 +267,23 @@ class Recorder:
             n = len(fold(raw))
             if n:
                 out.append({"id": sid, "started": header.get("started") or 0, "mode": header.get("mode") or "",
-                            "title": mode_title(header.get("mode")), "lines": n, "current": sid == self.sid})
+                            "title": mode_title(header.get("mode")), "lines": n, "current": sid == self.sid,
+                            "langs": langs_of(fold(raw))})
         return out
 
-    def text(self, sid):
-        """某一場的逐字稿文字；沒有這一場（或沒有內容）回 None"""
+    def text(self, sid, only=None):
+        """某一場的逐字稿文字；沒有這一場（或沒有內容）回 None。only＝只留這一種語言（r34）"""
         if not _ID_RE.match(str(sid or "")):
             return None
         header, raw = self._read(sid)
         lines = fold(raw) if header is not None else []
-        return to_text(header, lines) if lines else None
+        if not lines or (only and only not in langs_of(lines)):
+            return None
+        return to_text(header, lines, only)
+
+    def recent(self):
+        """正在進行的這一場的每一句（給「AI 重新翻譯並解釋」拿剛才那一段，r34）；沒有就是空的"""
+        if self.sid is None:
+            return []
+        header, raw = self._read(self.sid)
+        return fold(raw[-80:]) if header is not None else []

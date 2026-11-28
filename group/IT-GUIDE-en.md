@@ -480,6 +480,27 @@ The approach follows the script context, caption prompt and reply window of [Own
 
 **What has been verified** (2026-11-22): unit tests; the real WebUI with a stand-in engine walked through in a browser (automatic end, download, minutes, IT settings page; Chinese and Indonesian interface); "turn into meeting minutes" was also run through the main program's real `--summarize` against a fake LLM server (the original mode opens a window and waits for ESC when it finishes, which would hang a background job; it no longer waits). **Not yet verified with a real LLM and real meetings**: the quality of the minutes.
 
+### New subtitle layout, AI re-translate and explain, transcript language (r34)
+
+**"Didn't follow? AI re-translates and explains"** (server mode only; M2M100 in local mode cannot take instructions, so the button does not appear)
+
+- What is sent: the **original text** of up to 6 most recent sentences of the running session, within 120 seconds of the last one and 1,500 characters in total, plus this meeting's information and the glossary. It goes to the same LLM that IT configured, the same destination as subtitle translation.
+- Who can use it: everyone watching the subtitles, including people connected from phones (staff password required, as for watching). One request every 6 seconds per person.
+- Every click is one LLM request: an external AI service bills it, and a local LLM handles one at a time (same queue as typed replies). It waits up to 80 seconds.
+- The answer is shown only on the screen that asked; it is not written to the transcript and not saved.
+- A Chinese answer detected as Simplified is converted to Taiwanese Traditional.
+
+**Subtitle layout**
+
+- Chat view: the newest heard sentence stays in the large area at the top; earlier sentences are below, newest first, and the page no longer scrolls down by itself. The black subtitle view (last two sentences) is unchanged.
+- Level bar: the main program already sent the sound level every 0.2 seconds; it is now drawn next to "Subtitles running". It is hidden until level data has been received, so it cannot be mistaken for "no sound".
+
+**Transcript language**: when downloading, choose "Original and translation" or only one language (the URL takes a parameter such as `?lang=zh`). A sentence with no version in that language (for example a failed translation) is skipped. Meeting minutes always use the two-language version.
+
+**What has been verified** (2026-11-28): unit tests; the real WebUI with a stand-in engine and a fake LLM server operated in a browser (Chinese and Indonesian interface, and phone width). **Not yet verified with a real LLM**: the quality of the answers and how long they take. Please try it in your own meetings.
+
+The layout idea and the "AI translate and explain" idea follow [SubKun Live Transcribe](https://subkun.com/zh-tw/live-transcribe/); the code, styles and prompt were written for the group edition. Its recognition model (IBM Granite Speech 5.0 TurboCTC, Apache-2.0) supports only English, French, German, Spanish, Portuguese, Italian and Japanese, without Chinese, Indonesian, Vietnamese or Hindi, so it was not adopted in this version.
+
 ## ③ Staff computers that need live subtitles
 
 ### Windows

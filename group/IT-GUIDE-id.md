@@ -482,6 +482,27 @@ Pendekatannya mengikuti konteks naskah, prompt subtitle, dan jendela balasan dar
 
 **Yang sudah diverifikasi** (2026-11-22): unit test; WebUI asli dengan mesin pengganti dijalankan di browser (berakhir otomatis, unduh, notulen, halaman Pengaturan IT; antarmuka Mandarin dan Indonesia); "jadikan notulen rapat" juga dijalankan lewat `--summarize` asli milik program utama terhadap server LLM tiruan (mode aslinya membuka jendela dan menunggu tombol ESC saat selesai, yang akan membuat pekerjaan latar macet; sekarang tidak menunggu). **Belum diverifikasi dengan LLM asli dan rapat sebenarnya**: mutu notulennya.
 
+### Tata letak baru subtitle, AI menerjemahkan ulang dan menjelaskan, bahasa transkrip (r34)
+
+**"Tidak paham? AI menerjemahkan ulang dan menjelaskan"** (hanya mode server; M2M100 pada mode lokal tidak bisa diberi instruksi, jadi tombolnya tidak muncul)
+
+- Yang dikirim: **teks asli** paling banyak 6 kalimat terakhir dari sesi yang sedang berjalan, dalam 120 detik sebelum kalimat terakhir dan total 1.500 karakter, ditambah informasi rapat ini dan glosarium. Dikirim ke LLM yang sama dengan yang diatur IT, tujuannya sama dengan terjemahan subtitle.
+- Siapa yang bisa memakainya: semua yang menonton subtitle, termasuk yang tersambung dari ponsel (perlu kata sandi karyawan, sama seperti menonton). Satu permintaan setiap 6 detik per orang.
+- Setiap klik adalah satu permintaan LLM: layanan AI eksternal menagihnya, dan LLM lokal menangani satu per satu (antrean yang sama dengan balasan ketik). Menunggu paling lama 80 detik.
+- Jawaban hanya tampil di layar yang meminta; tidak ditulis ke transkrip dan tidak disimpan.
+- Jawaban Mandarin yang terdeteksi beraksara sederhana diubah ke aksara tradisional Taiwan.
+
+**Tata letak subtitle**
+
+- Tampilan obrolan: kalimat terbaru yang terdengar tetap di area besar paling atas; kalimat sebelumnya di bawahnya, yang baru di atas, dan halaman tidak lagi menggulir ke bawah sendiri. Tampilan subtitle berlatar hitam (dua kalimat terakhir) tidak berubah.
+- Batang level suara: program utama memang sudah mengirim level suara setiap 0,2 detik; sekarang digambar di samping "Subtitle berjalan". Batang disembunyikan sampai data level diterima, supaya tidak disangka "tidak ada suara".
+
+**Bahasa transkrip**: saat mengunduh, pilih "Teks asli dan terjemahan" atau hanya satu bahasa (URL memakai parameter seperti `?lang=zh`). Kalimat yang tidak punya versi dalam bahasa itu (misalnya terjemahan gagal) dilewati. Notulen rapat selalu memakai versi dua bahasa.
+
+**Yang sudah diverifikasi** (2026-11-28): unit test; WebUI asli dengan mesin pengganti dan server LLM tiruan dioperasikan di browser (antarmuka Mandarin dan Indonesia, serta lebar ponsel). **Belum diverifikasi dengan LLM asli**: mutu jawaban dan lama menunggunya. Silakan coba pada rapat Anda sendiri.
+
+Gagasan tata letak dan gagasan "AI menerjemahkan dan menjelaskan" mengikuti [SubKun Live Transcribe](https://subkun.com/zh-tw/live-transcribe/); kode, gaya, dan prompt ditulis sendiri untuk edisi grup. Model pengenalan suaranya (IBM Granite Speech 5.0 TurboCTC, Apache-2.0) hanya mendukung bahasa Inggris, Prancis, Jerman, Spanyol, Portugis, Italia, dan Jepang, tanpa Mandarin, Indonesia, Vietnam, atau Hindi, sehingga tidak dipakai pada versi ini.
+
 ## ③ Komputer karyawan yang perlu subtitle langsung
 
 ### Windows

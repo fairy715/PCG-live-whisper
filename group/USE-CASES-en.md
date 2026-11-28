@@ -211,6 +211,17 @@ No separate recording is needed: every live subtitle session is saved as a trans
 
 ---
 
+## The new subtitle layout, and asking AI when you did not follow (r34)
+
+- **The newest sentence stays at the top** in large type; earlier sentences are listed below, newest first. Keep your eyes on one place instead of chasing text down the page. The black "subtitle view" is unchanged.
+- **The green level bar** (next to "Subtitles running"): when it moves, the program is receiving sound. No subtitles and no movement means no sound is coming in, so check the speaker or microphone.
+- **"Didn't follow? AI re-translates and explains"** (server mode only): click it and AI re-translates the last few sentences as one passage into the language you chose, keeping numbers, dates and part numbers, and explains technical terms and abbreviations.
+  - It takes a few seconds to about ten; click again for a new answer. Wait a few seconds between clicks.
+  - People watching on their phones can use it too; the answer only appears on their own screen.
+- **Choose a language when downloading the transcript**: "Original and translation", or only one of the languages (for example Chinese only). In a two-way meeting, one language means every sentence in that language, whoever spoke.
+
+---
+
 ## Helpers on the screen (r29)
 
 - **Confirmation line before you start**: above the button the page says “You will hear: Indonesian → subtitles in: Chinese”. If that is not what you expect, step 3 is the wrong way round; change it before starting.

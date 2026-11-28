@@ -81,6 +81,23 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 .ul-connecting .o1{animation:ul-connecting-cw calc(3.6s / var(--ul-speed,1)) linear calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}.ul-connecting .o2{animation:ul-connecting-ccw calc(2.16s / var(--ul-speed,1)) linear calc(0s / var(--ul-speed,1)) infinite;animation-play-state:var(--ul-play,running)}@keyframes ul-connecting-cw{to{transform:rotate(360deg)}}@keyframes ul-connecting-ccw{to{transform:rotate(-360deg)}}
 /* ul-icons:end */
 [hidden]{display:none!important}
+/* r34：最新聽到的一句固定在上方用大字顯示，之前的句子在下面、新的在最上面（眼睛不用追著字跑）；
+   下面一顆「沒看懂？AI 重新翻譯並解釋」；上方有一條收到聲音的音量條。黑底的字幕模式不變 */
+.now{max-width:980px;margin:0 auto 12px;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--accent);border-radius:14px;padding:14px 18px;min-height:calc(var(--fs) * 5.4)}
+.now.me{background:var(--me);border-left-color:var(--me-line)}
+.now .t{font-size:12px;color:var(--dim);margin-bottom:4px}
+.now .p{font-size:calc(var(--fs) * 1.5);font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+.now .s{font-size:calc(var(--fs) * .85);color:var(--dim);margin-top:8px;overflow-wrap:anywhere}
+body:not(.sub) .msgs{flex-direction:column-reverse}
+body.sub .now,body.sub #ask{display:none}
+#ask{max-width:980px;margin:0 auto 14px;display:flex;gap:6px 12px;align-items:center;flex-wrap:wrap}
+#ask .note{margin:0;flex:1;min-width:200px}
+#askOut{flex-basis:100%;background:var(--accent-soft);border-radius:12px;padding:12px 16px;font-size:calc(var(--fs) * .9);line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+#askOut.err{background:none;color:var(--err);padding:0;font-size:14px}#askOut.wait{background:none;color:var(--dim);padding:0;font-size:14px}
+.lvl{display:inline-block;width:56px;height:6px;border-radius:999px;background:var(--line);overflow:hidden;flex:none}
+.lvl i{display:block;height:100%;width:0;background:var(--me-line);border-radius:999px;transition:width .18s linear}
+#trWhat{min-height:40px;max-width:60vw}
+@media (max-width:560px){.now{padding:12px 14px}.now .p{font-size:calc(var(--fs) * 1.25)}#ask .note{display:none}}
 /* r32：打字回覆（只在收音的這台電腦、字幕進行中） */
 #sayBar{flex:none;border-top:1px solid var(--line);background:var(--card);padding:10px 16px}
 #sayForm{display:flex;gap:8px;align-items:center;max-width:980px;margin:0 auto}
@@ -105,14 +122,16 @@ dialog::backdrop{background:rgba(0,0,0,.5)}
 </head>
 <body>
 <header>
-  <span class="dot" id="dot"></span><span class="sti" id="sti" hidden></span><span class="st" id="st" role="status"></span><span class="mode" id="mode"></span><span class="mode xl" id="xl" hidden></span>
+  <span class="dot" id="dot"></span><span class="sti" id="sti" hidden></span><span class="st" id="st" role="status"></span><span class="lvl" id="lvlW" hidden><i id="lvl"></i></span><span class="mode" id="mode"></span><span class="mode xl" id="xl" hidden></span>
   <span class="sp"></span>
   <label class="mylang"><span id="myLangL"></span><select id="langSel" aria-label="Language"></select></label>
   <button class="ic" id="fsDn" type="button" aria-label="A-">A−</button><button class="ic" id="fsUp" type="button" aria-label="A+">A+</button>
 </header>
 <main id="main">
   <div class="banner end" id="endBanner" hidden><span id="endText"></span><a class="btn ghost" href="/simple" id="backBtn"></a>
-    <a class="btn" id="trDl" hidden download></a><button class="btn ghost" id="trMin" type="button" hidden></button><span class="note" id="trNote" style="margin:0;flex-basis:100%" hidden></span></div>
+    <select id="trWhat" hidden aria-label="Transcript"></select><a class="btn" id="trDl" hidden download></a><button class="btn ghost" id="trMin" type="button" hidden></button><span class="note" id="trNote" style="margin:0;flex-basis:100%" hidden></span></div>
+  <div class="now" id="now" hidden role="status" aria-live="polite" aria-atomic="true"><div class="t" id="nowT"></div><div class="p" id="nowP"></div><div class="s" id="nowS"></div></div>
+  <div id="ask" hidden><button class="btn ghost" id="askBtn" type="button"></button><span class="note" id="askHint"></span><div id="askOut" hidden></div></div>
   <div class="msgs" id="msgs" role="log" aria-live="polite" aria-relevant="additions"><div class="empty" id="empty"></div></div>
 </main>
 <section id="sayBar" hidden>
@@ -181,30 +200,35 @@ const I18N={
 zh:{stop_title:'要結束這一場字幕嗎？',stop_text:'結束後字幕會停止，連進來看的人也會看到「字幕已結束」。',stop_no:'繼續開會',stop_yes:'結束字幕',pw_ok:'連線',pw_bad:'密碼不對，請再輸入一次',my_lang:"我要看",xl_on:"{l}由字幕機另外翻譯",xl_off:"這場字幕沒有{l}",share:'分享',share_title:'讓其他人用手機看字幕',share_scan:"用手機相機掃描，或在瀏覽器輸入下面的網址（要連同一個公司網路）。打開後在右上角選自己的語言：中文、印尼文、越南文、印地語、英文都可以。",share_copy:'複製網址',copied:'已複製',close:'關閉',share_pw:'打開時要輸入同仁密碼。',share_nopw:'注意：沒有設定同仁密碼，同一個網路上的人都看得到。請 IT 在設定頁設定。',share_off:'IT 還沒有開啟「允許其他電腦或手機連進來看字幕」。請 IT 到「IT 設定」開啟。',share_restart:'IT 已開啟分享，但程式要重新啟動一次才會生效。按下面的按鈕：字幕會先停止，約 10 秒後回到首頁，再按一次「開始」。',share_rs_btn:'停止字幕並重新啟動程式',share_rs_wait:'正在重新啟動，請稍候…',share_rs_done:'已重新啟動，回到首頁後再按一次「開始」。',share_rs_fail:'沒有自動重新啟動成功，請重新開機，或點桌面的「PCG 會議翻譯」。',share_rs_manual:'請重新開機，再點桌面的「PCG 會議翻譯」。',share_noip:'找不到這台電腦的網路位址，請確認有連上公司網路。',running:'字幕進行中',waiting:'等待字幕…',paused:'已暫停',ended:'字幕已結束',empty:'開始說話後，字幕會出現在這裡',stop:'停止',pause:'暫停',resume:'繼續',
   say_btn:'打字回覆',say_ph:'用{a}打字，翻成{b}',say_go:'翻譯',say_copy:'複製',say_copied:'已複製',say_close:'關閉',say_show:'念出來，或給對方看（{b}）',say_fail:'沒有翻成功，請再試一次',say_wait:'翻譯中…',say_swap:'對調語言',say_off:'字幕進行中才能用',
   tr_dl:'下載逐字稿',tr_min:'整理成會議紀錄',tr_min_go:'已經開始整理，正在前往「錄音 → 會議紀錄」…',tr_min_fail:'沒有送出：{e}',tr_idle:'超過 {n} 分鐘沒有新的字幕，已經自動結束。',tr_lines:'這一場共 {n} 句',
+  ask_btn:'沒看懂？AI 重新翻譯並解釋',ask_hint:'把剛才那一段整段重翻，數字和料號不漏，並解釋專業用語',ask_wait:'AI 正在重新翻譯剛才那一段…',ask_fail:'沒有成功，請再按一次',ask_rate:'請等幾秒再按',ask_empty:'還沒有字幕',lvl:'收到的聲音',tr_both:'原文與譯文對照',tr_only:'只要{l}',
   to_sub:'字幕模式',to_chat:'對話模式',overlay:'懸浮字幕',only_mine:'只顯示我的語言',back:'回到首頁',confirm_stop:'確定要停止字幕？',
   pw:'請輸入同仁密碼（向主持人或 IT 詢問）',reconnect:'連線中斷，重新連線中…',ovl_fail:'懸浮字幕開不起來',fail:'（翻譯失敗）',
   n_zh:'中文',n_en:'英文',n_ja:'日文',n_ko:'韓文',n_id:'印尼文',n_vi:'越南文',n_hi:'印地語',tr:'{a}轉錄'},
 en:{stop_title:'End this subtitle session?',stop_text:'Subtitles stop, and people who are watching will see “Subtitles ended”.',stop_no:'Keep going',stop_yes:'End subtitles',pw_ok:'Connect',pw_bad:'Wrong password. Please try again',my_lang:"I read",xl_on:"{l}: translated by the subtitle computer",xl_off:"No {l} in this session",share:'Share',share_title:'Let others watch on their phones',share_scan:"Scan with a phone camera, or type the address below in a browser (same company network). Then choose your language at the top right: Chinese, Indonesian, Vietnamese, Hindi or English.",share_copy:'Copy address',copied:'Copied',close:'Close',share_pw:'Viewers will be asked for the staff password.',share_nopw:'Note: no staff password is set, so anyone on the same network can watch. Ask IT to set one.',share_off:'IT has not turned on “Allow other computers and phones to view subtitles”. Ask IT to enable it in IT settings.',share_restart:'IT turned sharing on, but the program must restart once first. Press the button below: subtitles stop, and after about 10 seconds you return to the start page; press “Start” again.',share_rs_btn:'Stop subtitles and restart the program',share_rs_wait:'Restarting, please wait…',share_rs_done:'Restarted. On the start page, press “Start” again.',share_rs_fail:'The program did not restart by itself. Restart Windows, or click “PCG Meeting Translator” on the desktop.',share_rs_manual:'Restart Windows, then click “PCG Meeting Translator” on the desktop.',share_noip:'This computer has no network address. Check that it is connected to the company network.',running:'Subtitles running',waiting:'Waiting for subtitles…',paused:'Paused',ended:'Subtitles ended',empty:'Subtitles will appear here when someone speaks',stop:'Stop',pause:'Pause',resume:'Resume',
   say_btn:'Type a reply',say_ph:'Type in {a}, translated into {b}',say_go:'Translate',say_copy:'Copy',say_copied:'Copied',say_close:'Close',say_show:'Read it aloud or show it ({b})',say_fail:'Translation failed. Please try again',say_wait:'Translating…',say_swap:'Swap languages',say_off:'Available while subtitles are running',
   tr_dl:'Download transcript',tr_min:'Turn into meeting minutes',tr_min_go:'Started. Going to “Recording → Minutes”…',tr_min_fail:'Not sent: {e}',tr_idle:'No new subtitles for more than {n} minutes, so the session ended automatically.',tr_lines:'{n} sentences in this session',
+  ask_btn:'Didn’t follow? AI re-translates and explains',ask_hint:'Re-translates the last passage as a whole, keeps numbers and part numbers, and explains technical terms',ask_wait:'AI is re-translating the last passage…',ask_fail:'That did not work. Please try again',ask_rate:'Please wait a few seconds',ask_empty:'No subtitles yet',lvl:'Sound received',tr_both:'Original and translation',tr_only:'Only {l}',
   to_sub:'Subtitle view',to_chat:'Chat view',overlay:'Floating subtitles',only_mine:'Only my language',back:'Back to home',confirm_stop:'Stop the subtitles?',
   pw:'Enter the staff password (ask the host or IT)',reconnect:'Connection lost, reconnecting…',ovl_fail:'Could not open floating subtitles',fail:'(translation failed)',
   n_zh:'Chinese',n_en:'English',n_ja:'Japanese',n_ko:'Korean',n_id:'Indonesian',n_vi:'Vietnamese',n_hi:'Hindi',tr:'{a} transcription'},
 id:{stop_title:'Akhiri sesi subtitle ini?',stop_text:'Subtitle akan berhenti, dan orang yang menonton akan melihat “Subtitle selesai”.',stop_no:'Lanjutkan rapat',stop_yes:'Akhiri subtitle',pw_ok:'Sambungkan',pw_bad:'Kata sandi salah. Coba lagi',my_lang:"Saya baca",xl_on:"{l}: diterjemahkan oleh komputer subtitle",xl_off:"Sesi ini tidak ada {l}",share:'Bagikan',share_title:'Biarkan orang lain menonton di ponsel',share_scan:"Pindai dengan kamera ponsel, atau ketik alamat di bawah di browser (jaringan perusahaan yang sama). Lalu pilih bahasa Anda di kanan atas: Mandarin, Indonesia, Vietnam, Hindi, atau Inggris.",share_copy:'Salin alamat',copied:'Tersalin',close:'Tutup',share_pw:'Penonton akan diminta kata sandi karyawan.',share_nopw:'Perhatian: kata sandi karyawan belum diatur, jadi siapa pun di jaringan yang sama bisa menonton. Minta IT mengaturnya.',share_off:'IT belum mengaktifkan “Izinkan komputer dan ponsel lain menonton subtitle”. Minta IT mengaktifkannya di Pengaturan IT.',share_restart:'IT sudah mengaktifkan berbagi, tetapi program harus dimulai ulang sekali. Tekan tombol di bawah: subtitle berhenti, sekitar 10 detik kemudian kembali ke halaman awal; tekan “Mulai” lagi.',share_rs_btn:'Hentikan subtitle dan mulai ulang program',share_rs_wait:'Sedang memulai ulang, harap tunggu…',share_rs_done:'Sudah dimulai ulang. Di halaman awal, tekan “Mulai” lagi.',share_rs_fail:'Program tidak berhasil dimulai ulang otomatis. Mulai ulang Windows, atau klik “Penerjemah Rapat PCG” di desktop.',share_rs_manual:'Mulai ulang Windows, lalu klik “Penerjemah Rapat PCG” di desktop.',share_noip:'Komputer ini tidak punya alamat jaringan. Pastikan terhubung ke jaringan perusahaan.',running:'Subtitle berjalan',waiting:'Menunggu subtitle…',paused:'Dijeda',ended:'Subtitle selesai',empty:'Subtitle akan muncul di sini saat ada yang berbicara',stop:'Berhenti',pause:'Jeda',resume:'Lanjut',
   say_btn:'Ketik balasan',say_ph:'Ketik dalam bahasa {a}, diterjemahkan ke bahasa {b}',say_go:'Terjemahkan',say_copy:'Salin',say_copied:'Tersalin',say_close:'Tutup',say_show:'Bacakan atau tunjukkan (bahasa {b})',say_fail:'Gagal diterjemahkan. Coba lagi',say_wait:'Menerjemahkan…',say_swap:'Tukar bahasa',say_off:'Hanya bisa dipakai saat subtitle berjalan',
   tr_dl:'Unduh transkrip',tr_min:'Jadikan notulen rapat',tr_min_go:'Sudah dimulai. Menuju “Rekaman → Notulen”…',tr_min_fail:'Tidak terkirim: {e}',tr_idle:'Lebih dari {n} menit tidak ada subtitle baru, sesi diakhiri otomatis.',tr_lines:'Sesi ini {n} kalimat',
+  ask_btn:'Tidak paham? AI menerjemahkan ulang dan menjelaskan',ask_hint:'Menerjemahkan ulang bagian tadi secara utuh, angka dan nomor part tidak terlewat, serta menjelaskan istilah teknis',ask_wait:'AI sedang menerjemahkan ulang bagian tadi…',ask_fail:'Belum berhasil. Coba tekan lagi',ask_rate:'Tunggu beberapa detik',ask_empty:'Belum ada subtitle',lvl:'Suara diterima',tr_both:'Teks asli dan terjemahan',tr_only:'Hanya {l}',
   to_sub:'Tampilan subtitle',to_chat:'Tampilan obrolan',overlay:'Subtitle mengambang',only_mine:'Hanya bahasa saya',back:'Kembali ke beranda',confirm_stop:'Hentikan subtitle?',
   pw:'Masukkan kata sandi karyawan (tanyakan pembawa acara atau IT)',reconnect:'Koneksi terputus, menyambung ulang…',ovl_fail:'Subtitle mengambang tidak bisa dibuka',fail:'(gagal diterjemahkan)',
   n_zh:'Mandarin',n_en:'Inggris',n_ja:'Jepang',n_ko:'Korea',n_id:'Indonesia',n_vi:'Vietnam',n_hi:'Hindi',tr:'Transkripsi {a}'},
 vi:{stop_title:'Kết thúc phiên phụ đề này?',stop_text:'Phụ đề sẽ dừng, và những người đang xem sẽ thấy “Phụ đề đã kết thúc”.',stop_no:'Tiếp tục họp',stop_yes:'Kết thúc phụ đề',pw_ok:'Kết nối',pw_bad:'Sai mật khẩu. Hãy nhập lại',my_lang:"Tôi xem",xl_on:"{l}: do máy phụ đề dịch thêm",xl_off:"Phiên này không có {l}",share:'Chia sẻ',share_title:'Cho người khác xem trên điện thoại',share_scan:"Quét bằng camera điện thoại, hoặc nhập địa chỉ bên dưới vào trình duyệt (cùng mạng công ty). Sau đó chọn ngôn ngữ của bạn ở góc trên bên phải: tiếng Trung, Indonesia, Việt, Hindi hoặc Anh.",share_copy:'Sao chép địa chỉ',copied:'Đã sao chép',close:'Đóng',share_pw:'Người xem sẽ được yêu cầu nhập mật khẩu nhân viên.',share_nopw:'Lưu ý: chưa đặt mật khẩu nhân viên, nên ai cùng mạng cũng xem được. Hãy nhờ IT đặt mật khẩu.',share_off:'IT chưa bật “Cho phép máy tính và điện thoại khác xem phụ đề”. Hãy nhờ IT bật trong Cài đặt IT.',share_restart:'IT đã bật chia sẻ, nhưng chương trình cần khởi động lại một lần. Bấm nút bên dưới: phụ đề dừng, khoảng 10 giây sau quay về trang đầu; bấm “Bắt đầu” lại.',share_rs_btn:'Dừng phụ đề và khởi động lại chương trình',share_rs_wait:'Đang khởi động lại, vui lòng chờ…',share_rs_done:'Đã khởi động lại. Ở trang đầu, bấm “Bắt đầu” lại.',share_rs_fail:'Chương trình không tự khởi động lại được. Hãy khởi động lại Windows, hoặc bấm “Phiên dịch cuộc họp PCG” trên màn hình.',share_rs_manual:'Hãy khởi động lại Windows, rồi bấm “Phiên dịch cuộc họp PCG” trên màn hình.',share_noip:'Máy này không có địa chỉ mạng. Hãy kiểm tra kết nối mạng công ty.',running:'Đang hiện phụ đề',waiting:'Đang chờ phụ đề…',paused:'Đã tạm dừng',ended:'Phụ đề đã kết thúc',empty:'Phụ đề sẽ hiện ở đây khi có người nói',stop:'Dừng',pause:'Tạm dừng',resume:'Tiếp tục',
   say_btn:'Gõ để trả lời',say_ph:'Gõ bằng {a}, dịch sang {b}',say_go:'Dịch',say_copy:'Sao chép',say_copied:'Đã sao chép',say_close:'Đóng',say_show:'Đọc to hoặc cho người kia xem ({b})',say_fail:'Dịch không thành công. Hãy thử lại',say_wait:'Đang dịch…',say_swap:'Đổi chiều ngôn ngữ',say_off:'Chỉ dùng được khi phụ đề đang chạy',
   tr_dl:'Tải bản ghi lời',tr_min:'Tạo biên bản cuộc họp',tr_min_go:'Đã bắt đầu. Đang chuyển đến “Ghi âm → Biên bản”…',tr_min_fail:'Chưa gửi được: {e}',tr_idle:'Hơn {n} phút không có phụ đề mới nên phiên đã tự kết thúc.',tr_lines:'Phiên này có {n} câu',
+  ask_btn:'Chưa hiểu? AI dịch lại và giải thích',ask_hint:'Dịch lại trọn đoạn vừa rồi, không sót con số và mã hàng, đồng thời giải thích thuật ngữ',ask_wait:'AI đang dịch lại đoạn vừa rồi…',ask_fail:'Chưa thành công. Hãy bấm lại',ask_rate:'Vui lòng chờ vài giây',ask_empty:'Chưa có phụ đề',lvl:'Âm thanh nhận được',tr_both:'Nguyên văn và bản dịch',tr_only:'Chỉ {l}',
   to_sub:'Chế độ phụ đề',to_chat:'Chế độ hội thoại',overlay:'Phụ đề nổi',only_mine:'Chỉ ngôn ngữ của tôi',back:'Về trang chính',confirm_stop:'Dừng phụ đề?',
   pw:'Nhập mật khẩu nhân viên (hỏi người chủ trì hoặc IT)',reconnect:'Mất kết nối, đang kết nối lại…',ovl_fail:'Không mở được phụ đề nổi',fail:'(dịch thất bại)',
   n_zh:'tiếng Trung',n_en:'tiếng Anh',n_ja:'tiếng Nhật',n_ko:'tiếng Hàn',n_id:'tiếng Indonesia',n_vi:'tiếng Việt',n_hi:'tiếng Hindi',tr:'Ghi {a}'},
 hi:{stop_title:'यह सबटाइटल सत्र खत्म करें?',stop_text:'सबटाइटल रुक जाएँगे, और देख रहे लोगों को “सबटाइटल खत्म” दिखेगा।',stop_no:'मीटिंग जारी रखें',stop_yes:'सबटाइटल खत्म करें',pw_ok:'जोड़ें',pw_bad:'पासवर्ड गलत है। दोबारा डालें',my_lang:"मैं पढ़ूँगा",xl_on:"{l}: सबटाइटल कंप्यूटर अलग से अनुवाद करेगा",xl_off:"इस सत्र में {l} नहीं है",share:'शेयर करें',share_title:'दूसरों को फ़ोन पर सबटाइटल दिखाएँ',share_scan:"फ़ोन कैमरे से स्कैन करें, या ब्राउज़र में नीचे का पता डालें (एक ही कंपनी नेटवर्क)। फिर ऊपर दाईं ओर अपनी भाषा चुनें: चीनी, इंडोनेशियाई, वियतनामी, हिंदी या अंग्रेज़ी।",share_copy:'पता कॉपी करें',copied:'कॉपी हो गया',close:'बंद करें',share_pw:'देखने वालों से कर्मचारी पासवर्ड पूछा जाएगा।',share_nopw:'ध्यान दें: कर्मचारी पासवर्ड सेट नहीं है, इसलिए एक ही नेटवर्क पर कोई भी देख सकता है। IT से सेट करवाएँ।',share_off:'IT ने “दूसरे कंप्यूटर और फ़ोन को सबटाइटल देखने दें” चालू नहीं किया है। IT से IT सेटिंग में चालू करवाएँ।',share_restart:'IT ने शेयरिंग चालू की है, लेकिन प्रोग्राम को एक बार दोबारा शुरू करना होगा। नीचे का बटन दबाएँ: सबटाइटल रुकेंगे, लगभग 10 सेकंड बाद शुरुआती पेज पर लौटेंगे; फिर “शुरू करें” दबाएँ।',share_rs_btn:'सबटाइटल रोकें और प्रोग्राम दोबारा शुरू करें',share_rs_wait:'दोबारा शुरू हो रहा है, कृपया रुकें…',share_rs_done:'दोबारा शुरू हो गया। शुरुआती पेज पर फिर “शुरू करें” दबाएँ।',share_rs_fail:'प्रोग्राम अपने आप दोबारा शुरू नहीं हुआ। Windows दोबारा शुरू करें, या डेस्कटॉप पर “PCG मीटिंग अनुवादक” पर क्लिक करें।',share_rs_manual:'Windows दोबारा शुरू करें, फिर डेस्कटॉप पर “PCG मीटिंग अनुवादक” पर क्लिक करें।',share_noip:'इस कंप्यूटर का नेटवर्क पता नहीं मिला। कंपनी नेटवर्क से कनेक्शन जाँचें।',running:'सबटाइटल चल रहे हैं',waiting:'सबटाइटल का इंतज़ार…',paused:'रुका हुआ',ended:'सबटाइटल बंद हो गए',empty:'कोई बोलेगा तो सबटाइटल यहाँ दिखेंगे',stop:'रोकें',pause:'विराम',resume:'जारी रखें',
   say_btn:'लिखकर जवाब दें',say_ph:'{a} में लिखें, {b} में अनुवाद होगा',say_go:'अनुवाद करें',say_copy:'कॉपी करें',say_copied:'कॉपी हो गया',say_close:'बंद करें',say_show:'पढ़कर सुनाएँ या दिखाएँ ({b})',say_fail:'अनुवाद नहीं हो सका। दोबारा कोशिश करें',say_wait:'अनुवाद हो रहा है…',say_swap:'भाषाएँ बदलें',say_off:'सबटाइटल चलते समय ही उपलब्ध',
   tr_dl:'ट्रांसक्रिप्ट डाउनलोड करें',tr_min:'मीटिंग मिनट्स बनाएँ',tr_min_go:'शुरू हो गया। “रिकॉर्डिंग → मिनट्स” पर जा रहे हैं…',tr_min_fail:'भेजा नहीं जा सका: {e}',tr_idle:'{n} मिनट से ज़्यादा कोई नया सबटाइटल नहीं आया, इसलिए सत्र अपने-आप खत्म हो गया।',tr_lines:'इस सत्र में {n} वाक्य',
+  ask_btn:'समझ नहीं आया? AI दोबारा अनुवाद करके समझाएगा',ask_hint:'पिछले हिस्से का पूरा अनुवाद दोबारा करता है, संख्याएँ और पार्ट नंबर नहीं छोड़ता, और तकनीकी शब्द समझाता है',ask_wait:'AI पिछले हिस्से का दोबारा अनुवाद कर रहा है…',ask_fail:'नहीं हो सका। दोबारा दबाएँ',ask_rate:'कुछ सेकंड रुकें',ask_empty:'अभी कोई सबटाइटल नहीं',lvl:'आवाज़ मिल रही है',tr_both:'मूल और अनुवाद',tr_only:'केवल {l}',
   to_sub:'सबटाइटल व्यू',to_chat:'चैट व्यू',overlay:'तैरते सबटाइटल',only_mine:'केवल मेरी भाषा',back:'होम पर लौटें',confirm_stop:'सबटाइटल बंद करें?',
   pw:'कर्मचारी पासवर्ड डालें (होस्ट या IT से पूछें)',reconnect:'कनेक्शन टूटा, दोबारा जुड़ रहा है…',ovl_fail:'तैरते सबटाइटल नहीं खुल सके',fail:'(अनुवाद असफल)',
   n_zh:'चीनी',n_en:'अंग्रेज़ी',n_ja:'जापानी',n_ko:'कोरियाई',n_id:'इंडोनेशियाई',n_vi:'वियतनामी',n_hi:'हिंदी',tr:'{a} ट्रांसक्रिप्शन'}};
@@ -254,8 +278,11 @@ let drawn=[];          // 目前畫在畫面上的每一句（比對用）
 function render(){
   const box=$('msgs');
   // 黑底的字幕模式只放聽到的話（最新兩句）；自己打的句子看下面的卡片（r32）
-  const list=sub?events.filter(e=>e.source!=='typed'):events;
-  if(!list.length){drawn=[];box.innerHTML=`<div class="empty">${state.running&&!state.ended&&!state.paused?ULI.listen:''}${esc(t('empty'))}</div>`;return}
+  // 對話模式（r34）：最新聽到的一句放在上方的大字區，其餘的在下面（畫面上新的在最上面）
+  let cur=null;if(!sub)for(let i=events.length-1;i>=0;i--)if(events[i].source!=='typed'){cur=events[i];break}
+  const list=sub?events.filter(e=>e.source!=='typed'):events.filter(e=>e!==cur);
+  nowPaint(cur);box.setAttribute('aria-live',sub?'polite':'off');      // 對話模式由大字區念出來，下面的清單不重複念
+  if(!list.length){drawn=[];box.innerHTML=cur?'':`<div class="empty">${state.running&&!state.ended&&!state.paused?ULI.listen:''}${esc(t('empty'))}</div>`;return}
   const htmls=list.map(ev=>{
     const [p,s]=pick(ev),me=ev.source==='mic'||ev.source==='typed';
     const sec=s&&!onlyMine?`<div class="s"><span class="tag">${esc(s.tag)}</span>${esc(s.text)}</div>`:'';
@@ -269,7 +296,16 @@ function render(){
     if(htmls.length>drawn.length)box.insertAdjacentHTML('beforeend',htmls.slice(drawn.length).join(''));
   }
   drawn=htmls;
-  const m=$('main');if(stick)m.scrollTop=m.scrollHeight;
+  const m=$('main');if(sub&&stick)m.scrollTop=m.scrollHeight;       // 對話模式新的在最上面，不用往下捲
+}
+let nowHtml='';
+function nowPaint(ev){
+  const n=$('now');n.hidden=!ev;if(!ev){nowHtml='';return}
+  const [p,s]=pick(ev);
+  const h=[ev.source==='mic'?'me':'',ev.timestamp||'',`<span class="tag">${esc(p.tag)}</span>${esc(p.text==='（翻譯失敗）'?t('fail'):p.text)}`,
+           s&&!onlyMine?`<span class="tag">${esc(s.tag)}</span>${esc(s.text)}`:''];
+  if(h.join('\u0001')===nowHtml)return;nowHtml=h.join('\u0001');      // 內容沒變就不動（螢幕閱讀器不會重念）
+  n.classList.toggle('me',!!h[0]);$('nowT').textContent=h[1];$('nowP').innerHTML=h[2];$('nowS').innerHTML=h[3];$('nowS').hidden=!h[3];
 }
 /* 半句換整句（與 WebUI 同一條規則）：同一路 30 秒內、比較長、開頭大致相同 → 取代上一句 */
 const norm=s=>String(s||'').toLowerCase().replace(/[^0-9a-zऀ-ॿÀ-ỹ぀-ヿ㐀-鿿가-힯]/g,'');
@@ -311,7 +347,10 @@ function paint(){
   // 逐字稿（r33）：字幕結束後，收音的這台電腦可以下載這一場的文字；伺服器模式可以直接整理成會議紀錄
   const tr=state.ended&&state.local?state.tr:null;
   $('trDl').hidden=!tr;$('trMin').hidden=!(tr&&tr.minutes);$('trNote').hidden=!tr;
-  if(tr){$('trDl').textContent=t('tr_dl');$('trDl').href='/simple/live/transcript/'+tr.id+'.txt';$('trMin').textContent=t('tr_min');
+  $('trWhat').hidden=!(tr&&(tr.langs||[]).length>1);
+  if(tr){$('trDl').textContent=t('tr_dl');$('trMin').textContent=t('tr_min');
+    const w=$('trWhat'),keep=w.value;w.innerHTML=`<option value="">${esc(t('tr_both'))}</option>`+(tr.langs||[]).map(c=>`<option value="${esc(c)}">${esc(t('tr_only',{l:NATIVE[c]||c}))}</option>`).join('');
+    w.value=(tr.langs||[]).includes(keep)?keep:'';$('trDl').href='/simple/live/transcript/'+tr.id+'.txt'+(w.value?'?lang='+w.value:'');
     if(!$('trNote').dataset.k)$('trNote').textContent=t('tr_lines',{n:tr.lines})}
   // 遠端觀看（唯讀）不能停止、暫停、開懸浮字幕
   $('shareBtn').textContent=t('share');
@@ -320,6 +359,10 @@ function paint(){
   // 進行中也能回首頁（r30；原本只有字幕結束後才有「回到首頁」）：字幕不會停，首頁上方會有「打開字幕畫面」
   $('homeBtn').textContent=t('back');$('homeBtn').hidden=!state.local||state.ended;
   sayPaint();
+  // 沒看懂？AI 重新翻譯並解釋（r34）：伺服器模式、字幕進行中、已經有字幕時才出現
+  $('ask').hidden=!(state.explain&&state.running&&!state.ended&&events.some(e=>e.source!=='typed'));
+  $('askBtn').textContent=t('ask_btn');$('askBtn').disabled=askBusy;$('askHint').textContent=t('ask_hint');
+  $('lvlW').hidden=!(state.lvlSeen&&state.running&&!state.ended&&!state.paused);$('lvlW').title=t('lvl');
   document.body.classList.toggle('sub',sub);document.documentElement.style.setProperty('--fs',fs+'px');
   $('onlyMine').checked=onlyMine;
 }
@@ -372,18 +415,35 @@ $('sayForm').onsubmit=async e=>{
 async function loadTr(){
   if(!state.local)return;
   try{const j=await(await fetch('/api/simple/live/transcripts',{cache:'no-store'})).json();
-    const s=(j.sessions||[])[0];state.tr=s?{id:s.id,lines:s.lines,minutes:!!j.minutes}:null;paint()}catch(e){}
+    const s=(j.sessions||[])[0];state.tr=s?{id:s.id,lines:s.lines,minutes:!!j.minutes,langs:s.langs||[]}:null;paint()}catch(e){}
 }
+$('trWhat').onchange=()=>paint();
+const NATIVE={zh:'中文',en:'English',id:'Bahasa Indonesia',vi:'Tiếng Việt',hi:'हिन्दी',ja:'日本語',ko:'한국어'};
+function clientId(){let c=store.get('pcg_client');if(!c){c=Array.from(crypto.getRandomValues(new Uint8Array(12)),x=>x.toString(16).padStart(2,'0')).join('');store.set('pcg_client',c)}return c}
+/* r34：沒看懂？AI 重新翻譯並解釋——把剛才那一段交給大模型整段重翻（看字幕的人選的語言），再按一次換成新的回答 */
+let askBusy=false;
+$('askBtn').onclick=async()=>{
+  if(askBusy)return;askBusy=true;const out=$('askOut');out.hidden=false;out.className='wait';out.textContent=t('ask_wait');paint();
+  let j={};try{j=await(await fetch('/api/simple/explain',{method:'POST',headers:{'Content-Type':'application/json','X-Client-Id':clientId(),'X-Simple-Token':token},body:JSON.stringify({lang})})).json()}catch(e){}
+  askBusy=false;
+  if(j.ok){out.className='';out.textContent=j.text;out.lang=j.lang==='zh'?'zh-Hant':j.lang}
+  else{out.className='err';out.textContent=t(j.code==='explain_wait'?'ask_rate':j.code==='explain_empty'?'ask_empty':'ask_fail')}
+  paint();
+};
+/* r34：收到聲音的音量條（主程式每 0.2 秒送一次音量；沒有送過就不顯示，免得誤以為沒收到聲音） */
+let lvlAt=0;
+function lvlSet(v){lvlAt=Date.now();if(!state.lvlSeen){state.lvlSeen=true;paint()}$('lvl').style.width=Math.min(100,Math.round(Math.sqrt(Math.max(0,+v||0))*180))+'%'}
+setInterval(()=>{if(Date.now()-lvlAt>700)$('lvl').style.width='0'},400);
 $('trMin').onclick=async()=>{
   const b=$('trMin'),n=$('trNote');if(!state.tr)return;b.disabled=true;
-  let cid=store.get('pcg_client');if(!cid){cid=Array.from(crypto.getRandomValues(new Uint8Array(12)),x=>x.toString(16).padStart(2,'0')).join('');store.set('pcg_client',cid)}
+  const cid=clientId();
   let j={};try{j=await(await fetch('/api/simple/live/minutes',{method:'POST',headers:{'Content-Type':'application/json','X-Client-Id':cid,'X-Simple-Token':token},body:JSON.stringify({id:state.tr.id})})).json()}catch(e){}
   n.dataset.k='1';
   if(!j.ok){n.textContent=t('tr_min_fail',{e:j.error||j.code||''});b.disabled=false;return}
   n.textContent=t('tr_min_go');store.set('pcg_tab','pFile');setTimeout(()=>{location.href='/simple'},1200);
 };
 async function liveInfo(){
-  try{const j=await(await fetch('/api/simple/live',{cache:'no-store'})).json();state.reply=j.reply||null;saySwapped=false;paint()}catch(e){}
+  try{const j=await(await fetch('/api/simple/live',{cache:'no-store'})).json();state.reply=j.reply||null;state.explain=!!j.explain;saySwapped=false;paint()}catch(e){}
 }
 
 /* 分享：QR Code＋網址（只在收音的這台電腦上） */
@@ -442,7 +502,8 @@ function conn(){
   ws.onmessage=e=>{let ev;try{ev=JSON.parse(e.data)}catch(x){return}
     if(ev.type==='transcription')add(ev);
     else if(ev.type==='transcription_extra')addExtra(ev);
-    else if(ev.type==='started'){state.running=true;state.ended=false;state.idleMin=0;state.tr=null;state.mode=ev.mode||state.mode;paint();liveInfo()}
+    else if(ev.type==='rms')lvlSet(ev.value);
+    else if(ev.type==='started'){state.running=true;state.ended=false;state.idleMin=0;state.tr=null;state.lvlSeen=false;$('askOut').hidden=true;state.mode=ev.mode||state.mode;paint();liveInfo()}
     else if(ev.type==='stopped'||ev.type==='disconnected'){state.ended=true;state.running=false;
       if(ev.reason==='idle')state.idleMin=ev.minutes||0;          // 太久沒有字幕自動結束（r33）
       paint();loadTr()}};
@@ -453,7 +514,7 @@ function conn(){
   };
 }
 (async()=>{
-  try{const j=await(await fetch('/api/simple/live')).json();showVer(j.version);state.local=!!j.local;state.running=!!j.running;state.mode=j.mode||'';state.multi=j.multi_lang!==false;state.reply=j.reply||null;
+  try{const j=await(await fetch('/api/simple/live')).json();showVer(j.version);state.local=!!j.local;state.running=!!j.running;state.mode=j.mode||'';state.multi=j.multi_lang!==false;state.reply=j.reply||null;state.explain=!!j.explain;
     // 會議室字幕機（r19）：從同仁頁面開始時直接顯示 QR Code
     if(/[?&]share=1/.test(location.search)){sub=true;store.set('pcg_live_sub','1');if(fs<36){fs=36;store.set('pcg_live_fs',fs)}   // 會議室字幕機：直接用大字的字幕模式（r29）
       history.replaceState(null,'',location.pathname);setTimeout(()=>$('shareBtn').click(),300)}state.ended=!j.running&&false}catch(e){}

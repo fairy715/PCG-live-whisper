@@ -1,29 +1,34 @@
 {
  "_說明": "下一版發布時同仁頁面「有新版本」視窗顯示的新功能（每種語言 2～5 點，一點一句）。release 要等於這一次發布的 rN，發布流程才會附上；每次發布前更新這個檔",
- "release": "r33",
+ "release": "r34",
  "zh": [
-  "字幕結束後可以下載這一場的逐字稿（時間、原文、翻譯），不用另外錄音；伺服器模式還可以直接整理成會議紀錄",
-  "首頁最上面會顯示「上一場字幕」，隨時可以再下載",
-  "超過 20 分鐘沒有新的字幕會自動結束，畫面會說明原因；中間要休息很久請先按「暫停」"
+  "字幕畫面換了排法：最新的一句固定在最上面用大字顯示，之前的句子在下面，眼睛不用追著字跑",
+  "「字幕進行中」旁邊多了綠色的音量條，有在動就是有收到聲音",
+  "沒看懂時按「AI 重新翻譯並解釋」，把剛才那一段整段重翻並解釋專業用語（公司有接大模型時才有）",
+  "下載逐字稿可以選「原文與譯文對照」或只要一種語言"
  ],
  "en": [
-  "After the subtitles end you can download the transcript of the session (time, original, translation) without a separate recording; in server mode you can also turn it into meeting minutes",
-  "The home page shows “Last subtitle session” at the top, so you can download it again any time",
-  "After more than 20 minutes without a new subtitle the session ends by itself and the screen says why; for a long break, click “Pause” first"
+  "The subtitle screen has a new layout: the newest sentence stays at the top in large type and earlier ones are listed below, so your eyes stay in one place",
+  "A green level bar next to “Subtitles running” shows that sound is being received",
+  "When you did not follow, click “AI re-translates and explains” to get the last passage re-translated as a whole with technical terms explained (only when the company’s LLM is connected)",
+  "When downloading the transcript you can choose “Original and translation” or only one language"
  ],
  "id": [
-  "Setelah subtitle selesai, Anda bisa mengunduh transkrip sesi itu (waktu, teks asli, terjemahan) tanpa merekam terpisah; pada mode server bisa langsung dijadikan notulen rapat",
-  "Halaman utama menampilkan “Sesi subtitle terakhir” di bagian atas, sehingga bisa diunduh lagi kapan saja",
-  "Bila lebih dari 20 menit tidak ada subtitle baru, sesi berakhir sendiri dan layar menjelaskan alasannya; untuk istirahat panjang, klik “Jeda” dulu"
+  "Layar subtitle punya tata letak baru: kalimat terbaru tetap di paling atas dengan huruf besar dan kalimat sebelumnya di bawahnya, mata cukup melihat satu tempat",
+  "Batang hijau di samping “Subtitle berjalan” menunjukkan bahwa suara diterima",
+  "Bila tidak paham, klik “AI menerjemahkan ulang dan menjelaskan” untuk menerjemahkan ulang bagian tadi secara utuh beserta penjelasan istilah (hanya bila LLM perusahaan tersambung)",
+  "Saat mengunduh transkrip, Anda bisa memilih “Teks asli dan terjemahan” atau hanya satu bahasa"
  ],
  "vi": [
-  "Sau khi phụ đề kết thúc có thể tải bản ghi lời của phiên đó (thời gian, nguyên văn, bản dịch) mà không cần ghi âm riêng; ở chế độ máy chủ còn có thể tạo ngay biên bản cuộc họp",
-  "Trang chính hiện “Phiên phụ đề gần nhất” ở trên cùng, có thể tải lại bất cứ lúc nào",
-  "Quá 20 phút không có phụ đề mới thì phiên tự kết thúc và màn hình ghi rõ lý do; nghỉ giải lao lâu hãy bấm “Tạm dừng” trước"
+  "Màn hình phụ đề có bố cục mới: câu mới nhất luôn ở trên cùng bằng chữ lớn, các câu trước nằm bên dưới, mắt chỉ cần nhìn một chỗ",
+  "Thanh màu xanh cạnh “Đang hiện phụ đề” cho biết đang nhận được âm thanh",
+  "Khi chưa hiểu, bấm “AI dịch lại và giải thích” để dịch lại trọn đoạn vừa rồi và giải thích thuật ngữ (chỉ khi công ty đã kết nối LLM)",
+  "Khi tải bản ghi lời có thể chọn “Nguyên văn và bản dịch” hoặc chỉ một ngôn ngữ"
  ],
  "hi": [
-  "सबटाइटल खत्म होने के बाद उस सत्र का ट्रांसक्रिप्ट (समय, मूल, अनुवाद) डाउनलोड कर सकते हैं, अलग से रिकॉर्डिंग की ज़रूरत नहीं; सर्वर मोड में सीधे मीटिंग मिनट्स भी बना सकते हैं",
-  "होम पेज पर सबसे ऊपर “पिछला सबटाइटल सत्र” दिखता है, जिसे कभी भी फिर डाउनलोड कर सकते हैं",
-  "20 मिनट से ज़्यादा कोई नया सबटाइटल न आने पर सत्र अपने-आप खत्म हो जाता है और स्क्रीन पर कारण लिखा होता है; लंबे ब्रेक के लिए पहले “विराम” दबाएँ"
+  "सबटाइटल स्क्रीन का नया लेआउट: सबसे नया वाक्य बड़े अक्षरों में सबसे ऊपर रहता है और पहले के वाक्य नीचे, ताकि नज़र एक ही जगह रहे",
+  "“सबटाइटल चल रहे हैं” के पास हरी पट्टी दिखाती है कि आवाज़ मिल रही है",
+  "समझ न आए तो “AI दोबारा अनुवाद करके समझाएगा” दबाएँ: पिछले हिस्से का पूरा अनुवाद दोबारा और तकनीकी शब्दों की व्याख्या (केवल तब, जब कंपनी का LLM जुड़ा हो)",
+  "ट्रांसक्रिप्ट डाउनलोड करते समय “मूल और अनुवाद” या केवल एक भाषा चुन सकते हैं"
  ]
 }

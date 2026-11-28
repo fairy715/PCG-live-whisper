@@ -205,6 +205,17 @@ Tidak perlu merekam terpisah: setiap sesi subtitle langsung otomatis disimpan se
 
 ---
 
+## Tata letak baru layar subtitle, dan bertanya ke AI bila tidak paham (r34)
+
+- **Kalimat terbaru tetap di paling atas** dengan huruf besar; kalimat sebelumnya ada di bawahnya, yang baru di atas. Mata cukup melihat satu tempat, tidak perlu mengejar teks ke bawah. "Tampilan subtitle" berlatar hitam tidak berubah.
+- **Batang hijau** (di samping "Subtitle berjalan"): bila bergerak, program menerima suara. Tidak ada subtitle dan batang tidak bergerak berarti suara tidak masuk; periksa speaker atau mikrofon.
+- **"Tidak paham? AI menerjemahkan ulang dan menjelaskan"** (hanya mode server): klik, lalu AI menerjemahkan ulang beberapa kalimat terakhir sebagai satu bagian ke bahasa yang Anda pilih, angka, tanggal, dan nomor part tidak terlewat, serta menjelaskan istilah teknis dan singkatan.
+  - Perlu beberapa detik sampai belasan detik; klik lagi untuk jawaban baru. Beri jeda beberapa detik antarklik.
+  - Orang yang menonton di ponsel juga bisa memakainya; jawabannya hanya muncul di layar masing-masing.
+- **Pilih bahasa saat mengunduh transkrip**: "Teks asli dan terjemahan", atau hanya salah satu bahasa (misalnya hanya Mandarin). Pada rapat dua arah, satu bahasa berarti setiap kalimat dalam bahasa itu, siapa pun yang berbicara.
+
+---
+
 ## Bantuan di layar (r29)
 
 - **Kalimat konfirmasi sebelum mulai**: di atas tombol tertulis “Anda mendengar: Mandarin → subtitle: Indonesia”. Jika tidak sesuai harapan, langkah 3 terbalik; ubah dulu sebelum mulai.

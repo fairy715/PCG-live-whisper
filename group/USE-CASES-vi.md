@@ -205,6 +205,17 @@ Không cần ghi âm riêng: mỗi phiên phụ đề trực tiếp đều đư�
 
 ---
 
+## Bố cục mới của màn hình phụ đề, chưa hiểu thì hỏi AI (r34)
+
+- **Câu mới nhất luôn ở trên cùng** bằng chữ lớn; các câu trước nằm bên dưới, câu mới ở trên. Mắt chỉ cần nhìn một chỗ, không phải đuổi theo chữ xuống dưới. "Chế độ phụ đề" nền đen không đổi.
+- **Thanh màu xanh** (cạnh "Đang hiện phụ đề"): khi nó chuyển động là chương trình đang nhận được âm thanh. Không có phụ đề mà thanh cũng không động thì âm thanh chưa vào, hãy kiểm tra loa hoặc micro.
+- **"Chưa hiểu? AI dịch lại và giải thích"** (chỉ ở chế độ máy chủ): bấm một lần, AI dịch lại trọn mấy câu vừa rồi sang ngôn ngữ bạn chọn, không sót con số, ngày tháng, mã hàng, đồng thời giải thích thuật ngữ và chữ viết tắt.
+  - Mất vài giây đến hơn mười giây; bấm lại để có câu trả lời mới. Mỗi lần bấm cách nhau vài giây.
+  - Người xem bằng điện thoại cũng dùng được; câu trả lời chỉ hiện trên màn hình của chính họ.
+- **Chọn ngôn ngữ khi tải bản ghi lời**: "Nguyên văn và bản dịch", hoặc chỉ một ngôn ngữ (ví dụ chỉ tiếng Trung). Cuộc họp hai chiều mà chọn một ngôn ngữ thì câu nào cũng ở ngôn ngữ đó, bất kể ai nói.
+
+---
+
 ## Những trợ giúp trên màn hình (r29)
 
 - **Câu xác nhận trước khi bắt đầu**: phía trên nút có dòng “Bạn sẽ nghe: tiếng Trung → phụ đề: tiếng Việt”. Nếu không đúng ý bạn thì bước 3 đang bị ngược; hãy đổi lại rồi mới bắt đầu.

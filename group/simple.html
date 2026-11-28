@@ -137,6 +137,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
 .lang svg{width:18px;height:18px;color:var(--dim);vertical-align:middle}
 .sumline{margin:16px 0 0;padding:10px 12px;border-radius:10px;background:var(--accent-soft);font-weight:600;font-size:15px;line-height:1.5}
 .need{color:var(--warn);font-weight:600}
+#lastTrWhat{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 8px;max-width:60vw}
 /* r32：這場會議的資料 */
 .notesW{margin-top:6px}.notesW .field{margin-top:10px;color:var(--text);font-weight:600}
 .notesTa{display:block;width:100%;min-height:104px;font:inherit;padding:10px;border:1.5px solid var(--line);border-radius:10px;box-sizing:border-box;background:var(--card);color:var(--text);margin-top:6px;resize:vertical}
@@ -199,7 +200,7 @@ dialog::backdrop{background:rgba(0,0,0,.4)}
     </div>
     <!-- r33：上一場即時字幕的逐字稿（只在收音的這台電腦、字幕沒有在跑時顯示） -->
     <div id="lastTr" class="banner info" hidden>
-      <span id="lastTrText"></span> <a class="btn ghost" id="lastTrDl" download data-t="ltr_dl"></a>
+      <span id="lastTrText"></span> <select id="lastTrWhat" hidden aria-label="Transcript"></select> <a class="btn ghost" id="lastTrDl" download data-t="ltr_dl"></a>
       <button class="btn ghost" id="lastTrMin" type="button" hidden data-t="ltr_min"></button>
     </div>
     <div id="liveForm">
@@ -417,6 +418,7 @@ zh:{
   overlay_t:'字幕浮在所有視窗最上面',overlay_s:'開會軟體全螢幕時也看得到字幕',
   notes_btn:'＋ 加上這場會議的資料（選填，辨識和翻譯會比較準）',notes_title:'這場會議的資料（選填）',notes_ph:'王小明、Budi Santoso\n中爪新廠設備驗收\nPO-12345',notes_hint:'貼上與會者姓名、產品名稱、料號、議程，一行一項或用逗號分開。辨識和翻譯會照這些寫法。',notes_local:'這台電腦是本機模式：這些資料只用來幫助辨識（本機的翻譯模型用不到）。',notes_ext:'注意：這些資料會和會議內容一起送到公司外部的服務。',notes_clear:'清除',
   ltr_last:'上一場字幕（{d}，{n} 句）：',ltr_dl:'下載逐字稿',ltr_min:'整理成會議紀錄',ltr_min_ok:'已經開始整理，在下面「我送出的錄音」看進度。',
+  ltr_both:'原文與譯文對照',ltr_only:'只要{l}',
   topic_live:'會議主題（選填，可提高專有名詞的翻譯準確度）',topic_live_ph:'例：中爪新廠設備驗收',
   start_live:'開始即時字幕',preparing:'準備中…',
   live_note:'開始後會切到字幕畫面；要結束時按畫面下方的「停止」。第一次開始需要十幾秒準備。',
@@ -472,6 +474,7 @@ en:{
   overlay_t:'Keep subtitles on top of all windows',overlay_s:'Subtitles stay visible even when the meeting app is full screen',
   notes_btn:'+ Add information about this meeting (optional, improves recognition and translation)',notes_title:'Information about this meeting (optional)',notes_ph:'Wang Hsiao-ming, Budi Santoso\nCentral Java plant equipment acceptance\nPO-12345',notes_hint:'Paste participants’ names, product names, part numbers and the agenda, one per line or separated by commas. Recognition and translation will follow these spellings.',notes_local:'This computer is in local mode: the information only helps recognition (the local translation model cannot use it).',notes_ext:'Note: this information is sent to a service outside the company together with the meeting content.',notes_clear:'Clear',
   ltr_last:'Last subtitle session ({d}, {n} sentences):',ltr_dl:'Download transcript',ltr_min:'Turn into meeting minutes',ltr_min_ok:'Started. See the progress under “My recordings” below.',
+  ltr_both:'Original and translation',ltr_only:'Only {l}',
   topic_live:'Meeting topic (optional, improves translation of technical terms)',topic_live_ph:'e.g. Central Java plant equipment acceptance',
   start_live:'Start live subtitles',preparing:'Preparing…',
   live_note:'The subtitle screen opens after you start; press “Stop” at the bottom to end. The first start takes about 10–20 seconds.',
@@ -527,6 +530,7 @@ id:{
   overlay_t:'Subtitle selalu di atas semua jendela',overlay_s:'Subtitle tetap terlihat saat aplikasi rapat layar penuh',
   notes_btn:'+ Tambahkan informasi rapat ini (opsional, pengenalan dan terjemahan lebih akurat)',notes_title:'Informasi rapat ini (opsional)',notes_ph:'Wang Hsiao-ming, Budi Santoso\nSerah terima mesin pabrik Jawa Tengah\nPO-12345',notes_hint:'Tempelkan nama peserta, nama produk, nomor part, dan agenda, satu per baris atau dipisahkan koma. Pengenalan suara dan terjemahan akan mengikuti penulisan ini.',notes_local:'Komputer ini dalam mode lokal: informasi ini hanya membantu pengenalan suara (model terjemahan lokal tidak bisa memakainya).',notes_ext:'Perhatian: informasi ini dikirim ke layanan di luar perusahaan bersama isi rapat.',notes_clear:'Hapus',
   ltr_last:'Sesi subtitle terakhir ({d}, {n} kalimat):',ltr_dl:'Unduh transkrip',ltr_min:'Jadikan notulen rapat',ltr_min_ok:'Sudah dimulai. Lihat prosesnya di daftar rekaman di bawah.',
+  ltr_both:'Teks asli dan terjemahan',ltr_only:'Hanya {l}',
   topic_live:'Topik rapat (opsional, membantu menerjemahkan istilah teknis)',topic_live_ph:'mis. Serah terima mesin pabrik Jawa Tengah',
   start_live:'Mulai subtitle langsung',preparing:'Menyiapkan…',
   live_note:'Setelah dimulai, layar subtitle akan terbuka; tekan “Berhenti” di bawah untuk selesai. Persiapan pertama sekitar 10–20 detik.',
@@ -582,6 +586,7 @@ vi:{
   overlay_t:'Phụ đề luôn nằm trên mọi cửa sổ',overlay_s:'Vẫn thấy phụ đề khi ứng dụng họp ở chế độ toàn màn hình',
   notes_btn:'+ Thêm thông tin về cuộc họp này (không bắt buộc, nhận dạng và dịch chính xác hơn)',notes_title:'Thông tin về cuộc họp này (không bắt buộc)',notes_ph:'Wang Hsiao-ming, Nguyễn Văn An\nNghiệm thu thiết bị nhà máy\nPO-12345',notes_hint:'Dán tên người tham dự, tên sản phẩm, mã hàng và chương trình họp, mỗi dòng một mục hoặc cách nhau bằng dấu phẩy. Nhận dạng và dịch sẽ theo cách viết này.',notes_local:'Máy này đang ở chế độ cục bộ: thông tin chỉ giúp nhận dạng giọng nói (mô hình dịch cục bộ không dùng được).',notes_ext:'Lưu ý: thông tin này được gửi đến dịch vụ bên ngoài công ty cùng với nội dung cuộc họp.',notes_clear:'Xóa',
   ltr_last:'Phiên phụ đề gần nhất ({d}, {n} câu):',ltr_dl:'Tải bản ghi lời',ltr_min:'Tạo biên bản cuộc họp',ltr_min_ok:'Đã bắt đầu. Xem tiến độ trong danh sách bản ghi âm bên dưới.',
+  ltr_both:'Nguyên văn và bản dịch',ltr_only:'Chỉ {l}',
   topic_live:'Chủ đề cuộc họp (không bắt buộc, giúp dịch thuật ngữ chuyên ngành chính xác hơn)',topic_live_ph:'VD: Nghiệm thu thiết bị nhà máy',
   start_live:'Bắt đầu phụ đề trực tiếp',preparing:'Đang chuẩn bị…',
   live_note:'Sau khi bắt đầu sẽ chuyển sang màn hình phụ đề; bấm “Dừng” ở phía dưới để kết thúc. Lần đầu cần khoảng 10–20 giây để chuẩn bị.',
@@ -637,6 +642,7 @@ hi:{
   overlay_t:'सबटाइटल सभी विंडो के ऊपर रखें',overlay_s:'मीटिंग ऐप फ़ुल स्क्रीन होने पर भी सबटाइटल दिखते रहें',
   notes_btn:'+ इस मीटिंग की जानकारी जोड़ें (वैकल्पिक, पहचान और अनुवाद बेहतर होता है)',notes_title:'इस मीटिंग की जानकारी (वैकल्पिक)',notes_ph:'Wang Hsiao-ming, Rajesh Kumar\nप्लांट उपकरण स्वीकृति\nPO-12345',notes_hint:'प्रतिभागियों के नाम, उत्पाद के नाम, पार्ट नंबर और एजेंडा चिपकाएँ, हर पंक्ति में एक या अल्पविराम से अलग। पहचान और अनुवाद इन्हीं वर्तनी के अनुसार होगा।',notes_local:'यह कंप्यूटर लोकल मोड में है: यह जानकारी केवल आवाज़ की पहचान में मदद करती है (लोकल अनुवाद मॉडल इसका उपयोग नहीं कर सकता)।',notes_ext:'ध्यान दें: यह जानकारी मीटिंग की सामग्री के साथ कंपनी के बाहर की सेवा को भेजी जाती है।',notes_clear:'साफ़ करें',
   ltr_last:'पिछला सबटाइटल सत्र ({d}, {n} वाक्य):',ltr_dl:'ट्रांसक्रिप्ट डाउनलोड करें',ltr_min:'मीटिंग मिनट्स बनाएँ',ltr_min_ok:'शुरू हो गया। नीचे रिकॉर्डिंग की सूची में प्रगति देखें।',
+  ltr_both:'मूल और अनुवाद',ltr_only:'केवल {l}',
   topic_live:'मीटिंग का विषय (वैकल्पिक, तकनीकी शब्दों का अनुवाद बेहतर होता है)',topic_live_ph:'जैसे: प्लांट उपकरण स्वीकृति',
   start_live:'लाइव सबटाइटल शुरू करें',preparing:'तैयारी हो रही है…',
   live_note:'शुरू करने के बाद सबटाइटल स्क्रीन खुलेगी; बंद करने के लिए नीचे “रोकें” दबाएँ। पहली बार तैयारी में लगभग 10–20 सेकंड लगते हैं।',
@@ -882,11 +888,17 @@ $('liveRoom').addEventListener('change',()=>{if($('liveRoom').checked)$('liveSpe
 let liveInfo=null;
 /* r33：上一場即時字幕的逐字稿 */
 let lastTr=null;
+const LTR_NATIVE={zh:'中文',en:'English',id:'Bahasa Indonesia',vi:'Tiếng Việt',hi:'हिन्दी',ja:'日本語',ko:'한국어'};
+$('lastTrWhat').onchange=()=>lastTrPaint();
 function lastTrPaint(){
   const s=lastTr&&lastTr.s;$('lastTr').hidden=!s;if(!s)return;
   const d=new Date(s.started*1000),p=x=>String(x).padStart(2,'0');
   $('lastTrText').textContent=t('ltr_last',{d:`${d.getMonth()+1}/${d.getDate()} ${p(d.getHours())}:${p(d.getMinutes())}`,n:s.lines});
-  $('lastTrDl').href='/simple/live/transcript/'+s.id+'.txt';$('lastTrMin').hidden=!lastTr.minutes;
+  // r34：可以只下載一種語言的版本
+  const w=$('lastTrWhat'),keep=w.value,ls=s.langs||[];w.hidden=ls.length<2;
+  w.innerHTML=`<option value="">${esc(t('ltr_both'))}</option>`+ls.map(c=>`<option value="${esc(c)}">${esc(t('ltr_only',{l:LTR_NATIVE[c]||c}))}</option>`).join('');
+  w.value=ls.includes(keep)?keep:'';
+  $('lastTrDl').href='/simple/live/transcript/'+s.id+'.txt'+(w.value?'?lang='+w.value:'');$('lastTrMin').hidden=!lastTr.minutes;
 }
 async function loadLastTr(){
   const j=await api('/api/simple/live/transcripts');

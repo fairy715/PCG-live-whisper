@@ -6983,7 +6983,35 @@ class _PcgReply:
         except (TypeError, ValueError):
             fresh = False
         if fresh:
-            _webui_send(self.answer(rid, req.get("text"), req.get("src"), req.get("tgt")))
+            if req.get("kind") == "explain":             # r34：剛才那一段重新翻譯並解釋
+                _webui_send(self.explain(rid, req.get("text"), req.get("tgt")))
+            else:
+                _webui_send(self.answer(rid, req.get("text"), req.get("src"), req.get("tgt")))
+
+    def explain(self, rid, text, tgt):
+        """r34：把剛才那一段交給大模型整段重新翻譯成 tgt，並解釋專業用語（group/explain.py）。
+        用主程式正在用的那一台大模型；本機模式（M2M100）沒有大模型，回 explain_local"""
+        base = _pcg_tr_note["tr"]
+        if not isinstance(base, OllamaTranslator):
+            return {"type": "pcg_reply", "id": rid, "ok": False, "code": "explain_local"}
+        text = str(text or "").strip()
+        if not text:
+            return {"type": "pcg_reply", "id": rid, "ok": False, "code": "explain_empty"}
+        t0 = time.monotonic()
+        try:
+            from group import explain as _ex
+            prompt = _ex.prompt(text, tgt, _pcg_prompt_extra(text, f"x2{tgt}"))
+            out = call_ollama_raw(prompt, base.model, base.host, base.port, timeout=70,
+                                  server_type=base.server_type)
+            out = _ex.clean(out)
+            if tgt == "zh":
+                out = _to_traditional(out)
+        except Exception as e:  # noqa: BLE001
+            return {"type": "pcg_reply", "id": rid, "ok": False, "code": "explain_failed", "error": str(e)[:200]}
+        if not out:
+            return {"type": "pcg_reply", "id": rid, "ok": False, "code": "explain_failed"}
+        return {"type": "pcg_reply", "id": rid, "ok": True, "text": out, "tgt": tgt,
+                "took": round(time.monotonic() - t0, 2)}
 
     def answer(self, rid, text, src, tgt):
         text, direction = " ".join(str(text or "").split()), f"{src}2{tgt}"

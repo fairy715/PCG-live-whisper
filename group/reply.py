@@ -58,9 +58,10 @@ class Desk:
         tmp.write_text(json.dumps(req, ensure_ascii=False), encoding="utf-8")
         os.replace(tmp, self.flag)
 
-    async def ask(self, text, src, tgt, timeout=TIMEOUT):
+    async def ask(self, text, src, tgt, timeout=TIMEOUT, kind="say"):
         """請主程式把 text 從 src 翻成 tgt。回傳主程式的事件（{"ok": True, "text": …}）；
-        沒有回應回 {"ok": False, "code": "say_timeout"}。一次一句：前一句還沒回來時排隊"""
+        沒有回應回 {"ok": False, "code": "say_timeout"}。一次一句：前一句還沒回來時排隊。
+        kind="explain"（r34）：text 是剛才那一段，請大模型重新翻譯成 tgt 並解釋（group/explain.py）"""
         if self._lock is None:
             self._lock = asyncio.Lock()
         async with self._lock:
@@ -69,8 +70,8 @@ class Desk:
             fut = asyncio.get_running_loop().create_future()
             self.waiting[rid] = fut
             try:
-                await asyncio.to_thread(self._write, {"id": rid, "text": text, "src": src, "tgt": tgt,
-                                                      "at": time.time()})
+                await asyncio.to_thread(self._write, {"id": rid, "kind": kind, "text": text, "src": src,
+                                                      "tgt": tgt, "at": time.time()})
                 return await asyncio.wait_for(fut, timeout)
             except asyncio.TimeoutError:
                 return {"ok": False, "code": "say_timeout"}

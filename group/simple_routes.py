@@ -43,6 +43,7 @@ try:
     from group import reply as reply_mod
     from group import transcript as transcript_mod
     from group import model_bench
+    from group import explain as explain_mod
 except ImportError:                     # 測試時直接 import simple_routes
     import model_packs
     import diagnostics
@@ -53,6 +54,7 @@ except ImportError:                     # 測試時直接 import simple_routes
     import reply as reply_mod
     import transcript as transcript_mod
     import model_bench
+    import explain as explain_mod
 
 # 情境：同仁看到的是「錄音裡主要說什麼語言 → 拿到什麼」，背後對應主程式的模式代號
 DEFAULT_SCENARIOS = [
@@ -887,6 +889,9 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
                 "bound": bound_all(), "can_restart": can_restart(),
                 # 打字回覆（r32）：這一場是哪兩種語言（只辨識不翻譯的沒有）；只有收音的這台電腦能用
                 "reply": (reply_mod.pair(mode) if reply is not None and args and "--input" not in args else None),
+                # 沒看懂？AI 重新翻譯並解釋（r34）：伺服器模式（有大模型）才有；看字幕的人都能按
+                "explain": bool(reply is not None and transcript is not None
+                                and profile(settings(), has_gpu())["engine"] == "llm"),
                 "scenarios": [{k: s[k] for k in ("id", "title", "flag")}
                               | {"can_bidi": bool(s["bidi"]), "can_room": s["id"] in ROOM_SCENARIOS}
                               for s in LIVE_SCENARIOS]}
@@ -1237,6 +1242,41 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
             transcript.typed(src, tgt, text, out)          # 逐字稿（r33）也記下打字的句子
         return {"ok": True, "text": out, "src": src, "tgt": tgt}
 
+    # ─── 沒看懂？AI 重新翻譯並解釋（r34，group/explain.py）：看字幕的人（含分享出去的手機）都能按 ───
+    _explain_last = {}
+
+    @app.post("/api/simple/explain")
+    async def simple_explain(request: Request, body: dict = {}):
+        owner, err = auth(request)               # 分享出去的手機：要同仁密碼（和看字幕一樣）
+        if err:
+            return err
+        args = (live_args() if live_args else None) or []
+        if reply is None or transcript is None or not (live_running and live_running()) or "--input" in args:
+            return JSONResponse({"ok": False, "code": "say_not_running", "error": "字幕進行中才能用"}, status_code=409)
+        if profile(settings(), has_gpu())["engine"] != "llm":
+            return JSONResponse({"ok": False, "code": "explain_local",
+                                 "error": "本機模式沒有大模型，不能重新翻譯"}, status_code=409)
+        now = time.time()
+        if now - _explain_last.get(owner, 0) < 6:            # 同一個人連按：每 6 秒一次（每一次都要大模型算一段）
+            return JSONResponse({"ok": False, "code": "explain_wait", "error": "請等幾秒再按"}, status_code=429)
+        if len(_explain_last) > 500:
+            _explain_last.clear()
+        _explain_last[owner] = now
+        import asyncio
+        lines = await asyncio.to_thread(transcript.recent)
+        text = explain_mod.passage(lines)
+        if not text:
+            return JSONResponse({"ok": False, "code": "explain_empty", "error": "還沒有字幕"}, status_code=400)
+        tgt = str(body.get("lang") or "").strip().lower()
+        tgt = tgt if tgt in explain_mod.LANG_NAME else "zh"
+        ev = await reply.ask(text, "", tgt, timeout=80, kind="explain")
+        if not ev.get("ok"):
+            code = ev.get("code") or "explain_failed"
+            return JSONResponse({"ok": False, "code": "explain_failed" if code.startswith("say_") else code,
+                                 "error": "沒有翻成功，請再試一次", "detail": str(ev.get("error") or code)[:200]},
+                                status_code=504 if code == "say_timeout" else 502)
+        return {"ok": True, "text": str(ev.get("text") or ""), "lang": tgt}
+
     # ─── 即時字幕的逐字稿（r33，group/transcript.py）：只能在收音的這台電腦上拿 ───
     def _local_only(request):
         if not is_local(request):
@@ -1263,12 +1303,16 @@ def register(app, base_dir: Path, is_local, pw_hash, pw_match, config_file: Path
         if err:
             return err
         import asyncio
-        text = await asyncio.to_thread(transcript.text, sid)
+        # ?lang=zh|id|…（r34）：只要那一種語言的版本；不帶就是原文與譯文對照
+        only = str(request.query_params.get("lang") or "").strip().lower()
+        only = only if re.fullmatch(r"[a-z]{2,3}", only) else ""
+        text = await asyncio.to_thread(transcript.text, sid, only or None)
         if text is None:
             return JSONResponse({"ok": False, "code": "not_found", "error": "找不到這一場的逐字稿"}, status_code=404)
         # 開頭加 BOM：舊版記事本、Excel 才會當成 UTF-8
+        name = f"PCG-transcript-{sid}" + (f"-{only}" if only else "")
         return Response(("\ufeff" + text).encode("utf-8"), media_type="text/plain; charset=utf-8",
-                        headers={"Content-Disposition": f'attachment; filename="PCG-transcript-{sid}.txt"',
+                        headers={"Content-Disposition": f'attachment; filename="{name}.txt"',
                                  "Cache-Control": "no-store"})
 
     @app.post("/api/simple/live/minutes")

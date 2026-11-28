@@ -482,6 +482,27 @@ Cách làm tham khảo phần bối cảnh bài nói, prompt phụ đề và c�
 
 **Đã kiểm chứng đến đâu** (2026-11-22): kiểm thử đơn vị; WebUI thật với bộ máy thay thế được thao tác trọn quy trình trong trình duyệt (tự kết thúc, tải về, biên bản, trang cài đặt IT; giao diện tiếng Trung và tiếng Indonesia); "tạo biên bản cuộc họp" còn được chạy qua `--summarize` thật của chương trình chính với máy chủ LLM giả (chế độ gốc mở cửa sổ và chờ phím ESC khi xong, sẽ làm công việc nền bị treo; nay không chờ nữa). **Chưa kiểm chứng với LLM thật và cuộc họp thực tế**: chất lượng của biên bản.
 
+### Bố cục phụ đề mới, AI dịch lại và giải thích, ngôn ngữ của bản ghi lời (r34)
+
+**"Chưa hiểu? AI dịch lại và giải thích"** (chỉ ở chế độ máy chủ; M2M100 ở chế độ cục bộ không nhận chỉ dẫn được nên nút không hiện)
+
+- Nội dung gửi đi: **nguyên văn** của tối đa 6 câu gần nhất trong phiên đang chạy, trong vòng 120 giây trước câu cuối và tổng cộng không quá 1.500 ký tự, kèm thông tin cuộc họp và bảng thuật ngữ. Gửi tới cùng một LLM do IT cài đặt, cùng nơi với phần dịch phụ đề.
+- Ai dùng được: mọi người đang xem phụ đề, kể cả người kết nối bằng điện thoại (cần mật khẩu nhân viên như khi xem). Mỗi người 6 giây một lần.
+- Mỗi lần bấm là một yêu cầu tới LLM: dịch vụ AI bên ngoài sẽ tính phí, còn LLM cục bộ xử lý từng yêu cầu một (cùng hàng đợi với phần gõ để trả lời). Chờ tối đa 80 giây.
+- Câu trả lời chỉ hiện trên màn hình đã bấm; không ghi vào bản ghi lời, không lưu lại.
+- Câu trả lời tiếng Trung nếu phát hiện là chữ giản thể sẽ được đổi sang chữ phồn thể Đài Loan.
+
+**Bố cục phụ đề**
+
+- Chế độ hội thoại: câu mới nghe được luôn nằm ở vùng chữ lớn trên cùng; các câu trước ở bên dưới, câu mới ở trên, trang không còn tự cuộn xuống. Chế độ phụ đề nền đen (hai câu mới nhất) không đổi.
+- Thanh mức âm: chương trình chính vốn đã gửi mức âm mỗi 0,2 giây; nay được vẽ cạnh "Đang hiện phụ đề". Khi chưa nhận được dữ liệu mức âm thì thanh không hiện, để không bị hiểu lầm là "không có âm thanh".
+
+**Ngôn ngữ của bản ghi lời**: khi tải có thể chọn "Nguyên văn và bản dịch" hoặc chỉ một ngôn ngữ (địa chỉ có tham số như `?lang=zh`). Câu không có bản ở ngôn ngữ đó (ví dụ dịch thất bại) sẽ bị bỏ qua. Biên bản cuộc họp luôn dùng bản hai ngôn ngữ.
+
+**Đã kiểm chứng đến đâu** (2026-11-28): kiểm thử đơn vị; WebUI thật với bộ máy thay thế và máy chủ LLM giả được thao tác trong trình duyệt (giao diện tiếng Trung, tiếng Indonesia và chiều rộng điện thoại). **Chưa kiểm chứng với LLM thật**: chất lượng câu trả lời và thời gian chờ. Hãy thử trong cuộc họp của chính bạn.
+
+Ý tưởng bố cục và ý tưởng "AI dịch và giải thích" tham khảo [SubKun Live Transcribe](https://subkun.com/zh-tw/live-transcribe/); mã, kiểu dáng và prompt được viết riêng cho bản tập đoàn. Mô hình nhận dạng của nó (IBM Granite Speech 5.0 TurboCTC, Apache-2.0) chỉ hỗ trợ tiếng Anh, Pháp, Đức, Tây Ban Nha, Bồ Đào Nha, Ý và Nhật, không có tiếng Trung, Indonesia, Việt hay Hindi, nên bản này chưa dùng.
+
 ## ③ Máy nhân viên cần phụ đề trực tiếp
 
 ### Windows
